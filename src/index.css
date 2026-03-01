@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Pizza Theme Colors */
+  --pizza-tomato: #dc2626;
+  --pizza-tomato-dark: #b91c1c;
+  --pizza-mozzarella: #fdfbf7;
+  --pizza-cream: #faf8f3;
+  --pizza-basil: #16a34a;
+  --pizza-basil-dark: #15803d;
+  --pizza-crust: #d4892e;
+  --pizza-crust-light: #f5d89a;
+  --pizza-wood: #292524;
+  --pizza-wood-dark: #1c1917;
+  
+  /* Legacy mapped variables for compatibility */
+  --color-primary: #dc2626; /* Tomato Red */
+  --color-accent: #16a34a; /* Basil Green */
+  --color-bg: #fdfbf7; /* Mozzarella White */
+  --color-surface: #ffffff;
+  --color-text: #292524; /* Wood Dark */
+  --color-text-muted: #78716c;
+  --color-border: #e7e5e4;
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* Tailwind-mapped variables for components */
+  --brand-dark: #fdfbf7; /* mozzarella background */
+  --brand-card: #ffffff; /* card surface */
+  --brand-gold: #dc2626; /* tomato red - primary */
+  --brand-cream: #292524; /* wood dark - text */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--brand-dark);
+  color: var(--brand-cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: 'Playfair Display', Impact, serif;
+}
+
+/* Pizza Pattern Background */
+.pizza-bg {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23dc2626' fill-opacity='0.03'%3E%3Ccircle cx='10' cy='10' r='2'/%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3Ccircle cx='50' cy='50' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Wood-fired texture overlay */
+.wood-texture {
+  background-image: 
+    linear-gradient(90deg, rgba(41,37,36,0.03) 1px, transparent 1px),
+    linear-gradient(rgba(41,37,36,0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Tomato Sauce Gradient Button */
+.btn-tomato {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+
+.btn-tomato:hover {
+  background: linear-gradient(135deg, #e53e3e 0%, #dc2626 50%, #b91c1c 100%);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);
+}
+
+/* Crust Gradient Button */
+.btn-crust {
+  background: linear-gradient(135deg, #f5d89a 0%, #e5a84a 50%, #d4892e 100%);
+  box-shadow: 0 4px 14px rgba(212, 137, 46, 0.35);
+}
+
+.btn-crust:hover {
+  background: linear-gradient(135deg, #faebc8 0%, #f5d89a 50%, #e5a84a 100%);
+  box-shadow: 0 6px 20px rgba(212, 137, 46, 0.45);
+}
+
+/* Basil Accent Button */
+.btn-basil {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+}
+
+.btn-basil:hover {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.45);
+}
+
+/* Pizza Card Style */
+.pizza-card {
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.08);
+  transition: all 0.3s ease;
+}
+
+.pizza-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(220, 38, 38, 0.15);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fdfbf7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #dc2626, #d4892e);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #dc2626;
+}
+
+/* Selection */
+::selection {
+  background: rgba(220, 38, 38, 0.15);
+  color: #292524;
+}
+
+/* GPU-accelerated transforms */
+.gpu-accelerate {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Pizza slice decorative element */
+.pizza-slice {
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-top: 100px solid #dc2626;
+  border-radius: 50%;
+}
+
+/* Floating cheese animation helper */
+@keyframes float-cheese {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+.animate-float-cheese {
+  animation: float-cheese 4s ease-in-out infinite;
+}

@@ -1,0 +1,38 @@
+node_modules
+dist
+.env
+.DS_Store
+*.local
+.vscode
+.idea
+build
+.system_generated
+.gemini
+package-lock.json
+
+# System files outside project
+../../../Downloads/
+../../../Favorites/
+../../../IdeaProjects/
+../../../Links/
+../../../Music/
+../../../OneDrive/
+../../../Pictures/
+../../../Saved Games/
+../../../Searches/
+../../../Videos/
+../../../django/
+../../../eclipse/
+../../../flutter/
+../../../Windows/
+../../../XboxGames/
+
+# Windows system files
+../../../../NTUSER.DAT*
+../../../../hiberfil.sys
+../../../../pagefile.sys
+../../../../swapfile.sys
+../../../../WRPF70D.tmp
+../../../../devlist.txt
+../../../../eSupport/
+../../../../logUploaderSettings*

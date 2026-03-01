@@ -1,0 +1,259 @@
+{
+  "pizzas": [
+    {
+      "id": "pb1",
+      "name": "Margherita Royale",
+      "description": "Authentic San Marzano tomatoes, fresh mozzarella, basil, and extra virgin olive oil",
+      "price": 14.99,
+      "category": "classic",
+      "veg": true,
+      "popular": true,
+      "ingredients": [
+        "San Marzano Tomatoes",
+        "Fresh Mozzarella",
+        "Basil",
+        "Olive Oil"
+      ],
+      "image": "/pizzas/margherita.webp",
+      "customization": [
+        "Extra cheese",
+        "Garlic oil",
+        "Fresh chili"
+      ]
+    },
+    {
+      "id": "pb2",
+      "name": "Sizzling Pepperoni",
+      "description": "Premium pepperoni, mozzarella, and our spicy house tomato sauce",
+      "price": 16.99,
+      "category": "classic",
+      "veg": false,
+      "popular": true,
+      "ingredients": [
+        "Pepperoni",
+        "Mozzarella",
+        "Spicy Tomato Sauce"
+      ],
+      "image": "/pizzas/pepperoni.webp",
+      "customization": [
+        "Extra pepperoni",
+        "Hot honey drizzle"
+      ]
+    },
+    {
+      "id": "pb3",
+      "name": "Garden Harvest",
+      "description": "Roasted bell peppers, red onions, mushrooms, olives, and baby spinach",
+      "price": 15.49,
+      "category": "veggie",
+      "veg": true,
+      "popular": false,
+      "ingredients": [
+        "Bell Peppers",
+        "Red Onions",
+        "Mushrooms",
+        "Olives",
+        "Spinach"
+      ],
+      "image": "/pizzas/veggie.webp",
+      "customization": [
+        "Add feta",
+        "No onions"
+      ]
+    },
+    {
+      "id": "pb4",
+      "name": "Spicy Diavola",
+      "description": "Spicy salami, nduja, chili flakes, and hot honey",
+      "price": 18.99,
+      "category": "spicy",
+      "veg": false,
+      "popular": true,
+      "ingredients": [
+        "Spicy Salami",
+        "Nduja",
+        "Chili Flakes",
+        "Hot Honey"
+      ],
+      "image": "/pizzas/diavola.webp",
+      "customization": [
+        "Extra spicy",
+        "Add burrata"
+      ]
+    },
+    {
+      "id": "pb5",
+      "name": "BBQ Smokehouse",
+      "description": "Grilled chicken, red onions, cilantro, and tangy BBQ sauce",
+      "price": 17.99,
+      "category": "premium",
+      "veg": false,
+      "popular": true,
+      "ingredients": [
+        "Grilled Chicken",
+        "Red Onions",
+        "Cilantro",
+        "BBQ Sauce"
+      ],
+      "image": "/pizzas/bbq.webp",
+      "customization": [
+        "Extra BBQ",
+        "Add bacon"
+      ]
+    },
+    {
+      "id": "pb6",
+      "name": "Wild Mushroom",
+      "description": "Assorted forest mushrooms, truffle oil, and fresh parsley",
+      "price": 19.49,
+      "category": "premium",
+      "veg": true,
+      "popular": false,
+      "ingredients": [
+        "Forest Mushrooms",
+        "Truffle Oil",
+        "Parsley"
+      ],
+      "image": "/pizzas/mushroom.webp",
+      "customization": [
+        "Extra truffle oil",
+        "Add prosciutto"
+      ]
+    }
+  ],
+  "combos": [
+    {
+      "id": "combo1",
+      "name": "Solo Feast",
+      "pizza": "Margherita Royale",
+      "includes": [
+        "Margherita Royale",
+        "Garlic Bread",
+        "Soft drink"
+      ],
+      "price": 18.99,
+      "savings": 3.49,
+      "popular": true
+    },
+    {
+      "id": "combo2",
+      "name": "Duo Delight",
+      "pizza": "Sizzling Pepperoni",
+      "includes": [
+        "Sizzling Pepperoni",
+        "Margherita Royale",
+        "Cheesy breadsticks",
+        "2x Soft drinks"
+      ],
+      "price": 32.99,
+      "savings": 6.99,
+      "popular": true
+    },
+    {
+      "id": "combo3",
+      "name": "Family Party",
+      "pizza": "Spicy Diavola",
+      "includes": [
+        "3x Signature Pizzas",
+        "2x Large Sides",
+        "1.5L Beverage"
+      ],
+      "price": 54.99,
+      "savings": 12.49,
+      "popular": false
+    }
+  ],
+  "sides": [
+    {
+      "id": "s1",
+      "name": "Garlic Bread",
+      "price": 4.49,
+      "veg": true
+    },
+    {
+      "id": "s2",
+      "name": "Cheesy Breadsticks",
+      "price": 6.49,
+      "veg": true
+    },
+    {
+      "id": "s3",
+      "name": "Classic Fries",
+      "price": 3.49,
+      "veg": true
+    },
+    {
+      "id": "s4",
+      "name": "Garden Salad",
+      "price": 5.99,
+      "veg": true
+    },
+    {
+      "id": "s5",
+      "name": "Potato Wedges",
+      "price": 4.99,
+      "veg": true
+    }
+  ],
+  "drinks": [
+    {
+      "id": "d1",
+      "name": "Soft Drink",
+      "price": 2.49,
+      "sizes": [
+        "Regular",
+        "Large"
+      ]
+    },
+    {
+      "id": "d2",
+      "name": "Italian Soda",
+      "price": 4.49,
+      "flavors": [
+        "Limonata",
+        "Aranciata"
+      ]
+    },
+    {
+      "id": "d3",
+      "name": "Iced Tea",
+      "price": 2.99,
+      "sizes": [
+        "Regular",
+        "Large"
+      ]
+    },
+    {
+      "id": "d4",
+      "name": "Mineral Water",
+      "price": 2.49,
+      "sizes": [
+        "Still",
+        "Sparkling"
+      ]
+    }
+  ],
+  "giftCards": [
+    {
+      "amount": 25
+    },
+    {
+      "amount": 50
+    },
+    {
+      "amount": 100
+    },
+    {
+      "amount": 200
+    }
+  ],
+  "restaurant": {
+    "hours": "Mon-Sun: 10:00 AM - 11:00 PM",
+    "phone": "+1 (555) 123-4567",
+    "email": "hello@pizzablast.com",
+    "address": "123 Pizza Plaza, Crust Corner, NY 10001",
+    "deliveryAvailable": true,
+    "deliveryFee": 3.99,
+    "minOrder": 20
+  }
+}
