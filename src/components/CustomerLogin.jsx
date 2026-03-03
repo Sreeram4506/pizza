@@ -14,11 +14,15 @@ export default function CustomerLogin() {
     setLoading(true)
     setError('')
     try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 30000) // 30s timeout for Render cold start
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
+        signal: controller.signal
       })
+      clearTimeout(timeout)
       const data = await res.json()
       if (res.ok) {
         localStorage.setItem('customerToken', data.token)
@@ -27,7 +31,11 @@ export default function CustomerLogin() {
         setError(data.error || 'Login failed')
       }
     } catch (err) {
-      setError('Server unreachable')
+      if (err.name === 'AbortError') {
+        setError('Server is waking up, please try again in a moment...')
+      } else {
+        setError('Server unreachable. Please check your connection.')
+      }
     } finally {
       setLoading(false)
     }

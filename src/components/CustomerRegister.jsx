@@ -16,11 +16,15 @@ export default function CustomerRegister() {
     setLoading(true)
     setError('')
     try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 30000)
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, phone })
+        body: JSON.stringify({ name, email, password, phone }),
+        signal: controller.signal
       })
+      clearTimeout(timeout)
       const data = await res.json()
       if (res.ok) {
         localStorage.setItem('customerToken', data.token)
@@ -29,7 +33,11 @@ export default function CustomerRegister() {
         setError(data.error || 'Registration failed')
       }
     } catch (err) {
-      setError('Server unreachable')
+      if (err.name === 'AbortError') {
+        setError('Server is waking up, please try again in a moment...')
+      } else {
+        setError('Server unreachable. Please check your connection.')
+      }
     } finally {
       setLoading(false)
     }

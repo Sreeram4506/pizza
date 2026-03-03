@@ -13,14 +13,16 @@ export default function AdminLogin() {
         e.preventDefault()
         setError('')
         setLoading(true)
-
         try {
+            const controller = new AbortController()
+            const timeout = setTimeout(() => controller.abort(), 30000)
             const res = await fetch('/api/admin/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
+                signal: controller.signal
             })
-
+            clearTimeout(timeout)
             const data = await res.json()
             if (res.ok) {
                 localStorage.setItem('adminToken', data.token)
@@ -29,7 +31,11 @@ export default function AdminLogin() {
                 setError(data.error || 'Login failed')
             }
         } catch (err) {
-            setError('Something went wrong. Is the server running?')
+            if (err.name === 'AbortError') {
+                setError('Server is waking up, please try again in a moment...')
+            } else {
+                setError('Something went wrong. Is the server running?')
+            }
         } finally {
             setLoading(false)
         }
