@@ -108,12 +108,10 @@ io.on('connection', (socket) => {
   })
 })
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../dist')))
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'))
-  })
-}
+
+// NOTE: Frontend is served by Vercel — no static file serving needed here.
+// The backend only handles API and WebSocket requests.
+
 
 const PORT = config.port
 
