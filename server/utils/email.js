@@ -74,8 +74,17 @@ export const sendOrderConfirmation = async (order) => {
         </div>
 
         <div style="background-color: #f8f8f8; padding: 20px; border-radius: 15px;">
-          <h3 style="margin: 0 0 10px; font-size: 14px; text-transform: uppercase;">Delivery Details</h3>
-          <p style="margin: 0; font-size: 14px; line-height: 1.4;">${order.address.street}<br>${order.address.city}, ${order.address.zip}</p>
+          <h3 style="margin: 0 0 10px; font-size: 14px; text-transform: uppercase;">
+            ${order.type === 'delivery' ? 'Delivery Address' : order.type === 'pickup' ? 'Pickup Details' : 'Dine-in Details'}
+          </h3>
+          <p style="margin: 0; font-size: 14px; line-height: 1.4;">
+            ${order.type === 'delivery'
+      ? `${order.address.street}<br>${order.address.city} ${order.address.zip}`
+      : order.type === 'pickup'
+        ? `Ready for pickup at: ${new Date(order.estimatedReadyAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        : `Table reserved for: ${new Date(order.estimatedDineInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+    }
+          </p>
           <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
              <span style="font-size: 12px; color: #666;">Payment: ${order.payment.method.toUpperCase()}</span>
              <span style="font-size: 10px; font-weight: 800; color: ${isPaid ? '#059669' : '#d97706'}; background: ${isPaid ? '#ecfdf5' : '#fffbeb'}; padding: 4px 10px; border-radius: 50px; text-transform: uppercase;">${order.payment.status}</span>
@@ -104,12 +113,26 @@ export const sendAdminNotification = async (order) => {
       <h2 style="color: #dc2626;">🔥 New Order Received! 🔥</h2>
       <p>Order Number: <strong>${order.orderNumber}</strong></p>
       <p>Amount: <strong>$${order.total.toFixed(2)}</strong></p>
+      <p>Type: <strong>${order.type.toUpperCase()}</strong></p>
       <p>Method: ${order.payment.method.toUpperCase()} (${order.payment.status})</p>
       <hr>
       <h3>Customer Info:</h3>
-      <p>${order.customerInfo.name}<br>${order.customerInfo.email}<br>${order.customerInfo.phone}</p>
-      <p>Address: ${order.address.street}, ${order.address.city}</p>
-      <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/orders" style="display:inline-block; margin-top: 20px; padding: 10px 20px; background: #000; color: #fff; text-decoration: none; border-radius: 5px;">View in Dashboard</a>
+      <p>
+        <strong>${order.customerInfo.name}</strong><br>
+        ${order.customerInfo.email || 'No email provided'}<br>
+        ${order.customerInfo.phone}
+      </p>
+      <hr>
+      <h3>Service Details:</h3>
+      <p>
+        ${order.type === 'delivery'
+      ? `Address: ${order.address.street}, ${order.address.city} ${order.address.zip}`
+      : order.type === 'pickup'
+        ? `Pickup scheduled for: ${new Date(order.estimatedReadyAt).toLocaleString()}`
+        : `Dine-in scheduled for: ${new Date(order.estimatedDineInTime).toLocaleString()}`
+    }
+      </p>
+      <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/orders" style="display:inline-block; margin-top: 20px; padding: 15px 25px; background: #dc2626; color: #fff; text-decoration: none; border-radius: 10px; font-weight: bold;">Manage Order</a>
     </div>
   `
   return sendEmail(adminEmail, `🔥 NEW ORDER #${order.orderNumber}`, emailHtml)

@@ -1,21 +1,9 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  AreaChart,
-  Area
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, AreaChart, Area
 } from 'recharts'
 
 const COLORS = ['#dc2626', '#16a34a', '#f4a261', '#2a9d8f', '#e9c46a', '#264653']
@@ -23,12 +11,11 @@ const COLORS = ['#dc2626', '#16a34a', '#f4a261', '#2a9d8f', '#e9c46a', '#264653'
 export default function AnalyticsDashboard() {
   const [timeRange, setTimeRange] = useState('7d')
   const [analytics, setAnalytics] = useState({
-    salesData: [],
+    summary: {},
+    dailySales: [],
     popularItems: [],
-    orderStatus: [],
-    hourlyDistribution: [],
-    customerStats: {},
-    revenueMetrics: {}
+    statusDistribution: [],
+    hourlyDistribution: []
   })
   const [loading, setLoading] = useState(true)
 
@@ -38,6 +25,7 @@ export default function AnalyticsDashboard() {
 
   const fetchAnalytics = async () => {
     try {
+      setLoading(true)
       const token = localStorage.getItem('adminToken')
       const res = await fetch(`/api/analytics?range=${timeRange}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -53,169 +41,173 @@ export default function AnalyticsDashboard() {
     }
   }
 
+  const stats = [
+    { label: 'Revenue', value: `$${(analytics.summary?.totalRevenue || 0).toLocaleString()}`, icon: '💰', color: 'text-basil-400' },
+    { label: 'Orders', value: (analytics.summary?.totalOrders || 0).toString(), icon: '📋', color: 'text-tomato-400' },
+    { label: 'Avg Order', value: `$${(analytics.summary?.avgOrderValue || 0).toFixed(2)}`, icon: '🛒', color: 'text-amber-400' },
+    { label: 'New Cust', value: (analytics.summary?.newCustomers || 0).toString(), icon: '👤', color: 'text-blue-400' },
+    { label: 'Return', value: (analytics.summary?.returningCustomers || 0).toString(), icon: '🔄', color: 'text-purple-400' },
+    { label: 'Growth', value: `${((analytics.summary?.newCustomers || 0) / Math.max(analytics.summary?.totalOrders || 1, 1) * 100).toFixed(1)}%`, icon: '📈', color: 'text-green-400' }
+  ]
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin w-10 h-10 border-3 border-tomato-500 border-t-transparent rounded-full" />
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <div className="animate-spin w-10 h-10 border-[3px] border-tomato-500 border-t-transparent rounded-full" />
+        <p className="text-xs font-bold text-wood-400 uppercase tracking-widest animate-pulse">Analyzing Data...</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 max-w-6xl mx-auto pb-24 lg:pb-10">
+      {/* ── Header ─────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-display font-black text-white">Analytics Dashboard</h2>
-          <p className="text-wood-400 mt-1">Track your restaurant's performance and insights</p>
+          <h2 className="text-2xl sm:text-3xl font-display font-black text-white leading-tight">Insight Engine</h2>
+          <p className="text-wood-400 text-sm mt-1">Real-time performance and consumer habits</p>
         </div>
-        <select
-          value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value)}
-          className="px-4 py-2 bg-wood-800 border border-wood-700 rounded-lg text-white focus:border-tomato-500 outline-none"
-        >
-          <option value="24h">Last 24 Hours</option>
-          <option value="7d">Last 7 Days</option>
-          <option value="30d">Last 30 Days</option>
-          <option value="90d">Last 90 Days</option>
-        </select>
+        <div className="relative inline-block w-full sm:w-auto">
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+            className="w-full sm:w-auto px-5 py-3 bg-wood-800 border-2 border-wood-700 rounded-xl text-white text-[10px] font-black uppercase tracking-widest outline-none appearance-none pr-12 focus:border-tomato-500 transition-colors"
+          >
+            <option value="24h">Last 24 Hours</option>
+            <option value="7d">Last 7 Days</option>
+            <option value="30d">Last 30 Days</option>
+            <option value="90d">Last 90 Days</option>
+          </select>
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-wood-400">▼</span>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {[
-          { label: 'Revenue', value: `$${(analytics.summary?.totalRevenue || 0).toLocaleString()}`, icon: '💰', color: 'text-basil-400' },
-          { label: 'Orders', value: (analytics.summary?.totalOrders || 0).toString(), icon: '📋', color: 'text-tomato-400' },
-          { label: 'Avg Order', value: `$${(analytics.summary?.avgOrderValue || 0).toFixed(2)}`, icon: '🛒', color: 'text-amber-400' },
-          { label: 'New Customers', value: (analytics.summary?.newCustomers || 0).toString(), icon: '👤', color: 'text-blue-400' },
-          { label: 'Returning', value: (analytics.summary?.returningCustomers || 0).toString(), icon: '🔄', color: 'text-purple-400' },
-          { label: 'Growth', value: `${((analytics.summary?.newCustomers || 0) / Math.max(analytics.summary?.totalOrders || 1, 1) * 100).toFixed(1)}%`, icon: '📈', color: 'text-green-400' }
-        ].map((stat) => (
+      {/* ── High Level Stats Grid ─────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {stats.map((stat, idx) => (
           <motion.div
             key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-wood-800 rounded-xl p-4 border border-wood-700"
+            transition={{ delay: idx * 0.05 }}
+            className="bg-wood-800 rounded-2xl p-4 border border-wood-700 relative overflow-hidden group"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">{stat.icon}</span>
-              <span className="text-wood-400 text-sm">{stat.label}</span>
+            <div className="relative z-10">
+              <span className="text-lg opacity-80 group-hover:scale-110 transition-transform block mb-1">{stat.icon}</span>
+              <p className="text-wood-500 text-[9px] font-black uppercase tracking-wider leading-none mb-1">{stat.label}</p>
+              <p className={`text-lg font-black ${stat.color}`}>{stat.value}</p>
             </div>
-            <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
           </motion.div>
         ))}
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
-        <div className="bg-wood-800 rounded-xl p-6 border border-wood-700">
-          <h3 className="text-lg font-bold text-white mb-4">Revenue Trend</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={analytics.dailySales || []}>
-              <defs>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#dc2626" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#dc2626" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3d3d3d" />
-              <XAxis dataKey="date" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#292524', border: '1px solid #44403c', borderRadius: '8px' }}
-                labelStyle={{ color: '#fff' }}
-              />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#dc2626"
-                fillOpacity={1}
-                fill="url(#colorRevenue)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Orders by Hour */}
-        <div className="bg-wood-800 rounded-xl p-6 border border-wood-700">
-          <h3 className="text-lg font-bold text-white mb-4">Orders by Hour</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={analytics.hourlyDistribution || []}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3d3d3d" />
-              <XAxis dataKey="_id" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#292524', border: '1px solid #44403c', borderRadius: '8px' }}
-                labelStyle={{ color: '#fff' }}
-              />
-              <Bar dataKey="count" fill="#16a34a" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Charts Row 2 */}
+      {/* ── Sales Distribution Cards ────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Popular Items */}
-        <div className="bg-wood-800 rounded-xl p-6 border border-wood-700 lg:col-span-2">
-          <h3 className="text-lg font-bold text-white mb-4">Top Selling Items</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={analytics.popularItems || []} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#3d3d3d" />
-              <XAxis type="number" stroke="#9ca3af" />
-              <YAxis dataKey="name" type="category" stroke="#9ca3af" width={100} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#292524', border: '1px solid #44403c', borderRadius: '8px' }}
-                labelStyle={{ color: '#fff' }}
-              />
-              <Legend />
-              <Bar dataKey="count" name="Orders" fill="#dc2626" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        {/* Revenue Trend - Main Story */}
+        <div className="lg:col-span-2 bg-wood-800 rounded-3xl p-6 sm:p-8 border border-wood-700">
+          <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6 opacity-60">Revenue Trendline</h3>
+          <div className="h-[250px] sm:h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={analytics.dailySales || []}>
+                <defs>
+                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#dc2626" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#dc2626" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
+                <XAxis dataKey="date" stroke="#555" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="#555" fontSize={10} tickLine={false} axisLine={false} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#1c1917', border: '1px solid #444', borderRadius: '12px' }}
+                  itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#dc2626" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        {/* Order Status Distribution */}
-        <div className="bg-wood-800 rounded-xl p-6 border border-wood-700">
-          <h3 className="text-lg font-bold text-white mb-4">Order Status</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={analytics.statusDistribution || []}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ _id, percent }) => `${_id}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="count"
-              >
-                {(analytics.statusDistribution || []).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{ backgroundColor: '#292524', border: '1px solid #44403c', borderRadius: '8px' }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+        {/* Status Distribution - Side Card */}
+        <div className="bg-wood-800 rounded-3xl p-6 sm:p-8 border border-wood-700">
+          <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6 opacity-60">Order Health</h3>
+          <div className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={analytics.statusDistribution || []}
+                  cx="50%" cy="50%"
+                  innerRadius={60} outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="count"
+                >
+                  {(analytics.statusDistribution || []).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: '#1c1917', border: '1px solid #444', borderRadius: '12px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            {analytics.statusDistribution?.slice(0, 4).map((entry, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                <span className="text-[9px] font-black uppercase text-wood-400">{entry._id}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Quick Insights */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-tomato-600/20 to-tomato-800/20 rounded-xl p-6 border border-tomato-500/30">
-          <h4 className="text-tomato-400 font-bold mb-2">💡 Insight</h4>
-          <p className="text-white text-sm">Weekend sales are 45% higher than weekdays. Consider running weekend promotions.</p>
+      {/* ── Popularity and Peaks ────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Items */}
+        <div className="bg-wood-800 rounded-3xl p-6 sm:p-8 border border-wood-700">
+          <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6 opacity-60">Top Performers</h3>
+          <div className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={analytics.popularItems?.slice(0, 5) || []} layout="vertical">
+                <XAxis type="number" stroke="#555" fontSize={10} hide />
+                <YAxis dataKey="name" type="category" stroke="#fff" fontSize={10} width={80} axisLine={false} tickLine={false} />
+                <Tooltip cursor={{ fill: '#ffffff08' }} contentStyle={{ backgroundColor: '#1c1917', border: '1px solid #444', borderRadius: '12px' }} />
+                <Bar dataKey="count" fill="#dc2626" radius={[0, 4, 4, 0]} barSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-        <div className="bg-gradient-to-br from-basil-600/20 to-basil-800/20 rounded-xl p-6 border border-basil-500/30">
-          <h4 className="text-basil-400 font-bold mb-2">🌟 Top Performer</h4>
-          <p className="text-white text-sm">Margherita pizza accounts for 28% of total orders. Feature it prominently on your menu.</p>
+
+        {/* Hourly Distribution */}
+        <div className="bg-wood-800 rounded-3xl p-6 sm:p-8 border border-wood-700">
+          <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6 opacity-60">Rush Hour Matrix</h3>
+          <div className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={analytics.hourlyDistribution || []}>
+                <XAxis dataKey="_id" stroke="#555" fontSize={10} axisLine={false} tickLine={false} />
+                <YAxis hide />
+                <Tooltip contentStyle={{ backgroundColor: '#1c1917', border: '1px solid #444', borderRadius: '12px' }} />
+                <Bar dataKey="count" fill="#16a34a" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-        <div className="bg-gradient-to-br from-amber-600/20 to-amber-800/20 rounded-xl p-6 border border-amber-500/30">
-          <h4 className="text-amber-400 font-bold mb-2">⚠️ Attention</h4>
-          <p className="text-white text-sm">Cancellation rate is at 2.3%, below industry average. Great job!</p>
-        </div>
+      </div>
+
+      {/* ── Insights & Tips ────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[
+          { title: 'Smart Tip', icon: '💡', text: 'Weekend volume is 45% higher. Pre-prep dough Friday afternoon.', color: 'from-tomato-600/20 to-tomato-800/20 border-tomato-500/30' },
+          { title: 'Power Plate', icon: '🌟', text: 'Margherita is your anchor. Keep the ingredients premium.', color: 'from-basil-600/20 to-basil-800/20 border-basil-500/30' },
+          { title: 'Efficiency', icon: '⚠️', text: '7PM is your max peak. Consider the extra driver for that hour.', color: 'from-amber-600/20 to-amber-800/20 border-amber-500/30' }
+        ].map((item, i) => (
+          <div key={i} className={`bg-gradient-to-br ${item.color} rounded-2xl p-6 border`}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">{item.icon}</span>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-white">{item.title}</h4>
+            </div>
+            <p className="text-wood-100 text-xs font-medium leading-relaxed">{item.text}</p>
+          </div>
+        ))}
       </div>
     </div>
   )

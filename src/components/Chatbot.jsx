@@ -21,6 +21,9 @@ export default function Chatbot() {
   const [dineInTime, setDineInTime] = useState('')
   const [pickupDateTime, setPickupDateTime] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('card') // Default to card
+  const [guestName, setGuestName] = useState('')
+  const [guestPhone, setGuestPhone] = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
 
   // Get logged-in customer profile
   useEffect(() => {
@@ -43,7 +46,7 @@ export default function Chatbot() {
         console.error('Failed to fetch customer profile:', err)
       }
     }
-    
+
     getCustomerProfile()
   }, [])
 
@@ -57,8 +60,9 @@ export default function Chatbot() {
       }
     }
     return {
-      name: 'Chat Customer',
-      phone: '000-000-0000'
+      name: guestName || 'Guest Customer',
+      phone: guestPhone || '000-000-0000',
+      email: guestEmail || ''
     }
   }
   const [categories, setCategories] = useState([])
@@ -250,13 +254,10 @@ export default function Chatbot() {
           modifiers: i.modifiers || []
         })),
         type: orderType,
-        customerInfo: {
-          ...customerInfo,
-          // Add delivery address or dine-in time based on order type
-          ...(orderType === 'delivery' && deliveryAddress && { address: { street: deliveryAddress, city: '', zip: '' } }),
-          ...(orderType === 'pickup' && pickupDateTime && { pickupDateTime }),
-          ...(orderType === 'dine_in' && dineInTime && { dineInTime })
-        },
+        customerInfo: customerInfo,
+        address: orderType === 'delivery' && deliveryAddress ? { street: deliveryAddress, city: '', zip: '' } : undefined,
+        pickupDateTime: orderType === 'pickup' && pickupDateTime ? pickupDateTime : undefined,
+        dineInTime: orderType === 'dine_in' && dineInTime ? dineInTime : undefined,
         payment: {
           method: paymentMethod,
           status: paymentMethod === 'cash' ? 'pending' : 'paid',
@@ -315,13 +316,10 @@ export default function Chatbot() {
           modifiers: i.modifiers || []
         })),
         type: orderType,
-        customerInfo: {
-          ...customerInfo,
-          // Add delivery address or dine-in time based on order type
-          ...(orderType === 'delivery' && deliveryAddress && { address: { street: deliveryAddress, city: '', zip: '' } }),
-          ...(orderType === 'pickup' && pickupDateTime && { pickupDateTime }),
-          ...(orderType === 'dine_in' && dineInTime && { dineInTime })
-        },
+        customerInfo: customerInfo,
+        address: orderType === 'delivery' && deliveryAddress ? { street: deliveryAddress, city: '', zip: '' } : undefined,
+        pickupDateTime: orderType === 'pickup' && pickupDateTime ? pickupDateTime : undefined,
+        dineInTime: orderType === 'dine_in' && dineInTime ? dineInTime : undefined,
         payment: {
           method: paymentMethod,
           status: paymentMethod === 'cash' ? 'pending' : 'paid',
@@ -669,6 +667,35 @@ export default function Chatbot() {
                       <p className="text-xs text-wood-400 font-bold uppercase tracking-widest mt-2">Paying ${cartTotal.toFixed(2)} to Pizza Blast</p>
                     </div>
 
+                    {!customerProfile && (
+                      <div className="mb-8 p-6 bg-wood-50 rounded-2xl border border-crust-100">
+                        <h3 className="text-lg font-semibold text-wood-800 mb-4">Guest Information</h3>
+                        <div className="space-y-4">
+                          <input
+                            type="text"
+                            placeholder="Full Name"
+                            value={guestName}
+                            onChange={(e) => setGuestName(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 outline-none text-wood-800"
+                          />
+                          <input
+                            type="tel"
+                            placeholder="Phone Number"
+                            value={guestPhone}
+                            onChange={(e) => setGuestPhone(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 outline-none text-wood-800"
+                          />
+                          <input
+                            type="email"
+                            placeholder="Email Address (for confirmation)"
+                            value={guestEmail}
+                            onChange={(e) => setGuestEmail(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 outline-none text-wood-800"
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     {/* Order Type Selection */}
                     <div className="mb-8">
                       <h3 className="text-lg font-semibold text-wood-800 mb-4">Choose Order Type</h3>
@@ -676,11 +703,10 @@ export default function Chatbot() {
                         <button
                           type="button"
                           onClick={() => setOrderType('delivery')}
-                          className={`p-4 rounded-xl border-2 transition-all ${
-                            orderType === 'delivery'
-                              ? 'bg-tomato-600 text-white border-tomato-600'
-                              : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
-                          }`}
+                          className={`p-4 rounded-xl border-2 transition-all ${orderType === 'delivery'
+                            ? 'bg-tomato-600 text-white border-tomato-600'
+                            : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                            }`}
                         >
                           <div className="text-2xl mb-2">🚚</div>
                           <div className="font-semibold">Delivery</div>
@@ -690,11 +716,10 @@ export default function Chatbot() {
                         <button
                           type="button"
                           onClick={() => setOrderType('pickup')}
-                          className={`p-4 rounded-xl border-2 transition-all ${
-                            orderType === 'pickup'
-                              ? 'bg-tomato-600 text-white border-tomato-600'
-                              : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
-                          }`}
+                          className={`p-4 rounded-xl border-2 transition-all ${orderType === 'pickup'
+                            ? 'bg-tomato-600 text-white border-tomato-600'
+                            : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                            }`}
                         >
                           <div className="text-2xl mb-2">🛒</div>
                           <div className="font-semibold">Pickup</div>
@@ -704,11 +729,10 @@ export default function Chatbot() {
                         <button
                           type="button"
                           onClick={() => setOrderType('dine_in')}
-                          className={`p-4 rounded-xl border-2 transition-all ${
-                            orderType === 'dine_in'
-                              ? 'bg-tomato-600 text-white border-tomato-600'
-                              : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
-                          }`}
+                          className={`p-4 rounded-xl border-2 transition-all ${orderType === 'dine_in'
+                            ? 'bg-tomato-600 text-white border-tomato-600'
+                            : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                            }`}
                         >
                           <div className="text-2xl mb-2">🍽</div>
                           <div className="font-semibold">Dine In</div>
@@ -779,11 +803,10 @@ export default function Chatbot() {
                           <button
                             type="button"
                             onClick={() => setPaymentMethod('card')}
-                            className={`p-4 rounded-xl border-2 transition-all ${
-                              paymentMethod === 'card'
-                                ? 'bg-tomato-600 text-white border-tomato-600'
-                                : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
-                            }`}
+                            className={`p-4 rounded-xl border-2 transition-all ${paymentMethod === 'card'
+                              ? 'bg-tomato-600 text-white border-tomato-600'
+                              : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                              }`}
                           >
                             <div className="text-2xl mb-2">💳</div>
                             <div className="font-semibold">Card Payment</div>
@@ -793,11 +816,10 @@ export default function Chatbot() {
                           <button
                             type="button"
                             onClick={() => setPaymentMethod('cash')}
-                            className={`p-4 rounded-xl border-2 transition-all ${
-                              paymentMethod === 'cash'
-                                ? 'bg-tomato-600 text-white border-tomato-600'
-                                : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
-                            }`}
+                            className={`p-4 rounded-xl border-2 transition-all ${paymentMethod === 'cash'
+                              ? 'bg-tomato-600 text-white border-tomato-600'
+                              : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                              }`}
                           >
                             <div className="text-2xl mb-2">💵</div>
                             <div className="font-semibold">Cash on Delivery</div>
@@ -831,7 +853,17 @@ export default function Chatbot() {
                       {/* Payment Button */}
                       <button
                         type="button"
-                        onClick={() => paymentMethod === 'card' ? setView('payment') : handleCheckout()}
+                        onClick={() => {
+                          if (orderType === 'delivery' && !deliveryAddress) {
+                            alert('Please enter a delivery address');
+                            return;
+                          }
+                          if (!customerProfile && (!guestName || !guestPhone || !guestEmail)) {
+                            alert('Please fill in your guest information (Name, Phone, and Email) so we can send you a confirmation.');
+                            return;
+                          }
+                          paymentMethod === 'card' ? setView('payment') : handleCheckout()
+                        }}
                         className="w-full bg-tomato-600 text-white py-4 rounded-xl font-semibold hover:bg-tomato-700 transition-colors"
                       >
                         {paymentMethod === 'card' ? 'Proceed to Payment' : 'Place Order (Cash on Delivery)'}

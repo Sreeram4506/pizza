@@ -76,7 +76,7 @@ router.post('/', async (req, res) => {
 
   try {
     const tenantId = req.tenantId
-    const { items, customerInfo, address, type, payment } = req.body
+    const { items, customerInfo, address, type, payment, pickupDateTime, dineInTime } = req.body
 
     console.log('Order request - Authenticated user:', authenticatedUser)
     console.log('Order request - Body:', { items, customerInfo, address, type, payment })
@@ -113,7 +113,7 @@ router.post('/', async (req, res) => {
     // Calculate time estimates based on order type
     const now = new Date()
     let estimatedReadyAt, estimatedDeliveryAt, estimatedDineInTime
-    
+
     switch (type || 'delivery') {
       case 'delivery':
         estimatedReadyAt = new Date(now.getTime() + 25 * 60 * 1000) // 25 min for prep
@@ -122,8 +122,8 @@ router.post('/', async (req, res) => {
         break
       case 'pickup':
         // If customer provided pickupDateTime, use it, otherwise default to 20 min
-        if (customerInfo?.pickupDateTime) {
-          const pickupTime = new Date(customerInfo.pickupDateTime)
+        if (pickupDateTime) {
+          const pickupTime = new Date(pickupDateTime)
           estimatedReadyAt = new Date(pickupTime.getTime() - 5 * 60 * 1000) // Ready 5 min before pickup
         } else {
           estimatedReadyAt = new Date(now.getTime() + 20 * 60 * 1000) // 20 min default
@@ -133,11 +133,11 @@ router.post('/', async (req, res) => {
         break
       case 'dine_in':
         // If customer provided dineInTime, use it, otherwise default to 45 min
-        if (customerInfo?.dineInTime) {
+        if (dineInTime) {
           const dineTime = new Date()
-          const [timePart] = customerInfo.dineInTime.split(':')
-          dineTime.setHours(parseInt(timePart[0]))
-          dineTime.setMinutes(parseInt(timePart[1]))
+          const [hours, minutes] = dineInTime.split(':')
+          dineTime.setHours(parseInt(hours))
+          dineTime.setMinutes(parseInt(minutes))
           estimatedReadyAt = new Date(dineTime.getTime() - 30 * 60 * 1000) // Ready 30 min before dine
           estimatedDineInTime = dineTime
         } else {

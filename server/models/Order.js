@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const orderItemSchema = new mongoose.Schema({
-  itemId: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem', required: true },
+  itemId: { type: String, required: true }, // Can be ObjectId string or custom item ID
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true, min: 1 },
@@ -22,15 +22,15 @@ const orderSchema = new mongoose.Schema({
   deliveryFee: { type: Number, default: 0 },
   discount: { type: Number, default: 0 },
   total: { type: Number, required: true },
-  status: { 
-    type: String, 
-    enum: ['confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'], 
-    default: 'confirmed' 
+  status: {
+    type: String,
+    enum: ['confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'],
+    default: 'confirmed'
   },
-  type: { 
-    type: String, 
-    enum: ['delivery', 'pickup', 'dine_in'], 
-    required: true 
+  type: {
+    type: String,
+    enum: ['delivery', 'pickup', 'dine_in'],
+    required: true
   },
   customerInfo: {
     name: { type: String, required: true },
