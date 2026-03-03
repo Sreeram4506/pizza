@@ -1,42 +1,51 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { io } from 'socket.io-client'
+import { requestNotificationPermission, showPushNotification, playNotificationSound } from '../utils/notifications'
 
 export default function OrderNotifications() {
   const [notifications, setNotifications] = useState([])
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    // This would connect to WebSocket in a real implementation
-    // For now, we'll simulate incoming orders
-    
-    const simulateOrderNotification = () => {
+    // Connect to WebSocket
+    const apiUrl = import.meta.env.VITE_API_URL || window.location.origin
+    const socket = io(apiUrl, {
+      transports: ['websocket', 'polling']
+    })
+
+    const activeOrders = JSON.parse(localStorage.getItem('activeOrders') || '[]')
+    activeOrders.forEach(orderId => socket.emit('join-order', orderId))
+
+    // Handle order status updates
+    socket.on('order:status_update', (data) => {
       const newNotification = {
         id: Date.now(),
-        type: 'new_order',
-        title: 'New Order Received!',
-        message: `Order #${Math.floor(Math.random() * 1000)} is ready for preparation`,
+        type: 'status_update',
+        title: 'Order Status Update!',
+        message: data.message,
         time: new Date(),
-        read: false
+        read: false,
+        status: data.status
       }
-      
-      setNotifications(prev => [newNotification, ...prev].slice(0, 5))
-      setIsVisible(true)
-      
-      // Auto-hide after 5 seconds
-      setTimeout(() => {
-        setIsVisible(false)
-      }, 5000)
-    }
 
-    // Simulate orders every 30 seconds for demo
-    const interval = setInterval(simulateOrderNotification, 30000)
-    
-    return () => clearInterval(interval)
+      setNotifications(prev => [newNotification, ...prev].slice(0, 10))
+      setIsVisible(true)
+
+      // Browser Alert
+      showPushNotification(newNotification.title, { body: newNotification.message })
+      playNotificationSound(data.status === 'ready' || data.status === 'delivered' ? 'success' : 'default')
+    })
+
+    // On mount, ask for permission
+    requestNotificationPermission()
+
+    return () => socket.disconnect()
   }, [])
 
   const markAsRead = (id) => {
-    setNotifications(prev => 
-      prev.map(notif => 
+    setNotifications(prev =>
+      prev.map(notif =>
         notif.id === id ? { ...notif, read: true } : notif
       )
     )
@@ -82,9 +91,8 @@ export default function OrderNotifications() {
                   key={notification.id}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
-                    !notification.read ? 'bg-tomato-50' : ''
-                  }`}
+                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-tomato-50' : ''
+                    }`}
                   onClick={() => markAsRead(notification.id)}
                 >
                   <div className="flex items-start gap-3">

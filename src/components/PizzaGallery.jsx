@@ -15,31 +15,31 @@ export default function PizzaGallery() {
 
   useEffect(() => {
     fetchMenuData()
-    
+
     // Connect to WebSocket for real-time updates
     wsService.connect()
-    
+
     // Listen for menu updates
     wsService.on('menu_updated', (data) => {
       console.log('PizzaGallery: Menu updated via WebSocket:', data)
       fetchMenuData(true) // Force refresh
     })
-    
+
     wsService.on('item_added', (data) => {
       console.log('PizzaGallery: Item added via WebSocket:', data)
       fetchMenuData(true)
     })
-    
+
     wsService.on('item_updated', (data) => {
       console.log('PizzaGallery: Item updated via WebSocket:', data)
       fetchMenuData(true)
     })
-    
+
     wsService.on('item_removed', (data) => {
       console.log('PizzaGallery: Item removed via WebSocket:', data)
       fetchMenuData(true)
     })
-    
+
     return () => {
       wsService.disconnect()
     }
@@ -66,7 +66,7 @@ export default function PizzaGallery() {
       } else {
         console.error('PizzaGallery: Failed to fetch items:', itemsRes.status)
       }
-      
+
       setLastRefresh(Date.now())
     } catch (err) {
       console.error('PizzaGallery: Failed to fetch menu data:', err)
@@ -75,18 +75,18 @@ export default function PizzaGallery() {
     }
   }
 
-  const filteredItems = activeCategory === 'All' 
-    ? menuItems 
+  const filteredItems = activeCategory === 'All'
+    ? menuItems
     : menuItems.filter(item => {
-        const category = categories.find(cat => cat._id === item.categoryId)
-        return category && (
-          (activeCategory === 'Classic' && category.name.toLowerCase().includes('classic')) ||
-          (activeCategory === 'Meat' && category.name.toLowerCase().includes('meat')) ||
-          (activeCategory === 'Veggie' && category.name.toLowerCase().includes('veg')) ||
-          (activeCategory === 'Spicy' && category.name.toLowerCase().includes('spicy')) ||
-          (activeCategory === 'Gourmet' && category.name.toLowerCase().includes('gourmet'))
-        )
-      })
+      const category = categories.find(cat => cat._id === item.categoryId)
+      return category && (
+        (activeCategory === 'Classic' && category.name.toLowerCase().includes('classic')) ||
+        (activeCategory === 'Meat' && category.name.toLowerCase().includes('meat')) ||
+        (activeCategory === 'Veggie' && category.name.toLowerCase().includes('veg')) ||
+        (activeCategory === 'Spicy' && category.name.toLowerCase().includes('spicy')) ||
+        (activeCategory === 'Gourmet' && category.name.toLowerCase().includes('gourmet'))
+      )
+    })
 
   const getCategoryName = (categoryId) => {
     const category = categories.find(cat => cat._id === categoryId)
@@ -97,7 +97,7 @@ export default function PizzaGallery() {
     <section ref={ref} id="gallery" className="py-24 relative overflow-hidden bg-mozzarella-50">
       {/* Background Pattern */}
       <div className="absolute inset-0 pizza-bg opacity-30" />
-      
+
       {/* Decorative Elements */}
       <motion.div
         className="absolute top-40 left-10 opacity-10 hidden xl:block"
@@ -138,7 +138,7 @@ export default function PizzaGallery() {
               </svg>
             </button>
           </motion.div>
-          
+
           <h2 className="font-display font-black text-4xl md:text-5xl lg:text-6xl text-wood-800 mt-4 mb-6 tracking-tight">
             Handcrafted with <span className="text-tomato-600">Love</span>
           </h2>
@@ -158,11 +158,10 @@ export default function PizzaGallery() {
             onClick={() => setActiveCategory('All')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
-              activeCategory === 'All'
+            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${activeCategory === 'All'
                 ? 'bg-tomato-600 text-white shadow-lg'
                 : 'bg-mozzarella-200 text-wood-600 hover:bg-mozzarella-300 border border-tomato-200'
-            }`}
+              }`}
           >
             All ({menuItems.length})
           </motion.button>
@@ -172,11 +171,10 @@ export default function PizzaGallery() {
               onClick={() => setActiveCategory(category.name)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                activeCategory === category.name
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${activeCategory === category.name
                   ? 'bg-tomato-600 text-white shadow-lg'
                   : 'bg-mozzarella-200 text-wood-600 hover:bg-mozzarella-300 border border-tomato-200'
-              }`}
+                }`}
             >
               {category.name} ({menuItems.filter(item => item.categoryId === category._id).length})
             </motion.button>
@@ -198,19 +196,19 @@ export default function PizzaGallery() {
             ))
           ) : (
             filteredItems.map((item, index) => (
-                <PizzaCard
-                  key={item._id}
-                  image={item.image ? `http://localhost:5000${item.image}` : 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=500'}
-                  name={item.name}
-                  price={item.price}
-                  description={item.description}
-                  category={getCategoryName(item.categoryId)}
-                  available={item.available}
-                  dietary={item.dietary}
-                  index={index}
-                  isInView={isInView}
-                  onOrder={() => openWithIntent('order', { item: item.name })}
-                />
+              <PizzaCard
+                key={item._id}
+                image={item.image ? `${import.meta.env.VITE_API_URL || ''}${item.image}` : 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=500'}
+                name={item.name}
+                price={item.price}
+                description={item.description}
+                category={getCategoryName(item.categoryId)}
+                available={item.available}
+                dietary={item.dietary}
+                index={index}
+                isInView={isInView}
+                onOrder={() => openWithIntent('order', { item: item.name })}
+              />
             ))
           )}
         </div>
@@ -252,9 +250,8 @@ function PizzaCard({ image, name, price, description, category, available, dieta
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className={`bg-mozzarella-200 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 border border-basil-200 ${
-        !available ? 'opacity-60' : ''
-      }`}>
+      <div className={`bg-mozzarella-200 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 border border-basil-200 ${!available ? 'opacity-60' : ''
+        }`}>
         {/* Image Container */}
         <div className="relative aspect-square overflow-hidden">
           <motion.img
@@ -264,14 +261,14 @@ function PizzaCard({ image, name, price, description, category, available, dieta
             animate={{ scale: isHovered ? 1.1 : 1 }}
             transition={{ duration: 0.6 }}
           />
-          
+
           {/* Availability Badge */}
           {!available && (
             <div className="absolute top-4 right-4 px-3 py-1 bg-tomato-600 text-white text-xs font-bold rounded-full">
               Out of Stock
             </div>
           )}
-          
+
           {/* Dietary Tags */}
           {dietary && (
             <div className="absolute bottom-4 left-4 flex gap-1">
@@ -297,11 +294,11 @@ function PizzaCard({ image, name, price, description, category, available, dieta
             <h3 className="font-display font-bold text-xl text-wood-800 group-hover:text-tomato-600 transition-colors">{name}</h3>
             <span className="text-tomato-600 font-bold text-xl">${price.toFixed(2)}</span>
           </div>
-          
+
           {category && (
             <p className="text-wood-600 text-sm mb-3">{category}</p>
           )}
-          
+
           {description && (
             <p className="text-wood-500 text-sm line-clamp-2">{description}</p>
           )}

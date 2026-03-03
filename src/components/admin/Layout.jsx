@@ -21,12 +21,19 @@ export default function AdminLayout({ children }) {
   const location = useLocation()
 
   useEffect(() => {
+    // Check authentication
+    const token = localStorage.getItem('adminToken')
+    if (!token && location.pathname !== '/admin/login') {
+      navigate('/admin/login')
+      return
+    }
+
     // Set active item based on current path
     const currentItem = sidebarItems.find(item => location.pathname.includes(item.path))
     if (currentItem) {
       setActiveItem(currentItem.id)
     }
-  }, [location])
+  }, [location, navigate])
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken')
@@ -66,11 +73,10 @@ export default function AdminLayout({ children }) {
                 setActiveItem(item.id)
                 navigate(item.path)
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                activeItem === item.id
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeItem === item.id
                   ? 'bg-tomato-600 text-white shadow-lg'
                   : 'text-wood-300 hover:bg-wood-700 hover:text-white'
-              }`}
+                }`}
               whileHover={{ x: sidebarOpen ? 4 : 0 }}
               whileTap={{ scale: 0.98 }}
             >

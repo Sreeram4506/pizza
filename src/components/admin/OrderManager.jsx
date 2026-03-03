@@ -1,31 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { io } from 'socket.io-client'
+import { showPushNotification, playNotificationSound } from '../../utils/notifications'
 
-// Sound notification utility
-const playNotificationSound = () => {
-  try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
-    
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
-    
-    // Pleasant chime: C5 -> E5 -> G5
-    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime)
-    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1)
-    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2)
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
-    
-    oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.5)
-  } catch (err) {
-    console.error('Failed to play notification sound:', err)
-  }
-}
+// Notification sound utility moved to /utils/notifications.js
 
 export default function OrderManager() {
   const [orders, setOrders] = useState([])
@@ -49,49 +27,59 @@ export default function OrderManager() {
   }, [])
 
   // Setup Socket.IO connection
+  const soundRef = useRef(soundEnabled)
+  useEffect(() => { soundRef.current = soundEnabled }, [soundEnabled])
+
   useEffect(() => {
     const token = localStorage.getItem('adminToken')
-    
-    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+    const apiUrl = import.meta.env.VITE_API_URL || window.location.origin
+    const newSocket = io(apiUrl, {
       auth: { token },
       transports: ['websocket', 'polling']
     })
-    
+
     newSocket.on('connect', () => {
       console.log('Connected to live order system')
       newSocket.emit('join-admin')
     })
-    
+
     newSocket.on('connect_error', (error) => {
       console.error('Socket connection error:', error)
     })
-    
-    // Listen for new orders
+
     newSocket.on('order:new', (order) => {
       console.log('New order received:', order)
       setOrders(prev => [order, ...prev])
       setNewOrderAlert(order)
-      if (soundEnabled) playNotificationSound()
-      setTimeout(() => setNewOrderAlert(null), 5000)
+
+      if (soundRef.current) playNotificationSound('success')
+
+      // Browser Push Notification
+      showPushNotification('🔥 New Order Received!', {
+        body: `Order #${order.orderNumber} - $${order.total?.toFixed(2)}`,
+        tag: order._id
+      })
+
+      setTimeout(() => setNewOrderAlert(null), 8000)
     })
-    
+
     // Listen for order updates
     newSocket.on('order:update', (updatedOrder) => {
       console.log('Order updated:', updatedOrder)
       setOrders(prev => prev.map(o => o._id === updatedOrder._id ? updatedOrder : o))
       if (selectedOrder?._id === updatedOrder._id) setSelectedOrder(updatedOrder)
     })
-    
+
     // Listen for order deletion
     newSocket.on('order:deleted', (deletedOrderId) => {
       setOrders(prev => prev.filter(o => o._id !== deletedOrderId))
     })
-    
+
     setSocket(newSocket)
     fetchOrders()
-    
+
     return () => newSocket.disconnect()
-  }, [soundEnabled])
+  }, [])
 
   const fetchOrders = async () => {
     try {
@@ -99,7 +87,7 @@ export default function OrderManager() {
       const res = await fetch('/api/admin/orders', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      
+
       if (res.ok) {
         const data = await res.json()
         setOrders(data)
@@ -122,7 +110,7 @@ export default function OrderManager() {
         },
         body: JSON.stringify({ status: newStatus })
       })
-      
+
       if (res.ok) {
         fetchOrders() // Refresh orders
       }
@@ -131,8 +119,8 @@ export default function OrderManager() {
     }
   }
 
-  const filteredOrders = filter === 'all' 
-    ? orders 
+  const filteredOrders = filter === 'all'
+    ? orders
     : orders.filter(order => order.status === filter)
 
   const getStatusColor = (status) => {
@@ -168,7 +156,7 @@ export default function OrderManager() {
   }
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-8 relative max-w-6xl mx-auto">
       {/* New Order Alert Banner */}
       <AnimatePresence>
         {newOrderAlert && (
@@ -176,44 +164,48 @@ export default function OrderManager() {
             initial={{ opacity: 0, y: -50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -50, scale: 0.9 }}
-            className="fixed top-20 right-4 z-50 bg-tomato-600 text-white rounded-xl shadow-2xl p-4 max-w-sm border-4 border-tomato-400"
+            className="fixed top-24 right-6 z-50 bg-white border border-tomato-100 rounded-2xl shadow-2xl p-6 max-w-sm"
           >
-            <div className="flex items-start gap-3">
-              <span className="text-3xl">🍕</span>
-              <div className="flex-1">
-                <h4 className="font-bold text-lg">New Order Received!</h4>
-                <p className="text-tomato-100 text-sm">
-                  Order #{newOrderAlert.orderNumber} - ${newOrderAlert.total?.toFixed(2)}
-                </p>
-                <p className="text-tomato-100 text-xs mt-1">
-                  {newOrderAlert.items?.length || 0} items
-                </p>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-tomato-50 rounded-full flex items-center justify-center text-2xl">
+                🍕
               </div>
-              <button 
+              <div className="flex-1">
+                <h4 className="font-black text-stone-900 text-lg tracking-tight">New Order!</h4>
+                <p className="text-stone-500 text-sm mt-1">
+                  Order <span className="text-tomato-600 font-bold">#{newOrderAlert.orderNumber}</span>
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-xs font-black text-stone-400 uppercase tracking-widest">{newOrderAlert.items?.length || 0} items</span>
+                  <span className="text-stone-300">•</span>
+                  <span className="text-sm font-bold text-stone-900">${newOrderAlert.total?.toFixed(2)}</span>
+                </div>
+              </div>
+              <button
                 onClick={() => setNewOrderAlert(null)}
-                className="text-tomato-200 hover:text-white"
+                className="text-stone-300 hover:text-stone-900 transition-colors"
               >
                 ✕
               </button>
             </div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-6 flex gap-3">
               <button
                 onClick={() => {
                   setSelectedOrder(newOrderAlert)
                   setNewOrderAlert(null)
                 }}
-                className="flex-1 py-2 bg-white text-tomato-600 rounded-lg font-semibold text-sm hover:bg-tomato-50"
+                className="flex-1 py-3 bg-stone-100 text-stone-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-stone-200 transition-all"
               >
-                View Order
+                View
               </button>
               <button
                 onClick={() => {
                   updateOrderStatus(newOrderAlert._id, 'preparing')
                   setNewOrderAlert(null)
                 }}
-                className="flex-1 py-2 bg-tomato-700 text-white rounded-lg font-semibold text-sm hover:bg-tomato-800"
+                className="flex-1 py-3 bg-tomato-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-tomato-700 shadow-lg shadow-tomato-100 transition-all"
               >
-                Start Preparing
+                Prepare
               </button>
             </div>
           </motion.div>
@@ -221,29 +213,27 @@ export default function OrderManager() {
       </AnimatePresence>
 
       {/* Header */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-wood-800">Live Order Management</h1>
-          <p className="text-wood-600 mt-1">
-            Real-time order tracking • {orders.length} total orders
+          <h2 className="text-4xl font-black text-stone-900 tracking-tight">Live Orders</h2>
+          <p className="text-stone-500 mt-2 text-lg">
+            Real-time tracking • <span className="text-stone-900 font-bold">{orders.length} total</span>
             {pendingCount > 0 && (
-              <span className="ml-2 text-tomato-600 font-semibold">
-                ({pendingCount} pending)
+              <span className="ml-2 px-2 py-0.5 bg-tomato-50 text-tomato-600 rounded text-sm font-bold border border-tomato-100">
+                {pendingCount} Pending
               </span>
             )}
           </p>
         </div>
-        
-        <div className="flex items-center gap-3">
+
+        <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-stone-100 shadow-sm">
           {/* Sound Toggle */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className={`p-2 rounded-lg transition-colors ${
-              soundEnabled 
-                ? 'bg-tomato-100 text-tomato-600 hover:bg-tomato-200' 
-                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-            }`}
-            title={soundEnabled ? 'Sound notifications on' : 'Sound notifications off'}
+            className={`p-2.5 rounded-xl transition-all ${soundEnabled
+              ? 'bg-tomato-50 text-tomato-600'
+              : 'bg-stone-50 text-stone-400'
+              }`}
           >
             {soundEnabled ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -256,24 +246,18 @@ export default function OrderManager() {
               </svg>
             )}
           </button>
-          
-          {/* Connection Status */}
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-            socket?.connected 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-red-100 text-red-700'
-          }`}>
-            <span className={`w-2 h-2 rounded-full ${
-              socket?.connected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-            }`} />
-            <span className="text-sm font-medium">
-              {socket?.connected ? 'Live' : 'Offline'}
-            </span>
+
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${socket?.connected
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+            : 'bg-stone-50 text-stone-400 border-stone-100'
+            }`}>
+            <span className={`w-2 h-2 rounded-full ${socket?.connected ? 'bg-emerald-500 animate-pulse' : 'bg-stone-300'}`} />
+            <span className="text-xs font-black uppercase tracking-widest">{socket?.connected ? 'Live' : 'Syncing'}</span>
           </div>
-          
+
           <button
             onClick={fetchOrders}
-            className="px-4 py-2 bg-tomato-600 text-white rounded-lg hover:bg-tomato-700 transition-colors"
+            className="px-6 py-2 bg-stone-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-stone-800 transition-all"
           >
             Refresh
           </button>
@@ -281,21 +265,20 @@ export default function OrderManager() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 p-1 bg-stone-100 rounded-2xl w-fit">
         {['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'].map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              filter === status
-                ? 'bg-tomato-600 text-white shadow-lg'
-                : 'bg-mozzarella-200 text-wood-700 hover:bg-mozzarella-300'
-            }`}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filter === status
+              ? 'bg-white text-tomato-600 shadow-sm'
+              : 'text-stone-500 hover:text-stone-900'
+              }`}
           >
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+            {status}
             {status !== 'all' && (
-              <span className="ml-2 text-sm">
-                ({orders.filter(o => o.status === status).length})
+              <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${filter === status ? 'bg-tomato-50' : 'bg-stone-200'}`}>
+                {orders.filter(o => o.status === status).length}
               </span>
             )}
           </button>
@@ -303,236 +286,214 @@ export default function OrderManager() {
       </div>
 
       {/* Orders List */}
-      <div className="space-y-4">
-        {filteredOrders.map((order) => (
-          <motion.div
-            key={order._id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            layout
-            className={`bg-mozzarella-200 rounded-xl p-6 shadow-lg border-2 transition-all ${
-              order.status === 'pending' 
-                ? 'border-tomato-300 ring-2 ring-tomato-200' 
-                : 'border-basil-200'
-            }`}
-          >
-            <div className="flex flex-col lg:flex-row justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2 flex-wrap">
-                  <h3 className="text-lg font-semibold text-wood-800">
-                    Order #{order.orderNumber}
-                  </h3>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                    {getStatusIcon(order.status)} {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                  </span>
-                  {order.status === 'pending' && (
-                    <span className="px-2 py-1 bg-tomato-100 text-tomato-700 text-xs font-bold rounded animate-pulse">
-                      NEW
-                    </span>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-wood-600">
-                  <div>
-                    <p><strong>Customer:</strong> {order.customerId?.name || 'Guest'}</p>
-                    <p><strong>Phone:</strong> {order.customerId?.phone || 'N/A'}</p>
-                    <p><strong>Type:</strong> {order.type || 'delivery'}</p>
-                  </div>
-                  <div>
-                    <p><strong>Order Time:</strong> {new Date(order.createdAt).toLocaleString()}</p>
-                    <p><strong>Total:</strong> <span className="text-tomato-600 font-bold">${order.total?.toFixed(2) || '0.00'}</span></p>
-                    <p><strong>Items:</strong> {order.items?.length || 0}</p>
-                  </div>
-                </div>
-
-                {/* Order Items Preview */}
-                <div className="mt-4">
-                  <div className="flex flex-wrap gap-2">
-                    {order.items?.slice(0, 3).map((item, index) => (
-                      <span 
-                        key={index} 
-                        className="px-3 py-1 bg-white rounded-full text-sm text-wood-700 border border-crust-200"
-                      >
-                        {item.name} x{item.quantity}
-                      </span>
-                    ))}
-                    {order.items?.length > 3 && (
-                      <span className="px-3 py-1 bg-crust-100 rounded-full text-sm text-wood-600">
-                        +{order.items.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {order.notes && (
-                  <div className="mt-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <p className="text-sm text-yellow-800">
-                      <strong>Note:</strong> {order.notes}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col gap-2 lg:min-w-[140px]">
-                {order.status === 'pending' && (
-                  <>
-                    <button
-                      onClick={() => updateOrderStatus(order._id, 'preparing')}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold transition-colors"
-                    >
-                      👨‍🍳 Start Preparing
-                    </button>
-                    <button
-                      onClick={() => updateOrderStatus(order._id, 'cancelled')}
-                      className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 text-sm font-semibold transition-colors"
-                    >
-                      ❌ Cancel
-                    </button>
-                  </>
-                )}
-                {order.status === 'preparing' && (
-                  <button
-                    onClick={() => updateOrderStatus(order._id, 'ready')}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-semibold transition-colors"
-                  >
-                    ✅ Mark Ready
-                  </button>
-                )}
-                {order.status === 'ready' && (
-                  <button
-                    onClick={() => updateOrderStatus(order._id, 'completed')}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-semibold transition-colors"
-                  >
-                    🎉 Complete
-                  </button>
-                )}
-                <button
-                  onClick={() => setSelectedOrder(order)}
-                  className="px-4 py-2 bg-wood-600 text-white rounded-lg hover:bg-wood-700 text-sm font-semibold transition-colors"
-                >
-                  🔍 View Details
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Order Details Modal */}
-      <AnimatePresence>
-        {selectedOrder && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-            onClick={() => setSelectedOrder(null)}
-          >
+      <div className="grid grid-cols-1 gap-6">
+        {filteredOrders.length === 0 ? (
+          <div className="bg-white rounded-3xl p-20 border border-stone-100 text-center shadow-sm">
+            <div className="text-6xl mb-6">📦</div>
+            <h3 className="text-xl font-black text-stone-900 uppercase tracking-widest">No orders found</h3>
+            <p className="text-stone-500 mt-2">Change your filter or wait for new orders.</p>
+          </div>
+        ) : (
+          filteredOrders.map((order) => (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
+              key={order._id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              layout
+              className={`bg-white rounded-3xl p-8 border hover:shadow-md transition-all group ${order.status === 'pending' ? 'border-tomato-200 ring-4 ring-tomato-50/50' : 'border-stone-100'
+                }`}
             >
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-wood-800">Order #{selectedOrder.orderNumber}</h3>
-                  <p className="text-sm text-wood-500">Placed on {new Date(selectedOrder.createdAt).toLocaleString()}</p>
-                </div>
-                <button
-                  onClick={() => setSelectedOrder(null)}
-                  className="text-wood-500 hover:text-wood-700 p-2 rounded-full hover:bg-gray-100"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {/* Status Badge */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-wood-600">Status:</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedOrder.status)}`}>
-                    {getStatusIcon(selectedOrder.status)} {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
-                  </span>
-                </div>
-
-                {/* Customer Info */}
-                <div className="bg-mozzarella-100 p-4 rounded-xl">
-                  <h4 className="font-semibold text-wood-700 mb-2">Customer Information</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <p><strong>Name:</strong> {selectedOrder.customerId?.name || 'Guest'}</p>
-                    <p><strong>Phone:</strong> {selectedOrder.customerId?.phone || 'N/A'}</p>
-                    <p><strong>Email:</strong> {selectedOrder.customerId?.email || 'N/A'}</p>
-                    <p><strong>Type:</strong> {selectedOrder.type || 'delivery'}</p>
+              <div className="flex flex-col lg:flex-row justify-between gap-8">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-4">
+                    <span className="text-2xl font-black text-stone-900">#{order.orderNumber}</span>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status === 'pending' ? 'bg-tomato-50 text-tomato-600 border border-tomato-100' :
+                      order.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                        'bg-stone-50 text-stone-500 border border-stone-100'
+                      }`}>
+                      {order.status}
+                    </span>
                   </div>
-                  {selectedOrder.deliveryAddress && (
-                    <p className="text-sm mt-2"><strong>Address:</strong> {selectedOrder.deliveryAddress}</p>
-                  )}
-                </div>
 
-                {/* Order Items */}
-                <div>
-                  <h4 className="font-semibold text-wood-700 mb-2">Order Items</h4>
-                  <div className="space-y-2">
-                    {selectedOrder.items?.map((item, index) => (
-                      <div key={index} className="flex justify-between bg-mozzarella-100 p-3 rounded-lg">
-                        <div className="flex-1">
-                          <p className="font-medium text-wood-800">{item.name}</p>
-                          <p className="text-sm text-wood-600">Qty: {item.quantity}</p>
-                          {item.modifiers?.length > 0 && <p className="text-sm text-wood-500 mt-1">Modifiers: {item.modifiers.map(m => m.name).join(', ')}</p>}
+                  <div className="flex flex-wrap items-center gap-6 text-sm text-stone-500 font-medium">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-stone-50 rounded-full flex items-center justify-center text-stone-400">👤</div>
+                      <span className="text-stone-900 font-bold">{order.customerInfo?.name || (order.customerId ? 'Registered User' : 'Guest')}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-stone-400">🕒</span>
+                      {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-stone-400">📍</span>
+                      {order.type || 'delivery'}
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-stone-50">
+                    <div className="flex flex-wrap gap-2">
+                      {order.items?.map((item, idx) => (
+                        <div key={idx} className="bg-stone-50 px-3 py-2 rounded-xl border border-stone-100 flex items-center gap-2">
+                          <span className="w-6 h-6 bg-stone-900 text-white rounded-lg flex items-center justify-center text-[10px] font-bold">
+                            {item.quantity}
+                          </span>
+                          <span className="text-stone-700 font-bold text-xs">{item.name}</span>
                         </div>
-                        <p className="font-semibold text-wood-800">${(item.price * item.quantity).toFixed(2)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Total */}
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-wood-600">Subtotal</p>
-                      <p className="text-sm text-wood-600">Tax</p>
-                      <p className="text-lg font-semibold text-wood-800 mt-1">Total</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-wood-600">${(selectedOrder.subtotal || selectedOrder.total * 0.9)?.toFixed(2)}</p>
-                      <p className="text-sm text-wood-600">${(selectedOrder.tax || selectedOrder.total * 0.1)?.toFixed(2)}</p>
-                      <p className="text-lg font-bold text-tomato-600">${selectedOrder.total?.toFixed(2) || '0.00'}</p>
+                      ))}
                     </div>
                   </div>
                 </div>
 
-                {/* Notes */}
-                {selectedOrder.notes && (
-                  <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                    <h4 className="font-semibold text-yellow-800 mb-1">Order Notes</h4>
-                    <p className="text-yellow-700">{selectedOrder.notes}</p>
+                <div className="w-full lg:w-48 flex flex-col justify-between items-end gap-6 border-l border-stone-50 pl-8">
+                  <div className="text-right">
+                    <span className="block text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Total Amount</span>
+                    <span className="text-3xl font-black text-stone-900">${order.total?.toFixed(2)}</span>
                   </div>
-                )}
 
-                {/* Status Update Buttons */}
-                <div className="flex gap-2 pt-4 border-t">
-                  {selectedOrder.status === 'pending' && (
-                    <>
-                      <button onClick={() => { updateOrderStatus(selectedOrder._id, 'preparing'); setSelectedOrder(null); }} className="flex-1 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">👨‍🍳 Start Preparing</button>
-                      <button onClick={() => { updateOrderStatus(selectedOrder._id, 'cancelled'); setSelectedOrder(null); }} className="flex-1 py-3 bg-red-100 text-red-600 rounded-lg font-semibold hover:bg-red-200 transition-colors">❌ Cancel Order</button>
-                    </>
-                  )}
-                  {selectedOrder.status === 'preparing' && (
-                    <button onClick={() => { updateOrderStatus(selectedOrder._id, 'ready'); setSelectedOrder(null); }} className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">✅ Mark as Ready</button>
-                  )}
-                  {selectedOrder.status === 'ready' && (
-                    <button onClick={() => { updateOrderStatus(selectedOrder._id, 'completed'); setSelectedOrder(null); }} className="w-full py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors">🎉 Complete Order</button>
-                  )}
+                  <div className="space-y-2 w-full">
+                    {order.status === 'pending' && (
+                      <button
+                        onClick={() => updateOrderStatus(order._id, 'preparing')}
+                        className="w-full py-3 bg-tomato-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-tomato-700 transition-all shadow-lg shadow-tomato-100"
+                      >
+                        Accept
+                      </button>
+                    )}
+                    {order.status === 'preparing' && (
+                      <button
+                        onClick={() => updateOrderStatus(order._id, 'ready')}
+                        className="w-full py-3 bg-amber-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-amber-600 transition-all"
+                      >
+                        Ready
+                      </button>
+                    )}
+                    {order.status === 'ready' && (
+                      <button
+                        onClick={() => updateOrderStatus(order._id, 'completed')}
+                        className="w-full py-3 bg-emerald-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all"
+                      >
+                        Complete
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      className="w-full py-3 bg-stone-50 text-stone-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-stone-100 transition-all"
+                    >
+                      Details
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
-          </motion.div>
+          ))
+        )}
+      </div>
+
+      {/* Order Detail Modal */}
+      <AnimatePresence>
+        {selectedOrder && (
+          <div className="fixed inset-0 bg-stone-950/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 font-sans" onClick={() => setSelectedOrder(null)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full p-10 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-start mb-10">
+                <div>
+                  <div className="flex items-center gap-4 mb-2">
+                    <h2 className="text-4xl font-black text-stone-900 tracking-tight">Order #{selectedOrder.orderNumber}</h2>
+                    <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${getStatusColor(selectedOrder.status)}`}>{selectedOrder.status}</span>
+                  </div>
+                  <p className="text-stone-500 font-medium">Placed on {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                </div>
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="w-12 h-12 bg-stone-50 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-900 transition-all border border-stone-100"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-10 mb-10">
+                <div>
+                  <h4 className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">Customer Info</h4>
+                  <div className="space-y-2">
+                    <p className="font-black text-stone-900 leading-none">{selectedOrder.customerInfo?.name || (selectedOrder.customerId ? 'Registered User' : 'Guest')}</p>
+                    <p className="text-sm text-stone-500 font-medium">{selectedOrder.customerInfo?.email || 'No email provided'}</p>
+                    <p className="text-sm text-stone-500 font-medium">{selectedOrder.customerInfo?.phone || 'No phone provided'}</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">Delivery Method</h4>
+                  <div className="bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                    <p className="font-bold text-stone-900 capitalize">{selectedOrder.type || 'delivery'}</p>
+                    {selectedOrder.deliveryAddress && <p className="text-xs text-stone-500 mt-1">{selectedOrder.deliveryAddress}</p>}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-10">
+                <h4 className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">Order Items</h4>
+                <div className="space-y-4">
+                  {selectedOrder.items?.map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center py-4 border-b border-stone-50 last:border-0 group">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-stone-900 text-white rounded-xl flex items-center justify-center font-black">
+                          {item.quantity}
+                        </div>
+                        <div>
+                          <p className="font-black text-stone-900">{item.name}</p>
+                          <p className="text-sm text-stone-400 font-bold">{item.modifiers?.map(m => m.name).join(', ') || 'No extras'}</p>
+                        </div>
+                      </div>
+                      <p className="font-black text-stone-900">${(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-stone-900 rounded-3xl p-8 text-white">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-stone-400 text-sm font-bold">
+                    <span>Subtotal</span>
+                    <span>${(selectedOrder.subtotal || selectedOrder.total * 0.9).toFixed(2)}</span>
+                  </div>
+                  {selectedOrder.deliveryFee > 0 && (
+                    <div className="flex justify-between text-stone-400 text-sm font-bold">
+                      <span>Delivery Fee</span>
+                      <span>${selectedOrder.deliveryFee.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="pt-4 border-t border-stone-800 flex justify-between items-end">
+                    <span className="font-black text-lg">Total</span>
+                    <span className="text-4xl font-black text-tomato-500">${selectedOrder.total?.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-10 flex gap-4">
+                <select
+                  value={selectedOrder.status}
+                  onChange={(e) => updateOrderStatus(selectedOrder._id, e.target.value)}
+                  className="flex-1 px-6 py-4 bg-stone-100 rounded-2xl font-bold text-stone-600 outline-none border-none appearance-none cursor-pointer"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="ready">Ready</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="px-10 py-4 bg-stone-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-stone-800 transition-all shadow-xl shadow-stone-200"
+                >
+                  Done
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

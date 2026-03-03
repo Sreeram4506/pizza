@@ -6,9 +6,16 @@ export async function extractTenant(req, res, next) {
     const hostname = req.headers.host || req.hostname
     const cleanHostname = hostname.split(':')[0] // Remove port if present
     const subdomain = cleanHostname.split('.')[0]
-    
+
     // Skip for localhost, main domain, or API health checks
-    if (subdomain === 'localhost' || subdomain === 'www' || subdomain === 'api' || cleanHostname === 'pizzablast.com') {
+    const isBaseDomain = subdomain === 'localhost' ||
+      subdomain === 'www' ||
+      subdomain === 'api' ||
+      cleanHostname === 'pizzablast.com' ||
+      cleanHostname.includes('onrender.com') ||
+      cleanHostname.includes('vercel.app')
+
+    if (isBaseDomain) {
       // Allow requests without tenant (for admin operations or testing)
       req.tenant = null
       req.tenantId = null
@@ -16,13 +23,13 @@ export async function extractTenant(req, res, next) {
     }
 
     // Find tenant by subdomain
-    const tenant = await Tenant.findOne({ 
+    const tenant = await Tenant.findOne({
       subdomain: subdomain.toLowerCase(),
-      isActive: true 
+      isActive: true
     })
 
     if (!tenant) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         error: 'Restaurant not found',
         message: `No restaurant found for subdomain: ${subdomain}`
       })
@@ -31,7 +38,7 @@ export async function extractTenant(req, res, next) {
     // Attach tenant info to request
     req.tenant = tenant
     req.tenantId = tenant._id
-    
+
     next()
   } catch (error) {
     console.error('Tenant extraction error:', error)
@@ -41,8 +48,12 @@ export async function extractTenant(req, res, next) {
 
 // Middleware to require tenant (for customer-facing routes)
 export function requireTenant(req, res, next) {
-  if (!req.tenant) {
-    return res.status(400).json({ 
+  // Allow requests without tenant on localhost for development
+  const hostname = req.headers.host || req.hostname
+  const isLocal = hostname.includes('localhost') || hostname.includes('127.0.0.1')
+
+  if (!req.tenant && !isLocal) {
+    return res.status(400).json({
       error: 'Tenant required',
       message: 'This endpoint requires a restaurant subdomain'
     })
@@ -55,23 +66,23 @@ export async function optionalTenant(req, res, next) {
   try {
     const hostname = req.headers.host || req.hostname
     const subdomain = hostname.split('.')[0]
-    
+
     if (subdomain === 'localhost' || subdomain === 'www' || subdomain === 'api') {
       req.tenant = null
       req.tenantId = null
       return next()
     }
 
-    const tenant = await Tenant.findOne({ 
+    const tenant = await Tenant.findOne({
       subdomain: subdomain.toLowerCase(),
-      isActive: true 
+      isActive: true
     })
 
     if (tenant) {
       req.tenant = tenant
       req.tenantId = tenant._id
     }
-    
+
     next()
   } catch (error) {
     console.error('Optional tenant extraction error:', error)

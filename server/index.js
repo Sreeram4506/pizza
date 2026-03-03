@@ -13,6 +13,7 @@ import authRoutes from './routes/auth.js'
 import customerRoutes from './routes/customers.js'
 import analyticsRoutes from './routes/analytics.js'
 import cartRoutes from './routes/cart.js'
+import paymentRoutes from './routes/payments.js'
 import { config } from './config.js'
 import { connectDatabase } from './utils/database.js'
 import { extractTenant, requireTenant } from './middleware/tenant.js'
@@ -34,7 +35,28 @@ app.set('io', io)
 // Connect to MongoDB
 connectDatabase()
 
-app.use(cors())
+// Health check for Deployment
+app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }))
+
+// Configure CORS
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL
+].filter(Boolean)
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true
+}))
 app.use(express.json())
 
 // Serve static files from uploads directory
@@ -54,22 +76,33 @@ app.use('/api/customers', requireTenant, customerRoutes)
 app.use('/api/analytics', analyticsRoutes)
 app.use('/api/cart', requireTenant, verifyCustomer, cartRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/payments', paymentRoutes)
 
 // WebSocket connection handling
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id)
-  
+
   // Handle admin joining for order notifications
   socket.on('join-admin', () => {
     socket.join('admin:orders')
     console.log(`Socket ${socket.id} joined admin:orders room`)
   })
-  
+
   socket.on('join-tenant', (tenantId) => {
     socket.join(`tenant:${tenantId}`)
     console.log(`Socket ${socket.id} joined tenant: ${tenantId}`)
   })
-  
+
+  socket.on('join-order', (orderId) => {
+    socket.join(`order:${orderId}`)
+    console.log(`Socket ${socket.id} joined order: ${orderId}`)
+  })
+
+  socket.on('join-customer', (customerId) => {
+    socket.join(`customer:${customerId}`)
+    console.log(`Socket ${socket.id} joined customer: ${customerId}`)
+  })
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id)
   })

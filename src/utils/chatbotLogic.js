@@ -78,13 +78,13 @@ export async function getChatbotResponse(message, menuData, orderContext = {}) {
       break;
 
     case INTENTS.ORDER:
-      const popularBurgers = menuData?.burgers?.filter(b => b.popular) || [];
-      if (popularBurgers.length > 0) {
-        response.text = `Great! I can help you order. Our popular items:\n${popularBurgers.map(b => `• ${b.name} - $${b.price}`).join('\n')}\n\nWhat would you like to add? You can also ask for delivery or pickup!`;
-        response.quickReplies = [...popularBurgers.slice(0, 3).map(b => b.name), 'View Full Menu', 'Combos'];
+      const popularPizzas = menuData?.pizzas?.filter(b => b.popular) || [];
+      if (popularPizzas.length > 0) {
+        response.text = `Great! I can help you order. Our popular items:\n${popularPizzas.map(b => `• ${b.name} - $${b.price}`).join('\n')}\n\nWhat would you like to add? You can also ask for delivery or pickup!`;
+        response.quickReplies = [...popularPizzas.slice(0, 3).map(b => b.name), 'View Full Menu', 'Combos'];
       } else {
-        response.text = "Great choice! Our popular items: Classic Blast ($8.99), Double Cheese Explosion ($12.99), Spicy Inferno ($11.99). What would you like?";
-        response.quickReplies = ['Classic Blast', 'Double Cheese Explosion', 'Spicy Inferno', 'View Full Menu'];
+        response.text = "Great choice! Our popular items: Margherita Royale ($14.99), Sizzling Pepperoni ($16.99), Spicy Diavola ($18.99). What would you like?";
+        response.quickReplies = ['Margherita Royale', 'Sizzling Pepperoni', 'Spicy Diavola', 'View Full Menu'];
       }
       break;
 
@@ -99,7 +99,7 @@ export async function getChatbotResponse(message, menuData, orderContext = {}) {
       break;
 
     case INTENTS.HOURS:
-      response.text = "We're open Mon-Sun: 10:00 AM - 11:00 PM. Come grab a burger anytime! 🕐";
+      response.text = "We're open Mon-Sun: 10:00 AM - 11:00 PM. Come grab a pizza anytime! 🕐";
       response.quickReplies = ['Order Now', 'Location', 'Contact'];
       break;
 
@@ -142,12 +142,12 @@ export async function getChatbotResponse(message, menuData, orderContext = {}) {
 
     case INTENTS.RECOMMENDATION:
       response.text = "Our most popular picks:\n🔥 Margherita Royale - $14.99\n🔥 Sizzling Pepperoni - $16.99\n🔥 Spicy Diavola - $18.99\n🔥 BBQ Smokehouse - $17.99\nTry any of these - you won't regret it!";
-      response.quickReplies = ['Double Cheese', 'Classic Blast', 'Spicy Inferno', 'Order Now'];
+      response.quickReplies = ['Margherita Royale', 'Sizzling Pepperoni', 'Spicy Diavola', 'Order Now'];
       break;
 
     case INTENTS.CUSTOMIZE:
-      response.text = "We offer customizations: Extra cheese, extra sauce, no pickles, gluten-free bun, add bacon, add jalapeños. Just tell me your burger and how you'd like it!";
-      response.quickReplies = ['Extra cheese', 'No pickles', 'Gluten-free bun', 'Order Now'];
+      response.text = "We offer customizations: Extra cheese, extra sauce, thin crust, gluten-free base, add bacon, add jalapeños. Just tell me your pizza and how you'd like it!";
+      response.quickReplies = ['Extra cheese', 'Thin crust', 'Gluten-free base', 'Order Now'];
       break;
 
     default:

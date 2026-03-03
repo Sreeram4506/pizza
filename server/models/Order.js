@@ -49,6 +49,8 @@ const orderSchema = new mongoose.Schema({
     transactionId: { type: String, default: '' }
   },
   estimatedReadyAt: { type: Date },
+  estimatedDeliveryAt: { type: Date },
+  estimatedDineInTime: { type: Date },
   actualDeliveredAt: { type: Date },
   notes: { type: String, default: '' },
   source: { type: String, enum: ['website', 'app', 'phone', 'in_person'], default: 'website' }

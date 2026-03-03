@@ -56,11 +56,10 @@ export default function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
           ? 'bg-white/95 backdrop-blur-xl shadow-lg py-3'
           : 'bg-transparent py-5'
-      }`}
+        }`}
     >
       <nav className="container mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
@@ -73,9 +72,8 @@ export default function Navbar() {
           <div className="w-10 h-10 bg-tomato-600 rounded-full flex items-center justify-center shadow-crust">
             <span className="text-xl">🍕</span>
           </div>
-          <span className={`font-display font-bold text-2xl tracking-tight transition-colors duration-300 ${
-            scrolled ? 'text-wood-800' : 'text-wood-800'
-          }`}>
+          <span className={`font-display font-bold text-2xl tracking-tight transition-colors duration-300 ${scrolled ? 'text-wood-800' : 'text-wood-800'
+            }`}>
             Pizza<span className="text-tomato-600">Blast</span>
           </span>
         </motion.a>
@@ -86,11 +84,10 @@ export default function Navbar() {
             <button
               key={link.label}
               onClick={() => handleNavClick(link)}
-              className={`text-sm font-semibold tracking-wide transition-colors relative group ${
-                scrolled 
-                  ? 'text-wood-700 hover:text-tomato-600' 
+              className={`text-sm font-semibold tracking-wide transition-colors relative group ${scrolled
+                  ? 'text-wood-700 hover:text-tomato-600'
                   : 'text-wood-700 hover:text-tomato-600'
-              }`}
+                }`}
             >
               {link.label}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-tomato-600 transition-all duration-300 group-hover:w-full" />
@@ -119,14 +116,22 @@ export default function Navbar() {
           {isLoggedIn ? (
             <div className="flex items-center gap-3">
               <motion.button
+                className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-tomato-600 text-white text-sm font-semibold rounded-full hover:bg-tomato-700 transition-all shadow-lg"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/profile')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Profile
+              </motion.button>
+              <motion.button
                 className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-wood-700 text-white text-sm font-semibold rounded-full hover:bg-wood-800 transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleLogout}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
                 Logout
               </motion.button>
             </div>

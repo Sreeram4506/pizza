@@ -12,6 +12,8 @@ import { MenuItem } from '../models/MenuItem.js'
 import { Settings } from '../models/Settings.js'
 import { EmailCampaign } from '../models/EmailCampaign.js'
 import { PromotionalBanner } from '../models/PromotionalBanner.js'
+import { config } from '../config.js'
+import { sendMarketingEmail } from '../utils/email.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -20,34 +22,35 @@ const router = Router()
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads/menu'))
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, 'menu-' + uniqueSuffix + path.extname(file.originalname))
-  }
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '../uploads/menu'))
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, 'menu-' + uniqueSuffix + path.extname(file.originalname))
+    }
 })
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true)
-  } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, and WebP are allowed.'), false)
-  }
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true)
+    } else {
+        cb(new Error('Invalid file type. Only JPEG, PNG, and WebP are allowed.'), false)
+    }
 }
 
-const upload = multer({ 
-  storage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+const upload = multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 })
 
-// Admin credentials (In a real app, these should be in a DB)
-const ADMIN_USER = 'admin'
-const ADMIN_PASS_HASH = bcrypt.hashSync('password123', 10)
-const JWT_SECRET = process.env.JWT_SECRET || 'pizza-blast-secret-2024'
+// Admin credentials and JWT Secret from config
+// Admin credentials from config
+const ADMIN_USER = () => config.adminUsername
+const ADMIN_PASS_HASH = () => bcrypt.hashSync(config.adminPassword, 10)
+// Removed static JWT_SECRET constant to use config.JWT_SECRET directly
 
 // Multer error handling middleware
 const handleMulterError = (err, req, res, next) => {
@@ -72,8 +75,8 @@ const handleMulterError = (err, req, res, next) => {
 router.post('/login', async (req, res) => {
     const { username, password } = req.body
 
-    if (username === ADMIN_USER && bcrypt.compareSync(password, ADMIN_PASS_HASH)) {
-        const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '1d' })
+    if (username === ADMIN_USER() && bcrypt.compareSync(password, ADMIN_PASS_HASH())) {
+        const token = jwt.sign({ role: 'admin' }, config.JWT_SECRET, { expiresIn: '1d' })
         return res.json({ token })
     }
 
@@ -82,14 +85,20 @@ router.post('/login', async (req, res) => {
 
 // Middleware to verify Admin JWT
 const verifyAdmin = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1]
-    if (!token) return res.status(401).json({ error: 'Unauthorized' })
+    const authHeader = req.headers.authorization
+    const token = authHeader?.split(' ')[1]
+
+    if (!token) {
+        console.log('verifyAdmin: No token provided');
+        return res.status(401).json({ error: 'Unauthorized' })
+    }
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET)
+        const decoded = jwt.verify(token, config.JWT_SECRET)
         req.user = decoded
         next()
     } catch (err) {
+        console.error('verifyAdmin: Token verification failed:', err.message);
         res.status(401).json({ error: 'Invalid token' })
     }
 }
@@ -99,12 +108,12 @@ router.get('/orders', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         let query = {}
-        
+
         // Only add tenantId filter if it exists (for production)
         if (tenantId) {
             query.tenantId = tenantId
         }
-        
+
         const orders = await Order.find(query)
             .sort({ createdAt: -1 })
             .limit(50)
@@ -120,12 +129,12 @@ router.get('/users', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         let query = {}
-        
+
         // Only add tenantId filter if it exists (for production)
         if (tenantId) {
             query.tenantId = tenantId
         }
-        
+
         const customers = await Customer.find(query)
             .select('name email phone createdAt orderCount')
             .sort({ createdAt: -1 })
@@ -141,36 +150,36 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         let query = {}
-        
+
         // Only add tenantId filter if it exists (for production)
         if (tenantId) {
             query.tenantId = tenantId
         }
-        
+
         const now = new Date()
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
         const yesterday = new Date(today)
         yesterday.setDate(yesterday.getDate() - 1)
-        
+
         // Total orders and revenue
         const totalOrders = await Order.countDocuments(query)
         const allOrders = await Order.find({ ...query, status: { $nin: ['cancelled'] } })
         const totalRevenue = allOrders.reduce((sum, order) => sum + (order.total || 0), 0)
-        
+
         // Today's orders
         const todayOrdersQuery = { ...query, createdAt: { $gte: today }, status: { $nin: ['cancelled'] } }
         const todayOrders = await Order.find(todayOrdersQuery)
         const todayRevenue = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0)
-        
+
         // Pending orders
         const pendingOrders = await Order.countDocuments({ ...query, status: 'confirmed' })
-        
+
         // Active customers (customers with orders)
         const activeCustomers = await Customer.countDocuments({ ...query, orderCount: { $gt: 0 } })
-        
+
         // Average order value
         const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
-        
+
         // Popular items
         const itemCounts = {}
         allOrders.forEach(order => {
@@ -178,17 +187,17 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
                 itemCounts[item.name] = (itemCounts[item.name] || 0) + item.quantity
             })
         })
-        
+
         const popularItems = Object.entries(itemCounts)
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 10)
-        
+
         // Recent orders
         const recentOrders = await Order.find(query)
             .sort({ createdAt: -1 })
             .limit(10)
-        
+
         res.json({
             totalRevenue,
             totalOrders,
@@ -206,53 +215,32 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
     }
 })
 
-// Send Offers
+// Send Offers (Direct)
 router.post('/send-offers', verifyAdmin, async (req, res) => {
     const { emails, subject, message } = req.body
-    
+
     try {
         const tenantId = req.tenantId || 'default'
         let target = emails
-        
+
         if (!target || target.length === 0) {
-            const customers = await Customer.find({ tenantId, marketingConsent: true })
-            target = customers.map(c => c.email).filter(Boolean)
+            const customers = await Customer.find({ tenantId })
+            target = customers.map(c => ({ email: c.email, name: c.name })).filter(c => c.email)
+        } else {
+            // Assume emails is an array of strings
+            target = emails.map(e => ({ email: e, name: 'Valued Customer' }))
         }
-        
-        console.log(`Sending email to ${target.length} users: ${subject}`)
-        
-        // Try to send via Nodemailer if configured
-        const nodemailer = await import('nodemailer')
-        const host = process.env.SMTP_HOST
-        
-        if (!host) {
-            console.log('SMTP not configured; skipping real send')
-            return res.json({ success: true, message: `Simulation: Offers queued for ${target.length} users.` })
-        }
-        
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT) || 587,
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        })
 
-        const sendPromises = target.map(email => transporter.sendMail({
-            from: process.env.SMTP_FROM || 'noreply@pizzablast.local',
-            to: email,
-            subject: subject || 'Pizza Blast Offer',
-            text: message,
-            html: `<pre style="font-family:system-ui">${message}</pre>`
-        }))
+        console.log(`Sending marketing emails via backend utility...`)
 
-        await Promise.all(sendPromises)
-        res.json({ success: true, message: `Offers sent to ${target.length} users!` })
+        const sendPromises = target.map(t => sendMarketingEmail(t.email, subject, message, t.name))
+        const results = await Promise.allSettled(sendPromises)
+
+        const successCount = results.filter(r => r.status === 'fulfilled').length
+        res.json({ success: true, message: `Emails sent successfully to ${successCount} customers.` })
     } catch (err) {
-        console.error('Email send failed', err)
-        res.status(500).json({ success: false, error: 'Failed to send emails (server)' })
+        console.error('Marketing email failed', err)
+        res.status(500).json({ success: false, error: 'Failed to send emails' })
     }
 })
 
@@ -261,12 +249,12 @@ router.get('/menu/categories', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         let query = {}
-        
+
         // Only add tenantId filter if it exists (for production)
         if (tenantId) {
             query.tenantId = tenantId
         }
-        
+
         const categories = await MenuCategory.find(query)
             .sort({ sortOrder: 1, createdAt: 1 })
         res.json(categories)
@@ -280,16 +268,16 @@ router.post('/menu/categories', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         const { name, description, sortOrder } = req.body
-        
+
         const category = new MenuCategory({
             ...(tenantId && { tenantId }),
             name,
             description: description || '',
             sortOrder: sortOrder || 0
         })
-        
+
         await category.save()
-        
+
         // Emit WebSocket event
         const io = req.app.get('io')
         if (io) {
@@ -299,7 +287,7 @@ router.post('/menu/categories', verifyAdmin, async (req, res) => {
                 message: `New category "${name}" added`
             })
         }
-        
+
         res.status(201).json(category)
     } catch (err) {
         console.error('Failed to create category:', err)
@@ -311,17 +299,17 @@ router.put('/menu/categories/:id', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params
         const { name, description, sortOrder } = req.body
-        
+
         const category = await MenuCategory.findByIdAndUpdate(
-            id, 
+            id,
             { name, description: description || '', sortOrder: sortOrder || 0 },
             { new: true }
         )
-        
+
         if (!category) {
             return res.status(404).json({ error: 'Category not found' })
         }
-        
+
         res.json(category)
     } catch (err) {
         console.error('Failed to update category:', err)
@@ -333,11 +321,11 @@ router.delete('/menu/categories/:id', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params
         const category = await MenuCategory.findByIdAndDelete(id)
-        
+
         if (!category) {
             return res.status(404).json({ error: 'Category not found' })
         }
-        
+
         res.json({ message: 'Category deleted successfully' })
     } catch (err) {
         console.error('Failed to delete category:', err)
@@ -350,12 +338,12 @@ router.get('/menu/items', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         let query = {}
-        
+
         // Only add tenantId filter if it exists (for production)
         if (tenantId) {
             query.tenantId = tenantId
         }
-        
+
         const items = await MenuItem.find(query)
             .populate('categoryId', 'name')
             .sort({ createdAt: -1 })
@@ -371,10 +359,10 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
         console.log('POST /menu/items - Request received')
         console.log('Body:', req.body)
         console.log('File:', req.file)
-        
+
         const tenantId = req.tenantId
         const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
-        
+
         // Build item data
         const itemData = {
             ...(tenantId && { tenantId }),
@@ -387,20 +375,20 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
             tags: tags ? JSON.parse(tags) : [],
             dietary: dietary ? JSON.parse(dietary) : {}
         }
-        
+
         // Add image path if uploaded
         if (req.file) {
             itemData.image = `/uploads/menu/${req.file.filename}`
             console.log('Image saved:', itemData.image)
         }
-        
+
         console.log('Creating item with data:', itemData)
-        
+
         const item = new MenuItem(itemData)
         await item.save()
-        
+
         console.log('Item saved successfully:', item)
-        
+
         // Emit WebSocket event
         const io = req.app.get('io')
         if (io) {
@@ -410,7 +398,7 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
                 message: `New item "${name}" added to menu`
             })
         }
-        
+
         res.status(201).json(item)
     } catch (err) {
         console.error('Failed to create menu item:', err)
@@ -422,7 +410,7 @@ router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('ima
     try {
         const { id } = req.params
         const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
-        
+
         // Build update data
         const updateData = {
             name,
@@ -434,22 +422,22 @@ router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('ima
             tags: tags ? JSON.parse(tags) : [],
             dietary: dietary ? JSON.parse(dietary) : {}
         }
-        
+
         // Add image path if new image uploaded
         if (req.file) {
             updateData.image = `/uploads/menu/${req.file.filename}`
         }
-        
+
         const item = await MenuItem.findByIdAndUpdate(
             id,
             updateData,
             { new: true }
         )
-        
+
         if (!item) {
             return res.status(404).json({ error: 'Menu item not found' })
         }
-        
+
         // Emit WebSocket event
         const io = req.app.get('io')
         if (io) {
@@ -459,7 +447,7 @@ router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('ima
                 message: `Item "${name}" updated`
             })
         }
-        
+
         res.json(item)
     } catch (err) {
         console.error('Failed to update menu item:', err)
@@ -471,11 +459,11 @@ router.delete('/menu/items/:id', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params
         const item = await MenuItem.findByIdAndDelete(id)
-        
+
         if (!item) {
             return res.status(404).json({ error: 'Menu item not found' })
         }
-        
+
         // Emit WebSocket event
         const io = req.app.get('io')
         if (io) {
@@ -486,7 +474,7 @@ router.delete('/menu/items/:id', verifyAdmin, async (req, res) => {
                 message: `Item "${item.name}" removed from menu`
             })
         }
-        
+
         res.json({ message: 'Menu item deleted successfully' })
     } catch (err) {
         console.error('Failed to delete menu item:', err)
@@ -500,7 +488,7 @@ router.get('/public/settings', async (req, res) => {
         const tenantId = req.tenantId
         console.log('GET /admin/public/settings - Request received')
         console.log('Tenant ID:', tenantId)
-        
+
         let settings
         if (tenantId) {
             settings = await Settings.findOne({ tenantId })
@@ -515,7 +503,7 @@ router.get('/public/settings', async (req, res) => {
                 timezone: 'America/New_York'
             }
         }
-        
+
         console.log('Public settings found:', settings)
         res.json(settings)
     } catch (err) {
@@ -530,7 +518,7 @@ router.get('/settings', verifyAdmin, async (req, res) => {
         const tenantId = req.tenantId
         console.log('GET /admin/settings - Request received')
         console.log('Tenant ID:', tenantId)
-        
+
         let settings
         if (tenantId) {
             settings = await Settings.findOne({ tenantId })
@@ -545,7 +533,7 @@ router.get('/settings', verifyAdmin, async (req, res) => {
                 timezone: 'America/New_York'
             }
         }
-        
+
         console.log('Settings found:', settings)
         res.json(settings)
     } catch (err) {
@@ -560,9 +548,9 @@ router.post('/settings', verifyAdmin, async (req, res) => {
         console.log('POST /admin/settings - Request received')
         console.log('Tenant ID:', tenantId)
         console.log('Settings data:', req.body)
-        
+
         const { restaurantName, email, phone, address, currency, timezone } = req.body
-        
+
         const settingsData = {
             ...(tenantId && { tenantId }),
             restaurantName,
@@ -573,9 +561,9 @@ router.post('/settings', verifyAdmin, async (req, res) => {
             timezone,
             updatedAt: new Date()
         }
-        
+
         console.log('Settings data to save:', settingsData)
-        
+
         let settings
         if (tenantId) {
             settings = await Settings.findOneAndUpdate(
@@ -589,14 +577,14 @@ router.post('/settings', verifyAdmin, async (req, res) => {
             settings = settingsData
             console.log('Settings saved (localhost mode):', settings)
         }
-        
+
         // Emit WebSocket event for real-time updates
         const io = req.app.get('io')
         if (io) {
             io.emit('settings_updated', settings)
             console.log('WebSocket event emitted: settings_updated')
         }
-        
+
         console.log('Final settings response:', settings)
         res.json(settings)
     } catch (err) {
@@ -610,33 +598,15 @@ router.get('/email-campaigns', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         console.log('GET /admin/email-campaigns - Request received')
-        
+
         let campaigns
         if (tenantId) {
             campaigns = await EmailCampaign.find({ tenantId }).sort({ createdAt: -1 })
         } else {
-            // For localhost development, return mock campaigns
-            campaigns = [
-                {
-                    _id: 'mock1',
-                    name: 'Welcome Campaign',
-                    subject: 'Welcome to Pizza Blast!',
-                    status: 'sent',
-                    stats: { totalRecipients: 150, sent: 150, delivered: 142, opened: 89, clicked: 23 },
-                    createdAt: new Date('2024-01-15'),
-                    sentAt: new Date('2024-01-15')
-                },
-                {
-                    _id: 'mock2',
-                    name: 'Weekend Special',
-                    subject: '50% Off This Weekend!',
-                    status: 'draft',
-                    stats: { totalRecipients: 0, sent: 0, delivered: 0, opened: 0, clicked: 0 },
-                    createdAt: new Date('2024-01-20')
-                }
-            ]
+            // Return real campaigns from database (no tenant filter)
+            campaigns = await EmailCampaign.find({}).sort({ createdAt: -1 })
         }
-        
+
         console.log('Email campaigns found:', campaigns.length)
         res.json(campaigns)
     } catch (err) {
@@ -648,11 +618,8 @@ router.get('/email-campaigns', verifyAdmin, async (req, res) => {
 router.post('/email-campaigns', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
-        console.log('POST /admin/email-campaigns - Request received')
-        console.log('Campaign data:', req.body)
-        
-        const { name, subject, message, template, recipients } = req.body
-        
+        const { name, subject, message, template, recipients, sendNow } = req.body
+
         const campaignData = {
             ...(tenantId && { tenantId }),
             name,
@@ -660,28 +627,35 @@ router.post('/email-campaigns', verifyAdmin, async (req, res) => {
             message,
             template: template || 'custom',
             recipients: recipients || [],
+            status: sendNow ? 'sent' : 'draft',
+            sentAt: sendNow ? new Date() : null,
             stats: { totalRecipients: recipients?.length || 0 }
         }
-        
-        let campaign
-        if (tenantId) {
-            campaign = await EmailCampaign.create(campaignData)
-        } else {
-            // For localhost development, create mock campaign
-            campaign = {
-                _id: 'mock_' + Date.now(),
-                ...campaignData,
-                status: 'draft',
-                createdAt: new Date(),
-                updatedAt: new Date()
-            }
+
+        const campaign = await EmailCampaign.create(campaignData)
+
+        if (sendNow && recipients?.length > 0) {
+            console.log(`Processing "Send Now" for campaign: ${name}`)
+            const sendPromises = recipients.map(r => sendMarketingEmail(r.email, subject, message, r.name))
+            // We fire and forget or at least don't block the initial response
+            Promise.allSettled(sendPromises).then(results => {
+                const delivered = results.filter(r => r.status === 'fulfilled').length
+                const failed = results.filter(r => r.status === 'rejected')
+                if (failed.length > 0) {
+                    console.error(`${failed.length} emails failed to send. First error:`, failed[0].reason)
+                }
+                console.log(`Campaign processing complete: ${delivered} delivered, ${failed.length} failed`)
+                EmailCampaign.findByIdAndUpdate(campaign._id, {
+                    'stats.delivered': delivered,
+                    'stats.sent': recipients.length
+                }).exec().catch(err => console.error('Background update fail:', err))
+            })
         }
-        
-        console.log('Email campaign created:', campaign)
+
         res.json(campaign)
     } catch (err) {
-        console.error('Failed to create email campaign:', err)
-        res.status(500).json({ error: 'Failed to create email campaign' })
+        console.error('Failed to create/send campaign:', err)
+        res.status(500).json({ error: 'Failed to process campaign' })
     }
 })
 
@@ -689,19 +663,15 @@ router.get('/customers/list', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         console.log('GET /admin/customers/list - Request received')
-        
+
         let customers
         if (tenantId) {
-            customers = await Customer.find({ tenantId }).select('name email phone createdAt')
+            customers = await Customer.find({ tenantId }).select('_id name email phone createdAt')
         } else {
-            // For localhost development, return mock customers
-            customers = [
-                { _id: 'c1', name: 'John Doe', email: 'john@example.com', phone: '+1234567890', createdAt: new Date('2024-01-10') },
-                { _id: 'c2', name: 'Jane Smith', email: 'jane@example.com', phone: '+1234567891', createdAt: new Date('2024-01-12') },
-                { _id: 'c3', name: 'Bob Johnson', email: 'bob@example.com', phone: '+1234567892', createdAt: new Date('2024-01-14') }
-            ]
+            // Return actual customers from the database, even without a tenant filter
+            customers = await Customer.find({}).select('_id name email phone createdAt')
         }
-        
+
         console.log('Customers found:', customers.length)
         res.json(customers)
     } catch (err) {
@@ -715,7 +685,7 @@ router.get('/promotional-banners', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         console.log('GET /admin/promotional-banners - Request received')
-        
+
         let banners
         if (tenantId) {
             banners = await PromotionalBanner.find({ tenantId }).sort({ priority: -1, createdAt: -1 })
@@ -768,7 +738,7 @@ router.get('/promotional-banners', verifyAdmin, async (req, res) => {
                 }
             ]
         }
-        
+
         console.log('Promotional banners found:', banners.length)
         res.json(banners)
     } catch (err) {
@@ -782,24 +752,24 @@ router.post('/promotional-banners', verifyAdmin, async (req, res) => {
         const tenantId = req.tenantId
         console.log('POST /admin/promotional-banners - Request received')
         console.log('Banner data:', req.body)
-        
-        const { 
-            title, 
-            subtitle, 
-            description, 
-            imageUrl, 
-            backgroundColor, 
-            textColor, 
-            buttonText, 
-            buttonLink, 
-            position, 
-            size, 
-            startDate, 
-            endDate, 
-            priority, 
-            targetAudience 
+
+        const {
+            title,
+            subtitle,
+            description,
+            imageUrl,
+            backgroundColor,
+            textColor,
+            buttonText,
+            buttonLink,
+            position,
+            size,
+            startDate,
+            endDate,
+            priority,
+            targetAudience
         } = req.body
-        
+
         const bannerData = {
             ...(tenantId && { tenantId }),
             title,
@@ -818,7 +788,7 @@ router.post('/promotional-banners', verifyAdmin, async (req, res) => {
             targetAudience: targetAudience || ['all'],
             status: 'active'
         }
-        
+
         let banner
         if (tenantId) {
             banner = await PromotionalBanner.create(bannerData)
@@ -834,7 +804,7 @@ router.post('/promotional-banners', verifyAdmin, async (req, res) => {
                 updatedAt: new Date()
             }
         }
-        
+
         console.log('Promotional banner created:', banner)
         res.json(banner)
     } catch (err) {
@@ -848,12 +818,12 @@ router.put('/promotional-banners/:id', verifyAdmin, async (req, res) => {
         const tenantId = req.tenantId
         const { id } = req.params
         console.log('PUT /admin/promotional-banners/:id - Request received')
-        
+
         const updateData = {
             ...req.body,
             updatedAt: new Date()
         }
-        
+
         let banner
         if (tenantId) {
             banner = await PromotionalBanner.findOneAndUpdate(
@@ -865,11 +835,11 @@ router.put('/promotional-banners/:id', verifyAdmin, async (req, res) => {
             // For localhost development, just return success
             banner = { _id: id, ...updateData }
         }
-        
+
         if (!banner) {
             return res.status(404).json({ error: 'Banner not found' })
         }
-        
+
         console.log('Promotional banner updated:', banner)
         res.json(banner)
     } catch (err) {
@@ -883,7 +853,7 @@ router.delete('/promotional-banners/:id', verifyAdmin, async (req, res) => {
         const tenantId = req.tenantId
         const { id } = req.params
         console.log('DELETE /admin/promotional-banners/:id - Request received')
-        
+
         let result
         if (tenantId) {
             result = await PromotionalBanner.findOneAndDelete({ _id: id, tenantId })
@@ -891,11 +861,11 @@ router.delete('/promotional-banners/:id', verifyAdmin, async (req, res) => {
             // For localhost development, just return success
             result = { _id: id }
         }
-        
+
         if (!result) {
             return res.status(404).json({ error: 'Banner not found' })
         }
-        
+
         console.log('Promotional banner deleted:', id)
         res.json({ message: 'Banner deleted successfully' })
     } catch (err) {
@@ -909,12 +879,12 @@ router.get('/public/promotional-banners', async (req, res) => {
     try {
         const tenantId = req.tenantId
         console.log('GET /admin/public/promotional-banners - Request received')
-        
+
         let banners
         if (tenantId) {
-            banners = await PromotionalBanner.find({ 
-                tenantId, 
-                status: 'active', 
+            banners = await PromotionalBanner.find({
+                tenantId,
+                status: 'active',
                 isActive: true,
                 startDate: { $lte: new Date() },
                 endDate: { $gte: new Date() }
@@ -938,7 +908,7 @@ router.get('/public/promotional-banners', async (req, res) => {
                 }
             ]
         }
-        
+
         console.log('Active promotional banners found:', banners.length)
         res.json(banners)
     } catch (err) {

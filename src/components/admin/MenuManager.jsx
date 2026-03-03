@@ -38,7 +38,7 @@ export default function MenuManager() {
         fetch('/api/admin/menu/categories', { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch('/api/admin/menu/items', { headers: { 'Authorization': `Bearer ${token}` } })
       ])
-      
+
       if (catRes.ok) setCategories(await catRes.json())
       if (itemsRes.ok) setItems(await itemsRes.json())
     } catch (err) {
@@ -94,7 +94,7 @@ export default function MenuManager() {
       formData.append('modifiers', JSON.stringify(itemForm.modifiers))
       formData.append('tags', JSON.stringify(itemForm.tags))
       formData.append('dietary', JSON.stringify(itemForm.dietary))
-      
+
       // Add image if selected
       if (itemForm.imageFile) {
         formData.append('image', itemForm.imageFile)
@@ -115,7 +115,7 @@ export default function MenuManager() {
       })
 
       console.log('Response status:', res.status)
-      
+
       if (!res.ok) {
         const errorData = await res.json()
         console.error('Save failed:', errorData)
@@ -150,7 +150,7 @@ export default function MenuManager() {
   const handleDeleteCategory = async (id) => {
     if (!confirm('Delete this category? All items in it will be uncategorized.')) return
     const token = localStorage.getItem('adminToken')
-    
+
     try {
       const res = await fetch(`/api/admin/menu/categories/${id}`, {
         method: 'DELETE',
@@ -165,7 +165,7 @@ export default function MenuManager() {
   const handleDeleteItem = async (id) => {
     if (!confirm('Delete this item?')) return
     const token = localStorage.getItem('adminToken')
-    
+
     try {
       const res = await fetch(`/api/admin/menu/items/${id}`, {
         method: 'DELETE',
@@ -177,7 +177,7 @@ export default function MenuManager() {
     }
   }
 
-  const filteredItems = activeCategory 
+  const filteredItems = activeCategory
     ? items.filter(item => item.categoryId === activeCategory || item.categoryId?._id === activeCategory)
     : items
 
@@ -241,11 +241,10 @@ export default function MenuManager() {
       <div className="flex gap-3 overflow-x-auto pb-2">
         <button
           onClick={() => setActiveCategory(null)}
-          className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all ${
-            activeCategory === null
+          className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all ${activeCategory === null
               ? 'bg-tomato-600 text-white'
               : 'bg-wood-700 text-wood-300 hover:bg-wood-600'
-          }`}
+            }`}
         >
           All Items ({items.length})
         </button>
@@ -253,11 +252,10 @@ export default function MenuManager() {
           <div key={cat._id} className="flex items-center gap-1">
             <button
               onClick={() => setActiveCategory(cat._id)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all ${
-                activeCategory === cat._id
+              className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all ${activeCategory === cat._id
                   ? 'bg-tomato-600 text-white'
                   : 'bg-wood-700 text-wood-300 hover:bg-wood-600'
-              }`}
+                }`}
             >
               {cat.name} ({items.filter(i => i.categoryId === cat._id || i.categoryId?._id === cat._id).length})
             </button>
@@ -294,8 +292,8 @@ export default function MenuManager() {
                 {/* Item Image */}
                 {item.image && (
                   <div className="mb-3">
-                    <img 
-                      src={`http://localhost:5000${item.image}`}
+                    <img
+                      src={`${import.meta.env.VITE_API_URL || ''}${item.image}`}
                       alt={item.name}
                       className="w-full h-32 object-cover rounded-lg border border-wood-600"
                     />
@@ -305,9 +303,8 @@ export default function MenuManager() {
                 <p className="text-wood-400 text-sm mt-1 line-clamp-2">{item.description}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-tomato-400 font-bold">${item.price.toFixed(2)}</span>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    item.available ? 'bg-basil-600/20 text-basil-400' : 'bg-red-600/20 text-red-400'
-                  }`}>
+                  <span className={`text-xs px-2 py-1 rounded-full ${item.available ? 'bg-basil-600/20 text-basil-400' : 'bg-red-600/20 text-red-400'
+                    }`}>
                     {item.available ? 'Available' : 'Unavailable'}
                   </span>
                 </div>
@@ -328,7 +325,7 @@ export default function MenuManager() {
                       ...item,
                       dietary: item.dietary || { vegetarian: false, vegan: false, glutenFree: false, spicy: false }
                     })
-                    setImagePreview(item.image ? `http://localhost:5000${item.image}` : null)
+                    setImagePreview(item.image ? `${import.meta.env.VITE_API_URL || ''}${item.image}` : null)
                     setShowItemModal(true)
                   }}
                   className="p-2 text-wood-400 hover:text-white hover:bg-wood-700 rounded-lg"
@@ -435,9 +432,9 @@ export default function MenuManager() {
                   <div className="space-y-2">
                     {imagePreview && (
                       <div className="relative">
-                        <img 
-                          src={imagePreview} 
-                          alt="Preview" 
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
                           className="w-full h-32 object-cover rounded-lg border border-wood-600"
                         />
                         <button

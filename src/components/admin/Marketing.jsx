@@ -14,12 +14,14 @@ export default function Marketing() {
         return <PromotionalBanners />
       case 'social':
         return (
-          <div className="bg-wood-800 rounded-xl p-8 border border-wood-700 text-center">
-            <p className="text-4xl mb-4">📱</p>
-            <h3 className="text-xl font-bold text-white mb-2">Social Media Integration</h3>
-            <p className="text-wood-400">Connect your social media accounts and track engagement.</p>
-            <div className="mt-6">
-              <button className="px-6 py-3 bg-tomato-600 text-white font-semibold rounded-lg hover:bg-tomato-700 transition-colors">
+          <div className="bg-white rounded-2xl p-12 border border-stone-100 text-center shadow-sm">
+            <div className="w-20 h-20 bg-tomato-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl text-tomato-600">📱</span>
+            </div>
+            <h3 className="text-2xl font-bold text-stone-900 mb-2">Social Hub</h3>
+            <p className="text-stone-500 max-w-md mx-auto">Connect your Instagram, Facebook, and Twitter accounts to sync posts and track engagement.</p>
+            <div className="mt-8">
+              <button className="px-8 py-3 bg-stone-100 text-stone-400 font-bold rounded-full cursor-not-allowed">
                 Coming Soon
               </button>
             </div>
@@ -31,29 +33,37 @@ export default function Marketing() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-display font-black text-white">Marketing</h2>
-        <p className="text-wood-400 mt-1">Promote your restaurant and engage customers</p>
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-4xl font-black text-stone-900 tracking-tight">Marketing</h2>
+          <p className="text-stone-500 mt-2 text-lg">Growth tools to reach more pizza lovers</p>
+        </div>
+
+        <div className="flex p-1 bg-stone-100 rounded-xl">
+          {['email', 'promotions', 'social'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-2.5 text-sm font-bold capitalize transition-all duration-300 rounded-lg ${activeTab === tab
+                  ? 'bg-white text-tomato-600 shadow-sm'
+                  : 'text-stone-500 hover:text-stone-900'
+                }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="flex gap-4 border-b border-wood-700">
-        {['email', 'promotions', 'social'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-3 font-medium capitalize transition-colors ${
-              activeTab === tab
-                ? 'text-tomato-400 border-b-2 border-tomato-400'
-                : 'text-wood-400 hover:text-white'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {renderTabContent()}
+      <motion.div
+        key={activeTab}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        {renderTabContent()}
+      </motion.div>
     </div>
   )
 }

@@ -2,6 +2,8 @@ import { Router } from 'express'
 import { Customer } from '../models/Customer.js'
 import { Order } from '../models/Order.js'
 import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
+import jwt from 'jsonwebtoken'
+import { config } from '../config.js'
 
 const router = Router()
 
@@ -50,6 +52,32 @@ router.get('/:id', async (req, res) => {
     res.json({ customer, orders })
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch customer' })
+  }
+})
+
+// Get customer profile (for logged-in user)
+router.get('/profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' })
+    }
+
+    const decoded = jwt.verify(token, config.JWT_SECRET)
+    const tenantId = req.tenantId
+    
+    const customer = await Customer.findOne({ _id: decoded.customerId, tenantId })
+    
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' })
+    }
+    
+    res.json({ user: customer })
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' })
+    }
+    res.status(500).json({ error: 'Failed to fetch customer profile' })
   }
 })
 

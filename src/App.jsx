@@ -15,6 +15,7 @@ import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
 import OrderNotifications from './components/OrderNotifications'
 import OrderTracker from './components/OrderTracker'
+import CustomerProfile from './components/CustomerProfile'
 import CustomerLogin from './components/CustomerLogin'
 import CustomerRegister from './components/CustomerRegister'
 import AdminLogin from './components/AdminLogin'
@@ -31,7 +32,7 @@ import CustomPizzaBuilder from './components/CustomPizzaBuilder'
 // Routes where quick login should NOT appear
 const EXCLUDED_ROUTES = [
   '/login',
-  '/register', 
+  '/register',
   '/admin',
   '/admin/login'
 ]
@@ -40,15 +41,15 @@ const EXCLUDED_ROUTES = [
 function QuickLoginWrapper() {
   const location = useLocation()
   const { shouldShowPopup, dismissPopup, onLoginSuccess } = useQuickLoginTrigger()
-  
+
   // Check if current route is excluded
-  const isExcludedRoute = EXCLUDED_ROUTES.some(route => 
+  const isExcludedRoute = EXCLUDED_ROUTES.some(route =>
     location.pathname.startsWith(route)
   )
-  
+
   // Also check if user is already logged in
   const isLoggedIn = !!localStorage.getItem('token')
-  
+
   const shouldShow = shouldShowPopup && !isExcludedRoute && !isLoggedIn
 
   return (
@@ -88,15 +89,17 @@ function App() {
           <div className="min-h-screen bg-mozzarella-100 relative overflow-x-hidden selection:bg-tomato-200 selection:text-wood-800">
             <div className="relative z-10 text-slate-900">
               <QuickLoginWrapper />
-              
+
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<CustomerLogin />} />
                 <Route path="/register" element={<CustomerRegister />} />
                 <Route path="/track" element={<OrderTracker />} />
                 <Route path="/custom-pizza" element={<CustomPizzaBuilder />} />
+                <Route path="/profile" element={<CustomerProfile />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
+                <Route path="/admin/*" element={<AdminLayout />} />
+                {/* Fallback */}
                 <Route path="/admin/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
                 <Route path="/admin/menu" element={<AdminLayout><MenuManager /></AdminLayout>} />
                 <Route path="/admin/orders" element={<AdminLayout><OrderManager /></AdminLayout>} />

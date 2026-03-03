@@ -48,7 +48,7 @@ export default function CustomerManager() {
   const fetchLoyaltyConfig = async () => {
     try {
       const token = localStorage.getItem('adminToken')
-      const res = await fetch('/api/loyalty/config', {
+      const res = await fetch('/api/customers/loyalty/config', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       if (res.ok) {
@@ -63,7 +63,7 @@ export default function CustomerManager() {
     e.preventDefault()
     try {
       const token = localStorage.getItem('adminToken')
-      const res = await fetch('/api/loyalty/rewards', {
+      const res = await fetch('/api/customers/loyalty/rewards', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -91,7 +91,7 @@ export default function CustomerManager() {
   const handleAwardPoints = async (customerId, points) => {
     try {
       const token = localStorage.getItem('adminToken')
-      const res = await fetch(`/api/loyalty/award/${customerId}`, {
+      const res = await fetch(`/api/customers/${customerId}/award-points`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -112,7 +112,7 @@ export default function CustomerManager() {
     }
   }
 
-  const filteredCustomers = customers.filter(c => 
+  const filteredCustomers = customers.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.email?.toLowerCase().includes(search.toLowerCase()) ||
     c.phone.includes(search)
@@ -121,8 +121,8 @@ export default function CustomerManager() {
   const stats = {
     total: customers.length,
     totalPoints: customers.reduce((sum, c) => sum + (c.loyalty?.points || 0), 0),
-    avgOrderValue: customers.length > 0 
-      ? customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0) / customers.length 
+    avgOrderValue: customers.length > 0
+      ? customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0) / customers.length
       : 0
   }
 
@@ -242,9 +242,8 @@ export default function CustomerManager() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      tiers[customer.loyalty?.tier || 'bronze'].color
-                    } ${tiers[customer.loyalty?.tier || 'bronze'].text} bg-opacity-20`}>
+                    <span className={`px-2 py-1 rounded-full text-xs ${tiers[customer.loyalty?.tier || 'bronze'].color
+                      } ${tiers[customer.loyalty?.tier || 'bronze'].text} bg-opacity-20`}>
                       {tiers[customer.loyalty?.tier || 'bronze'].label}
                     </span>
                     <span className="text-wood-300 text-sm">{customer.loyalty?.points || 0} pts</span>
@@ -395,9 +394,8 @@ export default function CustomerManager() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white">{selectedCustomer.name}</h3>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      tiers[selectedCustomer.loyalty?.tier || 'bronze'].color
-                    } ${tiers[selectedCustomer.loyalty?.tier || 'bronze'].text} bg-opacity-20`}>
+                    <span className={`px-2 py-1 rounded-full text-xs ${tiers[selectedCustomer.loyalty?.tier || 'bronze'].color
+                      } ${tiers[selectedCustomer.loyalty?.tier || 'bronze'].text} bg-opacity-20`}>
                       {tiers[selectedCustomer.loyalty?.tier || 'bronze'].label} Member
                     </span>
                   </div>

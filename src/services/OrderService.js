@@ -3,15 +3,23 @@ const API_BASE = '/api';
 export const OrderService = {
     async placeOrder(orderData) {
         try {
+            const token = localStorage.getItem('customerToken');
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            // Add authorization header if token exists
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const response = await fetch(`${API_BASE}/orders`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers,
                 body: JSON.stringify(orderData),
             });
             if (!response.ok) throw new Error('Order failed');
-            return await response.ok ? response.json() : null;
+            return await response.json();
         } catch (error) {
             console.error('Order error:', error);
             return null;

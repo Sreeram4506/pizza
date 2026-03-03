@@ -13,8 +13,10 @@ class WebSocketService {
     }
 
     try {
-      this.socket = new WebSocket('ws://localhost:5000')
-      
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const host = import.meta.env.VITE_WS_URL || window.location.host
+      this.socket = new WebSocket(`${protocol}//${host}`)
+
       this.socket.onopen = () => {
         console.log('WebSocket connected')
         this.reconnectAttempts = 0
@@ -25,7 +27,7 @@ class WebSocketService {
         try {
           const data = JSON.parse(event.data)
           this.emit('message', data)
-          
+
           // Handle specific events
           if (data.type) {
             this.emit(data.type, data.payload)
@@ -55,7 +57,7 @@ class WebSocketService {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++
       console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
-      
+
       setTimeout(() => {
         this.connect()
       }, this.reconnectDelay * this.reconnectAttempts)
