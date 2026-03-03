@@ -167,3 +167,61 @@ body {
 .animate-float-cheese {
   animation: float-cheese 4s ease-in-out infinite;
 }
+
+/* ─── Mobile Utilities ─────────────────────── */
+
+/* Remove tap highlight on mobile buttons */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area bottom padding for devices with home indicator */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Admin page content padding — add bottom space for mobile bottom nav */
+.admin-main-content {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Prevent text overflow on mobile */
+.truncate-mobile {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Better touch targets — minimum 44px height for accessibility */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Smooth momentum scroll for iOS */
+.scroll-smooth-ios {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* Full-width mobile button */
+@media (max-width: 640px) {
+  .btn-mobile-full {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Reduce heavy animations on mobile for performance */
+  .reduce-motion-mobile {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Push page content above mobile bottom nav in admin */
+@media (max-width: 1024px) {
+  .admin-page-wrap {
+    padding-bottom: 5rem;
+  }
+}

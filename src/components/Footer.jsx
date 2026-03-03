@@ -30,11 +30,11 @@ export default function Footer() {
       {/* Decorative Top Border */}
       <div className="h-2 bg-gradient-to-r from-tomato-600 via-crust-500 to-basil-600" />
 
-      <div className="container mx-auto px-6 py-16 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16 relative z-10">
         {/* Main Footer Content */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-12 mb-10">
           {/* Brand Column */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2 lg:col-span-2">
             <motion.div
               className="flex items-center gap-3 mb-6"
               whileHover={{ scale: 1.02 }}
@@ -46,9 +46,9 @@ export default function Footer() {
                 Pizza<span className="text-tomato-400">Blast</span>
               </span>
             </motion.div>
-            
+
             <p className="text-wood-300 text-sm leading-relaxed mb-6 max-w-sm">
-              Authentic Italian pizza made with love. Hand-tossed, wood-fired, 
+              Authentic Italian pizza made with love. Hand-tossed, wood-fired,
               and delivered fresh to your door. Taste the tradition since 2015.
             </p>
 
