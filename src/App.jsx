@@ -13,7 +13,7 @@ import Testimonials from './components/Testimonials'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
-import OrderNotifications from './components/OrderNotifications'
+
 import OrderTracker from './components/OrderTracker'
 import CustomerProfile from './components/CustomerProfile'
 import CustomerLogin from './components/CustomerLogin'
@@ -65,7 +65,7 @@ function Home() {
   return (
     <>
       <Navbar />
-      <OrderNotifications />
+
       <main>
         <Hero />
         <BannerDisplay position="middle" />
