@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { ChatbotProvider } from './context/ChatbotContext'
 import { SettingsProvider } from './context/SettingsContext'
 import { useQuickLoginTrigger } from './hooks/useQuickLoginTrigger'
@@ -48,7 +48,7 @@ function QuickLoginWrapper() {
   )
 
   // Also check if user is already logged in
-  const isLoggedIn = !!localStorage.getItem('token')
+  const isLoggedIn = !!localStorage.getItem('customerToken')
 
   const shouldShow = shouldShowPopup && !isExcludedRoute && !isLoggedIn
 
@@ -98,16 +98,23 @@ function App() {
                 <Route path="/custom-pizza" element={<CustomPizzaBuilder />} />
                 <Route path="/profile" element={<CustomerProfile />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/*" element={<AdminLayout />} />
-                {/* Fallback */}
-                <Route path="/admin/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
-                <Route path="/admin/menu" element={<AdminLayout><MenuManager /></AdminLayout>} />
-                <Route path="/admin/orders" element={<AdminLayout><OrderManager /></AdminLayout>} />
-                <Route path="/admin/customers" element={<AdminLayout><CustomerManager /></AdminLayout>} />
-                <Route path="/admin/loyalty" element={<AdminLayout><CustomerManager /></AdminLayout>} />
-                <Route path="/admin/analytics" element={<AdminLayout><AnalyticsDashboard /></AdminLayout>} />
-                <Route path="/admin/marketing" element={<AdminLayout><Marketing /></AdminLayout>} />
-                <Route path="/admin/settings" element={<AdminLayout><Settings /></AdminLayout>} />
+
+                {/* Secure Nested Admin Routes */}
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="menu" element={<MenuManager />} />
+                  <Route path="orders" element={<OrderManager />} />
+                  <Route path="customers" element={<CustomerManager />} />
+                  <Route path="loyalty" element={<CustomerManager />} />
+                  <Route path="analytics" element={<AnalyticsDashboard />} />
+                  <Route path="marketing" element={<Marketing />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+                </Route>
+
+                {/* Catch-all 404 redirect to home or a dedicated 404 page */}
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
           </div>

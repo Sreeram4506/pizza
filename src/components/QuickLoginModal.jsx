@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 // Inline SVG Icons
 const XIcon = ({ className }) => (
@@ -129,7 +128,7 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
     try {
       // Use the new quick-auth endpoint
-      const response = await fetch(`${API_BASE_URL}/api/auth/quick-auth`, {
+      const response = await fetch(`/api/auth/quick-auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -147,9 +146,9 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
       }
 
       // Store token and user data
-      localStorage.setItem('token', data.token)
+      localStorage.setItem('customerToken', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
-      
+
       // Show success message briefly before closing
       onLoginSuccess?.(data.user)
       onClose()
@@ -207,13 +206,13 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
-            transition={{ 
+            transition={{
               duration: 0.3,
               ease: [0.4, 0, 0.2, 1]
             }}
             className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none"
           >
-            <div 
+            <div
               className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
@@ -262,11 +261,10 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     value={formData.name}
                     onChange={handleInputChange}
                     disabled={isLoading}
-                    className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${
-                      errors.name 
-                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                    className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${errors.name
+                        ? 'border-red-300 focus:border-red-500 bg-red-50'
                         : 'border-wood-200 focus:border-tomato-500'
-                    }`}
+                      }`}
                     placeholder="John Doe"
                   />
                   {errors.name && (
@@ -286,11 +284,10 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     value={formData.email}
                     onChange={handleInputChange}
                     disabled={isLoading}
-                    className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${
-                      errors.email 
-                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                    className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${errors.email
+                        ? 'border-red-300 focus:border-red-500 bg-red-50'
                         : 'border-wood-200 focus:border-tomato-500'
-                    }`}
+                      }`}
                     placeholder="john@example.com"
                   />
                   {errors.email && (
@@ -310,11 +307,10 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     disabled={isLoading}
-                    className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${
-                      errors.phone 
-                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                    className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${errors.phone
+                        ? 'border-red-300 focus:border-red-500 bg-red-50'
                         : 'border-wood-200 focus:border-tomato-500'
-                    }`}
+                      }`}
                     placeholder="+1 (555) 123-4567"
                   />
                   {errors.phone && (
@@ -335,11 +331,10 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                       value={formData.password}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none pr-10 ${
-                        errors.password 
-                          ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                      className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none pr-10 ${errors.password
+                          ? 'border-red-300 focus:border-red-500 bg-red-50'
                           : 'border-wood-200 focus:border-tomato-500'
-                      }`}
+                        }`}
                       placeholder="••••••••"
                     />
                     <button

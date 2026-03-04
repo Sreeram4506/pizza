@@ -7,6 +7,14 @@
         {
             "source": "/socket.io/:path*",
             "destination": "https://pizzabackend-qzi1.onrender.com/socket.io/:path*"
+        },
+        {
+            "source": "/uploads/:path*",
+            "destination": "https://pizzabackend-qzi1.onrender.com/uploads/:path*"
+        },
+        {
+            "source": "/((?!api|socket.io|uploads).*)",
+            "destination": "/index.html"
         }
     ]
 }

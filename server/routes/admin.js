@@ -220,11 +220,13 @@ router.post('/send-offers', verifyAdmin, async (req, res) => {
     const { emails, subject, message } = req.body
 
     try {
-        const tenantId = req.tenantId || 'default'
+        const tenantId = req.tenantId
         let target = emails
 
         if (!target || target.length === 0) {
-            const customers = await Customer.find({ tenantId })
+            // If No tenantId (localhost), search all. Otherwise search by tenant.
+            const query = tenantId ? { tenantId } : {}
+            const customers = await Customer.find(query)
             target = customers.map(c => ({ email: c.email, name: c.name })).filter(c => c.email)
         } else {
             // Assume emails is an array of strings
@@ -603,11 +605,11 @@ router.get('/email-campaigns', verifyAdmin, async (req, res) => {
         if (tenantId) {
             campaigns = await EmailCampaign.find({ tenantId }).sort({ createdAt: -1 })
         } else {
-            // Return real campaigns from database (no tenant filter)
+            // Return actual campaigns from database
             campaigns = await EmailCampaign.find({}).sort({ createdAt: -1 })
         }
 
-        console.log('Email campaigns found:', campaigns.length)
+        console.log(`Email campaigns found: ${campaigns.length} for tenant: ${tenantId || 'global'}`)
         res.json(campaigns)
     } catch (err) {
         console.error('Failed to fetch email campaigns:', err)

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 
 const sidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/admin/dashboard' },
@@ -13,7 +13,7 @@ const sidebarItems = [
   { id: 'settings', label: 'Settings', icon: '⚙️', path: '/admin/settings' },
 ]
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [activeItem, setActiveItem] = useState('dashboard')
@@ -83,8 +83,8 @@ export default function AdminLayout({ children }) {
               if (onClose) onClose()
             }}
             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-left ${activeItem === item.id
-                ? 'bg-tomato-600 text-white shadow-lg'
-                : 'text-wood-300 hover:bg-wood-700 hover:text-white'
+              ? 'bg-tomato-600 text-white shadow-lg'
+              : 'text-wood-300 hover:bg-wood-700 hover:text-white'
               }`}
             whileHover={{ x: sidebarOpen || onClose ? 4 : 0 }}
             whileTap={{ scale: 0.98 }}
@@ -242,7 +242,7 @@ export default function AdminLayout({ children }) {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              {children}
+              <Outlet />
             </motion.div>
           </AnimatePresence>
         </main>
@@ -256,8 +256,8 @@ export default function AdminLayout({ children }) {
               key={item.id}
               onClick={() => { setActiveItem(item.id); navigate(item.path) }}
               className={`flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl min-w-0 flex-1 transition-all ${activeItem === item.id
-                  ? 'text-tomato-400'
-                  : 'text-wood-400 hover:text-wood-200'
+                ? 'text-tomato-400'
+                : 'text-wood-400 hover:text-wood-200'
                 }`}
             >
               <span className="text-xl">{item.icon}</span>

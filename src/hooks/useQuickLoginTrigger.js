@@ -21,10 +21,10 @@ export const useQuickLoginTrigger = () => {
     try {
       const dismissedAt = localStorage.getItem(STORAGE_KEY)
       if (!dismissedAt) return false
-      
+
       const dismissedTime = parseInt(dismissedAt, 10)
       const now = Date.now()
-      
+
       return (now - dismissedTime) < DISMISS_DURATION
     } catch (error) {
       console.error('Error checking localStorage:', error)
@@ -54,7 +54,7 @@ export const useQuickLoginTrigger = () => {
     if (typeof window === 'undefined') return
 
     // Check if already logged in
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('customerToken')
     if (token) {
       hasTriggeredRef.current = true
       return
@@ -77,24 +77,24 @@ export const useQuickLoginTrigger = () => {
 
       const scrollY = window.scrollY
       const docHeight = document.body.scrollHeight - window.innerHeight
-      
+
       // Avoid division by zero
       if (docHeight <= 0) return
-      
+
       const scrollPercent = scrollY / docHeight
 
       if (scrollPercent >= SCROLL_THRESHOLD) {
         scrollTriggered = true
         hasTriggeredRef.current = true
-        
+
         // Clear time trigger if scroll triggers first
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current)
           timeoutRef.current = null
         }
-        
+
         setShouldShowPopup(true)
-        
+
         // Remove scroll listener after trigger
         window.removeEventListener('scroll', throttledScroll)
       }
@@ -117,12 +117,12 @@ export const useQuickLoginTrigger = () => {
 
     // Time trigger - random between 5-10 seconds
     const randomDelay = MIN_TIME_TRIGGER + Math.random() * (MAX_TIME_TRIGGER - MIN_TIME_TRIGGER)
-    
+
     timeoutRef.current = setTimeout(() => {
       if (!hasTriggeredRef.current) {
         hasTriggeredRef.current = true
         setShouldShowPopup(true)
-        
+
         // Remove scroll listener since time triggered first
         window.removeEventListener('scroll', throttledScroll)
       }
