@@ -205,6 +205,11 @@ export default function OrderManager() {
                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${getStatusColor(order.status)}`}>{order.status}</span>
                     </div>
                     <p className="text-wood-400 text-xs font-bold truncate">👤 {order.customerInfo?.name || 'Guest'} • {order.type?.toUpperCase()}</p>
+                    {order.type === 'delivery' && (
+                      <p className="text-tomato-400/80 text-[10px] font-bold mt-1 truncate max-w-[200px]">
+                        📍 {typeof order.address === 'string' ? order.address : `${order.address?.street}, ${order.address?.city}`}
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <span className="text-xl font-black text-tomato-400">${order.total?.toFixed(2)}</span>
@@ -255,16 +260,39 @@ export default function OrderManager() {
               <div className="space-y-6">
                 <section>
                   <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest block mb-2">Customer Info</label>
-                  <div className="bg-wood-700/50 p-3 rounded-xl border border-wood-600">
-                    <p className="text-sm font-bold text-white">{selectedOrder.customerInfo?.name || 'Guest User'}</p>
-                    <p className="text-xs text-wood-400 mt-1">{selectedOrder.customerInfo?.phone || 'No phone'}</p>
-                    <p className="text-[10px] font-black text-tomato-400 mb-1">Type: {selectedOrder.type?.toUpperCase()}</p>
-                    <p className="text-xs text-wood-400 mt-1">
-                      {selectedOrder.type === 'delivery'
-                        ? (typeof selectedOrder.address === 'string' ? selectedOrder.address : `${selectedOrder.address?.street}, ${selectedOrder.address?.city}`)
-                        : selectedOrder.type === 'pickup' ? 'Store Pickup' : 'Dine-in'
-                      }
-                    </p>
+                  <div className="bg-wood-700/50 p-4 rounded-xl border border-wood-600 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm font-bold text-white">{selectedOrder.customerInfo?.name || 'Guest User'}</p>
+                        <p className="text-xs text-wood-400 mt-0.5">{selectedOrder.customerInfo?.phone || 'No phone'}</p>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${selectedOrder.type === 'delivery' ? 'bg-tomato-600/20 text-tomato-400 border border-tomato-500/30' : 'bg-wood-600 text-wood-400'}`}>
+                        {selectedOrder.type}
+                      </span>
+                    </div>
+
+                    {selectedOrder.type === 'delivery' && (
+                      <div className="pt-3 border-t border-wood-600/50">
+                        <label className="text-[9px] font-black text-wood-500 uppercase tracking-widest block mb-1">Delivery Address</label>
+                        <p className="text-xs text-wood-100 leading-relaxed">
+                          {typeof selectedOrder.address === 'string'
+                            ? selectedOrder.address
+                            : (
+                              <>
+                                <span className="block font-bold">{selectedOrder.address?.street}</span>
+                                <span className="block">{selectedOrder.address?.city}{selectedOrder.address?.zip ? `, ${selectedOrder.address.zip}` : ''}</span>
+                              </>
+                            )
+                          }
+                        </p>
+                        {selectedOrder.address?.instructions && (
+                          <div className="mt-2 p-2 bg-tomato-600/5 rounded-lg border border-tomato-600/10">
+                            <label className="text-[8px] font-black text-tomato-400 uppercase tracking-widest block mb-0.5">Instructions</label>
+                            <p className="text-[10px] text-wood-300 italic">"{selectedOrder.address.instructions}"</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </section>
 

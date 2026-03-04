@@ -161,8 +161,20 @@ export default function Dashboard() {
               recentOrders.map((order) => (
                 <div key={order._id} className="flex items-center justify-between px-5 py-3.5 hover:bg-wood-700/40 transition-colors">
                   <div className="min-w-0">
-                    <p className="text-white font-bold text-sm truncate">#{order.orderNumber}</p>
-                    <p className="text-wood-400 text-xs truncate mt-0.5">{order.customerInfo?.name || 'Guest'}</p>
+                    <p className="text-white font-bold text-sm truncate flex items-center gap-2">
+                      #{order.orderNumber}
+                      <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-widest ${order.type === 'delivery' ? 'bg-tomato-600/20 text-tomato-400' : 'bg-wood-600 text-wood-400'}`}>
+                        {order.type}
+                      </span>
+                    </p>
+                    <p className="text-wood-400 text-xs truncate mt-0.5">
+                      👤 {order.customerInfo?.name || 'Guest'}
+                      {order.type === 'delivery' && (
+                        <span className="text-wood-500 font-medium italic ml-2">
+                          📍 {typeof order.address === 'string' ? order.address : `${order.address?.street}`}
+                        </span>
+                      )}
+                    </p>
                   </div>
                   <div className="text-right flex-shrink-0 ml-3">
                     <p className="text-tomato-400 font-black text-sm">${order.total?.toFixed(2)}</p>
