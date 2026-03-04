@@ -76,7 +76,6 @@ function Home() {
         <Contact />
       </main>
       <Footer />
-      <Chatbot />
     </>
   )
 }
@@ -89,6 +88,7 @@ function App() {
           <div className="min-h-screen bg-mozzarella-100 relative overflow-x-hidden selection:bg-tomato-200 selection:text-wood-800">
             <div className="relative z-10 text-slate-900">
               <QuickLoginWrapper />
+              <Chatbot />
 
               <Routes>
                 <Route path="/" element={<Home />} />

@@ -17,7 +17,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const { openWithIntent } = useChatbot()
+  const { openWithIntent, cartCount } = useChatbot()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -57,8 +57,8 @@ export default function Navbar() {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-          ? 'bg-white/95 backdrop-blur-xl shadow-lg py-3'
-          : 'bg-transparent py-5'
+        ? 'bg-white/95 backdrop-blur-xl shadow-lg py-3'
+        : 'bg-transparent py-5'
         }`}
     >
       <nav className="container mx-auto px-6 flex items-center justify-between">
@@ -85,8 +85,8 @@ export default function Navbar() {
               key={link.label}
               onClick={() => handleNavClick(link)}
               className={`text-sm font-semibold tracking-wide transition-colors relative group ${scrolled
-                  ? 'text-wood-700 hover:text-tomato-600'
-                  : 'text-wood-700 hover:text-tomato-600'
+                ? 'text-wood-700 hover:text-tomato-600'
+                : 'text-wood-700 hover:text-tomato-600'
                 }`}
             >
               {link.label}
@@ -107,9 +107,11 @@ export default function Navbar() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-tomato-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
-              0
-            </span>
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-tomato-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+                {cartCount}
+              </span>
+            )}
           </motion.button>
 
           {/* Login/User Button */}

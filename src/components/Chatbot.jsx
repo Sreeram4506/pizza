@@ -6,11 +6,21 @@ import wsService from '../services/websocket.js'
 import StripePayment from './StripePayment'
 
 export default function Chatbot() {
-  const { isOpen, setIsOpen, initialMessage } = useChatbot()
+  const {
+    isOpen,
+    setIsOpen,
+    initialMessage,
+    cart,
+    addToCart,
+    removeFromCart,
+    clearCart,
+    cartCount,
+    cartTotal
+  } = useChatbot()
+
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
-  const [cart, setCart] = useState([])
   const [view, setView] = useState('chat') // 'chat' | 'menu' | 'cart' | 'checkout'
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
@@ -188,7 +198,7 @@ export default function Chatbot() {
             name: `Custom Pizza (${data.item.base})`,
             available: true
           }
-          setCart(prev => [...prev, { ...customItem, qty: 1 }])
+          addToCart(customItem)
           setMessages(prev => [...prev, {
             type: 'bot',
             text: `🍕 **Custom Pizza Added!**\n\nBase: ${data.item.base}\nSauce: ${data.item.sauce}\nToppings: ${data.item.toppings.join(', ')}\nPrice: $${data.item.price}\n\nKeep adding or go to cart to checkout!`,
@@ -205,7 +215,7 @@ export default function Chatbot() {
             name: `Custom Pizza (${data.item.base})`,
             available: true
           }
-          setCart(prev => [...prev, { ...customItem, qty: 1 }])
+          addToCart(customItem)
           setView('checkout')
         }
         break
@@ -215,17 +225,19 @@ export default function Chatbot() {
       case 'order':
         setView('menu')
         break
+      case 'cart':
+        setView('cart')
+        break
+      case 'checkout':
+        setView('checkout')
+        break
       default:
         break
     }
   }
 
-  const addToCart = (item) => {
-    setCart(prev => {
-      const existing = prev.find(i => i._id === item._id)
-      if (existing) return prev.map(i => i._id === item._id ? { ...i, qty: i.qty + 1 } : i)
-      return [...prev, { ...item, qty: 1 }]
-    })
+  const handleAddToCart = (item) => {
+    addToCart(item)
     setMessages(prev => [...prev, {
       type: 'bot',
       text: `Added **${item.name}** to your cart! 🍕 Keep adding or go to cart to checkout.`,
@@ -233,17 +245,6 @@ export default function Chatbot() {
     }])
     setView('chat')
   }
-
-  const removeFromCart = (id) => {
-    setCart(prev => {
-      const item = prev.find(i => i._id === id)
-      if (item.qty === 1) return prev.filter(i => i._id !== id)
-      return prev.map(i => i._id === id ? { ...i, qty: i.qty - 1 } : i)
-    })
-  }
-
-  const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0)
-  const cartCount = cart.reduce((sum, i) => sum + i.qty, 0)
 
   const handleCheckoutIntent = () => {
     if (cart.length === 0) return
@@ -293,7 +294,7 @@ export default function Chatbot() {
           text: `✅ **Order Confirmed!**\n\nOrder ID: \`${orderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated delivery: **${eta}**\n💳 Status: **Paid via Card**`,
           confirmed: true,
         }])
-        setCart([])
+        clearCart()
       } else {
         setMessages(prev => [...prev, {
           type: 'bot',
@@ -355,7 +356,7 @@ export default function Chatbot() {
           text: `✅ **Order Confirmed!**\n\nOrder ID: \`${orderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated delivery: **${eta}**`,
           confirmed: true,
         }])
-        setCart([])
+        clearCart()
       } else {
         setMessages(prev => [...prev, {
           type: 'bot',
@@ -381,10 +382,16 @@ export default function Chatbot() {
     setMessages(prev => [...prev, { type: 'user', text: msg }])
     setIsTyping(true)
     try {
-      const res = await OrderService.chat(msg, { items: cart })
+      const res = await OrderService.chat(msg, {
+        items: cart,
+        customer: getCustomerInfo(),
+        orderType,
+        deliveryAddress
+      })
       setIsTyping(false)
       if (res.action === 'PLACE_ORDER') {
-        await handleCheckout()
+        // Instead of immediate placement, move to checkout view so user can review/fill details
+        handleCheckoutIntent()
       } else {
         setMessages(prev => [...prev, { type: 'bot', text: res.text || "I'm here to help! 🍕" }])
       }
@@ -443,8 +450,8 @@ export default function Chatbot() {
               </div>
 
               <div className="flex items-center gap-6">
-                {/* Tab buttons */}
-                <div className="hidden md:flex items-center bg-white/50 rounded-full p-1 border border-gray-100">
+                {/* Tab buttons - Visible on all screens for better nav */}
+                <div className="flex items-center bg-white/50 rounded-full p-1 border border-gray-100 overflow-x-auto">
                   {['chat', 'menu', 'cart'].map(tab => (
                     <motion.button
                       key={tab}
@@ -564,7 +571,7 @@ export default function Chatbot() {
                           <div className="flex flex-col items-end gap-3 shrink-0">
                             <span className="text-wood-800 font-black text-xl tracking-tighter">${item.price.toFixed(2)}</span>
                             <motion.button
-                              onClick={() => addToCart(item)}
+                              onClick={() => handleAddToCart(item)}
                               disabled={!item.available}
                               className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg ${item.available
                                 ? 'bg-tomato-600 text-white shadow-tomato-600/20'
@@ -681,6 +688,13 @@ export default function Chatbot() {
                       </div>
                       <h2 className="font-display font-black text-3xl text-wood-800 tracking-tight uppercase">Secure Payment</h2>
                       <p className="text-xs text-wood-400 font-bold uppercase tracking-widest mt-2">Paying ${cartTotal.toFixed(2)} to Pizza Blast</p>
+
+                      <button
+                        onClick={() => setView('cart')}
+                        className="mt-4 text-tomato-600 text-[10px] font-black uppercase tracking-widest hover:underline"
+                      >
+                        ← Back to Cart
+                      </button>
                     </div>
 
                     {!customerProfile && (
