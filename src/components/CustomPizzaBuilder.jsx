@@ -6,13 +6,13 @@ import { useChatbot } from '../context/ChatbotContext'
 const SteamParticle = ({ delay }) => (
   <motion.div
     initial={{ opacity: 0, y: 0, scale: 0.5 }}
-    animate={{ 
+    animate={{
       opacity: [0, 0.6, 0],
       y: -60,
       scale: [0.5, 1.2, 1.5],
       x: Math.random() * 40 - 20
     }}
-    transition={{ 
+    transition={{
       duration: 2,
       delay,
       repeat: Infinity,
@@ -31,7 +31,7 @@ const SteamParticle = ({ delay }) => (
 const SizzleEffect = ({ x, y, delay }) => (
   <motion.div
     initial={{ opacity: 1, scale: 0 }}
-    animate={{ 
+    animate={{
       opacity: 0,
       scale: [0, 1.5, 2],
       rotate: Math.random() * 360
@@ -41,9 +41,9 @@ const SizzleEffect = ({ x, y, delay }) => (
     style={{ left: x, top: y }}
   >
     <svg viewBox="0 0 24 24" fill="none" className="w-full h-full text-yellow-400">
-      <circle cx="12" cy="12" r="2" fill="currentColor" className="animate-pulse"/>
-      <path d="M12 6L12 2M12 22L12 18M6 12L2 12M22 12L18 12M8.5 8.5L5.5 5.5M18.5 18.5L15.5 15.5M8.5 15.5L5.5 18.5M18.5 5.5L15.5 8.5" 
-            stroke="currentColor" strokeWidth="1" strokeLinecap="round" className="animate-spin"/>
+      <circle cx="12" cy="12" r="2" fill="currentColor" className="animate-pulse" />
+      <path d="M12 6L12 2M12 22L12 18M6 12L2 12M22 12L18 12M8.5 8.5L5.5 5.5M18.5 18.5L15.5 15.5M8.5 15.5L5.5 18.5M18.5 5.5L15.5 8.5"
+        stroke="currentColor" strokeWidth="1" strokeLinecap="round" className="animate-spin" />
     </svg>
   </motion.div>
 )
@@ -52,7 +52,7 @@ const SizzleEffect = ({ x, y, delay }) => (
 const HeatWave = () => (
   <motion.div
     className="absolute inset-0 rounded-full pointer-events-none"
-    animate={{ 
+    animate={{
       background: [
         'radial-gradient(circle, transparent 0%, transparent 100%)',
         'radial-gradient(circle, rgba(255,100,0,0.1) 0%, transparent 70%)',
@@ -69,12 +69,12 @@ const SauceBubble = ({ delay, x, y }) => (
     className="absolute w-2 h-2 rounded-full bg-white opacity-60"
     style={{ left: x, top: y }}
     initial={{ scale: 0, opacity: 0 }}
-    animate={{ 
+    animate={{
       scale: [0, 1, 0],
       opacity: [0, 0.8, 0],
       y: [0, -5, -10]
     }}
-    transition={{ 
+    transition={{
       duration: 1.5,
       delay,
       repeat: Infinity,
@@ -138,7 +138,7 @@ export default function CustomPizzaBuilder() {
         })
       }
       setCookingEffects(prev => ({ ...prev, bubbles }))
-      
+
       // Trigger cooking steam
       setCookingEffects(prev => ({ ...prev, steam: true }))
       const timer = setTimeout(() => {
@@ -159,7 +159,7 @@ export default function CustomPizzaBuilder() {
         delay: 0
       }
       setCookingEffects(prev => ({ ...prev, sizzle: [...prev.sizzle, sizzle] }))
-      
+
       // Remove sizzle after animation
       setTimeout(() => {
         setCookingEffects(prev => ({ ...prev, sizzle: prev.sizzle.filter(s => s.id !== sizzle.id) }))
@@ -241,8 +241,28 @@ export default function CustomPizzaBuilder() {
 
     // Add to cart using existing chatbot system
     openWithIntent('add_to_cart', { item: customPizza })
-    
+
     // Reset builder
+    resetBuilder()
+  }
+
+  // Checkout now functionality
+  const checkoutNow = () => {
+    if (!selectedBase || !selectedSauce) {
+      alert('Please select both a base and sauce!')
+      return
+    }
+
+    const customPizza = {
+      type: 'custom',
+      base: selectedBase.name,
+      sauce: selectedSauce.name,
+      toppings: selectedToppings.map(t => t.name),
+      price: parseFloat(calculatePrice()),
+      quantity: 1
+    }
+
+    openWithIntent('checkout_now', { item: customPizza })
     resetBuilder()
   }
 
@@ -290,9 +310,9 @@ export default function CustomPizzaBuilder() {
             className="pizza-card p-8"
           >
             <h2 className="text-2xl font-display font-semibold mb-6 text-center text-wood-800">Pizza Preview</h2>
-            
+
             <div className="relative flex justify-center items-center h-96 overflow-visible">
-              <div 
+              <div
                 ref={pizzaCanvasRef}
                 className="relative w-80 h-80 rounded-full bg-gray-100 shadow-inner"
                 style={{ background: 'radial-gradient(circle, #f9f9f9, #e0e0e0)' }}
@@ -362,26 +382,26 @@ export default function CustomPizzaBuilder() {
                   {toppingElements.map((element) => (
                     <motion.div
                       key={element.id}
-                      initial={{ 
+                      initial={{
                         y: -100,
-                        x: element.x, 
+                        x: element.x,
                         opacity: 1,
                         rotate: 0,
                         scale: 0.5
                       }}
-                      animate={{ 
+                      animate={{
                         y: element.y,
-                        x: element.x, 
+                        x: element.x,
                         opacity: 1,
                         rotate: element.rotation,
                         scale: element.scale
                       }}
-                      exit={{ 
-                        y: 200, 
+                      exit={{
+                        y: 200,
                         opacity: 0,
                         scale: 0
                       }}
-                      transition={{ 
+                      transition={{
                         duration: 0.6,
                         delay: element.delay,
                         ease: "easeOut"
@@ -426,19 +446,17 @@ export default function CustomPizzaBuilder() {
                   className={`flex items-center ${step < 3 ? 'flex-1' : ''}`}
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
-                      currentStep >= step
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${currentStep >= step
                         ? 'bg-tomato-500 text-white'
                         : 'bg-wood-200 text-wood-500'
-                    }`}
+                      }`}
                   >
                     {step}
                   </div>
                   {step < 3 && (
                     <div
-                      className={`flex-1 h-1 mx-2 transition-colors ${
-                        currentStep > step ? 'bg-tomato-500' : 'bg-wood-200'
-                      }`}
+                      className={`flex-1 h-1 mx-2 transition-colors ${currentStep > step ? 'bg-tomato-500' : 'bg-wood-200'
+                        }`}
                     />
                   )}
                 </div>
@@ -462,11 +480,10 @@ export default function CustomPizzaBuilder() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setSelectedBase(base)}
-                        className={`p-4 rounded-lg border-2 transition-all ${
-                          selectedBase?.id === base.id
+                        className={`p-4 rounded-lg border-2 transition-all ${selectedBase?.id === base.id
                             ? 'border-tomato-500 bg-tomato-50'
                             : 'border-wood-200 hover:border-crust-400'
-                        }`}
+                          }`}
                       >
                         <div className="font-medium text-wood-800">{base.name}</div>
                         {base.price > 0 && (
@@ -496,11 +513,10 @@ export default function CustomPizzaBuilder() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setSelectedSauce(sauce)}
-                        className={`p-4 rounded-lg border-2 transition-all ${
-                          selectedSauce?.id === sauce.id
+                        className={`p-4 rounded-lg border-2 transition-all ${selectedSauce?.id === sauce.id
                             ? 'border-tomato-500 bg-tomato-50'
                             : 'border-wood-200 hover:border-crust-400'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center space-x-2">
                           <div
@@ -540,11 +556,10 @@ export default function CustomPizzaBuilder() {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => handleToppingToggle(topping)}
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            isSelected
+                          className={`p-3 rounded-lg border-2 transition-all ${isSelected
                               ? 'border-tomato-500 bg-tomato-50'
                               : 'border-wood-200 hover:border-crust-400'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center space-x-2">
                             <span className="text-xl">{topping.emoji}</span>
@@ -568,11 +583,10 @@ export default function CustomPizzaBuilder() {
                 whileTap={{ scale: 0.95 }}
                 onClick={prevStep}
                 disabled={currentStep === 1}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                  currentStep === 1
+                className={`px-6 py-2 rounded-lg font-medium transition-colors ${currentStep === 1
                     ? 'bg-mozzarella-200 text-wood-400 cursor-not-allowed'
                     : 'bg-mozzarella-200 text-wood-700 hover:bg-crust-200'
-                }`}
+                  }`}
               >
                 Previous
               </motion.button>
@@ -595,6 +609,14 @@ export default function CustomPizzaBuilder() {
                     className="px-6 py-2 bg-mozzarella-200 text-wood-700 rounded-lg font-medium hover:bg-crust-200 transition-colors"
                   >
                     Reset
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={checkoutNow}
+                    className="btn-tomato px-6 py-2 rounded-lg font-medium text-white transition-colors"
+                  >
+                    Order Now
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}

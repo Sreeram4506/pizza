@@ -197,6 +197,18 @@ export default function Chatbot() {
           setView('chat')
         }
         break
+      case 'checkout_now':
+        if (data.item) {
+          const customItem = {
+            ...data.item,
+            _id: `custom-${Date.now()}`,
+            name: `Custom Pizza (${data.item.base})`,
+            available: true
+          }
+          setCart(prev => [...prev, { ...customItem, qty: 1 }])
+          setView('checkout')
+        }
+        break
       case 'menu':
         setView('menu')
         break
@@ -496,7 +508,11 @@ export default function Chatbot() {
               {view === 'chat' && (
                 <div className="p-6 max-w-4xl mx-auto w-full space-y-6">
                   {messages.map((msg, i) => (
-                    <ChatMessage key={i} message={msg} onMenuOpen={() => setView('menu')} onCartOpen={() => setView('cart')} />
+                    <ChatMessage key={i} message={msg}
+                      onMenuOpen={() => setView('menu')}
+                      onCartOpen={() => setView('cart')}
+                      onCheckoutOpen={() => setView('checkout')}
+                    />
                   ))}
 
                   {isTyping && <TypingIndicator />}
@@ -920,7 +936,7 @@ export default function Chatbot() {
   )
 }
 
-function ChatMessage({ message, onMenuOpen, onCartOpen }) {
+function ChatMessage({ message, onMenuOpen, onCartOpen, onCheckoutOpen }) {
   const isBot = message.type === 'bot'
   // Simple bold markdown transform
   const formatText = (text) => text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/`(.*?)`/g, '<code style="background:rgba(244,162,97,0.2);padding:2px 5px;border-radius:4px;font-family:monospace">$1</code>')
@@ -961,6 +977,16 @@ function ChatMessage({ message, onMenuOpen, onCartOpen }) {
                 whileTap={{ scale: 0.95 }}
               >
                 🛒 View Cart
+              </motion.button>
+            )}
+            {message.cartAction && (
+              <motion.button
+                onClick={onCheckoutOpen}
+                className="px-6 py-2.5 rounded-2xl bg-tomato-600 text-white text-sm font-bold shadow-lg"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                💳 Checkout
               </motion.button>
             )}
 
