@@ -266,14 +266,14 @@ export default function CustomPizzaBuilder() {
       setCurrentStep(prev => Math.min(prev + 1, STEPS.length))
     }
     const atelier = document.getElementById('atelier')
-    atelier?.scrollIntoView({ behavior: 'smooth' })
+    atelier?.scrollIntoView({ behavior: 'auto' })
   }
 
   const prevStep = () => {
     if (currentStep === 4) setIsBaking(false)
     setCurrentStep(prev => Math.max(prev - 1, 1))
     const atelier = document.getElementById('atelier')
-    atelier?.scrollIntoView({ behavior: 'smooth' })
+    atelier?.scrollIntoView({ behavior: 'auto' })
   }
 
   return (
@@ -339,7 +339,7 @@ export default function CustomPizzaBuilder() {
                     }
                     setCurrentStep(step.id)
                     const atelier = document.getElementById('atelier')
-                    atelier?.scrollIntoView({ behavior: 'smooth' })
+                    atelier?.scrollIntoView({ behavior: 'auto' })
                   }
                 }}
                 className={`relative flex items-center gap-3 px-6 py-3 transition-all duration-500 ${currentStep === step.id
