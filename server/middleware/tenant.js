@@ -19,8 +19,11 @@ export async function extractTenant(req, res, next) {
       // Allow requests without tenant (for admin operations or testing)
       req.tenant = null
       req.tenantId = null
+      req.isBaseDomain = true
       return next()
     }
+
+    req.isBaseDomain = false
 
     // Find tenant by subdomain
     const tenant = await Tenant.findOne({
@@ -52,7 +55,7 @@ export function requireTenant(req, res, next) {
   const hostname = req.headers.host || req.hostname
   const isLocal = hostname.includes('localhost') || hostname.includes('127.0.0.1')
 
-  if (!req.tenant && !isLocal) {
+  if (!req.tenant && !isLocal && !req.isBaseDomain) {
     return res.status(400).json({
       error: 'Tenant required',
       message: 'This endpoint requires a restaurant subdomain'

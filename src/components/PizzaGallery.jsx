@@ -113,7 +113,7 @@ export default function PizzaGallery() {
             filteredItems.map((item, index) => (
               <MenuCard
                 key={item._id}
-                image={item.image ? `${import.meta.env.VITE_API_URL || ''}${item.image}` : 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=600&q=80'}
+                image={item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || ''}${item.image}`) : 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=600&q=80'}
                 name={item.name}
                 price={item.price}
                 description={item.description}

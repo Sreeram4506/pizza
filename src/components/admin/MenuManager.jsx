@@ -253,7 +253,7 @@ export default function MenuManager() {
                 {item.image && (
                   <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border border-wood-700">
                     <img
-                      src={`${import.meta.env.VITE_API_URL || ''}${item.image}`}
+                      src={item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || ''}${item.image}`}
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />
@@ -263,7 +263,7 @@ export default function MenuManager() {
                   <div className="flex justify-between items-start gap-2">
                     <h3 className="font-bold text-white text-sm sm:text-base leading-tight truncate">{item.name}</h3>
                     <div className="flex gap-1">
-                      <button onClick={() => { setEditingItem(item); setItemForm({ ...item, dietary: item.dietary || { vegetarian: false, vegan: false, glutenFree: false, spicy: false } }); setImagePreview(item.image ? `${import.meta.env.VITE_API_URL || ''}${item.image}` : null); setShowItemModal(true); }} className="text-xs">✏️</button>
+                      <button onClick={() => { setEditingItem(item); setItemForm({ ...item, dietary: item.dietary || { vegetarian: false, vegan: false, glutenFree: false, spicy: false } }); setImagePreview(item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || ''}${item.image}`) : null); setShowItemModal(true); }} className="text-xs">✏️</button>
                       <button onClick={() => handleDeleteItem(item._id)} className="text-xs">🗑️</button>
                     </div>
                   </div>
