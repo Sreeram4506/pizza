@@ -21,7 +21,7 @@ const loyaltyTransactionSchema = new mongoose.Schema({
 })
 
 const loyaltySchema = new mongoose.Schema({
-  tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', required: true },
+  tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', required: false },
   customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
   points: { type: Number, default: 0 },
   lifetimePoints: { type: Number, default: 0 },
@@ -39,7 +39,7 @@ const loyaltySchema = new mongoose.Schema({
 
 // Configuration schema for tenant loyalty settings
 const loyaltyConfigSchema = new mongoose.Schema({
-  tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', required: true, unique: true },
+  tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', required: false, unique: true, sparse: true },
   enabled: { type: Boolean, default: true },
   pointsPerDollar: { type: Number, default: 1 },
   welcomeBonus: { type: Number, default: 50 },

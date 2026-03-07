@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 
 export default function MenuManager() {
   const [categories, setCategories] = useState([])
@@ -104,7 +105,7 @@ export default function MenuManager() {
 
       if (!res.ok) {
         const errorData = await res.json()
-        alert(`Failed to save item: ${errorData.error || 'Unknown error'}`)
+        toast.error(`Failed to save item: ${errorData.error || 'Unknown error'}`)
         return
       }
 
@@ -117,9 +118,10 @@ export default function MenuManager() {
       })
       setImagePreview(null)
       fetchMenuData()
+      toast.success('Pizza saved successfully!')
     } catch (err) {
       console.error('Failed to save item:', err)
-      alert(`Failed to save item: ${err.message}`)
+      toast.error(`Failed to save item: ${err.message}`)
     }
   }
 

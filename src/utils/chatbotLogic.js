@@ -61,24 +61,27 @@ export async function getChatbotResponse(message, menuData, orderContext = {}) {
 
   switch (intent) {
     case INTENTS.GREETING:
-      response.text = "Hey! 👋 Welcome to Pizza Blast! I'm here to help you with the menu, orders, tracking, and more. What can I do for you?";
+      response.text = `Hey! 👋 Welcome to ${orderContext?.settings?.restaurantName || 'Pizza Blast'}! I'm here to help you with the menu, orders, tracking, and more. What can I do for you?`;
       response.quickReplies = ['View Menu', 'Order Now', 'Track Order', 'Gift Cards'];
       break;
 
     case INTENTS.MENU:
       response.text = "Here's our menu! All our pizzas are made fresh with premium ingredients. 🍕";
-      response.cards = menuData?.pizzas?.map(b => ({
+      response.cards = menuData?.map(b => ({
+        _id: b._id,
+        name: b.name,
         title: b.name,
-        price: `$${b.price}`,
+        price: b.price,
+        displayPrice: `$${b.price}`,
         desc: b.description,
-        veg: b.veg,
-        popular: b.popular,
+        veg: b.dietary?.vegetarian || false,
+        popular: b.isPopular || false,
       })) || [];
       response.quickReplies = ['Popular items?', 'Combos', 'Sides & Drinks', 'Order Now'];
       break;
 
     case INTENTS.ORDER:
-      const popularPizzas = menuData?.pizzas?.filter(b => b.popular) || [];
+      const popularPizzas = menuData?.filter(b => b.isPopular) || [];
       if (popularPizzas.length > 0) {
         response.text = `Great! I can help you order. Our popular items:\n${popularPizzas.map(b => `• ${b.name} - $${b.price}`).join('\n')}\n\nWhat would you like to add? You can also ask for delivery or pickup!`;
         response.quickReplies = [...popularPizzas.slice(0, 3).map(b => b.name), 'View Full Menu', 'Combos'];
@@ -104,12 +107,12 @@ export async function getChatbotResponse(message, menuData, orderContext = {}) {
       break;
 
     case INTENTS.LOCATION:
-      response.text = "We're located at 123 Pizza Plaza, Crust Corner, NY 10001. Can't wait to see you! 📍";
+      response.text = `We're located at ${orderContext?.settings?.address || '123 Pizza Plaza, Crust Corner, NY 10001'}. Can't wait to see you! 📍`;
       response.quickReplies = ['Get Directions', 'Order Delivery', 'Contact'];
       break;
 
     case INTENTS.CONTACT:
-      response.text = "Reach us at:\n📞 +1 (555) 123-4567\n📧 hello@pizzablast.com\nWe're here to help!";
+      response.text = `Reach us at:\n📞 ${orderContext?.settings?.phone || '+1 (555) 123-4567'}\n📧 ${orderContext?.settings?.email || 'hello@pizzablast.com'}\nWe're here to help!`;
       response.quickReplies = ['Hours', 'Location', 'Menu'];
       break;
 

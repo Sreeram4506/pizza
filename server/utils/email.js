@@ -138,29 +138,63 @@ export const sendAdminNotification = async (order) => {
   return sendEmail(adminEmail, `🔥 NEW ORDER #${order.orderNumber}`, emailHtml)
 }
 
-export const sendMarketingEmail = async (to, subject, message, customerName) => {
+export const sendMarketingEmail = async (to, subject, message, customerName, template = 'custom') => {
   const personalizedMessage = message
     .replace(/\{\{\s*customer_name\s*\}\}/g, customerName || 'Pizza Lover')
     .replace(/\n/g, '<br>')
 
-  const emailHtml = `
-      <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
-        <div style="background-color: #dc2626; padding: 40px; text-align: center;">
-          <h1 style="color: #fff; margin: 0; font-size: 32px; letter-spacing: -1px;">Pizza Blast! 🍕</h1>
-          <p style="color: #fff; margin: 10px 0 0; opacity: 0.9; font-size: 18px;">Special Delivery for You</p>
+  let contentHtml = ''
+
+  if (template === 'promotion' || template === 'flash') {
+    contentHtml = `
+      <div style="background-color: #dc2626; padding: 40px; text-align: center; border-radius: 20px 20px 0 0;">
+        <h1 style="color: #fff; margin: 0; font-size: 48px; font-weight: 900; text-transform: uppercase; letter-spacing: -2px;">FLASH DEAL! ⚡️</h1>
+      </div>
+      <div style="padding: 40px; background-color: #fff; text-align: center;">
+        <h2 style="font-size: 24px; color: #1c1917; margin-bottom: 20px;">Hey ${customerName || 'Pizza Lover'}, don't miss out!</h2>
+        <div style="font-size: 18px; line-height: 1.6; color: #444; margin-bottom: 30px;">
+          ${personalizedMessage}
         </div>
-        
-        <div style="padding: 40px; background-color: #fff;">
-          <h2 style="margin: 0 0 20px; color: #292524;">Hi ${customerName || 'Pizza Lover'},</h2>
-          <div style="font-size: 16px; line-height: 1.8; color: #444;">
-            ${personalizedMessage}
-          </div>
-        
+        <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/menu" style="display: inline-block; background-color: #dc2626; color: #fff; text-decoration: none; padding: 20px 40px; border-radius: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-size: 18px;">CLAIM MY PIZZA NOW</a>
+      </div>
+    `
+  } else if (template === 'newsletter') {
+    contentHtml = `
+      <div style="background-color: #1c1917; padding: 30px; text-align: center; border-radius: 20px 20px 0 0;">
+        <h1 style="color: #fff; margin: 0; font-size: 24px; letter-spacing: 2px; text-transform: uppercase;">THE PIZZA PRESS 🗞️</h1>
+      </div>
+      <div style="padding: 40px; background-color: #fff;">
+        <h2 style="font-size: 20px; color: #1c1917; margin-bottom: 15px;">Weekly Updates for ${customerName || 'Our Favorite Customer'}</h2>
+        <div style="font-size: 15px; line-height: 1.8; color: #444;">
+          ${personalizedMessage}
+        </div>
+        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}" style="color: #dc2626; font-weight: bold; text-decoration: none;">Read more on our blog →</a>
+        </div>
+      </div>
+    `
+  } else {
+    // Standard template
+    contentHtml = `
+      <div style="background-color: #dc2626; padding: 40px; text-align: center; border-radius: 20px 20px 0 0;">
+        <h1 style="color: #fff; margin: 0; font-size: 32px; letter-spacing: -1px;">Pizza Blast! 🍕</h1>
+      </div>
+      <div style="padding: 40px; background-color: #fff;">
+        <h2 style="margin: 0 0 20px; color: #292524;">Hi ${customerName || 'Pizza Lover'},</h2>
+        <div style="font-size: 16px; line-height: 1.8; color: #444;">
+          ${personalizedMessage}
+        </div>
         <div style="text-align: center; margin-top: 50px;">
           <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/menu" style="background-color: #dc2626; color: #fff; text-decoration: none; padding: 18px 35px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3); font-size: 16px;">Order Your Favorite Pizza</a>
         </div>
       </div>
+    `
+  }
 
+  const emailHtml = `
+    <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; max-width: 600px; margin: 20px auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+      ${contentHtml}
+      
       <div style="padding: 30px; background-color: #fef2f2; text-align: center; border-top: 1px solid #fee2e2;">
         <p style="margin: 0; color: #dc2626; font-weight: bold; font-size: 14px;">GET IT WHILE IT'S HOT! 🔥</p>
         <p style="margin: 5px 0 0; color: #991b1b; font-size: 12px;">Valid for a limited time only at participating locations.</p>
@@ -168,7 +202,7 @@ export const sendMarketingEmail = async (to, subject, message, customerName) => 
       
       <div style="background-color: #f9fafb; padding: 30px; text-align: center; font-size: 12px; color: #999;">
         <p style="margin: 0 0 10px;">© 2024 Pizza Blast. 123 Pizza Plaza, New York, NY 10001</p>
-        <p style="margin: 0;">You received this because you're a valued Pizza Blast customer. <a href="#" style="color: #999; text-decoration: underline;">Unsubscribe</a></p>
+        <p style="margin: 0;">You're receiving this because you're a valued customer. <a href="#" style="color: #999; text-decoration: underline;">Unsubscribe</a></p>
       </div>
     </div>
   `

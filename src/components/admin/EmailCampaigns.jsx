@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
 export default function EmailCampaigns() {
@@ -52,7 +53,7 @@ export default function EmailCampaigns() {
 
   const handleSendCampaign = async (e) => {
     e.preventDefault()
-    if (selectedCustomers.length === 0) return alert('Please select recipients')
+    if (selectedCustomers.length === 0) return toast.error('Please select recipients')
     setSendingEmail(true)
     try {
       const token = localStorage.getItem('adminToken')
@@ -73,10 +74,11 @@ export default function EmailCampaigns() {
         setCampaigns(prev => [saved, ...prev])
         setShowCreateModal(false)
         resetForm()
-        alert('Campaign launched!')
+        toast.success('Campaign launched!')
       }
     } catch (err) {
       console.error('Campaign error:', err)
+      toast.error('Failed to launch campaign')
     } finally {
       setSendingEmail(false)
     }
@@ -242,9 +244,13 @@ export default function EmailCampaigns() {
                     {customers.map((c) => (
                       <label key={c._id} className="flex items-center gap-3 p-3 hover:bg-wood-700 transition-colors cursor-pointer border-b border-wood-800 last:border-0">
                         <input type="checkbox" checked={selectedCustomers.some(sc => sc._id === c._id)} onChange={() => toggleCustomerSelection(c)} className="w-4 h-4 rounded border-wood-600 bg-wood-800 accent-tomato-600" />
-                        <div className="min-w-0">
+                        <div className="flex-1 min-w-0">
                           <p className="text-xs font-bold text-white truncate">{c.name}</p>
                           <p className="text-[10px] text-wood-500 truncate">{c.email}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] font-black text-tomato-500">{c.loyalty?.points || 0} PTS</p>
+                          <p className="text-[9px] text-wood-400">$ {(c.totalSpent || 0).toFixed(0)}</p>
                         </div>
                       </label>
                     ))}

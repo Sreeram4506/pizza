@@ -41,22 +41,23 @@ export default function AdminLogin() {
         }
     }
 
+    const inputClass = "w-full px-5 py-4 bg-white border border-[rgba(26,20,16,0.1)] text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/40 transition-all font-body text-sm rounded-xl"
+
     return (
-        <div className="min-h-screen bg-wood-900 text-wood-100 font-light">
-            {/* Texture Overlay */}
-            <div className="fixed inset-0 opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/soft_noise.png')]" />
+        <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center section-grain">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-ember-500/5 rounded-full blur-[100px] -mr-48 -mt-48" />
+            </div>
 
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md bg-wood-800/90 backdrop-blur-xl rounded-3xl p-10 md:p-12 border border-wood-700 shadow-xl relative z-10 mx-auto mt-20"
+                className="w-full max-w-md bg-noir-850 border border-[rgba(242,235,217,0.06)] p-10 md:p-12 relative z-10"
+                style={{ borderRadius: '2px' }}
             >
                 <div className="text-center mb-10">
-                    <div className="w-20 h-20 bg-tomato-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl shadow-lg">
-                        🔐
-                    </div>
-                    <h1 className="text-3xl font-display font-black text-wood-100 tracking-tight">Admin Access</h1>
-                    <p className="text-tomato-400 text-sm font-semibold mt-2">Secure Management Portal</p>
+                    <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-gold-400 block mb-4">Management Portal</span>
+                    <h1 className="font-display italic text-4xl text-[#1A1410] tracking-tight">Admin Access</h1>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -64,19 +65,21 @@ export default function AdminLogin() {
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-200 text-center font-medium"
+                            className="p-4 bg-ember-500/10 border border-ember-500/20 text-ember-500 text-xs font-mono tracking-wider text-center"
+                            style={{ borderRadius: '2px' }}
                         >
                             {error}
                         </motion.div>
                     )}
 
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-wood-300 uppercase tracking-wide ml-1">Username</label>
+                        <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Username</label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-5 py-4 rounded-xl bg-mozzarella-50 border border-crust-200 focus:border-tomato-500 focus:ring-2 focus:ring-tomato-200 outline-none text-wood-100 font-medium transition-all placeholder:text-wood-300"
+                            className={inputClass}
+                            style={{ borderRadius: '2px' }}
                             placeholder="admin"
                             required
                             autoComplete="username"
@@ -84,12 +87,13 @@ export default function AdminLogin() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-wood-300 uppercase tracking-wide ml-1">Password</label>
+                        <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Password</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-5 py-4 rounded-xl bg-mozzarella-50 border border-crust-200 focus:border-tomato-500 focus:ring-2 focus:ring-tomato-200 outline-none text-wood-800 font-medium transition-all placeholder:text-wood-400"
+                            className={inputClass}
+                            style={{ borderRadius: '2px' }}
                             placeholder="••••••••"
                             required
                             autoComplete="current-password"
@@ -99,23 +103,22 @@ export default function AdminLogin() {
                     <motion.button
                         whileTap={{ scale: 0.98 }}
                         disabled={loading}
-                        className="w-full py-4 bg-tomato-600 text-white font-bold rounded-xl shadow-lg hover:bg-tomato-700 transition-all disabled:opacity-50 tracking-wide"
+                        className="w-full py-5 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all disabled:opacity-50 rounded-xl"
+                        style={{ borderRadius: '2px' }}
                     >
                         {loading ? 'Authenticating...' : 'Secure Login'}
                     </motion.button>
                 </form>
 
-                <div className="mt-8 p-4 bg-crust-50 rounded-xl border border-crust-100">
-                    <p className="text-xs font-semibold text-wood-600 text-center mb-2">Default Credentials</p>
-                    <p className="text-sm text-wood-700 text-center font-mono">Username: admin</p>
-                    <p className="text-sm text-wood-700 text-center font-mono">Password: password123</p>
+                <div className="mt-8 p-4 bg-[#F5F3EF] border border-[rgba(26,20,16,0.06)] rounded-xl">
+                    <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-parchment-700 text-center mb-2">Default Credentials</p>
+                    <p className="text-sm text-parchment-700 text-center font-mono">admin / password123</p>
                 </div>
 
-                <p className="text-center text-xs font-medium text-wood-400 mt-6">
+                <p className="text-center font-mono text-[9px] tracking-[0.15em] uppercase text-parchment-700/40 mt-6">
                     Authorized personnel only
                 </p>
             </motion.div>
         </div>
     )
 }
-

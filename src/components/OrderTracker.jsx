@@ -16,25 +16,25 @@ export default function OrderTracker() {
 
     setLoading(true)
     setError('')
-    
+
     try {
       // Call the real API to track order
       const response = await fetch(`/api/orders/track/${orderNumber}`)
-      
+
       if (!response.ok) {
         throw new Error('Order not found')
       }
-      
+
       const order = await response.json()
-      
+
       setOrderStatus({
         orderNumber: order.orderNumber,
         status: order.status,
-        estimatedTime: order.status === 'confirmed' ? '15-20 mins' : 
-                         order.status === 'preparing' ? '10-15 mins' :
-                         order.status === 'ready' ? 'Ready for pickup' : 'Completed',
+        estimatedTime: ['confirmed', 'preparing', 'ready'].includes(order.status) ? '15-25 mins' :
+          order.status === 'out_for_delivery' ? 'On the way!' : 'Completed',
         items: order.items,
         total: order.total,
+        type: order.type,
         customerName: order.customerInfo?.name || 'Guest',
         orderTime: order.createdAt
       })
@@ -47,21 +47,49 @@ export default function OrderTracker() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'preparing': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'ready': return 'bg-green-100 text-green-800 border-green-200'
-      case 'completed': return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'confirmed': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'preparing':
+      case 'ready': return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'out_for_delivery': return 'bg-purple-100 text-purple-800 border-purple-200'
+      case 'delivered':
+      case 'completed': return 'bg-green-100 text-green-800 border-green-200'
       default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'pending': return '⏳'
-      case 'preparing': return '👨‍🍳'
-      case 'ready': return '✅'
-      case 'completed': return '🎉'
+      case 'confirmed': return '📝'
+      case 'preparing':
+      case 'ready': return '👨‍🍳'
+      case 'out_for_delivery': return '🛵'
+      case 'delivered':
+      case 'completed': return '✅'
       default: return '📋'
+    }
+  }
+
+  const getStepPercentage = (status) => {
+    switch (status) {
+      case 'confirmed': return '25%'
+      case 'preparing':
+      case 'ready': return '50%'
+      case 'out_for_delivery': return '75%'
+      case 'delivered':
+      case 'completed': return '100%'
+      default: return '0%'
+    }
+  }
+
+  const getStepName = (status) => {
+    switch (status) {
+      case 'confirmed': return 'Confirmed'
+      case 'preparing':
+      case 'ready': return 'Getting Ready'
+      case 'out_for_delivery': return 'Out for Delivery'
+      case 'delivered':
+      case 'completed': return 'Delivered'
+      default: return status
     }
   }
 
@@ -104,7 +132,7 @@ export default function OrderTracker() {
               {loading ? 'Tracking...' : 'Track Order'}
             </button>
           </form>
-          
+
           {error && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -127,7 +155,7 @@ export default function OrderTracker() {
             <div className="text-center mb-6">
               <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-full border-2 ${getStatusColor(orderStatus.status)}`}>
                 <span className="text-2xl">{getStatusIcon(orderStatus.status)}</span>
-                <span className="font-bold text-lg capitalize">{orderStatus.status}</span>
+                <span className="font-bold text-lg capitalize">{getStepName(orderStatus.status)}</span>
               </div>
               <h2 className="text-2xl font-bold text-wood-800 mt-4">
                 Order #{orderStatus.orderNumber}
@@ -139,27 +167,40 @@ export default function OrderTracker() {
 
             {/* Progress Bar */}
             <div className="mb-8">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-wood-600">Order Progress</span>
-                <span className="text-sm text-wood-600">
-                  {orderStatus.status === 'pending' && '25%'}
-                  {orderStatus.status === 'preparing' && '50%'}
-                  {orderStatus.status === 'ready' && '75%'}
-                  {orderStatus.status === 'completed' && '100%'}
-                </span>
+              <div className="flex justify-between items-center mb-4 relative z-10 px-2 sm:px-6">
+                {/* Step 1 */}
+                <div className={`flex flex-col items-center gap-2 ${['confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
+                  <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">1</div>
+                  <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">Confirmed</span>
+                </div>
+                {/* Step 2 */}
+                <div className={`flex flex-col items-center gap-2 ${['preparing', 'ready', 'out_for_delivery', 'delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
+                  <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">2</div>
+                  <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">Getting Ready</span>
+                </div>
+                {/* Step 3 */}
+                {orderStatus.type === 'delivery' && (
+                  <div className={`flex flex-col items-center gap-2 ${['out_for_delivery', 'delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
+                    <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">3</div>
+                    <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">Out for Delivery</span>
+                  </div>
+                )}
+                {/* Step 4 */}
+                <div className={`flex flex-col items-center gap-2 ${['delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
+                  <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">{orderStatus.type === 'delivery' ? '4' : '3'}</div>
+                  <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">{orderStatus.type === 'delivery' ? 'Delivered' : 'Ready'}</span>
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
+
+              <div className="w-full bg-wood-200 rounded-full h-3 relative overflow-hidden -mt-[44px] sm:-mt-[44px] mx-8 sm:mx-14 w-[calc(100%-4rem)] sm:w-[calc(100%-7rem)]">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ 
-                    width: orderStatus.status === 'pending' ? '25%' :
-                            orderStatus.status === 'preparing' ? '50%' :
-                            orderStatus.status === 'ready' ? '75%' : '100%'
-                  }}
+                  animate={{ width: getStepPercentage(orderStatus.status) }}
                   transition={{ duration: 1, ease: 'easeOut' }}
-                  className="bg-tomato-600 h-3 rounded-full"
+                  className="bg-tomato-500 h-3 rounded-full relative z-0"
                 />
               </div>
+              <div className="h-[44px]"></div>
             </div>
 
             {/* Order Details */}

@@ -1,170 +1,161 @@
 import { useRef } from 'react'
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
-import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
+import BannerDisplay from './BannerDisplay'
 
 export default function Hero() {
   const containerRef = useRef(null)
-  const textRef = useRef(null)
-  const navigate = useNavigate()
-  const { openWithIntent } = useChatbot()
-  const { settings, updateTrigger } = useSettings()
-
-  console.log('Hero: Rendering with restaurant name:', settings.restaurantName, 'updateTrigger:', updateTrigger)
+  const { settings } = useSettings()
 
   useGSAP(() => {
     if (!containerRef.current) return
     const ctx = gsap.context(() => {
-      gsap.from(textRef.current?.children || [], {
-        y: 80,
+      gsap.from('.hero-stagger', {
+        y: 60,
         opacity: 0,
-        stagger: 0.15,
-        duration: 0.8,
+        stagger: 0.12,
+        duration: 1,
         ease: 'power3.out',
-        delay: 0.3
+        delay: 0.2
       })
     }, containerRef)
     return () => ctx.revert()
   }, [])
 
   return (
-    <section id="home" ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden bg-mozzarella-100">
-      {/* Backgrounds */}
-      <div className="absolute inset-0 pizza-bg opacity-50" />
-      <div className="absolute inset-0 wood-texture opacity-30" />
+    <section
+      id="home"
+      ref={containerRef}
+      className="relative min-h-screen flex items-center overflow-hidden bg-[#FAFAF8] section-grain"
+    >
+      {/* Subtle warm glow */}
+      <div className="absolute inset-0 ember-glow-bg" />
+      <div className="absolute inset-0 gold-glow-bg" />
 
-      {/* Decorative floating elements - desktop only */}
-      <motion.div
-        className="absolute top-20 left-10 w-20 h-20 opacity-20 hidden lg:block"
-        animate={{ rotate: 360, y: [0, -20, 0] }}
-        transition={{ rotate: { duration: 30, repeat: Infinity, ease: 'linear' }, y: { duration: 4, repeat: Infinity, ease: 'easeInOut' } }}
-      >
-        <svg viewBox="0 0 100 100" className="w-full h-full text-tomato-600">
-          <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.3" />
-          <circle cx="35" cy="35" r="8" fill="#f5d89a" />
-          <circle cx="65" cy="40" r="6" fill="#f5d89a" />
-          <circle cx="50" cy="60" r="7" fill="#f5d89a" />
-          <circle cx="40" cy="70" r="5" fill="#f5d89a" />
-        </svg>
-      </motion.div>
+      {/* Decorative vertical line */}
+      <div className="absolute right-[45%] top-0 bottom-0 w-px bg-[rgba(26,20,16,0.06)] hidden lg:block" />
 
-      <motion.div
-        className="absolute bottom-32 right-20 w-16 h-16 opacity-15 hidden lg:block"
-        animate={{ rotate: -360, y: [0, 15, 0] }}
-        transition={{ rotate: { duration: 25, repeat: Infinity, ease: 'linear' }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut' } }}
-      >
-        <svg viewBox="0 0 100 100" className="w-full h-full text-basil-600">
-          <path d="M50 10 C70 30, 80 50, 50 90 C20 50, 30 30, 50 10" fill="currentColor" opacity="0.4" />
-        </svg>
-      </motion.div>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-6 pt-28 pb-16 sm:py-24 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-mozzarella-200 rounded-full shadow-lg mb-6 border border-basil-200"
-          >
-            <span className="w-2 h-2 rounded-full bg-basil-500 animate-pulse flex-shrink-0" />
-            <span className="text-wood-700 text-xs sm:text-sm font-semibold tracking-wide">Now Serving Fresh from the Oven</span>
-          </motion.div>
-
-          {/* Main Title */}
-          <motion.h1
-            ref={textRef}
-            className="font-display font-black text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-wood-800 mb-5 tracking-tight leading-tight"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-          >
-            <span className="text-tomato-600">{settings.restaurantName}</span>
-            <br />
-            <span className="text-wood-800">Authentic Italian</span>
-            {' '}
-            <span className="text-crust-600">Pizza</span>
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            className="text-base sm:text-xl md:text-2xl text-wood-600 mb-3 font-light"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            Hand-tossed • Wood-fired • Made with Love
-          </motion.p>
-
-          {/* Description */}
-          <motion.p
-            className="text-wood-500 text-sm sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed px-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-          >
-            Experience the perfect blend of San Marzano tomatoes, fresh mozzarella,
-            and aromatic basil on our signature 48-hour fermented crust.
-          </motion.p>
-
-          {/* CTA Buttons — stacked on mobile, row on sm+ */}
-          <motion.div
-            className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <motion.button
-              onClick={() => openWithIntent('order')}
-              className="group px-8 py-4 sm:py-5 bg-tomato-600 text-white font-bold rounded-full shadow-lg hover:bg-tomato-700 transition-all flex items-center justify-center gap-3"
-              whileHover={{ scale: 1.05, boxShadow: '0 8px 30px rgba(220, 38, 38, 0.4)' }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              Order Now
-            </motion.button>
-
-            <motion.button
-              onClick={() => openWithIntent('menu')}
-              className="group px-8 py-4 sm:py-5 bg-mozzarella-200 text-tomato-600 font-bold rounded-full border-2 border-tomato-200 hover:border-tomato-400 hover:bg-mozzarella-300 transition-all flex items-center justify-center gap-3"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              View Menu
-            </motion.button>
-
-            <motion.button
-              onClick={() => navigate('/custom-pizza')}
-              className="group px-8 py-4 sm:py-5 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-full shadow-lg hover:from-orange-600 hover:to-yellow-600 transition-all flex items-center justify-center gap-3"
-              whileHover={{ scale: 1.05, boxShadow: '0 8px 30px rgba(251, 146, 60, 0.4)' }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-              Build Your Pizza
-            </motion.button>
-          </motion.div>
-        </div>
+      {/* Scattered dots grid */}
+      <div className="absolute top-32 right-24 hidden lg:grid grid-cols-5 gap-3 opacity-[0.08]">
+        {Array.from({ length: 25 }).map((_, i) => (
+          <div key={i} className="w-1 h-1 rounded-full bg-[#1A1410]" />
+        ))}
       </div>
 
-      {/* Bottom wave decoration */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-          <path
-            d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-            fill="white"
-          />
-        </svg>
+      <BannerDisplay position="hero" />
+
+      {/* Main Content — Split Layout */}
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 pt-32 pb-20 lg:py-0 relative z-10 w-full">
+        <div className="flex flex-col lg:flex-row items-center lg:items-center min-h-screen">
+
+          {/* Left Panel */}
+          <div className="w-full lg:w-[45%] lg:pr-16 flex flex-col justify-center">
+            {/* Small label */}
+            <div className="hero-stagger">
+              <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#9B8D74]">
+                Est. 2024 &nbsp;·&nbsp; Artisan Kitchen
+              </span>
+            </div>
+
+            {/* Massive display heading */}
+            <div className="mt-8 hero-stagger">
+              <h1 className="font-display font-bold leading-[0.9] tracking-tight">
+                <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[96px] text-[#1A1410]">
+                  {settings.restaurantName || 'PizzaBlast'}
+                </span>
+                <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl italic text-[#1A1410]/20 mt-4">
+                  The Art of
+                </span>
+                <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl mt-2" style={{ WebkitTextStroke: '2px #1A1410', color: 'transparent' }}>
+                  Neapolitan
+                </span>
+              </h1>
+            </div>
+
+            {/* Accent rule */}
+            <div className="hero-stagger w-16 h-px bg-[#C1440E] mt-10" />
+
+            {/* Philosophy quote */}
+            <p className="hero-stagger mt-8 text-[#9B8D74] text-base md:text-lg italic font-body max-w-md">
+              "Where fire meets flour, and tradition meets tomorrow."
+            </p>
+
+            {/* CTA links */}
+            <div className="hero-stagger flex flex-wrap items-center gap-4 mt-12 relative z-20">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => document.querySelector('#gallery')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group px-8 py-3.5 bg-[#C1440E] text-white text-sm font-body font-semibold tracking-[0.1em] uppercase rounded-full flex items-center gap-2 transition-shadow shadow-lg shadow-[#C1440E]/25 hover:shadow-xl hover:shadow-[#C1440E]/40"
+              >
+                Explore Menu
+                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => document.querySelector('#atelier')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group px-8 py-3.5 border-2 border-[#1A1410] text-[#1A1410] text-sm font-body font-semibold tracking-[0.1em] uppercase rounded-full flex items-center gap-2 transition-colors hover:bg-[#1A1410] hover:text-white"
+              >
+                Build Your Own
+                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </motion.button>
+            </div>
+          </div>
+
+          {/* Right Panel */}
+          <div className="w-full lg:w-[55%] mt-16 lg:mt-0 relative flex items-center justify-center">
+            <motion.div
+              className="relative w-full max-w-lg lg:max-w-xl xl:max-w-2xl"
+              initial={{ opacity: 0, x: 60, rotate: 0 }}
+              animate={{ opacity: 1, x: 0, rotate: 2 }}
+              transition={{ delay: 0.5, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl shadow-xl" style={{ borderRadius: '12px' }}>
+                <img
+                  src="https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=800&q=80"
+                  alt="Neapolitan Pizza"
+                  className="w-full h-full object-cover img-noir"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent rounded-2xl" />
+              </div>
+
+              {/* Floating chips */}
+              <motion.div
+                className="absolute -left-6 top-1/4 bg-white/90 backdrop-blur-sm border border-[rgba(26,20,16,0.08)] px-4 py-3 rounded-lg shadow-md"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.2 }}
+              >
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#D4922A]">48h Fermented</span>
+              </motion.div>
+
+              <motion.div
+                className="absolute -right-4 top-1/3 bg-white/90 backdrop-blur-sm border border-[rgba(26,20,16,0.08)] px-4 py-3 rounded-lg shadow-md"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.4 }}
+              >
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#1A1410]">⭐ 4.9 Rating</span>
+              </motion.div>
+
+              <motion.div
+                className="absolute left-8 -bottom-4 bg-white/90 backdrop-blur-sm border border-[rgba(26,20,16,0.08)] px-4 py-3 rounded-lg shadow-md"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.6 }}
+              >
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ember-500">900°C Wood-Fired</span>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   )

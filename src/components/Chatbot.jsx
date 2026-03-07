@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 import { useChatbot } from '../context/ChatbotContext'
+import { useSettings } from '../context/SettingsContext'
 import { OrderService } from '../services/OrderService'
 import wsService from '../services/websocket.js'
 import StripePayment from './StripePayment'
@@ -15,8 +17,9 @@ export default function Chatbot() {
     removeFromCart,
     clearCart,
     cartCount,
-    cartTotal
+    // cartTotal // Removed from useChatbot as it's now calculated locally
   } = useChatbot()
+  const { settings } = useSettings()
 
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -34,6 +37,8 @@ export default function Chatbot() {
   const [guestName, setGuestName] = useState('')
   const [guestPhone, setGuestPhone] = useState('')
   const [guestEmail, setGuestEmail] = useState('')
+  const [availableRewards, setAvailableRewards] = useState([])
+  const [selectedReward, setSelectedReward] = useState(null)
 
   // Get logged-in customer profile
   useEffect(() => {
@@ -41,7 +46,7 @@ export default function Chatbot() {
       try {
         const token = localStorage.getItem('customerToken')
         if (token) {
-          const res = await fetch('/api/customers/profile', {
+          const res = await fetch('/api/auth/me', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -50,6 +55,7 @@ export default function Chatbot() {
           if (res.ok) {
             const data = await res.json()
             setCustomerProfile(data.user)
+            setAvailableRewards(data.availableRewards || [])
           }
         }
       } catch (err) {
@@ -79,6 +85,18 @@ export default function Chatbot() {
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
+
+  const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0)
+
+  let discountAmount = 0
+  if (selectedReward) {
+    if (selectedReward.discountType === 'percentage') {
+      discountAmount = cartSubtotal * (selectedReward.discountValue / 100)
+    } else {
+      discountAmount = selectedReward.discountValue
+    }
+  }
+  const cartTotal = Math.max(0, cartSubtotal - discountAmount)
 
   useEffect(() => {
     fetchMenuData()
@@ -166,7 +184,7 @@ export default function Chatbot() {
     if (isOpen && messages.length === 0) {
       setMessages([{
         type: 'bot',
-        text: "Hey! 👋 Welcome to **Pizza Blast**! I'm your AI ordering assistant.\n\nBrowse our menu below, add your favourites to the cart, then hit checkout!",
+        text: `Hey! 👋 Welcome to **${settings?.restaurantName || 'Pizza Blast'}**! I'm your AI ordering assistant.\n\nBrowse our menu below, add your favourites to the cart, then hit checkout!`,
         showMenuBtn: true,
       }])
     }
@@ -229,6 +247,16 @@ export default function Chatbot() {
         setView('cart')
         break
       case 'checkout':
+        if (data.item && typeof data.item === 'object') {
+          const customItem = {
+            ...data.item,
+            _id: `custom-${Date.now()}`,
+            name: data.item.name || `Custom Pizza (${data.item.base || 'Classic'})`,
+            qty: 1,
+            available: true
+          }
+          addToCart(customItem)
+        }
         setView('checkout')
         break
       default:
@@ -260,9 +288,9 @@ export default function Chatbot() {
       const customerInfo = getCustomerInfo()
       const order = await OrderService.placeOrder({
         items: cart.map(i => ({
-          itemId: i._id, // Add itemId for the order
+          itemId: i._id,
           name: i.name,
-          quantity: i.qty,  // Changed from qty to quantity
+          quantity: i.qty,
           price: i.price,
           modifiers: i.modifiers || []
         })),
@@ -271,6 +299,7 @@ export default function Chatbot() {
         address: orderType === 'delivery' && deliveryAddress ? { street: deliveryAddress, city: '', zip: '' } : undefined,
         pickupDateTime: orderType === 'pickup' && pickupDateTime ? pickupDateTime : undefined,
         dineInTime: orderType === 'dine_in' && dineInTime ? dineInTime : undefined,
+        appliedReward: selectedReward ? selectedReward._id : undefined,
         payment: {
           method: paymentMethod,
           status: paymentMethod === 'cash' ? 'pending' : 'paid',
@@ -280,6 +309,7 @@ export default function Chatbot() {
       setIsTyping(false)
       if (order) {
         const orderId = order._id || order.id;
+        const dispOrderId = order.orderNumber || orderId;
 
         // Store in local storage for tracking
         const activeOrders = JSON.parse(localStorage.getItem('activeOrders') || '[]');
@@ -291,7 +321,7 @@ export default function Chatbot() {
         const eta = new Date(order.eta || new Date(Date.now() + 30 * 60000)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         setMessages(prev => [...prev, {
           type: 'bot',
-          text: `✅ **Order Confirmed!**\n\nOrder ID: \`${orderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated delivery: **${eta}**\n💳 Status: **Paid via Card**`,
+          text: `✅ **Order Confirmed!**\n\nOrder ID: \`${dispOrderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated delivery: **${eta}**\n💳 Status: **Paid via Card**`,
           confirmed: true,
         }])
         clearCart()
@@ -322,9 +352,9 @@ export default function Chatbot() {
       const customerInfo = getCustomerInfo()
       const order = await OrderService.placeOrder({
         items: cart.map(i => ({
-          itemId: i._id, // Add itemId for the order
+          itemId: i._id,
           name: i.name,
-          quantity: i.qty,  // Changed from qty to quantity
+          quantity: i.qty,
           price: i.price,
           modifiers: i.modifiers || []
         })),
@@ -333,6 +363,7 @@ export default function Chatbot() {
         address: orderType === 'delivery' && deliveryAddress ? { street: deliveryAddress, city: '', zip: '' } : undefined,
         pickupDateTime: orderType === 'pickup' && pickupDateTime ? pickupDateTime : undefined,
         dineInTime: orderType === 'dine_in' && dineInTime ? dineInTime : undefined,
+        appliedReward: selectedReward ? selectedReward._id : undefined,
         payment: {
           method: paymentMethod,
           status: paymentMethod === 'cash' ? 'pending' : 'paid',
@@ -342,6 +373,7 @@ export default function Chatbot() {
       setIsTyping(false)
       if (order) {
         const orderId = order._id || order.id;
+        const dispOrderId = order.orderNumber || orderId;
 
         // Store in local storage for tracking
         const activeOrders = JSON.parse(localStorage.getItem('activeOrders') || '[]');
@@ -353,7 +385,7 @@ export default function Chatbot() {
         const eta = new Date(order.eta || new Date(Date.now() + 30 * 60000)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         setMessages(prev => [...prev, {
           type: 'bot',
-          text: `✅ **Order Confirmed!**\n\nOrder ID: \`${orderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated delivery: **${eta}**`,
+          text: `✅ **Order Confirmed!**\n\nOrder ID: \`${dispOrderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated delivery: **${eta}**`,
           confirmed: true,
         }])
         clearCart()
@@ -386,7 +418,8 @@ export default function Chatbot() {
         items: cart,
         customer: getCustomerInfo(),
         orderType,
-        deliveryAddress
+        deliveryAddress,
+        settings
       })
       setIsTyping(false)
       if (res.action === 'PLACE_ORDER') {
@@ -405,7 +438,7 @@ export default function Chatbot() {
     <>
       {/* Floating Chat Button with cart badge */}
       <motion.button
-        className="fixed bottom-8 right-8 z-50 w-16 h-16 rounded-full bg-gradient-to-r from-tomato-500 to-tomato-700 shadow-[0_0_30px_rgba(239,68,68,0.4)] flex items-center justify-center text-white"
+        className="fixed bottom-8 right-8 z-[60] w-16 h-16 rounded-full bg-gradient-to-r from-tomato-500 to-tomato-700 shadow-[0_0_30px_rgba(239,68,68,0.4)] flex items-center justify-center text-white"
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 1 }}
@@ -433,7 +466,7 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-50 bg-mozzarella-100 flex flex-col border-none text-wood-800"
+            className="fixed inset-0 z-[60] bg-mozzarella-100 flex flex-col border-none text-wood-800"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-8 border-b border-gray-100 bg-white">
@@ -493,7 +526,7 @@ export default function Chatbot() {
                         💳
                       </div>
                       <h2 className="font-display font-black text-3xl text-wood-800 tracking-tight uppercase">Secure Payment</h2>
-                      <p className="text-xs text-wood-400 font-bold uppercase tracking-widest mt-2">Paying ${(cartTotal + (orderType === 'delivery' ? 3.99 : 0)).toFixed(2)} to Pizza Blast</p>
+                      <p className="text-xs text-wood-400 font-bold uppercase tracking-widest mt-2">Paying ${(cartTotal + (orderType === 'delivery' ? 3.99 : 0)).toFixed(2)} to {settings?.restaurantName || 'Pizza Blast'}</p>
                     </div>
 
                     <StripePayment
@@ -687,7 +720,11 @@ export default function Chatbot() {
                         💳
                       </div>
                       <h2 className="font-display font-black text-3xl text-wood-800 tracking-tight uppercase">Secure Payment</h2>
-                      <p className="text-xs text-wood-400 font-bold uppercase tracking-widest mt-2">Paying ${cartTotal.toFixed(2)} to Pizza Blast</p>
+                      <p className="text-xs text-wood-400 font-bold uppercase tracking-widest mt-2 flex flex-col items-center">
+                        <span>Subtotal: ${cartSubtotal.toFixed(2)}</span>
+                        {selectedReward && <span className="text-green-500 font-bold">- Discount: ${discountAmount.toFixed(2)}</span>}
+                        <span>Paying ${(cartTotal + (orderType === 'delivery' ? 3.99 : 0)).toFixed(2)} to {settings?.restaurantName || 'Pizza Blast'}</span>
+                      </p>
 
                       <button
                         onClick={() => setView('cart')}
@@ -722,6 +759,41 @@ export default function Chatbot() {
                             onChange={(e) => setGuestEmail(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 outline-none text-wood-800"
                           />
+                        </div>
+                      </div>
+                    )}
+
+                    {customerProfile && availableRewards.length > 0 && (
+                      <div className="mb-8">
+                        <h3 className="text-lg font-semibold text-wood-800 mb-4 flex justify-between items-center">
+                          Apply Loyalty Reward
+                          <span className="text-tomato-500 text-sm font-black">{customerProfile.loyalty?.points || 0} PTS</span>
+                        </h3>
+                        <div className="space-y-3">
+                          {availableRewards.map((reward) => {
+                            const canAfford = (customerProfile.loyalty?.points || 0) >= reward.pointsCost;
+                            const isSelected = selectedReward?._id === reward._id;
+                            return (
+                              <button
+                                key={reward._id}
+                                disabled={!canAfford && !isSelected}
+                                onClick={() => isSelected ? setSelectedReward(null) : setSelectedReward(reward)}
+                                className={`w-full text-left p-4 rounded-xl border flex justify-between items-center transition-all ${isSelected ? 'border-tomato-500 bg-tomato-50' : canAfford ? 'border-wood-200 hover:border-tomato-300 bg-white' : 'border-wood-100 bg-wood-50 opacity-60 cursor-not-allowed'}`}
+                              >
+                                <div>
+                                  <div className="font-semibold text-wood-800">{reward.name}</div>
+                                  <div className="text-xs text-wood-500">{reward.pointsCost} Points • {reward.discountType === 'percentage' ? `${reward.discountValue}%` : `$${reward.discountValue}`} OFF</div>
+                                </div>
+                                {isSelected ? (
+                                  <span className="text-tomato-500 font-bold text-sm">Applied</span>
+                                ) : canAfford ? (
+                                  <span className="text-tomato-500 text-sm font-semibold">Apply</span>
+                                ) : (
+                                  <span className="text-wood-400 text-sm">Need {reward.pointsCost - (customerProfile.loyalty?.points || 0)} more</span>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -885,11 +957,11 @@ export default function Chatbot() {
                         type="button"
                         onClick={() => {
                           if (orderType === 'delivery' && !deliveryAddress) {
-                            alert('Please enter a delivery address');
+                            toast.error('Please enter a delivery address');
                             return;
                           }
                           if (!customerProfile && (!guestName || !guestPhone || !guestEmail)) {
-                            alert('Please fill in your guest information (Name, Phone, and Email) so we can send you a confirmation.');
+                            toast.error('Please fill in your guest information (Name, Phone, and Email) so we can send you a confirmation.');
                             return;
                           }
                           paymentMethod === 'card' ? setView('payment') : handleCheckout()

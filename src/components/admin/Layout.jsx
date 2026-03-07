@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
+import { useSettings } from '../../context/SettingsContext'
 
 const sidebarItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/admin/dashboard' },
@@ -20,6 +21,7 @@ export default function AdminLayout() {
   const [notifications, setNotifications] = useState([])
   const navigate = useNavigate()
   const location = useLocation()
+  const { settings } = useSettings()
 
   useEffect(() => {
     // Close mobile sidebar on route change
@@ -58,7 +60,7 @@ export default function AdminLayout() {
           </div>
           {(sidebarOpen || onClose) && (
             <div>
-              <h1 className="font-display font-bold text-white text-base leading-tight">PizzaBlast</h1>
+              <h1 className="font-display font-bold text-white text-base leading-tight">{settings?.restaurantName?.replace(' ', '') || 'PizzaBlast'}</h1>
               <p className="text-tomato-400 text-xs">Admin Panel</p>
             </div>
           )}
@@ -226,7 +228,7 @@ export default function AdminLayout() {
               {/* Restaurant label - hidden on small screens */}
               <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-wood-700 rounded-lg">
                 <span className="text-base">🏪</span>
-                <span className="text-white font-medium text-xs">Pizza Blast</span>
+                <span className="text-white font-medium text-xs">{settings?.restaurantName || 'Pizza Blast'}</span>
               </div>
             </div>
           </div>
@@ -234,17 +236,7 @@ export default function AdminLayout() {
 
         {/* Page Content */}
         <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+          <Outlet />
         </main>
       </div>
 

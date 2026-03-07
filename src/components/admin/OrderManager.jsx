@@ -11,6 +11,7 @@ export default function OrderManager() {
   const [socket, setSocket] = useState(null)
   const [newOrderAlert, setNewOrderAlert] = useState(null)
   const [soundEnabled, setSoundEnabled] = useState(true)
+  const [deliveryUsers, setDeliveryUsers] = useState([])
   const audioContextRef = useRef(null)
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function OrderManager() {
 
     setSocket(newSocket)
     fetchOrders()
+    fetchDeliveryUsers()
     return () => newSocket.disconnect()
   }, [])
 
@@ -92,6 +94,37 @@ export default function OrderManager() {
     }
   }
 
+  const fetchDeliveryUsers = async () => {
+    try {
+      const token = localStorage.getItem('adminToken')
+      const res = await fetch('/api/admin/delivery-users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.ok) setDeliveryUsers(await res.json())
+    } catch (err) {
+      console.error('Failed to fetch delivery users', err)
+    }
+  }
+
+  const assignDriver = async (orderId, driverId) => {
+    if (!driverId) return;
+    try {
+      const token = localStorage.getItem('adminToken')
+      const res = await fetch(`/api/admin/orders/${orderId}/assign`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deliveryPersonId: driverId })
+      })
+      if (res.ok) {
+        showPushNotification('Driver Assigned!', { body: `Order #${selectedOrder?.orderNumber} is out for delivery.` })
+        fetchOrders()
+        setSelectedOrder(null)
+      }
+    } catch (err) {
+      console.error('Failed to assign driver:', err)
+    }
+  }
+
   const filteredOrders = filter === 'all'
     ? orders
     : orders.filter(order => order.status === filter)
@@ -101,6 +134,8 @@ export default function OrderManager() {
       case 'pending': return 'bg-tomato-50 text-tomato-600 border-tomato-100'
       case 'preparing': return 'bg-blue-50 text-blue-600 border-blue-100'
       case 'ready': return 'bg-green-50 text-green-600 border-green-100'
+      case 'out_for_delivery': return 'bg-purple-50 text-purple-600 border-purple-100'
+      case 'delivered':
       case 'completed': return 'bg-stone-50 text-stone-500 border-stone-100'
       case 'cancelled': return 'bg-red-50 text-red-600 border-red-100'
       default: return 'bg-stone-50 text-stone-500 border-stone-100'
@@ -170,7 +205,7 @@ export default function OrderManager() {
 
       {/* ── Filters ────────────────────────── */}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
-        {['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'].map((status) => (
+        {['all', 'pending', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'completed', 'cancelled'].map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
@@ -193,7 +228,8 @@ export default function OrderManager() {
           filteredOrders.map((order) => (
             <motion.div
               key={order._id}
-              layout
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               className={`bg-wood-800 rounded-2xl p-4 sm:p-5 border transition-all ${order.status === 'pending' ? 'border-tomato-500/50 ring-2 ring-tomato-500/10' : 'border-wood-700'
                 }`}
             >
@@ -229,7 +265,8 @@ export default function OrderManager() {
                   <button onClick={() => setSelectedOrder(order)} className="flex-1 py-2.5 bg-wood-700 text-wood-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-wood-600 transition-colors">Details</button>
                   {order.status === 'pending' && <button onClick={() => updateOrderStatus(order._id, 'preparing')} className="flex-1 py-2.5 bg-tomato-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-tomato-700 shadow-lg shadow-tomato-600/20">Accept</button>}
                   {order.status === 'preparing' && <button onClick={() => updateOrderStatus(order._id, 'ready')} className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 shadow-lg shadow-blue-500/20">Ready</button>}
-                  {order.status === 'ready' && <button onClick={() => updateOrderStatus(order._id, 'completed')} className="flex-1 py-2.5 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-700 shadow-lg shadow-green-500/20">Deliver</button>}
+                  {order.status === 'ready' && order.type !== 'delivery' && <button onClick={() => updateOrderStatus(order._id, 'completed')} className="flex-1 py-2.5 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-700 shadow-lg shadow-green-500/20">Complete</button>}
+                  {order.status === 'ready' && order.type === 'delivery' && <button onClick={() => setSelectedOrder(order)} className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-purple-700 shadow-lg shadow-purple-500/20">Assign Driver</button>}
                 </div>
               </div>
             </motion.div>
@@ -293,6 +330,29 @@ export default function OrderManager() {
                         )}
                       </div>
                     )}
+
+                    {selectedOrder.type === 'delivery' && (selectedOrder.status === 'ready' || selectedOrder.status === 'out_for_delivery') && (
+                      <div className="pt-3 border-t border-wood-600/50">
+                        <label className="text-[10px] font-black text-tomato-400 uppercase tracking-widest block mb-2">Driver Assignment</label>
+                        {selectedOrder.status === 'out_for_delivery' ? (
+                          <div className="text-sm text-white font-bold bg-purple-600/20 border border-purple-500/30 p-3 rounded-xl flex items-center justify-between">
+                            <span>Assigned to: {selectedOrder.deliveryPersonId?.name || 'Driver'}</span>
+                            <span className="text-[10px] uppercase font-black tracking-widest text-purple-400 px-2 py-1 bg-purple-600/20 rounded-md">On The Way</span>
+                          </div>
+                        ) : (
+                          <select
+                            onChange={(e) => assignDriver(selectedOrder._id, e.target.value)}
+                            className="w-full py-3 bg-wood-600 rounded-xl px-4 text-sm font-bold text-white border-none focus:ring-2 focus:ring-tomato-500 outline-none"
+                            defaultValue=""
+                          >
+                            <option value="" disabled>Select Driver to Assign...</option>
+                            {deliveryUsers.map(driver => (
+                              <option key={driver._id} value={driver._id}>{driver.name}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </section>
 
@@ -328,6 +388,8 @@ export default function OrderManager() {
                       <option value="pending">Pending</option>
                       <option value="preparing">Preparing</option>
                       <option value="ready">Ready</option>
+                      <option value="out_for_delivery">Out for Delivery</option>
+                      <option value="delivered">Delivered</option>
                       <option value="completed">Completed</option>
                       <option value="cancelled">Cancelled</option>
                     </select>

@@ -1,9 +1,9 @@
 import { Router } from 'express'
 import { Order } from '../models/Order.js'
 import { Customer } from '../models/Customer.js'
-import { authenticateCustomer } from './auth.js'
+import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
+import { optionalVerifyCustomer } from '../middleware/auth.js'
 import { v4 as uuidv4 } from 'uuid'
-import jwt from 'jsonwebtoken'
 import { config } from '../config.js'
 import { sendOrderConfirmation, sendAdminNotification } from '../utils/email.js'
 
@@ -32,51 +32,28 @@ router.get('/', async (req, res) => {
 })
 
 // Create new order
-router.post('/', async (req, res) => {
+router.post('/', optionalVerifyCustomer, async (req, res) => {
   console.log('=== ORDER ROUTE CALLED ===')
-  console.log('Request headers:', req.headers.authorization)
 
-  // Apply authentication
+  // Apply authentication (handled by optionalVerifyCustomer)
   let authenticatedUser = null
-  try {
-    const token = req.headers.authorization?.replace('Bearer ', '')
-
-    if (token) {
-      console.log('Token found, verifying...')
-      const decoded = jwt.verify(token, config.JWT_SECRET)
-      console.log('Token decoded:', decoded)
-
-      if (decoded.role === 'customer') {
-        // Find the customer
-        const tenantId = req.tenantId
-        let customer = null
-
-        if (tenantId) {
-          customer = await Customer.findOne({ tenantId, _id: decoded.customerId })
-        } else {
-          customer = await Customer.findOne({ _id: decoded.customerId })
-        }
-
-        if (customer) {
-          authenticatedUser = {
-            id: customer._id,
-            name: customer.name,
-            email: customer.email,
-            phone: customer.phone,
-            isGuest: false
-          }
-          console.log('Authentication successful - user:', authenticatedUser)
-        }
+  if (req.customerId && req.customerRole === 'customer') {
+    // Attempt to locate customer profile
+    const customer = await Customer.findById(req.customerId)
+    if (customer) {
+      authenticatedUser = {
+        id: customer._id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        isGuest: false
       }
     }
-  } catch (err) {
-    console.log('Authentication error:', err.message)
-    authenticatedUser = null
   }
 
   try {
     const tenantId = req.tenantId
-    const { items, customerInfo, address, type, payment, pickupDateTime, dineInTime } = req.body
+    const { items, customerInfo, address, type, payment, pickupDateTime, dineInTime, appliedReward } = req.body
 
     console.log('Order request - Authenticated user:', authenticatedUser)
     console.log('Order request - Body:', { items, customerInfo, address, type, payment })
@@ -87,12 +64,41 @@ router.post('/', async (req, res) => {
 
     // Calculate totals
     const subtotal = items.reduce((sum, item) => {
-      const modifiersTotal = item.modifiers?.reduce((mSum, m) => mSum + (m.price || 0), 0) || 0
-      return sum + (item.price + modifiersTotal) * item.quantity
+      const price = Number(item.price) || 0
+      const quantity = Number(item.quantity) || 1
+      const modifiersTotal = item.modifiers?.reduce((mSum, m) => mSum + (Number(m.price) || 0), 0) || 0
+      return sum + (price + modifiersTotal) * quantity
     }, 0)
     const tax = subtotal * 0.08 // 8% tax
     const deliveryFee = type === 'delivery' ? 3.99 : 0
-    const total = subtotal + tax + deliveryFee
+    let discount = 0
+    let usedRewardCost = 0
+    let usedRewardName = ''
+
+    // Process Loyalty Reward
+    if (appliedReward && authenticatedUser) {
+      const configQuery = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] };
+      const config = await LoyaltyConfig.findOne(configQuery);
+      if (config) {
+        const reward = config.rewards.find(r => r._id.toString() === appliedReward);
+
+        // Validate customer has enough points
+        const customerData = await Customer.findById(authenticatedUser.id);
+        const currentPoints = customerData?.loyalty?.points || 0;
+
+        if (reward && currentPoints >= reward.pointsCost) {
+          usedRewardCost = reward.pointsCost;
+          usedRewardName = reward.name;
+          if (reward.discountType === 'percentage') {
+            discount = subtotal * (reward.discountValue / 100);
+          } else {
+            discount = reward.discountValue;
+          }
+        }
+      }
+    }
+
+    const total = Math.max(0, subtotal - discount) + tax + deliveryFee
 
     // Use authenticated user info or provided customerInfo
     let finalCustomerInfo
@@ -167,7 +173,7 @@ router.post('/', async (req, res) => {
       subtotal,
       tax,
       deliveryFee: type === 'delivery' ? 3.99 : 0,
-      discount: 0,
+      discount,
       total,
       status: 'confirmed',
       customerInfo: finalCustomerInfo,
@@ -186,17 +192,38 @@ router.post('/', async (req, res) => {
       // Authenticated user - update their existing record
       console.log('Updating authenticated customer:', authenticatedUser.name)
 
+      const updateQuery = {
+        $inc: { orderCount: 1, totalSpent: total },
+        $set: {
+          lastOrderAt: new Date(),
+          isGuest: false
+        }
+      }
+
+      if (usedRewardCost > 0) {
+        if (!updateQuery.$inc) updateQuery.$inc = {}
+        updateQuery.$inc['loyalty.points'] = -usedRewardCost
+      }
+
       const customer = await Customer.findOneAndUpdate(
         { ...(tenantId && { tenantId }), _id: authenticatedUser.id },
-        {
-          $inc: { orderCount: 1, totalSpent: total },
-          $set: {
-            lastOrderAt: new Date(),
-            isGuest: false
-          }
-        },
+        updateQuery,
         { new: true }
       )
+
+      if (usedRewardCost > 0) {
+        let loyalty = await Loyalty.findOne({ tenantId: tenantId || null, customerId: customer._id })
+        if (!loyalty) {
+          loyalty = new Loyalty({ tenantId: tenantId || null, customerId: customer._id })
+        }
+        loyalty.points = (loyalty.points || 0) - usedRewardCost
+        loyalty.transactions.push({
+          type: 'redemption',
+          points: -usedRewardCost,
+          description: `Used reward: ${usedRewardName}`
+        })
+        await loyalty.save()
+      }
 
       console.log('Authenticated customer updated:', customer._id, customer.name, 'Order count:', customer.orderCount)
     } else if (customerInfo?.phone) {
@@ -241,8 +268,13 @@ router.post('/', async (req, res) => {
 
     res.status(201).json(order)
   } catch (err) {
-    console.error('Order creation error:', err)
-    res.status(500).json({ error: 'Failed to create order' })
+    console.error('CRITICAL Order creation error:', err)
+    console.error('Error Stack:', err.stack)
+    res.status(500).json({
+      error: 'Failed to create order',
+      details: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    })
   }
 })
 
@@ -278,45 +310,8 @@ router.get('/track/:orderNumber', async (req, res) => {
   }
 })
 
-// Update order status
-router.put('/:id/status', async (req, res) => {
-  try {
-    const tenantId = req.tenantId
-    const { status } = req.body
-
-    const updateData = { status }
-
-    if (status === 'delivered') {
-      updateData.actualDeliveredAt = new Date()
-    }
-
-    const order = await Order.findOneAndUpdate(
-      { _id: req.params.id, tenantId },
-      updateData,
-      { new: true }
-    )
-
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' })
-    }
-
-    // Emit WebSocket event to admin room, tenant room, AND the specific order room
-    const io = req.app.get('io')
-    if (io) {
-      io.to('admin:orders').emit('order:update', order)
-      io.to(`tenant:${tenantId || 'default'}`).emit('order:update', order)
-      io.to(`order:${order._id}`).emit('order:status_update', {
-        id: order._id,
-        status: order.status,
-        message: `Your order is now ${order.status}!`
-      })
-    }
-
-    res.json(order)
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update status' })
-  }
-})
+// Removed insecure status update endpoint.
+// Use PUT /api/admin/orders/:id/status for status updates (requires admin authentication).
 
 // Track order by phone
 router.get('/track/:phone', async (req, res) => {
@@ -325,9 +320,9 @@ router.get('/track/:phone', async (req, res) => {
     const phone = req.params.phone.replace(/\D/g, '')
 
     const order = await Order.findOne({
-      tenantId,
+      ...(tenantId && { tenantId }),
       'customerInfo.phone': { $regex: phone },
-      status: { $nin: ['delivered', 'cancelled'] }
+      status: { $nin: ['delivered', 'completed', 'cancelled'] }
     }).sort({ createdAt: -1 })
 
     if (!order) {

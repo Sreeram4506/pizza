@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { useSettings } from '../context/SettingsContext'
+import toast from 'react-hot-toast'
 
 export default function AdminDashboard() {
+    const { settings } = useSettings()
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
     const [users, setUsers] = useState([])
     const [analytics, setAnalytics] = useState(null)
     const [activeTab, setActiveTab] = useState('orders')
     const [offerText, setOfferText] = useState('')
-    const [offerSubject, setOfferSubject] = useState('Exclusive Pizza Blast Offer! 🍕')
+    const [offerSubject, setOfferSubject] = useState(`Exclusive ${settings?.restaurantName || 'Pizza Blast'} Offer! 🍕`)
     const [sendingEmail, setSendingEmail] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const navigate = useNavigate()
@@ -61,9 +64,12 @@ export default function AdminDashboard() {
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ emails, subject: offerSubject, message: offerText })
             })
-            if (res.ok) { alert('Offers sent successfully!'); setOfferText('') }
+            if (res.ok) {
+                toast.success('Offers sent successfully!')
+                setOfferText('')
+            }
         } catch (err) {
-            alert('Failed to send offers')
+            toast.error('Failed to send offers')
         } finally {
             setSendingEmail(false)
         }
@@ -83,7 +89,7 @@ export default function AdminDashboard() {
                     <div className="w-10 h-10 bg-tomato-600 rounded-xl flex items-center justify-center text-xl shadow-lg flex-shrink-0">🍕</div>
                     <div className="hidden sm:block">
                         <h1 className="font-display font-black text-base text-white tracking-tight leading-none">Admin Panel</h1>
-                        <p className="text-[10px] text-tomato-400 font-semibold uppercase tracking-wider">Pizza Blast Control</p>
+                        <p className="text-[10px] text-tomato-400 font-semibold uppercase tracking-wider">{settings?.restaurantName || 'Pizza Blast'} Control</p>
                     </div>
                 </div>
 

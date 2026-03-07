@@ -15,6 +15,7 @@ const orderItemSchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
   tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', required: false }, // Made optional for localhost
   customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
+  deliveryPersonId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   orderNumber: { type: String, required: true, unique: true },
   items: [orderItemSchema],
   subtotal: { type: Number, required: true },

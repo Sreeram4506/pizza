@@ -4,7 +4,7 @@ const promotionalBannerSchema = new mongoose.Schema({
   tenantId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Tenant',
-    required: true
+    required: false
   },
   title: {
     type: String,

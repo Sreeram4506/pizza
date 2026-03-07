@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import { ChatbotProvider } from './context/ChatbotContext'
 import { SettingsProvider } from './context/SettingsContext'
 import { useQuickLoginTrigger } from './hooks/useQuickLoginTrigger'
@@ -6,6 +7,7 @@ import QuickLoginModal from './components/QuickLoginModal'
 import Navbar from './components/Navbar'
 import BannerDisplay from './components/BannerDisplay'
 import Hero from './components/Hero'
+import MarqueeStrip from './components/MarqueeStrip'
 import About from './components/About'
 import PizzaGallery from './components/PizzaGallery'
 import ComboDeals from './components/ComboDeals'
@@ -17,6 +19,7 @@ import Chatbot from './components/Chatbot'
 import OrderTracker from './components/OrderTracker'
 import CustomerProfile from './components/CustomerProfile'
 import CustomerLogin from './components/CustomerLogin'
+import DeliveryPortal from './components/DeliveryPortal'
 import CustomerRegister from './components/CustomerRegister'
 import AdminLogin from './components/AdminLogin'
 import AdminLayout from './components/admin/Layout'
@@ -26,6 +29,7 @@ import OrderManager from './components/admin/OrderManager'
 import CustomerManager from './components/admin/CustomerManager'
 import AnalyticsDashboard from './components/admin/Analytics'
 import Marketing from './components/admin/Marketing'
+import LoyaltyManager from './components/admin/LoyaltyManager'
 import Settings from './components/admin/Settings'
 import CustomPizzaBuilder from './components/CustomPizzaBuilder'
 
@@ -34,7 +38,8 @@ const EXCLUDED_ROUTES = [
   '/login',
   '/register',
   '/admin',
-  '/admin/login'
+  '/admin/login',
+  '/delivery'
 ]
 
 // Component to handle quick login popup
@@ -42,14 +47,10 @@ function QuickLoginWrapper() {
   const location = useLocation()
   const { shouldShowPopup, dismissPopup, onLoginSuccess } = useQuickLoginTrigger()
 
-  // Check if current route is excluded
   const isExcludedRoute = EXCLUDED_ROUTES.some(route =>
     location.pathname.startsWith(route)
   )
-
-  // Also check if user is already logged in
   const isLoggedIn = !!localStorage.getItem('customerToken')
-
   const shouldShow = shouldShowPopup && !isExcludedRoute && !isLoggedIn
 
   return (
@@ -65,17 +66,23 @@ function Home() {
   return (
     <>
       <Navbar />
+      {/* Grain texture overlay */}
+      <div className="grain-overlay" />
 
       <main>
         <Hero />
+        <MarqueeStrip />
         <BannerDisplay position="middle" />
-        <About />
         <PizzaGallery />
+        <CustomPizzaBuilder />
+        <About />
         <ComboDeals />
         <Testimonials />
         <Contact />
       </main>
+      <BannerDisplay position="bottom" />
       <Footer />
+      <Chatbot />
     </>
   )
 }
@@ -85,35 +92,42 @@ function App() {
     <BrowserRouter>
       <SettingsProvider>
         <ChatbotProvider>
-          <div className="min-h-screen bg-mozzarella-100 relative overflow-x-hidden selection:bg-tomato-200 selection:text-wood-800">
-            <div className="relative z-10 text-slate-900">
+          <div className="min-h-screen bg-[#FAFAF8] relative overflow-x-hidden selection:bg-ember-500/15 selection:text-[#1A1410]">
+            <div className="relative z-10 text-[#1A1410]">
+              <Toaster position="top-center" toastOptions={{
+                className: 'font-body',
+                style: {
+                  background: '#1A1410',
+                  color: '#fff',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }
+              }} />
               <QuickLoginWrapper />
-              <Chatbot />
 
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/login" element={<CustomerLogin />} />
-                <Route path="/register" element={<CustomerRegister />} />
-                <Route path="/track" element={<OrderTracker />} />
-                <Route path="/custom-pizza" element={<CustomPizzaBuilder />} />
-                <Route path="/profile" element={<CustomerProfile />} />
+                <Route path="/login" element={<><Navbar /><CustomerLogin /><Chatbot /></>} />
+                <Route path="/register" element={<><Navbar /><CustomerRegister /><Chatbot /></>} />
+                <Route path="/track" element={<><Navbar /><OrderTracker /><Chatbot /></>} />
+                <Route path="/profile" element={<><Navbar /><CustomerProfile /><Chatbot /></>} />
                 <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/delivery" element={<DeliveryPortal />} />
 
-                {/* Secure Nested Admin Routes */}
+                {/* Secure Nested Admin Routes — no chatbot, no grain */}
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="menu" element={<MenuManager />} />
                   <Route path="orders" element={<OrderManager />} />
                   <Route path="customers" element={<CustomerManager />} />
-                  <Route path="loyalty" element={<CustomerManager />} />
+                  <Route path="loyalty" element={<LoyaltyManager />} />
                   <Route path="analytics" element={<AnalyticsDashboard />} />
                   <Route path="marketing" element={<Marketing />} />
                   <Route path="settings" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                 </Route>
 
-                {/* Catch-all 404 redirect to home or a dedicated 404 page */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
@@ -123,6 +137,5 @@ function App() {
     </BrowserRouter>
   )
 }
-
 
 export default App

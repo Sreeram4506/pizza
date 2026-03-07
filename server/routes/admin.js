@@ -7,13 +7,16 @@ import { fileURLToPath } from 'url'
 import { dirname } from 'path'
 import { Order } from '../models/Order.js'
 import { Customer } from '../models/Customer.js'
+import { User } from '../models/User.js'
 import { MenuCategory } from '../models/MenuCategory.js'
 import { MenuItem } from '../models/MenuItem.js'
 import { Settings } from '../models/Settings.js'
 import { EmailCampaign } from '../models/EmailCampaign.js'
 import { PromotionalBanner } from '../models/PromotionalBanner.js'
+import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
 import { config } from '../config.js'
 import { sendMarketingEmail } from '../utils/email.js'
+import { verifyAdmin } from '../middleware/auth.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -49,8 +52,7 @@ const upload = multer({
 // Admin credentials and JWT Secret from config
 // Admin credentials from config
 const ADMIN_USER = () => config.adminUsername
-const ADMIN_PASS_HASH = () => bcrypt.hashSync(config.adminPassword, 10)
-// Removed static JWT_SECRET constant to use config.JWT_SECRET directly
+const ADMIN_PASS_HASH = bcrypt.hashSync(config.adminPassword, 10)
 
 // Multer error handling middleware
 const handleMulterError = (err, req, res, next) => {
@@ -75,33 +77,13 @@ const handleMulterError = (err, req, res, next) => {
 router.post('/login', async (req, res) => {
     const { username, password } = req.body
 
-    if (username === ADMIN_USER() && bcrypt.compareSync(password, ADMIN_PASS_HASH())) {
+    if (username === ADMIN_USER() && bcrypt.compareSync(password, ADMIN_PASS_HASH)) {
         const token = jwt.sign({ role: 'admin' }, config.JWT_SECRET, { expiresIn: '1d' })
         return res.json({ token })
     }
 
     res.status(401).json({ error: 'Invalid credentials' })
 })
-
-// Middleware to verify Admin JWT
-const verifyAdmin = (req, res, next) => {
-    const authHeader = req.headers.authorization
-    const token = authHeader?.split(' ')[1]
-
-    if (!token) {
-        console.log('verifyAdmin: No token provided');
-        return res.status(401).json({ error: 'Unauthorized' })
-    }
-
-    try {
-        const decoded = jwt.verify(token, config.JWT_SECRET)
-        req.user = decoded
-        next()
-    } catch (err) {
-        console.error('verifyAdmin: Token verification failed:', err.message);
-        res.status(401).json({ error: 'Invalid token' })
-    }
-}
 
 // Get all orders
 router.get('/orders', verifyAdmin, async (req, res) => {
@@ -124,6 +106,167 @@ router.get('/orders', verifyAdmin, async (req, res) => {
     }
 })
 
+// Update order status
+router.put('/orders/:id/status', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        const { status } = req.body
+
+        const updateData = { status }
+        if (status === 'delivered' || status === 'completed') {
+            updateData.actualDeliveredAt = new Date()
+        }
+
+        const order = await Order.findOneAndUpdate(
+            { _id: req.params.id, ...(tenantId && { tenantId }) },
+            updateData,
+            { new: true }
+        )
+
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' })
+        }
+
+        // Award loyalty points if status is completed/delivered
+        if (order.status === 'completed' || order.status === 'delivered') {
+            try {
+                const loyaltyConfig = await LoyaltyConfig.findOne({ ...(tenantId && { tenantId }) })
+                if (loyaltyConfig?.enabled && order.total > 0) {
+                    const phone = order.customerInfo?.phone
+                    const customer = await Customer.findOne({
+                        ...(tenantId && { tenantId }),
+                        $or: [
+                            ...(order.customerId ? [{ _id: order.customerId }] : []),
+                            ...(phone ? [{ phone }] : [])
+                        ]
+                    })
+
+                    if (customer) {
+                        const pointsToAward = Math.floor(order.total * (loyaltyConfig.pointsPerDollar || 1))
+
+                        // Check if already awarded (simple check - though better to track in order)
+                        // Implementation note: Ideally we mark order as 'points_awarded: true'
+                        // Since we don't have that field yet, we'll check if a transaction exists for this orderId
+                        const existingTransaction = await Loyalty.findOne({
+                            customerId: customer._id,
+                            'transactions.orderId': order._id
+                        })
+
+                        if (!existingTransaction && pointsToAward > 0) {
+                            customer.loyalty.points += pointsToAward
+                            customer.loyalty.lifetimePoints += pointsToAward
+                            await customer.save()
+
+                            let loyalty = await Loyalty.findOne({ customerId: customer._id })
+                            if (!loyalty) loyalty = new Loyalty({ tenantId: tenantId || customer.tenantId, customerId: customer._id })
+
+                            loyalty.points += pointsToAward
+                            loyalty.lifetimePoints += pointsToAward
+                            loyalty.transactions.push({
+                                type: 'earned',
+                                points: pointsToAward,
+                                orderId: order._id,
+                                description: `Points earned from order #${order.orderNumber}`
+                            })
+                            await loyalty.save()
+                            console.log(`[LOYALTY] Awarded ${pointsToAward} points to ${customer.name}`)
+                        }
+                    }
+                }
+            } catch (loyaltyErr) {
+                console.error('[LOYALTY ERROR] Failed to award points:', loyaltyErr.message)
+            }
+        }
+
+        // Emit WebSocket events
+        const io = req.app.get('io')
+        if (io) {
+            io.to('admin:orders').emit('order:update', order)
+            io.to(`tenant:${tenantId || 'default'}`).emit('order:update', order)
+            io.to(`order:${order._id}`).emit('order:status_update', {
+                id: order._id,
+                status: order.status,
+                message: `Your order is now ${order.status}!`
+            })
+        }
+
+        res.json(order)
+    } catch (err) {
+        console.error('Failed to update status:', err)
+        res.status(500).json({ error: 'Failed to update status' })
+    }
+})
+
+// Assign delivery driver to order
+router.put('/orders/:id/assign', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        const { id } = req.params
+        const { deliveryPersonId } = req.body
+
+        const order = await Order.findOneAndUpdate(
+            { _id: id, ...(tenantId && { tenantId }) },
+            { deliveryPersonId, status: 'out_for_delivery' },
+            { new: true }
+        ).populate('deliveryPersonId', 'name phone')
+
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' })
+        }
+
+        const io = req.app.get('io')
+        if (io) {
+            io.to('admin:orders').emit('order:update', order)
+            io.to(`tenant:${tenantId || 'default'}`).emit('order:update', order)
+        }
+
+        res.json(order)
+    } catch (err) {
+        console.error('Failed to assign driver:', err)
+        res.status(500).json({ error: 'Failed to assign driver' })
+    }
+})
+
+// Get delivery role users
+router.get('/delivery-users', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        let query = { role: 'delivery' }
+
+        if (tenantId) {
+            query.tenantId = tenantId
+        }
+
+        const drivers = await User.find(query).select('name phone email isActive')
+        res.json(drivers)
+    } catch (err) {
+        console.error('Failed to fetch delivery users:', err)
+        res.status(500).json({ error: 'Failed to fetch delivery users' })
+    }
+})
+
+// Cancel/Delete order
+router.delete('/orders/:id', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        const { id } = req.params
+
+        const order = await Order.findOneAndDelete({ _id: id, ...(tenantId && { tenantId }) })
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' })
+        }
+
+        const io = req.app.get('io')
+        if (io) {
+            io.to('admin:orders').emit('order:deleted', id)
+        }
+
+        res.json({ message: 'Order deleted successfully' })
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to delete order' })
+    }
+})
+
 // Get registered users
 router.get('/users', verifyAdmin, async (req, res) => {
     try {
@@ -136,9 +279,9 @@ router.get('/users', verifyAdmin, async (req, res) => {
         }
 
         const customers = await Customer.find(query)
-            .select('name email phone createdAt orderCount')
+            .select('name email phone createdAt orderCount totalSpent loyalty lastOrderAt isGuest')
             .sort({ createdAt: -1 })
-            .limit(50)
+            .limit(100)
         res.json(customers)
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch users' })
@@ -172,7 +315,7 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
         const todayRevenue = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0)
 
         // Pending orders
-        const pendingOrders = await Order.countDocuments({ ...query, status: 'confirmed' })
+        const pendingOrders = await Order.countDocuments({ ...query, status: 'pending' })
 
         // Active customers (customers with orders)
         const activeCustomers = await Customer.countDocuments({ ...query, orderCount: { $gt: 0 } })
@@ -495,7 +638,10 @@ router.get('/public/settings', async (req, res) => {
         if (tenantId) {
             settings = await Settings.findOne({ tenantId })
         } else {
-            // For localhost development, return default settings
+            settings = await Settings.findOne({ tenantId: null }) || await Settings.findOne({ tenantId: { $exists: false } })
+        }
+
+        if (!settings) {
             settings = {
                 restaurantName: 'Pizza Blast',
                 email: 'contact@pizzablast.com',
@@ -525,7 +671,10 @@ router.get('/settings', verifyAdmin, async (req, res) => {
         if (tenantId) {
             settings = await Settings.findOne({ tenantId })
         } else {
-            // For localhost development, return default settings
+            settings = await Settings.findOne({ tenantId: null }) || await Settings.findOne({ tenantId: { $exists: false } })
+        }
+
+        if (!settings) {
             settings = {
                 restaurantName: 'Pizza Blast',
                 email: 'contact@pizzablast.com',
@@ -575,9 +724,12 @@ router.post('/settings', verifyAdmin, async (req, res) => {
             )
             console.log('Settings saved to database:', settings)
         } else {
-            // For localhost development, just return success
-            settings = settingsData
-            console.log('Settings saved (localhost mode):', settings)
+            settings = await Settings.findOneAndUpdate(
+                { tenantId: null },
+                { $set: settingsData },
+                { upsert: true, new: true }
+            )
+            console.log('Settings saved (global mode):', settings)
         }
 
         // Emit WebSocket event for real-time updates
@@ -638,20 +790,21 @@ router.post('/email-campaigns', verifyAdmin, async (req, res) => {
 
         if (sendNow && recipients?.length > 0) {
             console.log(`Processing "Send Now" for campaign: ${name}`)
-            const sendPromises = recipients.map(r => sendMarketingEmail(r.email, subject, message, r.name))
-            // We fire and forget or at least don't block the initial response
-            Promise.allSettled(sendPromises).then(results => {
-                const delivered = results.filter(r => r.status === 'fulfilled').length
-                const failed = results.filter(r => r.status === 'rejected')
-                if (failed.length > 0) {
-                    console.error(`${failed.length} emails failed to send. First error:`, failed[0].reason)
-                }
-                console.log(`Campaign processing complete: ${delivered} delivered, ${failed.length} failed`)
-                EmailCampaign.findByIdAndUpdate(campaign._id, {
-                    'stats.delivered': delivered,
-                    'stats.sent': recipients.length
-                }).exec().catch(err => console.error('Background update fail:', err))
-            })
+            const sendPromises = recipients.map(r => sendMarketingEmail(r.email, subject, message, r.name, template))
+
+            const results = await Promise.allSettled(sendPromises)
+            const delivered = results.filter(r => r.status === 'fulfilled').length
+            const failed = results.filter(r => r.status === 'rejected')
+
+            if (failed.length > 0) {
+                console.error(`${failed.length} emails failed to send. First error:`, failed[0].reason)
+            }
+            console.log(`Campaign processing complete: ${delivered} delivered, ${failed.length} failed`)
+
+            campaign.stats.delivered = delivered
+            campaign.stats.sent = recipients.length
+            campaign.status = 'sent'
+            await campaign.save()
         }
 
         res.json(campaign)
@@ -668,10 +821,10 @@ router.get('/customers/list', verifyAdmin, async (req, res) => {
 
         let customers
         if (tenantId) {
-            customers = await Customer.find({ tenantId }).select('_id name email phone createdAt')
+            customers = await Customer.find({ tenantId }).select('_id name email phone createdAt loyalty totalSpent')
         } else {
             // Return actual customers from the database, even without a tenant filter
-            customers = await Customer.find({}).select('_id name email phone createdAt')
+            customers = await Customer.find({}).select('_id name email phone createdAt loyalty totalSpent')
         }
 
         console.log('Customers found:', customers.length)
@@ -688,58 +841,8 @@ router.get('/promotional-banners', verifyAdmin, async (req, res) => {
         const tenantId = req.tenantId
         console.log('GET /admin/promotional-banners - Request received')
 
-        let banners
-        if (tenantId) {
-            banners = await PromotionalBanner.find({ tenantId }).sort({ priority: -1, createdAt: -1 })
-        } else {
-            // For localhost development, return mock banners
-            banners = [
-                {
-                    _id: 'mock1',
-                    title: 'Weekend Special',
-                    subtitle: '50% Off All Pizzas',
-                    description: 'Get 50% off on all pizzas this weekend only!',
-                    imageUrl: '',
-                    backgroundColor: '#FF6B6B',
-                    textColor: '#FFFFFF',
-                    buttonText: 'Order Now',
-                    buttonLink: '/menu',
-                    position: 'top',
-                    size: 'large',
-                    status: 'active',
-                    startDate: new Date('2024-01-15'),
-                    endDate: new Date('2024-01-17'),
-                    priority: 5,
-                    targetAudience: ['all'],
-                    clicks: 45,
-                    impressions: 1250,
-                    isActive: true,
-                    createdAt: new Date('2024-01-15')
-                },
-                {
-                    _id: 'mock2',
-                    title: 'New Menu Item',
-                    subtitle: 'Try Our BBQ Chicken Pizza',
-                    description: 'Smoky BBQ chicken with fresh vegetables',
-                    imageUrl: '',
-                    backgroundColor: '#4ECDC4',
-                    textColor: '#FFFFFF',
-                    buttonText: 'Learn More',
-                    buttonLink: '/menu',
-                    position: 'middle',
-                    size: 'medium',
-                    status: 'active',
-                    startDate: new Date('2024-01-20'),
-                    endDate: new Date('2024-02-20'),
-                    priority: 3,
-                    targetAudience: ['all'],
-                    clicks: 23,
-                    impressions: 890,
-                    isActive: true,
-                    createdAt: new Date('2024-01-20')
-                }
-            ]
-        }
+        const query = tenantId ? { tenantId } : {}
+        const banners = await PromotionalBanner.find(query).sort({ priority: -1, createdAt: -1 })
 
         console.log('Promotional banners found:', banners.length)
         res.json(banners)
@@ -791,21 +894,7 @@ router.post('/promotional-banners', verifyAdmin, async (req, res) => {
             status: 'active'
         }
 
-        let banner
-        if (tenantId) {
-            banner = await PromotionalBanner.create(bannerData)
-        } else {
-            // For localhost development, create mock banner
-            banner = {
-                _id: 'mock_' + Date.now(),
-                ...bannerData,
-                clicks: 0,
-                impressions: 0,
-                isActive: true,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            }
-        }
+        const banner = await PromotionalBanner.create(bannerData)
 
         console.log('Promotional banner created:', banner)
         res.json(banner)
@@ -826,17 +915,12 @@ router.put('/promotional-banners/:id', verifyAdmin, async (req, res) => {
             updatedAt: new Date()
         }
 
-        let banner
-        if (tenantId) {
-            banner = await PromotionalBanner.findOneAndUpdate(
-                { _id: id, tenantId },
-                updateData,
-                { new: true }
-            )
-        } else {
-            // For localhost development, just return success
-            banner = { _id: id, ...updateData }
-        }
+        const query = tenantId ? { _id: id, tenantId } : { _id: id }
+        const banner = await PromotionalBanner.findOneAndUpdate(
+            query,
+            updateData,
+            { new: true }
+        )
 
         if (!banner) {
             return res.status(404).json({ error: 'Banner not found' })
@@ -856,13 +940,8 @@ router.delete('/promotional-banners/:id', verifyAdmin, async (req, res) => {
         const { id } = req.params
         console.log('DELETE /admin/promotional-banners/:id - Request received')
 
-        let result
-        if (tenantId) {
-            result = await PromotionalBanner.findOneAndDelete({ _id: id, tenantId })
-        } else {
-            // For localhost development, just return success
-            result = { _id: id }
-        }
+        const query = tenantId ? { _id: id, tenantId } : { _id: id }
+        const result = await PromotionalBanner.findOneAndDelete(query)
 
         if (!result) {
             return res.status(404).json({ error: 'Banner not found' })
@@ -882,40 +961,38 @@ router.get('/public/promotional-banners', async (req, res) => {
         const tenantId = req.tenantId
         console.log('GET /admin/public/promotional-banners - Request received')
 
-        let banners
-        if (tenantId) {
-            banners = await PromotionalBanner.find({
-                tenantId,
-                status: 'active',
-                isActive: true,
-                startDate: { $lte: new Date() },
-                endDate: { $gte: new Date() }
-            }).sort({ priority: -1 })
-        } else {
-            // For localhost development, return mock active banners
-            banners = [
-                {
-                    _id: 'mock1',
-                    title: 'Weekend Special',
-                    subtitle: '50% Off All Pizzas',
-                    description: 'Get 50% off on all pizzas this weekend only!',
-                    imageUrl: '',
-                    backgroundColor: '#FF6B6B',
-                    textColor: '#FFFFFF',
-                    buttonText: 'Order Now',
-                    buttonLink: '/menu',
-                    position: 'middle',
-                    size: 'large',
-                    priority: 5
-                }
-            ]
-        }
+        const baseQuery = tenantId ? { tenantId } : {}
+        const banners = await PromotionalBanner.find({
+            ...baseQuery,
+            status: 'active',
+            isActive: true,
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() }
+        }).sort({ priority: -1 })
 
         console.log('Active promotional banners found:', banners.length)
         res.json(banners)
     } catch (err) {
         console.error('Failed to fetch active promotional banners:', err)
         res.status(500).json({ error: 'Failed to fetch active promotional banners' })
+    }
+})
+
+// Track banner click (public)
+router.post('/promotional-banners/:id/click', async (req, res) => {
+    try {
+        const { id } = req.params
+        // We don't necessarily need tenantId here if IDs are unique, 
+        // but it's safer to include it if we can extract it.
+        const banner = await PromotionalBanner.findByIdAndUpdate(
+            id,
+            { $inc: { clicks: 1 } },
+            { new: true }
+        )
+        if (!banner) return res.status(404).json({ error: 'Banner not found' })
+        res.json({ success: true, clicks: banner.clicks })
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to track click' })
     }
 })
 

@@ -2,8 +2,8 @@ import { Router } from 'express'
 import { Customer } from '../models/Customer.js'
 import { Order } from '../models/Order.js'
 import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
-import jwt from 'jsonwebtoken'
 import { config } from '../config.js'
+import { verifyCustomer } from '../middleware/auth.js'
 
 const router = Router()
 
@@ -12,9 +12,9 @@ router.get('/', async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { search, limit = 50, page = 1 } = req.query
-    
+
     let query = { tenantId }
-    
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -22,12 +22,12 @@ router.get('/', async (req, res) => {
         { phone: { $regex: search, $options: 'i' } }
       ]
     }
-    
+
     const customers = await Customer.find(query)
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit))
-    
+
     res.json(customers)
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch customers' })
@@ -39,16 +39,16 @@ router.get('/:id', async (req, res) => {
   try {
     const tenantId = req.tenantId
     const customer = await Customer.findOne({ _id: req.params.id, tenantId })
-    
+
     if (!customer) {
       return res.status(404).json({ error: 'Customer not found' })
     }
-    
+
     // Get order history
     const orders = await Order.find({ tenantId, 'customerInfo.phone': customer.phone })
       .sort({ createdAt: -1 })
       .limit(10)
-    
+
     res.json({ customer, orders })
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch customer' })
@@ -56,27 +56,17 @@ router.get('/:id', async (req, res) => {
 })
 
 // Get customer profile (for logged-in user)
-router.get('/profile', async (req, res) => {
+router.get('/profile', verifyCustomer, async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '')
-    if (!token) {
-      return res.status(401).json({ error: 'No token provided' })
-    }
-
-    const decoded = jwt.verify(token, config.JWT_SECRET)
     const tenantId = req.tenantId
-    
-    const customer = await Customer.findOne({ _id: decoded.customerId, tenantId })
-    
+    const customer = await Customer.findOne({ _id: req.customerId, ...(tenantId && { tenantId }) })
+
     if (!customer) {
       return res.status(404).json({ error: 'Customer not found' })
     }
-    
+
     res.json({ user: customer })
   } catch (err) {
-    if (err.name === 'JsonWebTokenError') {
-      return res.status(401).json({ error: 'Invalid token' })
-    }
     res.status(500).json({ error: 'Failed to fetch customer profile' })
   }
 })
@@ -86,10 +76,10 @@ router.post('/', async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { name, email, phone, address, marketingConsent } = req.body
-    
+
     // Check if customer exists
     let customer = await Customer.findOne({ tenantId, phone })
-    
+
     if (customer) {
       // Update existing
       customer.name = name || customer.name
@@ -108,7 +98,7 @@ router.post('/', async (req, res) => {
         marketingConsent
       })
       await customer.save()
-      
+
       // Check if loyalty is enabled and add welcome bonus
       const loyaltyConfig = await LoyaltyConfig.findOne({ tenantId })
       if (loyaltyConfig?.enabled && loyaltyConfig.welcomeBonus > 0) {
@@ -124,14 +114,14 @@ router.post('/', async (req, res) => {
           }]
         })
         await loyalty.save()
-        
+
         // Update customer loyalty
         customer.loyalty.points = loyaltyConfig.welcomeBonus
         customer.loyalty.lifetimePoints = loyaltyConfig.welcomeBonus
         await customer.save()
       }
     }
-    
+
     res.json(customer)
   } catch (err) {
     res.status(500).json({ error: 'Failed to create customer' })
@@ -143,33 +133,38 @@ router.post('/:id/award-points', async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { points, reason } = req.body
-    
-    const customer = await Customer.findOne({ _id: req.params.id, tenantId })
+
+    const query = tenantId ? { _id: req.params.id, tenantId } : { _id: req.params.id }
+    const customer = await Customer.findOne(query)
     if (!customer) {
       return res.status(404).json({ error: 'Customer not found' })
     }
-    
+
     // Update customer loyalty
-    customer.loyalty.points += points
-    customer.loyalty.lifetimePoints += points
+    if (!customer.loyalty) {
+      customer.loyalty = { points: 0, lifetimePoints: 0, tier: 'bronze' }
+    }
+    customer.loyalty.points = (customer.loyalty.points || 0) + points
+    customer.loyalty.lifetimePoints = (customer.loyalty.lifetimePoints || 0) + points
     await customer.save()
-    
+
     // Update loyalty record
     let loyalty = await Loyalty.findOne({ tenantId, customerId: customer._id })
     if (!loyalty) {
       loyalty = new Loyalty({ tenantId, customerId: customer._id })
     }
-    loyalty.points += points
-    loyalty.lifetimePoints += points
+    loyalty.points = (loyalty.points || 0) + points
+    loyalty.lifetimePoints = (loyalty.lifetimePoints || 0) + points
     loyalty.transactions.push({
       type: 'bonus',
       points,
       description: reason || 'Manual award'
     })
     await loyalty.save()
-    
+
     res.json({ customer, loyalty })
   } catch (err) {
+    console.error('Award Points Error:', err)
     res.status(500).json({ error: 'Failed to award points' })
   }
 })
@@ -178,8 +173,9 @@ router.post('/:id/award-points', async (req, res) => {
 router.get('/loyalty/config', async (req, res) => {
   try {
     const tenantId = req.tenantId
-    let config = await LoyaltyConfig.findOne({ tenantId })
-    
+    const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
+    let config = await LoyaltyConfig.findOne(query)
+
     if (!config) {
       // Create default config
       config = new LoyaltyConfig({
@@ -197,10 +193,11 @@ router.get('/loyalty/config', async (req, res) => {
       })
       await config.save()
     }
-    
+
     res.json(config)
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch loyalty config' })
+    console.error('Loyalty Config Error:', err)
+    res.status(500).json({ error: 'Failed to fetch loyalty config', details: err.message })
   }
 })
 
@@ -208,14 +205,16 @@ router.get('/loyalty/config', async (req, res) => {
 router.put('/loyalty/config', async (req, res) => {
   try {
     const tenantId = req.tenantId
+    const query = tenantId ? { tenantId } : { tenantId: null }
     const config = await LoyaltyConfig.findOneAndUpdate(
-      { tenantId },
+      query,
       req.body,
       { new: true, upsert: true }
     )
     res.json(config)
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update loyalty config' })
+    console.error('Loyalty Config Update Error:', err)
+    res.status(500).json({ error: 'Failed to update loyalty config', details: err.message })
   }
 })
 
@@ -223,17 +222,19 @@ router.put('/loyalty/config', async (req, res) => {
 router.post('/loyalty/rewards', async (req, res) => {
   try {
     const tenantId = req.tenantId
-    const config = await LoyaltyConfig.findOne({ tenantId })
-    
+    const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
+    const config = await LoyaltyConfig.findOne(query)
+
     if (!config) {
       return res.status(404).json({ error: 'Loyalty config not found' })
     }
-    
+
     config.rewards.push(req.body)
     await config.save()
-    
+
     res.json(config)
   } catch (err) {
+    console.error('Create Reward Error:', err)
     res.status(500).json({ error: 'Failed to create reward' })
   }
 })
@@ -243,33 +244,33 @@ router.post('/:id/redeem', async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { rewardId } = req.body
-    
+
     const customer = await Customer.findOne({ _id: req.params.id, tenantId })
     if (!customer) {
       return res.status(404).json({ error: 'Customer not found' })
     }
-    
+
     const config = await LoyaltyConfig.findOne({ tenantId })
     const reward = config.rewards.id(rewardId)
-    
+
     if (!reward) {
       return res.status(404).json({ error: 'Reward not found' })
     }
-    
+
     if (customer.loyalty.points < reward.pointsCost) {
       return res.status(400).json({ error: 'Insufficient points' })
     }
-    
+
     // Deduct points
     customer.loyalty.points -= reward.pointsCost
     await customer.save()
-    
+
     // Add to customer's rewards
     let loyalty = await Loyalty.findOne({ tenantId, customerId: customer._id })
     if (!loyalty) {
       loyalty = new Loyalty({ tenantId, customerId: customer._id })
     }
-    
+
     loyalty.points -= reward.pointsCost
     loyalty.transactions.push({
       type: 'redeemed',
@@ -284,7 +285,7 @@ router.post('/:id/redeem', async (req, res) => {
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
     })
     await loyalty.save()
-    
+
     res.json({ customer, loyalty, reward })
   } catch (err) {
     res.status(500).json({ error: 'Failed to redeem reward' })

@@ -1,36 +1,32 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 
 const testimonials = [
   {
     id: 1,
     name: 'Sarah M.',
-    avatar: '👩',
-    text: "Best pizza in town! The Margherita Royale is literally life-changing. The crust is so airy and perfect, and you can taste the quality of the San Marzano tomatoes. I'm officially addicted!",
+    text: "Best pizza in town! The Margherita Royale is literally life-changing. The crust is so airy and perfect, and you can taste the quality in every single bite.",
     rating: 5,
     order: 'Margherita Royale',
   },
   {
     id: 2,
     name: 'James K.',
-    avatar: '👨‍💼',
-    text: "Authentic wood-fired taste that transports me straight to Naples. The chatbot made ordering my custom toppings super easy. Pizza Blast is now my weekly Friday night tradition!",
+    text: "Authentic wood-fired taste that transports me straight to Naples. Pizza Blast is now my weekly Friday night tradition — nothing else compares.",
     rating: 5,
     order: 'Custom Pepperoni',
   },
   {
     id: 3,
     name: 'Emily R.',
-    avatar: '👩‍🌾',
-    text: "Finally a place that does valid vegetarian options right! The Garden Harvest pizza with fresh basil and seasonal veggies is absolutely Divine. My whole family loves it!",
+    text: "Finally a place that does vegetarian options right! The Garden Harvest pizza is absolutely divine. My whole family loves it.",
     rating: 5,
     order: 'Garden Harvest',
   },
   {
     id: 4,
     name: 'Mike T.',
-    avatar: '👨‍🍳',
-    text: "As a chef myself, I'm picky about pizza. The 48-hour fermented dough here is legit - perfect chew and char. The Diavola has just the right amount of heat. Highly recommend!",
+    text: "As a chef myself, I'm picky about pizza. The 48-hour fermented dough here is legit — perfect chew and char. Highly recommend.",
     rating: 5,
     order: 'Spicy Diavola',
   },
@@ -41,145 +37,107 @@ export default function Testimonials() {
   const isInView = useInView(ref, { once: true, margin: '-50px' })
   const [active, setActive] = useState(0)
 
-  return (
-    <section ref={ref} className="py-24 relative bg-mozzarella-100 overflow-hidden">
-      {/* Decorative Background */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-tomato-100 rounded-full blur-3xl opacity-40" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-basil-100 rounded-full blur-3xl opacity-30" />
+  // Auto-rotate
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActive(prev => (prev + 1) % testimonials.length)
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [])
 
-      <div className="container mx-auto px-6 relative z-10">
-        {/* Section Header */}
+  return (
+    <section ref={ref} className="py-24 lg:py-32 relative bg-white overflow-hidden section-grain">
+      <div className="absolute inset-0 gold-glow-bg" />
+
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-crust-100 rounded-full mb-6"
-          >
-            <span className="text-2xl">⭐</span>
-            <span className="text-crust-700 text-sm font-semibold tracking-wide">Customer Love</span>
-          </motion.div>
-          
-          <h2 className="font-display font-black text-4xl md:text-5xl lg:text-6xl text-wood-800 mb-6 tracking-tight">
-            What Pizza <span className="text-tomato-600">Lovers</span> Say
+          <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold-400 block mb-4">
+            Testimonials
+          </span>
+          <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
+            What They Say
           </h2>
         </motion.div>
 
-        {/* Testimonial Carousel */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.2 }}
-          className="max-w-4xl mx-auto"
-        >
+        {/* Testimonial — One at a time, centered, auto-rotate */}
+        <div className="max-w-3xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={active}
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 1.05, y: -20 }}
-              transition={{ duration: 0.4 }}
-              className="bg-white rounded-3xl p-8 md:p-12 shadow-pizza border border-crust-100"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
             >
-              {/* Rating */}
-              <div className="flex justify-center gap-1 mb-8">
+              {/* Stars — thin accent lines, not emoji */}
+              <div className="flex justify-center gap-2 mb-10">
                 {[...Array(testimonials[active].rating)].map((_, i) => (
-                  <motion.span
+                  <motion.div
                     key={i}
-                    className="text-3xl"
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: 0.1 * i, type: 'spring' }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.08 * i, type: 'spring' }}
                   >
-                    ⭐
-                  </motion.span>
+                    <svg className="w-4 h-4 text-ember-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </motion.div>
                 ))}
               </div>
 
-              {/* Quote */}
-              <div className="relative mb-8">
-                <span className="absolute -top-4 -left-2 text-6xl text-tomato-200 font-display">"</span>
-                <p className="text-wood-600 text-xl md:text-2xl leading-relaxed text-center font-light italic relative z-10 px-8">
-                  {testimonials[active].text}
-                </p>
-                <span className="absolute -bottom-8 -right-2 text-6xl text-tomato-200 font-display">"</span>
-              </div>
+              {/* Quote — Cormorant italic, large */}
+              <p className="font-display italic text-2xl md:text-3xl lg:text-4xl text-[#1A1410] leading-relaxed mb-10 px-4">
+                "{testimonials[active].text}"
+              </p>
 
-              {/* Divider */}
-              <div className="w-20 h-1 bg-crust-300 mx-auto rounded-full mb-8" />
+              {/* Thin divider */}
+              <div className="w-12 h-px bg-gold-400/30 mx-auto mb-8" />
 
-              {/* Author */}
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-tomato-100 rounded-full flex items-center justify-center text-3xl mb-4">
-                  {testimonials[active].avatar}
-                </div>
-                <p className="font-display font-bold text-xl text-wood-800">{testimonials[active].name}</p>
-                <p className="text-tomato-600 text-sm font-medium">Ordered: {testimonials[active].order}</p>
+              {/* Customer — mono small caps */}
+              <div>
+                <p className="font-mono text-xs tracking-[0.2em] uppercase text-[#1A1410] mb-1">{testimonials[active].name}</p>
+                <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-[#9B8D74]">Ordered: {testimonials[active].order}</p>
               </div>
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation Dots */}
-          <div className="flex justify-center gap-3 mt-8">
+          {/* Navigation dots — minimal */}
+          <div className="flex justify-center gap-3 mt-12">
             {testimonials.map((_, i) => (
-              <motion.button
+              <button
                 key={i}
                 onClick={() => setActive(i)}
-                className={`h-3 rounded-full transition-all duration-500 ${
-                  i === active 
-                    ? 'bg-tomato-600 w-10' 
-                    : 'bg-crust-200 w-3 hover:bg-crust-300'
-                }`}
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.9 }}
+                className={`transition-all duration-500 ${i === active
+                  ? 'w-8 h-1 bg-ember-500 rounded'
+                  : 'w-4 h-1 bg-[#1A1410]/10 hover:bg-[#1A1410]/20 rounded'
+                  }`}
+                style={{ borderRadius: '1px' }}
               />
             ))}
           </div>
+        </div>
 
-          {/* Navigation Arrows */}
-          <div className="flex justify-center gap-4 mt-6">
-            <motion.button
-              onClick={() => setActive((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1))}
-              className="w-12 h-12 rounded-full bg-white border-2 border-crust-200 flex items-center justify-center text-wood-600 hover:border-tomato-400 hover:text-tomato-600 transition-all"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </motion.button>
-            <motion.button
-              onClick={() => setActive((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1))}
-              className="w-12 h-12 rounded-full bg-white border-2 border-crust-200 flex items-center justify-center text-wood-600 hover:border-tomato-400 hover:text-tomato-600 transition-all"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </motion.button>
-          </div>
-        </motion.div>
-
-        {/* Stats Bar */}
+        {/* Stats */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
           transition={{ delay: 0.5 }}
-          className="mt-16 flex flex-wrap justify-center gap-8 md:gap-16"
+          className="mt-20 flex flex-wrap justify-center gap-16"
         >
           {[
-            { value: '4.9', label: 'Average Rating', icon: '⭐' },
-            { value: '2,500+', label: 'Happy Customers', icon: '😊' },
-            { value: '98%', label: 'Would Recommend', icon: '👍' },
-          ].map((stat, i) => (
+            { value: '4.9', label: 'Average Rating' },
+            { value: '2,500+', label: 'Happy Customers' },
+            { value: '98%', label: 'Would Recommend' },
+          ].map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="text-3xl mb-2">{stat.icon}</div>
-              <div className="font-display font-black text-3xl text-tomato-600">{stat.value}</div>
-              <div className="text-wood-500 text-sm">{stat.label}</div>
+              <div className="font-mono text-2xl text-ember-500 mb-2 tracking-wider">{stat.value}</div>
+              <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#9B8D74]">{stat.label}</div>
             </div>
           ))}
         </motion.div>

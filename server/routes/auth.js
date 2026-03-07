@@ -2,6 +2,8 @@ import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { Customer } from '../models/Customer.js'
+import { Order } from '../models/Order.js'
+import { LoyaltyConfig } from '../models/Loyalty.js'
 
 const router = Router()
 
@@ -313,6 +315,12 @@ router.get('/me', authenticateCustomer, async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(5)
 
+    // Fetch available rewards
+    const tenantId = req.tenantId
+    const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
+    const config = await LoyaltyConfig.findOne(query)
+    const availableRewards = config ? config.rewards : []
+
     res.json({
       user: {
         id: customer._id,
@@ -321,7 +329,8 @@ router.get('/me', authenticateCustomer, async (req, res) => {
         phone: customer.phone,
         loyalty: customer.loyalty || { points: 0, lifetimePoints: 0, tier: 'bronze' }
       },
-      orders
+      orders,
+      availableRewards
     })
   } catch (err) {
     console.error('Profile fetch error:', err)

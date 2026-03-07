@@ -3,12 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
 import Footer from './Footer'
+import { useChatbot } from '../context/ChatbotContext'
+import toast from 'react-hot-toast'
 
 export default function CustomerProfile() {
     const [profile, setProfile] = useState(null)
     const [orders, setOrders] = useState([])
+    const [availableRewards, setAvailableRewards] = useState([])
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
+    const { openWithIntent } = useChatbot()
 
     useEffect(() => {
         const token = localStorage.getItem('customerToken')
@@ -29,6 +33,7 @@ export default function CustomerProfile() {
                 const data = await res.json()
                 setProfile(data.user)
                 setOrders(data.orders || [])
+                setAvailableRewards(data.availableRewards || [])
             } else {
                 localStorage.removeItem('customerToken')
                 navigate('/login')
@@ -38,6 +43,19 @@ export default function CustomerProfile() {
         } finally {
             setLoading(false)
         }
+    }
+
+    const handleReorder = (pastOrder) => {
+        // Since we are interacting with the Context Cart via the Chatbot/OrderService interface
+        // We simulate "adding to cart" and opening the checkout summary
+        const reorderItems = pastOrder.items.map(item => `${item.quantity}x ${item.menuItem?.name || 'Custom Pizza'}`).join(', ')
+        toast.success(`Reordering: ${reorderItems}`, { duration: 4000 })
+
+        // Open checkout directly with the total price and an intent to skip building
+        openWithIntent('checkout', {
+            item: `Reorder #${pastOrder.orderNumber}`,
+            price: pastOrder.total.toFixed(2)
+        })
     }
 
     if (loading) {
@@ -95,6 +113,25 @@ export default function CustomerProfile() {
                                         </div>
                                     </div>
                                 </div>
+
+                                <div className="w-full mt-8 pt-6 border-t border-crust-100 space-y-3">
+                                    <button
+                                        onClick={() => navigate('/')}
+                                        className="w-full py-3 bg-crust-50 hover:bg-crust-100 text-wood-600 rounded-xl font-black uppercase tracking-widest text-[10px] transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <span>🏠</span> Back to Home
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            localStorage.removeItem('customerToken');
+                                            toast.success('Logged out successfully');
+                                            navigate('/');
+                                        }}
+                                        className="w-full py-3 border border-tomato-200 hover:bg-tomato-50 text-tomato-600 rounded-xl font-black uppercase tracking-widest text-[10px] transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <span>🚪</span> Logout
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
 
@@ -131,6 +168,28 @@ export default function CustomerProfile() {
                                             />
                                         </div>
                                     </div>
+
+                                    {availableRewards.length > 0 && (
+                                        <div className="mt-8 pt-8 border-t border-white/10">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-wood-400 mb-4">Available Rewards</p>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {availableRewards.map((reward, i) => {
+                                                    const canAfford = (profile?.loyalty?.points || 0) >= reward.pointsCost;
+                                                    return (
+                                                        <div key={i} className={`p-4 rounded-xl border ${canAfford ? 'bg-tomato-500/10 border-tomato-500/30' : 'bg-white/5 border-white/10 opacity-60'}`}>
+                                                            <div className="flex justify-between items-start">
+                                                                <div>
+                                                                    <p className="font-bold text-sm text-white">{reward.name}</p>
+                                                                    <p className="text-[10px] text-wood-400 mt-1 uppercase font-bold tracking-wider">{reward.discountType === 'percentage' ? `${reward.discountValue}% OFF` : `$${reward.discountValue} OFF`}</p>
+                                                                </div>
+                                                                <span className={`text-xs font-black ${canAfford ? 'text-tomato-400' : 'text-wood-500'}`}>{reward.pointsCost} PTS</span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </motion.div>
 
@@ -175,6 +234,14 @@ export default function CustomerProfile() {
                                                     <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white text-wood-600 border border-crust-100 mt-1 inline-block">
                                                         {order.status}
                                                     </span>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.05 }}
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={(e) => { e.stopPropagation(); handleReorder(order); }}
+                                                        className="ml-3 px-4 py-1.5 bg-tomato-50 text-tomato-600 border border-tomato-200 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-tomato-600 hover:text-white transition-colors"
+                                                    >
+                                                        Reorder
+                                                    </motion.button>
                                                 </div>
                                             </div>
                                         ))

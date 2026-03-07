@@ -1,76 +1,49 @@
+import { io } from 'socket.io-client'
+
 class WebSocketService {
   constructor() {
     this.socket = null
     this.listeners = new Map()
-    this.reconnectAttempts = 0
-    this.maxReconnectAttempts = 5
-    this.reconnectDelay = 1000
   }
 
   connect() {
-    if (this.socket?.readyState === WebSocket.OPEN) {
-      return
-    }
+    if (this.socket?.connected) return
 
-    try {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-      const host = import.meta.env.VITE_WS_URL || window.location.host
-      this.socket = new WebSocket(`${protocol}//${host}`)
+    const url = import.meta.env.VITE_WS_URL || window.location.origin
+    console.log('[WS] Connecting to:', url)
 
-      this.socket.onopen = () => {
-        console.log('WebSocket connected')
-        this.reconnectAttempts = 0
-        this.emit('connected')
-      }
+    this.socket = io(url, {
+      transports: ['websocket', 'polling'],
+      withCredentials: true
+    })
 
-      this.socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data)
-          this.emit('message', data)
+    this.socket.on('connect', () => {
+      console.log('[WS] Connected successfully')
+      this.emit('connected')
+    })
 
-          // Handle specific events
-          if (data.type) {
-            this.emit(data.type, data.payload)
-          }
-        } catch (err) {
-          console.error('WebSocket message parse error:', err)
-        }
-      }
+    this.socket.on('disconnect', () => {
+      console.log('[WS] Disconnected')
+      this.emit('disconnected')
+    })
 
-      this.socket.onclose = () => {
-        console.log('WebSocket disconnected')
-        this.emit('disconnected')
-        this.attemptReconnect()
-      }
+    this.socket.on('error', (error) => {
+      console.error('[WS] Error:', error)
+      this.emit('error', error)
+    })
 
-      this.socket.onerror = (error) => {
-        console.error('WebSocket error:', error)
-        this.emit('error', error)
-      }
-    } catch (err) {
-      console.error('WebSocket connection error:', err)
-      this.attemptReconnect()
-    }
+    // Generic message handler to maintain compatibility with existing emit system
+    this.socket.onAny((event, ...args) => {
+      console.log(`[WS] Event: ${event}`, args)
+      this.emit(event, ...args)
+    })
   }
 
-  attemptReconnect() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++
-      console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
-
-      setTimeout(() => {
-        this.connect()
-      }, this.reconnectDelay * this.reconnectAttempts)
+  send(event, data) {
+    if (this.socket?.connected) {
+      this.socket.emit(event, data)
     } else {
-      console.error('Max reconnection attempts reached')
-    }
-  }
-
-  send(data) {
-    if (this.socket?.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(data))
-    } else {
-      console.warn('WebSocket not connected, message not sent:', data)
+      console.warn('[WS] Not connected, event not sent:', event)
     }
   }
 

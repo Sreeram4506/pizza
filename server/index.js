@@ -14,8 +14,10 @@ import customerRoutes from './routes/customers.js'
 import analyticsRoutes from './routes/analytics.js'
 import cartRoutes from './routes/cart.js'
 import paymentRoutes from './routes/payments.js'
+import deliveryRoutes from './routes/delivery.js'
 import { config } from './config.js'
 import { connectDatabase } from './utils/database.js'
+import { runCleanup } from './utils/cleanup.js'
 import { extractTenant, requireTenant } from './middleware/tenant.js'
 import { verifyCustomer } from './middleware/auth.js'
 
@@ -33,7 +35,10 @@ const io = new Server(httpServer, {
 app.set('io', io)
 
 // Connect to MongoDB
-connectDatabase()
+connectDatabase().then(() => {
+  // Run one-time cleanup to fix typos and remove placeholders
+  runCleanup()
+})
 
 // Health check for Deployment
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }))
@@ -62,6 +67,11 @@ app.use(express.json())
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
+// Fallback for missing upload files — redirect to a placeholder instead of 404
+app.use('/uploads', (req, res) => {
+  res.redirect('https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=600&q=80')
+})
+
 // Tenant extraction middleware
 app.use(extractTenant)
 
@@ -77,6 +87,7 @@ app.use('/api/analytics', analyticsRoutes)
 app.use('/api/cart', requireTenant, verifyCustomer, cartRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/payments', paymentRoutes)
+app.use('/api/delivery', requireTenant, deliveryRoutes)
 
 // WebSocket connection handling
 io.on('connection', (socket) => {

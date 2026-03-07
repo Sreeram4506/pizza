@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import wsService from '../services/websocket.js'
 
 const SettingsContext = createContext()
 
@@ -41,6 +42,21 @@ export function SettingsProvider({ children }) {
     }
 
     loadSettings()
+
+    // Connect to WebSocket and listen for real-time setting changes
+    wsService.connect()
+
+    const handleSettingsUpdate = (data) => {
+      console.log('SettingsContext: Settings updated via WebSocket', data)
+      setSettings(data)
+      setUpdateTrigger(Date.now())
+    }
+
+    wsService.on('settings_updated', handleSettingsUpdate)
+
+    return () => {
+      wsService.off('settings_updated', handleSettingsUpdate)
+    }
   }, [])
 
   return (

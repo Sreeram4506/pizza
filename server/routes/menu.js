@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { dirname } from 'path'
 import { MenuCategory } from '../models/MenuCategory.js'
 import { MenuItem } from '../models/MenuItem.js'
+import { verifyAdmin } from '../middleware/auth.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -31,7 +32,7 @@ const fileFilter = (req, file, cb) => {
   }
 }
 
-const upload = multer({ 
+const upload = multer({
   storage,
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
@@ -46,17 +47,7 @@ const emitMenuUpdate = (req, event, data) => {
   }
 }
 
-// Verify admin middleware (temporary until auth is fully updated)
-const verifyAdmin = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1]
-  if (!token) return res.status(401).json({ error: 'Unauthorized' })
-  try {
-    // For now, allow through - full JWT verification will be in auth.js
-    next()
-  } catch (err) {
-    res.status(401).json({ error: 'Invalid token' })
-  }
-}
+// Menu routes
 
 // Get all categories for a tenant
 router.get('/categories', async (req, res) => {
@@ -64,17 +55,17 @@ router.get('/categories', async (req, res) => {
     console.log('GET /api/menu/categories - Request received')
     const tenantId = req.tenantId
     console.log('Tenant ID:', tenantId)
-    
+
     // For localhost development, get all categories without tenant filter
     let query = {}
     if (tenantId) {
       query.tenantId = tenantId
     }
     query.isActive = true
-    
+
     const categories = await MenuCategory.find(query)
       .sort({ sortOrder: 1, createdAt: 1 })
-    
+
     console.log('Categories found:', categories.length, categories)
     res.json(categories)
   } catch (err) {
@@ -88,14 +79,14 @@ router.post('/categories', verifyAdmin, async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { name, description, sortOrder } = req.body
-    
+
     const category = new MenuCategory({
       tenantId,
       name,
       description: description || '',
       sortOrder: sortOrder || 0
     })
-    
+
     await category.save()
     res.status(201).json(category)
   } catch (err) {
@@ -108,17 +99,17 @@ router.put('/categories/:id', verifyAdmin, async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { name, description, sortOrder, isActive } = req.body
-    
+
     const category = await MenuCategory.findOneAndUpdate(
       { _id: req.params.id, tenantId },
       { name, description, sortOrder, isActive },
       { new: true }
     )
-    
+
     if (!category) {
       return res.status(404).json({ error: 'Category not found' })
     }
-    
+
     res.json(category)
   } catch (err) {
     res.status(500).json({ error: 'Failed to update category' })
@@ -129,16 +120,16 @@ router.put('/categories/:id', verifyAdmin, async (req, res) => {
 router.delete('/categories/:id', verifyAdmin, async (req, res) => {
   try {
     const tenantId = req.tenantId
-    
+
     const category = await MenuCategory.findOneAndDelete({
       _id: req.params.id,
       tenantId
     })
-    
+
     if (!category) {
       return res.status(404).json({ error: 'Category not found' })
     }
-    
+
     res.json({ message: 'Category deleted' })
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete category' })
@@ -151,17 +142,17 @@ router.get('/items', async (req, res) => {
     console.log('GET /api/menu/items - Request received')
     const tenantId = req.tenantId
     console.log('Tenant ID:', tenantId)
-    
+
     // For localhost development, get all items without tenant filter
     let query = {}
     if (tenantId) {
       query.tenantId = tenantId
     }
     query.isActive = true
-    
+
     const items = await MenuItem.find(query)
       .sort({ sortOrder: 1, createdAt: -1 })
-    
+
     console.log('Menu items found:', items.length, items)
     res.json(items)
   } catch (err) {
@@ -191,7 +182,7 @@ router.post('/items', verifyAdmin, upload.single('image'), async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
-    
+
     // Build item data
     const itemData = {
       tenantId,
@@ -204,25 +195,25 @@ router.post('/items', verifyAdmin, upload.single('image'), async (req, res) => {
       tags: tags ? JSON.parse(tags) : [],
       dietary: dietary ? JSON.parse(dietary) : {}
     }
-    
+
     // Add image path if uploaded
     if (req.file) {
       itemData.image = `/uploads/menu/${req.file.filename}`
     }
-    
+
     const item = new MenuItem(itemData)
     await item.save()
-    
+
     // Populate category for response
     await item.populate('categoryId', 'name')
-    
+
     // Emit WebSocket event
     emitMenuUpdate(req, 'item_added', {
       type: 'item_added',
       item: item,
       message: `New item "${name}" added to menu`
     })
-    
+
     res.status(201).json(item)
   } catch (err) {
     console.error('Failed to create menu item:', err)
@@ -235,7 +226,7 @@ router.put('/items/:id', verifyAdmin, upload.single('image'), async (req, res) =
   try {
     const tenantId = req.tenantId
     const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
-    
+
     // Build update data
     const updateData = {
       name,
@@ -247,29 +238,29 @@ router.put('/items/:id', verifyAdmin, upload.single('image'), async (req, res) =
       tags: tags ? JSON.parse(tags) : [],
       dietary: dietary ? JSON.parse(dietary) : {}
     }
-    
+
     // Add image path if new image uploaded
     if (req.file) {
       updateData.image = `/uploads/menu/${req.file.filename}`
     }
-    
+
     const item = await MenuItem.findOneAndUpdate(
       { _id: req.params.id, tenantId },
       updateData,
       { new: true }
     ).populate('categoryId', 'name')
-    
+
     if (!item) {
       return res.status(404).json({ error: 'Item not found' })
     }
-    
+
     // Emit WebSocket event
     emitMenuUpdate(req, 'item_updated', {
       type: 'item_updated',
       item: item,
       message: `Item "${name}" updated`
     })
-    
+
     res.json(item)
   } catch (err) {
     console.error('Failed to update menu item:', err)
@@ -281,16 +272,16 @@ router.put('/items/:id', verifyAdmin, upload.single('image'), async (req, res) =
 router.delete('/items/:id', verifyAdmin, async (req, res) => {
   try {
     const tenantId = req.tenantId
-    
+
     const item = await MenuItem.findOneAndDelete({
       _id: req.params.id,
       tenantId
     })
-    
+
     if (!item) {
       return res.status(404).json({ error: 'Item not found' })
     }
-    
+
     // Emit WebSocket event
     emitMenuUpdate(req, 'item_removed', {
       type: 'item_removed',
@@ -298,7 +289,7 @@ router.delete('/items/:id', verifyAdmin, async (req, res) => {
       itemName: item.name,
       message: `Item "${item.name}" removed from menu`
     })
-    
+
     res.json({ message: 'Item deleted' })
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete item' })
@@ -310,24 +301,24 @@ router.patch('/items/:id/availability', verifyAdmin, async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { available } = req.body
-    
+
     const item = await MenuItem.findOneAndUpdate(
       { _id: req.params.id, tenantId },
       { available },
       { new: true }
     ).populate('categoryId', 'name')
-    
+
     if (!item) {
       return res.status(404).json({ error: 'Item not found' })
     }
-    
+
     // Emit WebSocket event
     emitMenuUpdate(req, 'item_updated', {
       type: 'item_updated',
       item: item,
       message: `Item "${item.name}" is now ${available ? 'available' : 'unavailable'}`
     })
-    
+
     res.json(item)
   } catch (err) {
     res.status(500).json({ error: 'Failed to update availability' })

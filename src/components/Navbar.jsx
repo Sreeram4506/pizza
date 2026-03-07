@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useChatbot } from '../context/ChatbotContext'
+import toast from 'react-hot-toast'
+import { useSettings } from '../context/SettingsContext'
+import BannerDisplay from './BannerDisplay'
 
 const navLinks = [
   { label: 'Home', href: '#home' },
-  { label: 'Menu', intent: 'menu' },
-  { label: 'Order', intent: 'order' },
-  { label: 'Custom Pizza', href: '/custom-pizza' },
+  { label: 'Menu', href: '#gallery' },
+  { label: 'Atelier', href: '#atelier' },
   { label: 'Track', href: '/track' },
-  { label: 'Deals', href: '#deals' },
+  { label: 'Offers', href: '#deals' },
   { label: 'Contact', href: '#contact' },
 ]
 
@@ -18,6 +20,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const { openWithIntent, cartCount } = useChatbot()
+  const { settings } = useSettings()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -48,6 +51,7 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('customerToken')
     setIsLoggedIn(false)
+    toast.success('Logged out successfully.')
     navigate('/')
   }
 
@@ -56,41 +60,35 @@ export default function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-        ? 'bg-white/95 backdrop-blur-xl shadow-lg py-3'
-        : 'bg-transparent py-5'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 flex flex-col ${scrolled
+        ? 'bg-white/90 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] shadow-sm'
+        : 'bg-transparent'
         }`}
     >
-      <nav className="container mx-auto px-6 flex items-center justify-between">
+      <BannerDisplay position="top" />
+      <nav className={`max-w-[1400px] w-full mx-auto px-6 lg:px-12 flex items-center justify-between transition-all duration-500 ${scrolled ? 'py-3' : 'py-6'}`}>
         {/* Logo */}
         <motion.a
           href="#home"
-          className="flex items-center gap-2 group"
+          className="flex items-center gap-3 group"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <div className="w-10 h-10 bg-tomato-600 rounded-full flex items-center justify-center shadow-crust">
-            <span className="text-xl">🍕</span>
-          </div>
-          <span className={`font-display font-bold text-2xl tracking-tight transition-colors duration-300 ${scrolled ? 'text-wood-800' : 'text-wood-800'
-            }`}>
-            Pizza<span className="text-tomato-600">Blast</span>
+          <span className="font-display font-bold text-2xl tracking-tight text-[#1A1410] italic">
+            {settings?.restaurantName?.split(' ')[0] || 'Pizza'}
+            <span className="text-ember-500">{settings?.restaurantName?.split(' ').slice(1).join(' ') || 'Blast'}</span>
           </span>
         </motion.a>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-10">
           {navLinks.map((link) => (
             <button
               key={link.label}
               onClick={() => handleNavClick(link)}
-              className={`text-sm font-semibold tracking-wide transition-colors relative group ${scrolled
-                ? 'text-wood-700 hover:text-tomato-600'
-                : 'text-wood-700 hover:text-tomato-600'
-                }`}
+              className="nav-link text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors duration-300"
             >
               {link.label}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-tomato-600 transition-all duration-300 group-hover:w-full" />
             </button>
           ))}
         </div>
@@ -99,90 +97,87 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           {/* Cart Icon */}
           <motion.button
-            className="relative w-11 h-11 rounded-full bg-white border-2 border-crust-200 flex items-center justify-center text-wood-700 hover:border-tomato-400 hover:text-tomato-600 transition-all shadow-sm"
-            whileHover={{ scale: 1.05 }}
+            className="relative w-10 h-10 flex items-center justify-center text-[#5C554E] hover:text-[#1A1410] transition-colors"
             whileTap={{ scale: 0.95 }}
             onClick={() => openWithIntent('cart')}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
             </svg>
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-tomato-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-ember-500 text-white text-[9px] font-mono font-bold flex items-center justify-center"
+              >
                 {cartCount}
-              </span>
+              </motion.span>
             )}
           </motion.button>
 
-          {/* Login/User Button */}
+          {/* Profile / Auth */}
           {isLoggedIn ? (
-            <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3">
               <motion.button
-                className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-tomato-600 text-white text-sm font-semibold rounded-full hover:bg-tomato-700 transition-all shadow-lg"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/profile')}
+                className="text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors nav-link"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
                 Profile
               </motion.button>
               <motion.button
-                className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-wood-700 text-white text-sm font-semibold rounded-full hover:bg-wood-800 transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleLogout}
+                className="text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors nav-link"
               >
                 Logout
               </motion.button>
             </div>
           ) : (
             <motion.button
-              className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-tomato-600 text-white text-sm font-semibold rounded-full hover:bg-tomato-700 transition-all shadow-lg"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/login')}
+              className="hidden md:block text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors nav-link"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
               Login
             </motion.button>
           )}
 
-          {/* Admin Access Link */}
+          {/* Admin */}
           <motion.button
-            className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-wood-800 text-white text-sm font-medium rounded-full hover:bg-wood-700 transition-all"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/admin/login')}
+            className="hidden md:block text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#B8AA8F] hover:text-[#5C554E] transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
             Admin
           </motion.button>
 
           {/* Mobile menu button */}
           <motion.button
-            className="lg:hidden w-11 h-11 rounded-full bg-white border-2 border-crust-200 flex items-center justify-center text-wood-700"
+            className="lg:hidden w-10 h-10 flex items-center justify-center text-[#1A1410]"
             onClick={() => setMobileOpen(!mobileOpen)}
             whileTap={{ scale: 0.95 }}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               {mobileOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <>
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <line x1="3" y1="12" x2="15" y2="12" />
+                  <line x1="3" y1="18" x2="21" y2="18" />
+                </>
               )}
             </svg>
           </motion.button>
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -190,9 +185,9 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:hidden overflow-hidden bg-white border-t border-crust-100"
+            className="lg:hidden overflow-hidden bg-white/98 backdrop-blur-xl border-t border-[rgba(26,20,16,0.06)]"
           >
-            <div className="container mx-auto px-6 py-6 flex flex-col gap-3">
+            <div className="max-w-[1400px] mx-auto px-6 py-8 flex flex-col gap-2">
               {navLinks.map((link, i) => (
                 <motion.button
                   key={link.label}
@@ -200,39 +195,55 @@ export default function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 * i }}
                   onClick={() => handleNavClick(link)}
-                  className="text-left text-lg text-wood-700 hover:text-tomato-600 font-semibold py-2 px-4 rounded-xl hover:bg-tomato-50 transition-all"
+                  className="text-left text-lg font-display italic text-[#1A1410]/70 hover:text-[#1A1410] py-3 px-4 transition-all border-b border-[rgba(26,20,16,0.04)] last:border-none"
                 >
                   {link.label}
                 </motion.button>
               ))}
-              <div className="border-t border-crust-100 pt-4 mt-2 space-y-3">
-                <motion.button
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="w-full py-3 bg-tomato-600 text-white font-semibold rounded-xl"
-                  onClick={() => { setMobileOpen(false); navigate('/login'); }}
-                >
-                  Login
-                </motion.button>
-                <motion.button
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.35 }}
-                  className="w-full py-3 border-2 border-tomato-600 text-tomato-600 font-semibold rounded-xl"
-                  onClick={() => { setMobileOpen(false); navigate('/register'); }}
-                >
-                  Register
-                </motion.button>
-                <motion.button
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="w-full py-3 bg-wood-800 text-white font-semibold rounded-xl"
-                  onClick={() => { setMobileOpen(false); navigate('/admin/login'); }}
-                >
-                  Admin Access
-                </motion.button>
+              <div className="border-t border-[rgba(212,146,42,0.15)] pt-6 mt-4 space-y-3">
+                {isLoggedIn ? (
+                  <>
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="w-full py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
+                      onClick={() => { setMobileOpen(false); navigate('/profile'); }}
+                    >
+                      Profile
+                    </motion.button>
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.35 }}
+                      className="w-full py-4 border border-[rgba(26,20,16,0.1)] text-[#1A1410] font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
+                      onClick={() => { setMobileOpen(false); handleLogout(); }}
+                    >
+                      Logout
+                    </motion.button>
+                  </>
+                ) : (
+                  <>
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="w-full py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
+                      onClick={() => { setMobileOpen(false); navigate('/login'); }}
+                    >
+                      Login
+                    </motion.button>
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.35 }}
+                      className="w-full py-4 border border-[rgba(26,20,16,0.1)] text-[#1A1410] font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
+                      onClick={() => { setMobileOpen(false); navigate('/register'); }}
+                    >
+                      Register
+                    </motion.button>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

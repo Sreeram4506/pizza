@@ -64,13 +64,12 @@ describe('Navbar Component', () => {
 
   test('renders navigation links', () => {
     renderWithProviders(<Navbar />)
-    
+
     expect(screen.getByText('Home')).toBeInTheDocument()
     expect(screen.getByText('Menu')).toBeInTheDocument()
-    expect(screen.getByText('Order')).toBeInTheDocument()
-    expect(screen.getByText('Custom Pizza')).toBeInTheDocument()
+    expect(screen.getByText('Atelier')).toBeInTheDocument()
     expect(screen.getByText('Track')).toBeInTheDocument()
-    expect(screen.getByText('Deals')).toBeInTheDocument()
+    expect(screen.getByText('Offers')).toBeInTheDocument()
     expect(screen.getByText('Contact')).toBeInTheDocument()
   })
 
@@ -81,9 +80,9 @@ describe('Navbar Component', () => {
 
   test('shows profile button when user is authenticated', () => {
     localStorageMock.getItem.mockReturnValue('test-token')
-    
+
     renderWithProviders(<Navbar />)
-    
+
     // Check if Profile button is shown when authenticated
     const profileButton = screen.queryByText('Profile')
     if (profileButton) {
@@ -96,11 +95,11 @@ describe('Navbar Component', () => {
 
   test('toggles mobile menu', async () => {
     renderWithProviders(<Navbar />)
-    
+
     // Test that mobile menu button exists
     const menuButton = screen.getByRole('button', { name: /menu/i })
     expect(menuButton).toBeInTheDocument()
-    
+
     // Test that navigation links are present
     expect(screen.getByText('Home')).toBeInTheDocument()
     expect(screen.getByText('Menu')).toBeInTheDocument()
@@ -108,33 +107,33 @@ describe('Navbar Component', () => {
 
   test('navigates to correct routes', () => {
     renderWithProviders(<Navbar />)
-    
+
     // Test that navigation elements are present (they're buttons, not links)
     const homeLink = screen.getByText('Home')
     expect(homeLink).toBeInTheDocument()
-    
+
     const menuLink = screen.getByText('Menu')
     expect(menuLink).toBeInTheDocument()
-    
+
     // Test Custom Pizza link which has an href
-    const customPizzaLink = screen.getByText('Custom Pizza')
+    const customPizzaLink = screen.getByText('Atelier')
     expect(customPizzaLink).toBeInTheDocument()
-    
+
     const trackLink = screen.getByText('Track')
     expect(trackLink).toBeInTheDocument()
   })
 
   test('handles logout', async () => {
     localStorageMock.getItem.mockReturnValue('test-token')
-    
+
     renderWithProviders(<Navbar />)
-    
+
     // Check if Profile button is shown when authenticated
     const profileButton = screen.queryByText('Profile')
     if (profileButton) {
       expect(profileButton).toBeInTheDocument()
     }
-    
+
     // For now, just test that Login button is shown (component behavior)
     expect(screen.getByText('Login')).toBeInTheDocument()
   })
