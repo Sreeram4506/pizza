@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { ChatbotProvider } from './context/ChatbotContext'
@@ -88,6 +89,16 @@ function Home() {
 }
 
 function App() {
+  // Auto-wake Render backend
+  useEffect(() => {
+    const wakeServer = () => {
+      fetch('https://pizzabackend-qzi1.onrender.com/health').catch(() => { })
+    }
+
+    wakeServer()
+    setTimeout(wakeServer, 2000)
+  }, [])
+
   return (
     <BrowserRouter>
       <SettingsProvider>
