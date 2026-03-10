@@ -330,7 +330,8 @@ router.get('/me', authenticateCustomer, async (req, res) => {
         loyalty: customer.loyalty || { points: 0, lifetimePoints: 0, tier: 'bronze' }
       },
       orders,
-      availableRewards
+      availableRewards: config ? config.rewards : [],
+      loyaltyConfig: config
     })
   } catch (err) {
     console.error('Profile fetch error:', err)

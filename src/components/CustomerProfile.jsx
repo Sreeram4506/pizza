@@ -14,6 +14,8 @@ export default function CustomerProfile() {
     const navigate = useNavigate()
     const { openWithIntent } = useChatbot()
 
+    const [loyaltyConfig, setLoyaltyConfig] = useState(null)
+
     useEffect(() => {
         const token = localStorage.getItem('customerToken')
         if (!token) {
@@ -25,7 +27,6 @@ export default function CustomerProfile() {
 
     const fetchProfileData = async (token) => {
         try {
-            // We'll create this endpoint in the backend
             const res = await fetch('/api/auth/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -34,6 +35,7 @@ export default function CustomerProfile() {
                 setProfile(data.user)
                 setOrders(data.orders || [])
                 setAvailableRewards(data.availableRewards || [])
+                setLoyaltyConfig(data.loyaltyConfig)
             } else {
                 localStorage.removeItem('customerToken')
                 navigate('/login')
@@ -46,12 +48,8 @@ export default function CustomerProfile() {
     }
 
     const handleReorder = (pastOrder) => {
-        // Since we are interacting with the Context Cart via the Chatbot/OrderService interface
-        // We simulate "adding to cart" and opening the checkout summary
         const reorderItems = pastOrder.items.map(item => `${item.quantity}x ${item.menuItem?.name || 'Custom Pizza'}`).join(', ')
         toast.success(`Reordering: ${reorderItems}`, { duration: 4000 })
-
-        // Open checkout directly with the total price and an intent to skip building
         openWithIntent('checkout', {
             item: `Reorder #${pastOrder.orderNumber}`,
             price: pastOrder.total.toFixed(2)
@@ -73,7 +71,17 @@ export default function CustomerProfile() {
         platinum: { color: 'bg-purple-500', text: 'text-purple-600', label: 'Platinum' }
     }
 
-    const currentTier = tiers[profile?.loyalty?.tier || 'bronze']
+    const tiersList = ['bronze', 'silver', 'gold', 'platinum']
+    const currentTierName = profile?.loyalty?.tier || 'bronze'
+    const currentTierIndex = tiersList.indexOf(currentTierName)
+    const nextTierName = currentTierIndex < tiersList.length - 1 ? tiersList[currentTierIndex + 1] : null
+    const nextTierConfig = nextTierName ? (loyaltyConfig?.tiers?.[nextTierName] || { minPoints: 500 }) : null
+    
+    const progressPoints = profile?.loyalty?.points || 0
+    const nextPoints = nextTierConfig?.minPoints || 0
+    const progressPercent = nextPoints > 0 ? Math.min((progressPoints / nextPoints) * 100, 100) : 100
+
+    const currentTier = tiers[currentTierName]
 
     return (
         <div className="min-h-screen bg-mozzarella-100 selection:bg-tomato-200">
@@ -158,12 +166,14 @@ export default function CustomerProfile() {
                                     <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
                                         <div className="flex justify-between text-sm font-bold uppercase tracking-widest mb-3">
                                             <span>Tier Progress</span>
-                                            <span className="text-tomato-400">{profile?.loyalty?.points || 0} / 500 to Silver</span>
+                                            <span className="text-tomato-400">
+                                                {nextTierName ? `${progressPoints} / ${nextPoints} to ${nextTierName.charAt(0).toUpperCase() + nextTierName.slice(1)}` : 'Maximum Tier Achieved'}
+                                            </span>
                                         </div>
                                         <div className="h-3 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/5">
                                             <motion.div
                                                 initial={{ width: 0 }}
-                                                animate={{ width: `${Math.min((profile?.loyalty?.points || 0) / 500 * 100, 100)}%` }}
+                                                animate={{ width: `${progressPercent}%` }}
                                                 className="h-full bg-gradient-to-r from-tomato-500 to-orange-400 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.4)]"
                                             />
                                         </div>

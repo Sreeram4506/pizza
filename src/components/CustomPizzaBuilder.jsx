@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useChatbot } from '../context/ChatbotContext'
+import { useSettings } from '../context/SettingsContext'
 
 // ═══════════════════════════════════════════
 // PIZZA ATELIER — Cinematic Builder
@@ -93,8 +94,8 @@ function PulseRing({ trigger }) {
   )
 }
 
-// Pizza configuration
-const PIZZA_CONFIG = {
+// Pizza configuration defaults
+const DEFAULT_PIZZA_CONFIG = {
   bases: [
     { id: 'thin', name: 'Thin Crust', price: 0, color: '#D4C5A1', desc: 'Crispy & light' },
     { id: 'thick', name: 'Thick Crust', price: 1, color: '#C4A484', desc: 'Chewy & satisfying' },
@@ -129,6 +130,9 @@ const STEPS = [
 ]
 
 export default function CustomPizzaBuilder() {
+  const { settings } = useSettings()
+  const PIZZA_CONFIG = settings?.atelierConfig || DEFAULT_PIZZA_CONFIG
+
   const [selectedBase, setSelectedBase] = useState(null)
   const [selectedSauce, setSelectedSauce] = useState(null)
   const [selectedToppings, setSelectedToppings] = useState([])

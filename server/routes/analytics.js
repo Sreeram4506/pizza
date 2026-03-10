@@ -94,6 +94,42 @@ router.get('/', async (req, res) => {
       { $sort: { _id: 1 } }
     ])
     
+    // Generate Dynamic Insights
+    const insights = []
+    
+    // Insight 1: Operational Peak
+    const peakHourData = [...hourlyDistribution].sort((a, b) => b.count - a.count)[0]
+    if (peakHourData) {
+      const peakHour = peakHourData._id
+      const timeStr = peakHour > 12 ? `${peakHour - 12}:00 PM` : `${peakHour}:00 AM`
+      insights.push({
+        title: 'Operational Delta',
+        icon: '🏛️',
+        text: `Daily throughput peaks at ${timeStr}. Recommend increasing prep staff capacity 30 mins prior to peak.`,
+        color: 'bg-amber-50 border-amber-100 text-amber-900'
+      })
+    }
+
+    // Insight 2: Product Synthesis
+    if (popularItems.length > 0) {
+      const topItem = popularItems[0]
+      insights.push({
+        title: 'Product Synthesis',
+        icon: '🌟',
+        text: `The "${topItem.name}" is your primary volume driver (${topItem.count} units). Priority focus for upcoming visual assets.`,
+        color: 'bg-[#1A1410] border-transparent text-white'
+      })
+    }
+
+    // Insight 3: Patron Fidelity
+    const retentionRate = (returningCustomers / Math.max(newCustomers + returningCustomers, 1)) * 100
+    insights.push({
+      title: 'Patron Fidelity',
+      icon: '🍷',
+      text: `Returning patron density represents ${retentionRate.toFixed(1)}% of flow. Loyalty yields are stabilizing in high-margin segments.`,
+      color: 'bg-[#FAFAF8] border-[rgba(26,20,16,0.06)] text-[#1A1410]'
+    })
+
     res.json({
       summary: {
         totalRevenue,
@@ -109,7 +145,8 @@ router.get('/', async (req, res) => {
         date: d._id,
         revenue: d.revenue,
         orders: d.orders
-      }))
+      })),
+      insights
     })
   } catch (err) {
     console.error('Analytics error:', err)

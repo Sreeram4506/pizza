@@ -38,6 +38,27 @@ router.get('/orders', verifyDelivery, async (req, res) => {
         console.error('Failed to fetch delivery orders:', err)
         res.status(500).json({ error: 'Failed to fetch delivery orders' })
     }
+router.get('/stats', verifyDelivery, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        const query = {
+            deliveryPersonId: req.user.id,
+            status: 'delivered',
+            ...(tenantId && { tenantId })
+        }
+        
+        const deliveredOrders = await Order.find(query)
+        const totalEarnings = deliveredOrders.reduce((sum, o) => sum + (o.total || 0), 0)
+        
+        res.json({
+            deliveredCount: deliveredOrders.length,
+            totalEarnings,
+            avgDeliveryTime: 24 // minutes (mocked for demo)
+        })
+    } catch (err) {
+        console.error('Failed to fetch delivery stats:', err)
+        res.status(500).json({ error: 'Failed' })
+    }
 })
 
 // Mark an order as delivered

@@ -3,6 +3,33 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSettings } from '../../context/SettingsContext'
 import toast from 'react-hot-toast'
 
+const DEFAULT_PIZZA_CONFIG = {
+  bases: [
+    { id: 'thin', name: 'Thin Crust', price: 0, color: '#D4C5A1', desc: 'Crispy & light' },
+    { id: 'thick', name: 'Thick Crust', price: 1, color: '#C4A484', desc: 'Chewy & satisfying' },
+    { id: 'cheese-burst', name: 'Cheese Burst', price: 2.5, color: '#E6B325', desc: 'Molten cheese edge' },
+    { id: 'whole-wheat', name: 'Whole Wheat', price: 1.5, color: '#A67B5B', desc: 'Hearty & wholesome' },
+  ],
+  sauces: [
+    { id: 'tomato', name: 'San Marzano', price: 0, color: '#C1440E', desc: 'Classic Neapolitan' },
+    { id: 'bbq', name: 'Smoky BBQ', price: 0.75, color: '#5C3317', desc: 'Sweet & smoky' },
+    { id: 'white', name: 'Garlic Cream', price: 1, color: '#E8DFC9', desc: 'Rich & velvety' },
+    { id: 'pesto', name: 'Basil Pesto', price: 1.25, color: '#4A7C3F', desc: 'Fresh & aromatic' },
+  ],
+  toppings: [
+    { id: 'pepperoni', name: 'Pepperoni', price: 1.5, emoji: '🍕', category: 'Meat' },
+    { id: 'mushrooms', name: 'Wild Mushrooms', price: 1, emoji: '🍄', category: 'Veggie' },
+    { id: 'olives', name: 'Kalamata Olives', price: 1.25, emoji: '🫒', category: 'Veggie' },
+    { id: 'jalapenos', name: 'Jalapeños', price: 1, emoji: '🌶️', category: 'Spicy' },
+    { id: 'bell-peppers', name: 'Bell Peppers', price: 0.75, emoji: '🫑', category: 'Veggie' },
+    { id: 'onions', name: 'Caramelized Onion', price: 0.5, emoji: '🧅', category: 'Veggie' },
+    { id: 'cheese', name: 'Bufala Mozzarella', price: 2, emoji: '🧀', category: 'Cheese' },
+    { id: 'corn', name: 'Sweet Corn', price: 0.75, emoji: '🌽', category: 'Veggie' },
+    { id: 'tomatoes', name: 'Cherry Tomatoes', price: 0.75, emoji: '🍅', category: 'Veggie' },
+    { id: 'pineapple', name: 'Roasted Pineapple', price: 1, emoji: '🍍', category: 'Sweet' },
+  ],
+}
+
 export default function Settings() {
   const { settings: contextSettings, setSettings: setGlobalSettings, loading: contextLoading } = useSettings()
   const [loading, setLoading] = useState(false)
@@ -192,6 +219,32 @@ export default function Settings() {
                 <div className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-[#9B8D74] text-[10px]">▼</div>
               </div>
             </div>
+          </div>
+          <div className="space-y-4 pt-8 border-t border-[rgba(26,20,16,0.06)]">
+            <div className="flex items-center justify-between">
+              <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Atelier Cinematic Builder Protocol (JSON)</label>
+              <button 
+                type="button" 
+                onClick={() => setSettings({ ...settings, atelierConfig: DEFAULT_PIZZA_CONFIG })}
+                className="font-mono text-[8px] uppercase font-black text-ember-600 hover:underline"
+              >
+                Reset to Standards
+              </button>
+            </div>
+            <textarea
+              value={JSON.stringify(settings.atelierConfig || DEFAULT_PIZZA_CONFIG, null, 2)}
+              onChange={(e) => {
+                try {
+                  const val = JSON.parse(e.target.value)
+                  setSettings({ ...settings, atelierConfig: val })
+                } catch (err) {
+                  // Local parse error ignored to allow typing
+                }
+              }}
+              className="w-full px-8 py-6 bg-[#1A1410] border-2 border-[rgba(26,20,16,0.03)] rounded-2xl text-amber-50 font-mono text-[11px] outline-none focus:border-ember-600 transition-all shadow-inner overflow-x-auto leading-relaxed scrollbar-hide"
+              rows={12}
+            />
+            <p className="font-sans text-[8px] text-[#9B8D74] italic opacity-60">⚠️ Advanced: Direct JSON manipulation of ingredients, prices, and visual hex codes.</p>
           </div>
         </section>
 

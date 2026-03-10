@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useSettings } from '../context/SettingsContext'
 
@@ -6,6 +6,21 @@ export default function About() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const { settings } = useSettings()
+  const [statsData, setStatsData] = useState({ orders: 0, customers: 0, experienceYears: 12 })
+
+  useEffect(() => {
+    fetch('/api/admin/public/stats')
+      .then(res => res.json())
+      .then(data => setStatsData(data))
+      .catch(() => {})
+  }, [])
+
+  const stats = [
+    { num: `${(statsData.orders / 1000).toFixed(1)}k+`, label: 'Pizzas Served' },
+    { num: '48h', label: 'Dough Fermentation' },
+    { num: statsData.customers > 0 ? `${statsData.customers}+` : '24+', label: 'Elite Patrons' },
+    { num: '900°C', label: 'Wood-Fired Heat' },
+  ]
 
   return (
     <section ref={ref} className="py-20 lg:py-40 relative bg-white overflow-hidden section-grain">
@@ -71,12 +86,7 @@ export default function About() {
           transition={{ delay: 0.4 }}
           className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-px bg-[rgba(26,20,16,0.06)]"
         >
-          {[
-            { num: '100K+', label: 'Pizzas Served' },
-            { num: '48h', label: 'Dough Fermentation' },
-            { num: '24+', label: 'Signature Recipes' },
-            { num: '900°C', label: 'Wood-Fired Heat' },
-          ].map((stat, i) => (
+          {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}

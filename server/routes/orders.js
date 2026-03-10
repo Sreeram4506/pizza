@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { config } from '../config.js'
 import { sendOrderConfirmation, sendAdminNotification } from '../utils/email.js'
 
-console.log('Orders route loaded - authenticateCustomer imported:', typeof authenticateCustomer)
+// Orders route module
 
 const router = Router()
 
@@ -218,7 +218,7 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
         }
         loyalty.points = (loyalty.points || 0) - usedRewardCost
         loyalty.transactions.push({
-          type: 'redemption',
+          type: 'redeemed',
           points: -usedRewardCost,
           description: `Used reward: ${usedRewardName}`
         })
@@ -313,8 +313,8 @@ router.get('/track/:orderNumber', async (req, res) => {
 // Removed insecure status update endpoint.
 // Use PUT /api/admin/orders/:id/status for status updates (requires admin authentication).
 
-// Track order by phone
-router.get('/track/:phone', async (req, res) => {
+// Track order by phone - changed path to avoid conflict with order number tracking
+router.get('/track-by-phone/:phone', async (req, res) => {
   try {
     const tenantId = req.tenantId
     const phone = req.params.phone.replace(/\D/g, '')

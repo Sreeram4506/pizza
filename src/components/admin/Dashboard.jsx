@@ -61,13 +61,16 @@ export default function Dashboard() {
     return map[status] || 'bg-slate-50 text-slate-700 border-slate-100'
   }
 
+  const performanceStatus = stats.pendingOrders > 5 ? 'Busy' : stats.pendingOrders > 0 ? 'Active' : 'Optimal'
+  const performanceColor = stats.pendingOrders > 5 ? 'text-rose-600' : stats.pendingOrders > 0 ? 'text-amber-600' : 'text-emerald-600'
+
   const statCards = [
     { label: 'Today Sales', value: `$${stats.todayRevenue.toFixed(2)}`, icon: '💎', color: 'text-[#1A1410]', suffix: 'USD' },
     { label: 'Live Orders', value: stats.todayOrders.toString(), icon: '📋', color: 'text-ember-600', suffix: 'Items' },
     { label: 'Basket Avg', value: `$${stats.avgOrderValue.toFixed(2)}`, icon: '🛒', color: 'text-[#1A1410]', suffix: 'Val' },
     { label: 'Retention', value: stats.activeCustomers.toString(), icon: '👥', color: 'text-[#1A1410]', suffix: 'Users' },
     { label: 'Preparation', value: stats.pendingOrders.toString(), icon: '⏳', color: 'text-ember-600', suffix: 'Wait' },
-    { label: 'Performance', value: 'High', icon: '📈', color: 'text-[#1A1410]', suffix: 'Ops' },
+    { label: 'Performance', value: performanceStatus, icon: '📈', color: performanceColor, suffix: 'Ops' },
   ]
 
   const quickActions = [

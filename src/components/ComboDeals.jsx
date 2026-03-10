@@ -28,19 +28,23 @@ const combos = [
 ]
 
 function CountdownTimer() {
-  const [time, setTime] = useState({ hours: 2, minutes: 14, seconds: 33 })
+  const [time, setTime] = useState({ hours: 0, minutes: 0, seconds: 0 })
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(prev => {
-        let { hours, minutes, seconds } = prev
-        seconds--
-        if (seconds < 0) { seconds = 59; minutes-- }
-        if (minutes < 0) { minutes = 59; hours-- }
-        if (hours < 0) { hours = 23; minutes = 59; seconds = 59 }
-        return { hours, minutes, seconds }
-      })
-    }, 1000)
+    const calculateTimeLeft = () => {
+      const now = new Date()
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
+      const diff = endOfDay - now
+      
+      return {
+        hours: Math.floor(diff / (1000 * 60 * 60)),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60)
+      }
+    }
+
+    const interval = setInterval(() => setTime(calculateTimeLeft()), 1000)
+    setTime(calculateTimeLeft())
     return () => clearInterval(interval)
   }, [])
 

@@ -8,6 +8,7 @@ export default function DeliveryPortal() {
     const [loading, setLoading] = useState(true)
     const [token, setToken] = useState(localStorage.getItem('adminToken') || '')
     const [isDriver, setIsDriver] = useState(false)
+    const [stats, setStats] = useState({ deliveredCount: 0, totalEarnings: 0, avgDeliveryTime: 0 })
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -16,7 +17,6 @@ export default function DeliveryPortal() {
             return
         }
 
-        // Try to connect and fetch orders
         const fetchOrders = async () => {
             try {
                 const res = await fetch('/api/delivery/orders', {
@@ -35,9 +35,20 @@ export default function DeliveryPortal() {
             }
         }
 
-        fetchOrders()
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/delivery/stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                if (res.ok) {
+                    setStats(await res.json())
+                }
+            } catch (err) {}
+        }
 
-        // Setup WebSocket
+        fetchOrders()
+        fetchStats()
+
         const apiUrl = import.meta.env.VITE_API_URL || window.location.origin
         const socket = io(apiUrl, {
             auth: { token },
@@ -45,7 +56,8 @@ export default function DeliveryPortal() {
         })
 
         socket.on('order:update', () => {
-            fetchOrders() // refresh list when something changes
+            fetchOrders()
+            fetchStats()
         })
 
         return () => socket.disconnect()
@@ -59,6 +71,7 @@ export default function DeliveryPortal() {
             })
             if (res.ok) {
                 setOrders(prev => prev.filter(o => o._id !== orderId))
+                // Optimistically update some stats if needed, or re-fetch
             }
         } catch (err) {
             console.error('Delivery update failed', err)
@@ -94,10 +107,10 @@ export default function DeliveryPortal() {
     return (
         <div className="min-h-screen bg-wood-900 text-white overflow-x-hidden">
             {/* Header */}
-            <div className="bg-wood-800 border-b border-wood-700 p-4 sticky top-0 z-10 flex justify-between items-center shadow-lg">
+            <div className="bg-wood-800 border-b border-wood-700 p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg">
                 <div>
                     <h1 className="text-xl font-sans font-bold text-tomato-400">Driver Portal</h1>
-                    <p className="text-[10px] text-wood-400 font-bold uppercase tracking-widest">{orders.length} Active Deliveries</p>
+                    <p className="text-[10px] text-wood-400 font-bold uppercase tracking-widest">Enterprise Mobile View</p>
                 </div>
                 <button
                     onClick={() => {
@@ -108,6 +121,26 @@ export default function DeliveryPortal() {
                 >
                     Logout
                 </button>
+            </div>
+
+            {/* Metrics Dashboard */}
+            <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-wood-950 border-b border-wood-700 sticky top-[73px] z-10 shadow-md">
+                <div className="bg-wood-800/50 p-4 rounded-2xl border border-wood-700 text-center">
+                    <p className="text-[9px] font-black text-tomato-400 uppercase tracking-widest mb-1">Active</p>
+                    <p className="text-2xl font-black">{orders.length}</p>
+                </div>
+                <div className="bg-wood-800/50 p-4 rounded-2xl border border-wood-700 text-center">
+                    <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">Done Today</p>
+                    <p className="text-2xl font-black">{stats.deliveredCount}</p>
+                </div>
+                <div className="bg-wood-800/50 p-4 rounded-2xl border border-wood-700 text-center">
+                    <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Earnings</p>
+                    <p className="text-2xl font-black">${stats.totalEarnings?.toFixed(0)}</p>
+                </div>
+                <div className="bg-wood-800/50 p-4 rounded-2xl border border-wood-700 text-center">
+                    <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Avg Time</p>
+                    <p className="text-2xl font-black">{stats.avgDeliveryTime}m</p>
+                </div>
             </div>
 
             {/* Orders List */}

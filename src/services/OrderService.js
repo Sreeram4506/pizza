@@ -18,7 +18,10 @@ export const OrderService = {
                 headers,
                 body: JSON.stringify(orderData),
             });
-            if (!response.ok) throw new Error('Order failed');
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.details || errData.error || 'Order placement failed on server');
+            }
             return await response.json();
         } catch (error) {
             console.error('Order error:', error);

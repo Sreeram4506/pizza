@@ -660,6 +660,27 @@ router.get('/public/settings', async (req, res) => {
     }
 })
 
+// Public API for restaurant stats (no auth)
+router.get('/public/stats', async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        const query = tenantId ? { tenantId } : {}
+        
+        const [orderCount, customerCount] = await Promise.all([
+            Order.countDocuments(query),
+            Customer.countDocuments(query)
+        ])
+        
+        res.json({
+            orders: orderCount,
+            customers: customerCount,
+            experienceYears: 12 // Hardcoded but could be from settings
+        })
+    } catch (err) {
+        res.status(500).json({ error: 'Failed' })
+    }
+})
+
 // Settings Management (admin only)
 router.get('/settings', verifyAdmin, async (req, res) => {
     try {
@@ -700,8 +721,8 @@ router.post('/settings', verifyAdmin, async (req, res) => {
         console.log('Tenant ID:', tenantId)
         console.log('Settings data:', req.body)
 
-        const { restaurantName, email, phone, address, currency, timezone } = req.body
-
+        const { restaurantName, email, phone, address, currency, timezone, atelierConfig } = req.body
+        
         const settingsData = {
             ...(tenantId && { tenantId }),
             restaurantName,
@@ -710,6 +731,7 @@ router.post('/settings', verifyAdmin, async (req, res) => {
             address,
             currency,
             timezone,
+            atelierConfig,
             updatedAt: new Date()
         }
 

@@ -271,11 +271,11 @@ export default function AnalyticsDashboard() {
 
       {/* ── Intelligence Feed ────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { title: 'Operational Delta', icon: '🏛️', text: 'Weekend throughput peaks at 18:00. Increase dough hydration protocols by 12% for volume.', color: 'bg-amber-50 border-amber-100 text-amber-900' },
-          { title: 'Product Synthesis', icon: '🌟', text: 'The "Margherita Premium" yields 40% of net margin. Priority focus for upcoming visual assets.', color: 'bg-[#1A1410] border-transparent text-white' },
-          { title: 'Patron Fidelity', icon: '🍷', text: 'Returning density has increased to 68%. Loyalty rewards should shift to tiered experiential giftings.', color: 'bg-[#FAFAF8] border-[rgba(26,20,16,0.06)] text-[#1A1410]' }
-        ].map((item, i) => (
+        {(analytics.insights || [
+          { title: 'Operational Delta', icon: '🏛️', text: 'Daily throughput peaks at 18:00. Recommend increasing prep staff capacity 30 mins prior to peak.', color: 'bg-amber-50 border-amber-100 text-amber-900' },
+          { title: 'Product Synthesis', icon: '🌟', text: 'Top performing assets are yielding 40% of net margin. Priority focus for upcoming visual assets.', color: 'bg-[#1A1410] border-transparent text-white' },
+          { title: 'Patron Fidelity', icon: '🍷', text: 'Returning density is increasing. Loyalty rewards should shift to tiered experiential giftings.', color: 'bg-[#FAFAF8] border-[rgba(26,20,16,0.06)] text-[#1A1410]' }
+        ]).map((item, i) => (
           <motion.div
             key={i}
             whileHover={{ y: -5 }}
