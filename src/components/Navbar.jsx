@@ -22,6 +22,7 @@ export default function Navbar() {
   const { openWithIntent, cartCount } = useChatbot()
   const { settings } = useSettings()
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
@@ -100,7 +101,7 @@ export default function Navbar() {
           {navLinks.map((link) => (
             <button
               key={link.label}
-              onClick={() => handleNavClick(link)}
+              onClick={(e) => handleNavClick(e, link)}
               className="nav-link text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors duration-300"
             >
               {link.label}
@@ -209,7 +210,7 @@ export default function Navbar() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 * i }}
-                  onClick={() => handleNavClick(link)}
+                  onClick={(e) => handleNavClick(e, link)}
                   className="text-left text-lg font-display italic text-[#1A1410]/70 hover:text-[#1A1410] py-3 px-4 transition-all border-b border-[rgba(26,20,16,0.04)] last:border-none"
                 >
                   {link.label}
