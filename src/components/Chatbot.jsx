@@ -438,19 +438,19 @@ export default function Chatbot() {
     <>
       {/* Floating Chat Button with cart badge */}
       <motion.button
-        className="fixed bottom-8 right-8 z-[60] w-16 h-16 rounded-full bg-gradient-to-r from-tomato-500 to-tomato-700 shadow-[0_0_30px_rgba(239,68,68,0.4)] flex items-center justify-center text-white"
+        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-[60] w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-tomato-500 to-tomato-700 shadow-[0_4px_20px_rgba(239,68,68,0.3)] flex items-center justify-center text-white"
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 1 }}
-        whileHover={{ scale: 1.1, shadow: '0 0 50px rgba(244,162,97,0.6)' }}
+        whileHover={{ scale: 1.1, shadow: '0 8px 30px rgba(244,162,97,0.4)' }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <motion.span className="text-2xl" animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
+        <motion.span className="text-xl sm:text-2xl" animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
           {isOpen ? '✕' : '💬'}
         </motion.span>
         {cartCount > 0 && !isOpen && (
-          <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-white text-black text-xs flex items-center justify-center font-black shadow-lg">
+          <span className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-black text-[10px] sm:text-xs flex items-center justify-center font-black shadow-lg">
             {cartCount}
           </span>
         )}
@@ -469,27 +469,27 @@ export default function Chatbot() {
             className="fixed inset-0 z-[60] bg-mozzarella-100 flex flex-col border-none text-wood-800"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-8 border-b border-gray-100 bg-white">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-tomato-600 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(220,38,38,0.2)] text-white">
+            <div className="flex items-center justify-between p-4 sm:p-8 border-b border-gray-100 bg-white">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-tomato-600 flex items-center justify-center text-xl sm:text-2xl shadow-[0_0_20px_rgba(220,38,38,0.2)] text-white shrink-0">
                   🍕
                 </div>
-                <div>
-                  <h3 className="font-display font-black text-xl text-wood-800 tracking-tight uppercase">Pizza Assistant</h3>
-                  <p className="text-[10px] text-basil-600 font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-basil-600 animate-pulse" /> System Active
+                <div className="min-w-0">
+                  <h3 className="font-display font-black text-sm sm:text-xl text-wood-800 tracking-tight uppercase truncate">Pizza Assistant</h3>
+                  <p className="text-[8px] sm:text-[10px] text-basil-600 font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-basil-600 animate-pulse" /> <span className="hidden xs:inline">System Active</span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3 sm:gap-6">
                 {/* Tab buttons - Visible on all screens for better nav */}
-                <div className="flex items-center bg-white/50 rounded-full p-1 border border-gray-100 overflow-x-auto">
+                <div className="flex items-center bg-white/50 rounded-full p-1 border border-gray-100">
                   {['chat', 'menu', 'cart'].map(tab => (
                     <motion.button
                       key={tab}
                       onClick={() => setView(tab)}
-                      className={`px-8 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${view === tab ? 'bg-tomato-600 text-white shadow-lg shadow-tomato-600/20' : 'text-wood-600 hover:text-tomato-600'}`}
+                      className={`px-3 sm:px-8 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${view === tab ? 'bg-tomato-600 text-white shadow-lg shadow-tomato-600/20' : 'text-wood-600 hover:text-tomato-600'}`}
                       whileTap={{ scale: 0.95 }}
                     >
                       {tab === 'cart' ? `Cart ${cartCount > 0 ? `(${cartCount})` : ''}` : tab}
@@ -499,10 +499,10 @@ export default function Chatbot() {
 
                 <motion.button
                   onClick={() => setIsOpen(false)}
-                  className="w-12 h-12 rounded-full border border-crust-100 flex items-center justify-center text-wood-500 hover:text-tomato-600 hover:border-tomato-200 transition-all font-bold"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-crust-100 flex items-center justify-center text-wood-500 hover:text-tomato-600 hover:border-tomato-200 transition-all font-bold shrink-0"
                   whileTap={{ scale: 0.9 }}
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </motion.button>
@@ -563,11 +563,11 @@ export default function Chatbot() {
               {/* MENU VIEW */}
               {view === 'menu' && (
                 <div className="p-6 max-w-4xl mx-auto w-full">
-                  <div className="flex items-center justify-between mb-8">
-                    <h2 className="font-display font-black text-4xl text-wood-800 tracking-tighter">🍕 Our Selection</h2>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                    <h2 className="font-display font-black text-3xl sm:text-4xl text-wood-800 tracking-tighter">🍕 Our Selection</h2>
                     <button
                       onClick={fetchMenuData}
-                      className="px-4 py-2 bg-tomato-100 text-tomato-700 rounded-lg hover:bg-tomato-200 transition-colors"
+                      className="px-4 py-2 bg-tomato-100 text-tomato-700 rounded-lg hover:bg-tomato-200 transition-colors text-xs uppercase font-black tracking-widest"
                       title="Refresh menu"
                     >
                       Refresh
@@ -587,33 +587,33 @@ export default function Chatbot() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.05 }}
-                          className={`flex items-center justify-between gap-6 p-8 rounded-[2.5rem] bg-white border border-crust-100 hover:border-tomato-300 transition-all group ${!item.available ? 'opacity-60' : ''
+                          className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white border border-crust-100 hover:border-tomato-300 transition-all group ${!item.available ? 'opacity-60' : ''
                             }`}
                         >
-                          <div className="flex items-center gap-6">
-                            <span className="text-4xl filter drop-shadow-[0_0_10px_rgba(220,38,38,0.2)] transition-transform group-hover:scale-125">🍕</span>
+                          <div className="flex items-center gap-4 sm:gap-6">
+                            <span className="text-3xl sm:text-4xl filter drop-shadow-[0_0_10px_rgba(220,38,38,0.2)] transition-transform group-hover:scale-125 shrink-0">🍕</span>
                             <div>
-                              <div className="flex items-center gap-3">
-                                <span className="font-display font-black text-lg text-wood-800 uppercase tracking-tight">{item.name}</span>
-                                {item.isPopular && <span className="text-[9px] bg-tomato-600 text-white font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full">Popular</span>}
-                                {!item.available && <span className="text-[9px] bg-gray-400 text-white font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full">Out of Stock</span>}
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-display font-black text-base sm:text-lg text-wood-800 uppercase tracking-tight">{item.name}</span>
+                                {item.isPopular && <span className="text-[8px] bg-tomato-600 text-white font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-full">Popular</span>}
+                                {!item.available && <span className="text-[8px] bg-gray-400 text-white font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-full">Out of Stock</span>}
                               </div>
-                              <p className="text-sm text-gray-500 mt-1 font-light">{item.description}</p>
+                              <p className="text-xs text-gray-500 mt-1 font-light line-clamp-2">{item.description}</p>
                             </div>
                           </div>
-                          <div className="flex flex-col items-end gap-3 shrink-0">
-                            <span className="text-wood-800 font-black text-xl tracking-tighter">${item.price.toFixed(2)}</span>
+                          <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 w-full sm:w-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-gray-100 shrink-0">
+                            <span className="text-wood-800 font-black text-lg sm:text-xl tracking-tighter">${item.price.toFixed(2)}</span>
                             <motion.button
                               onClick={() => handleAddToCart(item)}
                               disabled={!item.available}
-                              className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg ${item.available
+                              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-lg ${item.available
                                 ? 'bg-tomato-600 text-white shadow-tomato-600/20'
                                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                 }`}
                               whileHover={item.available ? { scale: 1.05 } : {}}
                               whileTap={item.available ? { scale: 0.95 } : {}}
                             >
-                              {item.available ? '+ ADD' : 'UNAVAILABLE'}
+                              {item.available ? '+ ADD' : 'UN'}
                             </motion.button>
                           </div>
                         </motion.div>
@@ -646,49 +646,52 @@ export default function Chatbot() {
                   ) : (
                     <div className="flex flex-col gap-4">
                       {cart.map(item => (
-                        <div key={item._id} className="flex items-center justify-between p-8 rounded-[2.5rem] bg-white border border-crust-100">
-                          <div className="flex items-center gap-6">
-                            <span className="text-5xl">🍕</span>
+                        <div key={item._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white border border-crust-100 gap-6">
+                          <div className="flex items-center gap-4 sm:gap-6">
+                            <span className="text-3xl sm:text-5xl">🍕</span>
                             <div>
-                              <p className="font-display font-black text-wood-800 text-xl uppercase tracking-tight">{item.name}</p>
-                              <p className="text-tomato-600 font-black text-lg tracking-tight">${(item.price * item.qty).toFixed(2)}</p>
+                              <p className="font-display font-black text-base sm:text-xl text-wood-800 uppercase tracking-tight truncate max-w-[150px] sm:max-w-none">{item.name}</p>
+                              <p className="text-tomato-600 font-black text-base sm:text-lg tracking-tight">${(item.price * item.qty).toFixed(2)}</p>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-4">
-                            <motion.button
-                              onClick={() => removeFromCart(item._id)}
-                              className="w-12 h-12 rounded-2xl bg-mozzarella-100 border border-crust-100 flex items-center justify-center text-wood-700 font-black hover:bg-mozzarella-200 transition-colors"
-                              whileTap={{ scale: 0.9 }}
-                            >−</motion.button>
-                            <span className="text-wood-800 font-black w-8 text-center text-2xl tracking-tighter">{item.qty}</span>
-                            <motion.button
-                              onClick={() => addToCart(item)}
-                              className="w-12 h-12 rounded-2xl bg-tomato-600 flex items-center justify-center text-white font-black shadow-lg shadow-tomato-600/10"
-                              whileTap={{ scale: 0.9 }}
-                            >+</motion.button>
+                          <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-4 sm:pt-0">
+                            <p className="sm:hidden text-[10px] font-black uppercase tracking-widest text-wood-400">Quantity</p>
+                            <div className="flex items-center gap-3 sm:gap-4">
+                              <motion.button
+                                onClick={() => removeFromCart(item._id)}
+                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-mozzarella-100 border border-crust-100 flex items-center justify-center text-wood-700 font-black"
+                                whileTap={{ scale: 0.9 }}
+                              >−</motion.button>
+                              <span className="text-wood-800 font-black w-6 sm:w-8 text-center text-xl sm:text-2xl tracking-tighter">{item.qty}</span>
+                              <motion.button
+                                onClick={() => addToCart(item)}
+                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-tomato-600 flex items-center justify-center text-white font-black"
+                                whileTap={{ scale: 0.9 }}
+                              >+</motion.button>
+                            </div>
                           </div>
                         </div>
                       ))}
 
 
-                      <div className="mt-12 p-10 rounded-[3rem] bg-white text-black shadow-2xl relative overflow-hidden group">
+                      <div className="mt-8 sm:mt-12 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] bg-white text-black shadow-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold/10 rounded-full blur-3xl -mr-16 -mt-16" />
-                        <div className="flex justify-between items-center mb-10">
+                        <div className="flex justify-between items-center mb-8 sm:mb-10">
                           <div>
-                            <p className="text-wood-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total Amount Due</p>
-                            <h3 className="text-5xl font-black tracking-tighter">${cartTotal.toFixed(2)}</h3>
+                            <p className="text-wood-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1 sm:mb-2 text-[8px] sm:text-[10px]">Total Amount Due</p>
+                            <h3 className="text-3xl sm:text-5xl font-black tracking-tighter">${cartTotal.toFixed(2)}</h3>
                           </div>
-                          <div className="w-16 h-16 rounded-3xl bg-mozzarella-100 flex items-center justify-center text-4xl shadow-inner italic font-black text-tomato-600 border border-crust-100">PB</div>
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-mozzarella-100 flex items-center justify-center text-2xl sm:text-4xl shadow-inner font-black text-tomato-600 border border-crust-100">PB</div>
                         </div>
                         <motion.button
                           onClick={handleCheckoutIntent}
                           disabled={isPlacingOrder}
-                          className="w-full py-6 rounded-[2rem] bg-tomato-600 text-white font-black text-lg shadow-xl shadow-tomato-600/20 disabled:opacity-50 tracking-widest uppercase"
+                          className="w-full py-5 sm:py-6 rounded-[1.5rem] sm:rounded-[2rem] bg-tomato-600 text-white font-black text-base sm:text-lg shadow-xl shadow-tomato-600/20 disabled:opacity-50 tracking-widest uppercase"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
-                          {isPlacingOrder ? '⏳ Processing Order...' : 'Secure Checkout'}
+                          {isPlacingOrder ? '⏳ Processing...' : 'Checkout Now'}
                         </motion.button>
 
 
@@ -978,34 +981,34 @@ export default function Chatbot() {
 
             {/* Input — only in chat view */}
             {view === 'chat' && (
-              <div className="p-8 bg-white border-t border-crust-100">
+              <div className="p-4 sm:p-8 bg-white border-t border-gray-100">
                 <div className="max-w-4xl mx-auto w-full">
-                  <div className="flex gap-4 mb-6">
+                  <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6 overflow-x-auto scrollbar-hide pb-2">
                     <motion.button type="button" onClick={() => setView('menu')}
-                      className="px-8 py-2.5 rounded-full border border-crust-100 text-wood-500 text-[10px] font-black uppercase tracking-[0.2em] hover:text-tomato-600 hover:border-tomato-200 transition-all shadow-sm"
+                      className="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full border border-crust-100 text-wood-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] hover:text-tomato-600 hover:border-tomato-200 transition-all shadow-sm whitespace-nowrap"
                       whileTap={{ scale: 0.95 }}>Browse Menu</motion.button>
                     {cart.length > 0 && (
                       <motion.button type="button" onClick={() => setView('cart')}
-                        className="px-8 py-2.5 rounded-full bg-tomato-600 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-tomato-600/10"
+                        className="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full bg-tomato-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-tomato-600/10 whitespace-nowrap"
                         whileTap={{ scale: 0.95 }}>Cart ({cartCount})</motion.button>
                     )}
                   </div>
-                  <form onSubmit={handleSend} className="flex gap-4">
+                  <form onSubmit={handleSend} className="flex gap-2 sm:gap-4">
                     <input
                       ref={inputRef}
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      placeholder="Message your pizza assistant..."
-                      className="flex-1 px-8 py-5 rounded-[2rem] bg-mozzarella-100 border-none focus:ring-2 focus:ring-tomato-600/10 outline-none text-wood-800 font-bold placeholder:text-wood-300 transition-all"
+                      placeholder="Message Assistant..."
+                      className="flex-1 px-4 sm:px-8 py-4 sm:py-5 rounded-[1.5rem] sm:rounded-[2rem] bg-mozzarella-100 border-none focus:ring-2 focus:ring-tomato-600/10 outline-none text-wood-800 font-bold placeholder:text-wood-300 text-sm sm:text-base transition-all"
                     />
                     <motion.button
                       type="submit"
-                      className="w-16 h-16 bg-tomato-600 text-white font-black rounded-full shadow-lg shadow-tomato-600/20 flex items-center justify-center shrink-0"
+                      className="w-12 h-12 sm:w-16 sm:h-16 bg-tomato-600 text-white font-black rounded-full shadow-lg shadow-tomato-600/20 flex items-center justify-center shrink-0"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                       </svg>
                     </motion.button>

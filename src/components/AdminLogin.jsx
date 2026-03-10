@@ -56,8 +56,8 @@ export default function AdminLogin() {
                 style={{ borderRadius: '2px' }}
             >
                 <div className="text-center mb-10">
-                    <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-gold-400 block mb-4">Management Portal</span>
-                    <h1 className="font-display italic text-4xl text-[#1A1410] tracking-tight">Admin Access</h1>
+                    <span className="font-sans text-[9px] tracking-[0.3em] uppercase text-gold-400 block mb-4">Management Portal</span>
+                    <h1 className="font-sans font-bold text-4xl text-[#1A1410] tracking-tight">Admin Access</h1>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -65,7 +65,7 @@ export default function AdminLogin() {
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="p-4 bg-ember-500/10 border border-ember-500/20 text-ember-500 text-xs font-mono tracking-wider text-center"
+                            className="p-4 bg-ember-500/10 border border-ember-500/20 text-ember-500 text-xs font-sans tracking-wider text-center"
                             style={{ borderRadius: '2px' }}
                         >
                             {error}
@@ -73,7 +73,7 @@ export default function AdminLogin() {
                     )}
 
                     <div className="space-y-2">
-                        <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Username</label>
+                        <label className="font-sans text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Username</label>
                         <input
                             type="text"
                             value={username}
@@ -87,7 +87,7 @@ export default function AdminLogin() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Password</label>
+                        <label className="font-sans text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Password</label>
                         <input
                             type="password"
                             value={password}
@@ -111,11 +111,11 @@ export default function AdminLogin() {
                 </form>
 
                 <div className="mt-8 p-4 bg-[#F5F3EF] border border-[rgba(26,20,16,0.06)] rounded-xl">
-                    <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-parchment-700 text-center mb-2">Default Credentials</p>
-                    <p className="text-sm text-parchment-700 text-center font-mono">admin / password123</p>
+                    <p className="font-sans text-[9px] tracking-[0.2em] uppercase text-parchment-700 text-center mb-2">Default Credentials</p>
+                    <p className="text-sm text-parchment-700 text-center font-sans tracking-tight">admin / password123</p>
                 </div>
 
-                <p className="text-center font-mono text-[9px] tracking-[0.15em] uppercase text-parchment-700/40 mt-6">
+                <p className="text-center font-sans text-[9px] tracking-[0.15em] uppercase text-parchment-700/40 mt-6">
                     Authorized personnel only
                 </p>
             </motion.div>

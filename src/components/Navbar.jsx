@@ -110,7 +110,7 @@ export default function Navbar() {
         </div>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-6">
           {/* Cart Icon */}
           <motion.button
             className="relative w-10 h-10 flex items-center justify-center text-[#5C554E] hover:text-[#1A1410] transition-colors"
@@ -156,7 +156,7 @@ export default function Navbar() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/login')}
-              className="hidden md:block text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors nav-link"
+              className="hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors nav-link"
             >
               Login
             </motion.button>
@@ -167,7 +167,7 @@ export default function Navbar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/admin/login')}
-            className="hidden md:block text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#B8AA8F] hover:text-[#5C554E] transition-colors"
+            className="hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#B8AA8F] hover:text-[#5C554E] transition-colors"
           >
             Admin
           </motion.button>

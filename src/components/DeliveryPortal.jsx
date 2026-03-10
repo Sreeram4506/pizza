@@ -96,7 +96,7 @@ export default function DeliveryPortal() {
             {/* Header */}
             <div className="bg-wood-800 border-b border-wood-700 p-4 sticky top-0 z-10 flex justify-between items-center shadow-lg">
                 <div>
-                    <h1 className="text-xl font-display font-black text-tomato-400">Driver Portal</h1>
+                    <h1 className="text-xl font-sans font-bold text-tomato-400">Driver Portal</h1>
                     <p className="text-[10px] text-wood-400 font-bold uppercase tracking-widest">{orders.length} Active Deliveries</p>
                 </div>
                 <button

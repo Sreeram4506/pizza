@@ -288,7 +288,7 @@ export default function CustomPizzaBuilder() {
 
 
       {/* Main Content */}
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 pt-24 pb-32 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-16 sm:pt-24 pb-32 relative z-10">
         {/* Cinematic Header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -327,10 +327,10 @@ export default function CustomPizzaBuilder() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="flex items-center justify-center gap-4 mb-16"
+          className="flex items-center justify-center gap-2 sm:gap-4 mb-10 sm:mb-16 overflow-x-auto pb-4 scrollbar-hide"
         >
           {STEPS.map((step, i) => (
-            <div key={step.id} className="flex items-center">
+            <div key={step.id} className="flex items-center shrink-0">
               <motion.button
                 onClick={() => {
                   if (step.id <= currentStep || (step.id === 2 && selectedBase) || (step.id === 3 && selectedSauce)) {
@@ -342,17 +342,17 @@ export default function CustomPizzaBuilder() {
                     atelier?.scrollIntoView({ behavior: 'auto' })
                   }
                 }}
-                className={`relative flex items-center gap-3 px-6 py-3 transition-all duration-500 ${currentStep === step.id
+                className={`relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 transition-all duration-500 ${currentStep === step.id
                   ? 'text-[#1A1410]'
                   : currentStep > step.id
                     ? 'text-gold-500'
                     : 'text-[#9B8D74]/40'
                   }`}
               >
-                <span className={`font-mono text-lg ${currentStep === step.id ? 'text-ember-600' : ''}`}>
+                <span className={`font-mono text-sm sm:text-lg ${currentStep === step.id ? 'text-ember-600' : ''}`}>
                   {currentStep > step.id ? '✓' : `0${step.id}`}
                 </span>
-                <div className="hidden md:block text-left">
+                <div className="hidden sm:block text-left">
                   <div className="font-mono text-[10px] tracking-[0.2em] uppercase">{step.title}</div>
                   <div className="font-body text-xs opacity-60">{step.subtitle}</div>
                 </div>
@@ -366,7 +366,7 @@ export default function CustomPizzaBuilder() {
                 )}
               </motion.button>
               {i < STEPS.length - 1 && (
-                <div className={`w-12 h-px mx-2 transition-colors duration-500 ${currentStep > step.id ? 'bg-gold-400/40' : 'bg-[rgba(26,20,16,0.08)]'
+                <div className={`w-4 sm:w-12 h-px mx-1 sm:mx-2 transition-colors duration-500 ${currentStep > step.id ? 'bg-gold-400/40' : 'bg-[rgba(26,20,16,0.08)]'
                   }`} />
               )}
             </div>
@@ -381,7 +381,7 @@ export default function CustomPizzaBuilder() {
             initial={{ opacity: 0, x: -60 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="order-2 lg:order-1"
+            className="order-1"
           >
             <div
               className="relative"
@@ -402,7 +402,7 @@ export default function CustomPizzaBuilder() {
               >
                 <div
                   ref={pizzaCanvasRef}
-                  className="relative w-72 h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full"
+                  className="relative w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full"
                   style={{
                     background: selectedBase
                       ? 'radial-gradient(circle at 40% 40%, rgba(26,20,16,0.04), rgba(245,243,239,0.4))'
@@ -631,7 +631,7 @@ export default function CustomPizzaBuilder() {
             initial={{ opacity: 0, x: 60 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="order-1 lg:order-2"
+            className="order-2"
           >
             {/* Step Content — Animated Transitions */}
             <AnimatePresence mode="wait">
@@ -883,14 +883,14 @@ export default function CustomPizzaBuilder() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className="mt-12 flex items-center justify-between"
+              className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-6"
             >
               <motion.button
                 whileHover={currentStep > 1 ? { scale: 1.05 } : {}}
                 whileTap={currentStep > 1 ? { scale: 0.95 } : {}}
                 onClick={prevStep}
                 disabled={currentStep === 1}
-                className={`flex items-center gap-2 font-mono text-xs tracking-[0.15em] uppercase transition-all ${currentStep === 1 ? 'text-[#1A1410]/20 cursor-not-allowed' : 'text-[#9B8D74] hover:text-[#1A1410]'
+                className={`flex items-center gap-2 font-mono text-xs tracking-[0.15em] uppercase transition-all ${currentStep === 1 ? 'text-[#1A1410]/20 cursor-not-allowed hidden sm:flex' : 'text-[#9B8D74] hover:text-[#1A1410]'
                   }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -899,14 +899,14 @@ export default function CustomPizzaBuilder() {
                 Previous
               </motion.button>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 {currentStep < 4 ? (
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={nextStep}
                     disabled={currentStep === 1 && !selectedBase}
-                    className={`px-8 py-4 bg-ember-500 text-parchment-200 font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center gap-2 ${(currentStep === 1 && !selectedBase) ? 'opacity-50 cursor-not-allowed' : ''
+                    className={`w-full sm:w-auto px-8 py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center justify-center gap-2 ${(currentStep === 1 && !selectedBase) ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     style={{ borderRadius: '2px' }}
                   >
@@ -916,11 +916,11 @@ export default function CustomPizzaBuilder() {
                     </svg>
                   </motion.button>
                 ) : (
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={resetBuilder}
-                      className="px-6 py-4 border border-[rgba(26,20,16,0.1)] text-[#9B8D74] font-body text-sm tracking-[0.1em] uppercase hover:text-[#1A1410] transition-all rounded-xl"
+                      className="w-full sm:w-auto px-6 py-4 border border-[rgba(26,20,16,0.1)] text-[#9B8D74] font-body text-sm tracking-[0.1em] uppercase hover:text-[#1A1410] transition-all"
                       style={{ borderRadius: '2px' }}
                     >
                       Reset
@@ -930,7 +930,7 @@ export default function CustomPizzaBuilder() {
                       whileTap={bakeProgress === 100 ? { scale: 0.98 } : {}}
                       onClick={addToCartInternal}
                       disabled={bakeProgress < 100}
-                      className={`px-6 py-4 border border-gold-400/30 text-gold-400 font-body font-semibold text-sm tracking-[0.1em] uppercase hover:bg-gold-400/10 transition-all rounded-xl ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
+                      className={`w-full sm:w-auto px-6 py-4 border border-gold-400/30 text-gold-400 font-body font-semibold text-sm tracking-[0.1em] uppercase hover:bg-gold-400/10 transition-all ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
                         }`}
                       style={{ borderRadius: '2px' }}
                     >
@@ -941,7 +941,7 @@ export default function CustomPizzaBuilder() {
                       whileTap={bakeProgress === 100 ? { scale: 0.98 } : {}}
                       onClick={checkoutNow}
                       disabled={bakeProgress < 100}
-                      className={`px-8 py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center gap-2 rounded-xl ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
+                      className={`w-full sm:w-auto px-8 py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center justify-center gap-2 ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
                         }`}
                       style={{ borderRadius: '2px' }}
                     >
@@ -951,6 +951,14 @@ export default function CustomPizzaBuilder() {
                       </svg>
                     </motion.button>
                   </div>
+                )}
+                {currentStep > 1 && (
+                  <button
+                    onClick={prevStep}
+                    className="sm:hidden mt-2 font-mono text-[10px] tracking-[0.15em] uppercase text-[#9B8D74] underline"
+                  >
+                    Go Back
+                  </button>
                 )}
               </div>
             </motion.div>

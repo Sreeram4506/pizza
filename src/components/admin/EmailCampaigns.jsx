@@ -128,7 +128,7 @@ export default function EmailCampaigns() {
           <div className="absolute inset-0 border-2 border-ember-100 rounded-full" />
           <div className="absolute inset-0 border-2 border-ember-600 border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Syncing Dispatch History</p>
+        <p className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Syncing Dispatch History</p>
       </div>
     )
   }
@@ -138,12 +138,12 @@ export default function EmailCampaigns() {
       {/* ── Dispatch Header ─────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h3 className="text-3xl font-display font-black italic text-[#1A1410] leading-none mb-2">Electronic Dispatch</h3>
+          <h3 className="text-3xl font-sans font-bold text-[#1A1410] leading-none mb-2">Electronic Dispatch</h3>
           <p className="text-[#9B8D74] text-xs font-medium">Direct outreach to your elite Mediterranean circle.</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="h-14 px-10 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
+          className="h-14 px-10 bg-[#1A1410] text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
         >
           Initialize Transmission
         </button>
@@ -155,8 +155,8 @@ export default function EmailCampaigns() {
           {campaigns.length === 0 ? (
             <motion.div layout className="py-24 text-center bg-white rounded-[3rem] border border-[rgba(26,20,16,0.06)] shadow-sm">
               <span className="text-5xl mb-6 block grayscale opacity-30">✉️</span>
-              <h4 className="font-display font-black text-2xl italic text-[#1A1410]">Registry Clear</h4>
-              <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#9B8D74] mt-2">No active dispatches in queue.</p>
+              <h4 className="font-sans font-bold text-2xl text-[#1A1410]">Registry Clear</h4>
+              <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-[#9B8D74] mt-2">No active dispatches in queue.</p>
             </motion.div>
           ) : (
             campaigns.map((campaign) => (
@@ -170,14 +170,14 @@ export default function EmailCampaigns() {
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-6">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-4 mb-2">
-                      <h4 className="text-[#1A1410] font-display font-black text-xl italic group-hover:text-ember-600 transition-colors truncate">{campaign.name}</h4>
-                      <span className={`px-3 py-1 rounded-full font-mono text-[8px] font-black uppercase tracking-widest border shadow-sm ${campaign.status === 'sent' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-[#FAFAF8] text-[#9B8D74] border-[rgba(26,20,16,0.06)]'
+                      <h4 className="text-[#1A1410] font-sans font-bold text-xl group-hover:text-ember-600 transition-colors truncate">{campaign.name}</h4>
+                      <span className={`px-3 py-1 rounded-full font-sans text-[8px] font-bold uppercase tracking-widest border shadow-sm ${campaign.status === 'sent' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-[#FAFAF8] text-[#9B8D74] border-[rgba(26,20,16,0.06)]'
                         }`}>
                         {campaign.status}
                       </span>
                     </div>
                     <p className="text-[#9B8D74] text-xs font-medium italic truncate block">Subject: {campaign.subject}</p>
-                    <div className="flex items-center gap-4 mt-4 font-mono text-[9px] font-black uppercase tracking-widest text-[#9B8D74]/60">
+                    <div className="flex items-center gap-4 mt-4 font-sans text-[9px] font-bold uppercase tracking-widest text-[#9B8D74]/60">
                       <span className="flex items-center gap-1.5"><span className="opacity-40">CAL</span> {new Date(campaign.createdAt).toLocaleDateString()}</span>
                       {campaign.stats?.totalRecipients > 0 && <span className="flex items-center gap-1.5"><span className="opacity-40">GRP</span> {campaign.stats.totalRecipients} Contacts</span>}
                     </div>
@@ -186,12 +186,12 @@ export default function EmailCampaigns() {
                   {campaign.stats?.totalRecipients > 0 && (
                     <div className="flex gap-6 p-5 bg-[#FAFAF8] rounded-[1.5rem] border border-[rgba(26,20,16,0.03)] shadow-inner">
                       <div className="text-center min-w-[70px]">
-                        <div className="font-display font-black text-2xl italic text-[#1A1410]">{campaign.stats.totalRecipients}</div>
-                        <div className="font-mono text-[8px] text-[#9B8D74] uppercase font-black mt-1">Cohort</div>
+                        <div className="font-sans font-bold text-2xl text-[#1A1410]">{campaign.stats.totalRecipients}</div>
+                        <div className="font-sans text-[8px] text-[#9B8D74] uppercase font-bold mt-1">Cohort</div>
                       </div>
                       <div className="text-center min-w-[70px]">
-                        <div className="font-display font-black text-2xl italic text-emerald-600">{Math.round((campaign.stats.delivered / campaign.stats.totalRecipients) * 100) || 0}%</div>
-                        <div className="font-mono text-[8px] text-[#9B8D74] uppercase font-black mt-1">Efficacy</div>
+                        <div className="font-sans font-bold text-2xl text-emerald-600">{Math.round((campaign.stats.delivered / campaign.stats.totalRecipients) * 100) || 0}%</div>
+                        <div className="font-sans text-[8px] text-[#9B8D74] uppercase font-bold mt-1">Efficacy</div>
                       </div>
                     </div>
                   )}
@@ -216,7 +216,7 @@ export default function EmailCampaigns() {
             >
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#1A1410]" />
               <div className="flex justify-between items-center mb-10">
-                <h3 className="text-4xl font-display font-black italic text-[#1A1410] leading-none">Campaign Studio</h3>
+                <h3 className="text-4xl font-sans font-bold text-[#1A1410] leading-none">Campaign Studio</h3>
                 <button onClick={() => setShowCreateModal(false)} className="w-12 h-12 bg-[#FAFAF8] rounded-full flex items-center justify-center text-[#9B8D74] hover:bg-rose-500 hover:text-white transition-all font-bold">✕</button>
               </div>
 

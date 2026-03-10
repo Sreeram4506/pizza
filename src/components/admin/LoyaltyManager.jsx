@@ -117,7 +117,7 @@ export default function LoyaltyManager() {
                     <div className="absolute inset-0 border-4 border-emerald-100 rounded-full" />
                     <div className="absolute inset-0 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Synchronizing Loyalty Protocols</p>
+                <p className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Synchronizing Loyalty Protocols</p>
             </div>
         )
     }
@@ -129,9 +129,9 @@ export default function LoyaltyManager() {
                 <div>
                     <div className="flex items-center gap-2 mb-2">
                         <span className="w-8 h-[1px] bg-emerald-600" />
-                        <span className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-emerald-600">Retention Strategy</span>
+                        <span className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-emerald-600">Retention Strategy</span>
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-display font-black italic text-[#1A1410] leading-tight">
+                    <h2 className="text-4xl md:text-5xl font-sans font-bold text-[#1A1410] leading-tight">
                         Loyalty HQ
                     </h2>
                     <p className="text-[#9B8D74] mt-2 font-medium tracking-tight">Engineer the perfect value loop for your elite patrons.</p>
@@ -139,14 +139,14 @@ export default function LoyaltyManager() {
                 <div className="flex gap-3">
                     <button
                         onClick={() => setIsEditingConfig(!isEditingConfig)}
-                        className={`h-12 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border shadow-sm ${isEditingConfig ? 'bg-[#1A1410] text-white border-black' : 'bg-white text-[#1A1410] border-[rgba(26,20,16,0.06)] hover:bg-[#F5F3EF]'
+                        className={`h-12 px-6 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all active:scale-95 border shadow-sm ${isEditingConfig ? 'bg-[#1A1410] text-white border-black' : 'bg-white text-[#1A1410] border-[rgba(26,20,16,0.06)] hover:bg-[#F5F3EF]'
                             }`}
                     >
                         ⚙️ Architecture
                     </button>
                     <button
                         onClick={() => setShowRewardModal(true)}
-                        className="h-12 px-8 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
+                        className="h-12 px-8 bg-[#1A1410] text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
                     >
                         + Create Asset
                     </button>
@@ -163,10 +163,10 @@ export default function LoyaltyManager() {
                         className="overflow-hidden"
                     >
                         <form onSubmit={handleUpdateConfig} className="bg-white border border-[rgba(26,20,16,0.06)] rounded-[2.5rem] p-10 mb-8 shadow-sm">
-                            <h4 className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] mb-8 pb-2 border-b border-[rgba(26,20,16,0.03)]">Core Parameters</h4>
+                            <h4 className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] mb-8 pb-2 border-b border-[rgba(26,20,16,0.03)]">Core Parameters</h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                                 <div className="space-y-1.5">
-                                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Earnings Ratio (Pts/$1)</label>
+                                    <label className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Earnings Ratio (Pts/$1)</label>
                                     <input
                                         type="number"
                                         value={loyaltyConfig?.pointsPerDollar || 0}
@@ -175,7 +175,7 @@ export default function LoyaltyManager() {
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Initiation Bonus</label>
+                                    <label className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Initiation Bonus</label>
                                     <input
                                         type="number"
                                         value={loyaltyConfig?.welcomeBonus || 0}
@@ -198,8 +198,8 @@ export default function LoyaltyManager() {
                     {(!loyaltyConfig || loyaltyConfig.rewards?.length === 0) ? (
                         <motion.div layout className="col-span-full py-32 text-center bg-white rounded-[3rem] border border-[rgba(26,20,16,0.06)] shadow-inner">
                             <span className="text-5xl mb-6 block grayscale opacity-30">🎁</span>
-                            <h3 className="font-display font-black text-2xl italic text-[#1A1410]">No Active Assets</h3>
-                            <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#9B8D74] mt-2">The reward repository is currently empty.</p>
+                            <h3 className="font-sans font-bold text-2xl text-[#1A1410]">No Active Assets</h3>
+                            <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-[#9B8D74] mt-2">The reward repository is currently empty.</p>
                         </motion.div>
                     ) : (
                         loyaltyConfig.rewards.map((reward) => (
@@ -220,21 +220,21 @@ export default function LoyaltyManager() {
                                 </div>
 
                                 <div className="mb-6">
-                                    <p className="text-[#1A1410] font-display font-black text-2xl italic group-hover:text-emerald-600 transition-colors">{reward.name}</p>
+                                    <p className="text-[#1A1410] font-sans font-bold text-2xl group-hover:text-emerald-600 transition-colors">{reward.name}</p>
                                     <div className="flex items-center gap-2 mt-2">
-                                        <span className="font-mono text-[9px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-100 italic">Active Asset</span>
+                                        <span className="font-sans text-[9px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-100">Active Asset</span>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between pt-6 border-t border-[rgba(26,20,16,0.03)]">
                                     <div>
-                                        <label className="font-mono text-[8px] font-black uppercase tracking-widest text-[#9B8D74] block mb-1">Exchange Cost</label>
-                                        <p className="text-emerald-600 font-display font-black text-3xl italic leading-none">{reward.pointsCost} <span className="text-[10px] font-mono uppercase font-black opacity-30">PTS</span></p>
+                                        <label className="font-sans text-[8px] font-bold uppercase tracking-widest text-[#9B8D74] block mb-1">Exchange Cost</label>
+                                        <p className="text-emerald-600 font-sans font-bold text-3xl leading-none">{reward.pointsCost} <span className="text-[10px] font-sans uppercase font-bold opacity-30">PTS</span></p>
                                     </div>
                                     <div className="text-right">
-                                        <label className="font-mono text-[8px] font-black uppercase tracking-widest text-[#9B8D74] block mb-1">Asset Value</label>
-                                        <p className="text-[#1A1410] font-mono text-xl font-black italic tracking-tighter">
-                                            {reward.discountType === 'percentage' ? `${reward.discountValue}%` : `$${reward.discountValue}`} <span className="text-[10px] font-mono uppercase font-black opacity-30">OFF</span>
+                                        <label className="font-sans text-[8px] font-bold uppercase tracking-widest text-[#9B8D74] block mb-1">Asset Value</label>
+                                        <p className="text-[#1A1410] font-sans text-xl font-bold tracking-tighter">
+                                            {reward.discountType === 'percentage' ? `${reward.discountValue}%` : `$${reward.discountValue}`} <span className="text-[10px] font-sans uppercase font-bold opacity-30">OFF</span>
                                         </p>
                                     </div>
                                 </div>

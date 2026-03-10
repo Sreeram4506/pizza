@@ -8,7 +8,7 @@ export default function About() {
   const { settings } = useSettings()
 
   return (
-    <section ref={ref} className="py-32 lg:py-40 relative bg-white overflow-hidden section-grain">
+    <section ref={ref} className="py-20 lg:py-40 relative bg-white overflow-hidden section-grain">
       {/* Huge ghost number */}
       <div className="absolute top-1/2 -translate-y-1/2 right-0 font-display text-[25vw] leading-none text-[#1A1410]/[0.03] select-none pointer-events-none hidden lg:block">
         01
@@ -17,7 +17,7 @@ export default function About() {
       {/* Ember glow */}
       <div className="absolute inset-0 ember-glow-bg" />
 
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -30,7 +30,7 @@ export default function About() {
           </span>
 
           {/* Pull quote */}
-          <blockquote className="font-display italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#1A1410] leading-[1.2] tracking-tight mb-12">
+          <blockquote className="font-display italic text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-[#1A1410] leading-[1.2] tracking-tight mb-12">
             "We don't make food.<br />
             We make <span className="text-ember-500">memories</span>."
           </blockquote>

@@ -145,7 +145,7 @@ export default function MenuManager() {
           <div className="absolute inset-0 border-4 border-ember-100 rounded-full" />
           <div className="absolute inset-0 border-4 border-ember-600 border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Consulting the Kitchen</p>
+        <p className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Consulting the Kitchen</p>
       </div>
     )
   }
@@ -157,9 +157,9 @@ export default function MenuManager() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-8 h-[1px] bg-ember-600" />
-            <span className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-ember-600">Inventory Control</span>
+            <span className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-ember-600">Inventory Control</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-display font-black italic text-[#1A1410] leading-tight">
+          <h2 className="text-4xl md:text-5xl font-sans font-bold text-[#1A1410] leading-tight">
             Menu Kitchen
           </h2>
           <p className="text-[#9B8D74] mt-2 font-medium tracking-tight">Curate your authentic Mediterranean selections.</p>
@@ -167,7 +167,7 @@ export default function MenuManager() {
         <div className="flex gap-3">
           <button
             onClick={() => { setEditingCategory(null); setCategoryForm({ name: '', description: '' }); setShowCategoryModal(true) }}
-            className="h-12 px-6 bg-white border border-[rgba(26,20,16,0.06)] text-[#1A1410] rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#F5F3EF] transition-all active:scale-95 shadow-sm"
+            className="h-12 px-6 bg-white border border-[rgba(26,20,16,0.06)] text-[#1A1410] rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-[#F5F3EF] transition-all active:scale-95 shadow-sm"
           >
             + New Category
           </button>
@@ -182,7 +182,7 @@ export default function MenuManager() {
               setImagePreview(null)
               setShowItemModal(true)
             }}
-            className="h-12 px-8 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
+            className="h-12 px-8 bg-[#1A1410] text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
           >
             + Create Pizza
           </button>
@@ -193,7 +193,7 @@ export default function MenuManager() {
       <div className="flex gap-2 p-1.5 bg-white border border-[rgba(26,20,16,0.06)] rounded-[2rem] overflow-x-auto scrollbar-hide shadow-sm sticky top-0 z-10 backdrop-blur-xl bg-white/90">
         <button
           onClick={() => setActiveCategory(null)}
-          className={`px-8 py-3 rounded-[1.5rem] font-mono text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeCategory === null ? 'bg-[#1A1410] text-white shadow-lg' : 'text-[#9B8D74] hover:bg-[#F5F3EF]'
+          className={`px-8 py-3 rounded-[1.5rem] font-sans text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${activeCategory === null ? 'bg-[#1A1410] text-white shadow-lg' : 'text-[#9B8D74] hover:bg-[#F5F3EF]'
             }`}
         >
           Entire Collection ({items.length})
@@ -202,7 +202,7 @@ export default function MenuManager() {
           <div key={cat._id} className="relative flex-shrink-0 flex items-center">
             <button
               onClick={() => setActiveCategory(cat._id)}
-              className={`px-8 py-3 rounded-[1.5rem] font-mono text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeCategory === cat._id ? 'bg-[#1A1410] text-white shadow-lg' : 'text-[#9B8D74] hover:bg-[#F5F3EF]'
+              className={`px-8 py-3 rounded-[1.5rem] font-sans text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${activeCategory === cat._id ? 'bg-[#1A1410] text-white shadow-lg' : 'text-[#9B8D74] hover:bg-[#F5F3EF]'
                 }`}
             >
               {cat.name}
@@ -221,8 +221,8 @@ export default function MenuManager() {
           {filteredItems.length === 0 ? (
             <motion.div layout className="col-span-full py-32 text-center bg-white rounded-[3rem] border border-[rgba(26,20,16,0.06)] shadow-inner">
               <span className="text-5xl mb-6 block grayscale opacity-30">🍕</span>
-              <h3 className="font-display font-black text-2xl italic text-[#1A1410]">Kitchen is Empty</h3>
-              <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#9B8D74] mt-2">No selections recorded in this category</p>
+              <h3 className="font-sans font-bold text-2xl text-[#1A1410]">Kitchen is Empty</h3>
+              <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-[#9B8D74] mt-2">No selections recorded in this category</p>
             </motion.div>
           ) : (
             filteredItems.map((item) => (
@@ -247,7 +247,7 @@ export default function MenuManager() {
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-display font-black text-xl italic text-[#1A1410] truncate group-hover:text-ember-600 transition-colors">
+                        <h3 className="font-sans font-bold text-xl text-[#1A1410] truncate group-hover:text-ember-600 transition-colors">
                           {item.name}
                         </h3>
                         <div className="flex gap-2">
@@ -262,12 +262,12 @@ export default function MenuManager() {
 
                     <div className="flex items-center justify-between pt-4 mt-2 border-t border-[rgba(26,20,16,0.03)]">
                       <div className="space-y-0.5">
-                        <p className="font-display font-black text-2xl italic text-[#1A1410] tracking-tight">
-                          <span className="text-xs font-mono font-black italic opacity-30 mr-1">$</span>
+                        <p className="font-sans font-bold text-2xl text-[#1A1410] tracking-tight">
+                          <span className="text-xs font-sans font-bold opacity-30 mr-1">$</span>
                           {item.price.toFixed(2)}
                         </p>
                       </div>
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-mono text-[9px] font-black uppercase tracking-widest border shadow-sm ${item.available ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-sans text-[9px] font-bold uppercase tracking-widest border shadow-sm ${item.available ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'
                         }`}>
                         <span className={`w-1 h-1 rounded-full ${item.available ? 'bg-emerald-500' : 'bg-rose-500'} animate-pulse`} />
                         {item.available ? 'Active Stock' : 'Out of Stock'}
@@ -340,7 +340,7 @@ export default function MenuManager() {
             >
               <div className="absolute top-0 left-0 right-0 h-1 bg-[#1A1410]" />
               <div className="flex justify-between items-center mb-10">
-                <h3 className="text-4xl font-display font-black italic text-[#1A1410] leading-none">
+                <h3 className="text-4xl font-sans font-bold text-[#1A1410] leading-none">
                   {editingItem ? 'Edit Recipe' : 'New Creation'}
                 </h3>
                 <button onClick={() => setShowItemModal(false)} className="w-12 h-12 bg-[#FAFAF8] rounded-full flex items-center justify-center text-[#9B8D74] hover:bg-rose-500 hover:text-white transition-all shadow-sm hover:shadow-rose-100 font-bold">✕</button>
@@ -355,7 +355,7 @@ export default function MenuManager() {
                     ) : (
                       <div className="text-center">
                         <span className="text-4xl mb-4 block">📸</span>
-                        <span className="font-mono text-[9px] font-black uppercase tracking-widest text-[#9B8D74]">Upload Food Photography</span>
+                        <span className="font-sans text-[9px] font-bold uppercase tracking-widest text-[#9B8D74]">Upload Food Photography</span>
                       </div>
                     )}
                     <input

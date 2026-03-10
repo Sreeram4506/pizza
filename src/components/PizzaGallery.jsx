@@ -46,10 +46,10 @@ export default function PizzaGallery() {
   }
 
   return (
-    <section ref={ref} id="gallery" className="py-24 lg:py-32 relative overflow-hidden bg-[#FAFAF8] section-grain">
+    <section ref={ref} id="gallery" className="py-16 lg:py-32 relative overflow-hidden bg-[#FAFAF8] section-grain">
       <div className="absolute inset-0 gold-glow-bg" />
 
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}

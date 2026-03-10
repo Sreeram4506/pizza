@@ -131,7 +131,7 @@ export default function PromotionalBanners() {
           <div className="absolute inset-0 border-2 border-amber-100 rounded-full" />
           <div className="absolute inset-0 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Syncing Visual Assets</p>
+        <p className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Syncing Visual Assets</p>
       </div>
     )
   }
@@ -141,12 +141,12 @@ export default function PromotionalBanners() {
       {/* ── Orchestration Header ─────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h3 className="text-3xl font-display font-black italic text-[#1A1410] leading-none mb-2">Visual Orchestration</h3>
+          <h3 className="text-3xl font-sans font-bold text-[#1A1410] leading-none mb-2">Visual Orchestration</h3>
           <p className="text-[#9B8D74] text-xs font-medium">Curate the aesthetic highlights for your patrons.</p>
         </div>
         <button
           onClick={() => { setEditingBanner(null); resetForm(); setShowCreateModal(true); }}
-          className="h-14 px-10 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
+          className="h-14 px-10 bg-[#1A1410] text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
         >
           Forge Visual Asset
         </button>
@@ -158,8 +158,8 @@ export default function PromotionalBanners() {
           {banners.length === 0 ? (
             <motion.div layout className="py-24 text-center bg-white rounded-[3rem] border border-[rgba(26,20,16,0.06)] shadow-sm">
               <span className="text-5xl mb-6 block grayscale opacity-30">🖼️</span>
-              <h4 className="font-display font-black text-2xl italic text-[#1A1410]">Gallery Empty</h4>
-              <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#9B8D74] mt-2">No active banners in current rotation.</p>
+              <h4 className="font-sans font-bold text-2xl text-[#1A1410]">Gallery Empty</h4>
+              <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-[#9B8D74] mt-2">No active banners in current rotation.</p>
             </motion.div>
           ) : (
             banners.map((banner) => (
@@ -173,15 +173,15 @@ export default function PromotionalBanners() {
                 <div className="flex flex-col lg:flex-row gap-10">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap gap-3 mb-4">
-                      <span className={`px-3 py-1 rounded-full font-mono text-[8px] font-black uppercase tracking-widest border shadow-sm ${banner.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-[#FAFAF8] text-[#9B8D74] border-[rgba(26,20,16,0.06)]'
+                      <span className={`px-3 py-1 rounded-full font-sans text-[8px] font-bold uppercase tracking-widest border shadow-sm ${banner.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-[#FAFAF8] text-[#9B8D74] border-[rgba(26,20,16,0.06)]'
                         }`}>
                         {banner.status}
                       </span>
-                      <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-full font-mono text-[8px] font-black uppercase tracking-widest italic shadow-sm">
+                      <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-full font-sans text-[8px] font-bold uppercase tracking-widest shadow-sm">
                         LOC: {banner.position}
                       </span>
                     </div>
-                    <h4 className="text-3xl font-display font-black italic text-[#1A1410] mb-3 group-hover:text-amber-600 transition-colors">{banner.title}</h4>
+                    <h4 className="text-3xl font-sans font-bold text-[#1A1410] mb-3 group-hover:text-amber-600 transition-colors">{banner.title}</h4>
                     <p className="text-[#9B8D74] text-xs font-medium line-clamp-2 leading-relaxed mb-6">{banner.description}</p>
                     <div className="flex items-center gap-6 font-mono text-[9px] font-black uppercase tracking-widest text-[#9B8D74]/60">
                       <span className="flex items-center gap-1.5"><span className="opacity-40">CAL</span> {new Date(banner.startDate).toLocaleDateString()} - {new Date(banner.endDate).toLocaleDateString()}</span>
@@ -197,12 +197,12 @@ export default function PromotionalBanners() {
                     >
                       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
                       <div className="relative z-10">
-                        <p className="font-display font-black text-lg italic leading-tight" style={{ color: banner.textColor }}>{banner.title}</p>
-                        <p className="font-mono text-[8px] font-black uppercase tracking-widest opacity-60 mt-1" style={{ color: banner.textColor }}>{banner.subtitle}</p>
+                        <p className="font-sans font-bold text-lg leading-tight" style={{ color: banner.textColor }}>{banner.title}</p>
+                        <p className="font-sans text-[8px] font-bold uppercase tracking-widest opacity-60 mt-1" style={{ color: banner.textColor }}>{banner.subtitle}</p>
                       </div>
                       {banner.buttonText && (
                         <div
-                          className="absolute right-6 bottom-4 px-4 py-1.5 rounded-full font-mono text-[7px] font-black uppercase tracking-widest shadow-lg"
+                          className="absolute right-6 bottom-4 px-4 py-1.5 rounded-full font-sans text-[7px] font-bold uppercase tracking-widest shadow-lg"
                           style={{ backgroundColor: banner.textColor, color: banner.backgroundColor }}
                         >
                           {banner.buttonText}
@@ -235,7 +235,7 @@ export default function PromotionalBanners() {
             >
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-amber-600" />
               <div className="flex justify-between items-center mb-10">
-                <h3 className="text-4xl font-display font-black italic text-[#1A1410] leading-none">{editingBanner ? 'Refine Asset' : 'Forge Asset'}</h3>
+                <h3 className="text-4xl font-sans font-bold text-[#1A1410] leading-none">{editingBanner ? 'Refine Asset' : 'Forge Asset'}</h3>
                 <button onClick={() => setShowCreateModal(false)} className="w-12 h-12 bg-[#FAFAF8] rounded-full flex items-center justify-center text-[#9B8D74] hover:bg-rose-500 hover:text-white transition-all font-bold">✕</button>
               </div>
 

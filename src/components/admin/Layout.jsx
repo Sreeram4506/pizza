@@ -49,10 +49,10 @@ export default function AdminLayout() {
           </div>
           {(sidebarOpen || onClose) && (
             <div className="min-w-0">
-              <h1 className="font-display font-black text-[#1A1410] text-sm italic leading-none truncate">
+              <h1 className="font-sans font-bold text-[#1A1410] text-sm leading-none truncate">
                 {settings?.restaurantName || 'PizzaBlast'}
               </h1>
-              <p className="font-mono text-[9px] font-black uppercase tracking-widest text-ember-600 mt-1">Admin Ops</p>
+              <p className="font-sans text-[9px] font-bold uppercase tracking-widest text-ember-600 mt-1">Admin Ops</p>
             </div>
           )}
         </div>
@@ -67,7 +67,7 @@ export default function AdminLayout() {
 
       {/* Navigation Links */}
       <nav className="flex-1 px-4 py-8 space-y-1.5 overflow-y-auto scrollbar-hide">
-        <label className={`block px-3 mb-4 font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] opacity-50 ${(!sidebarOpen && !onClose) ? 'sr-only' : ''}`}>
+        <label className={`block px-3 mb-4 font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] opacity-50 ${(!sidebarOpen && !onClose) ? 'sr-only' : ''}`}>
           Navigation
         </label>
         {sidebarItems.map((item) => {
@@ -116,7 +116,7 @@ export default function AdminLayout() {
               <p className="text-[#1A1410] font-bold text-xs truncate">Manager</p>
               <button
                 onClick={handleLogout}
-                className="text-ember-600 text-[10px] font-black uppercase tracking-widest hover:text-ember-700 transition-colors mt-0.5"
+                className="text-ember-600 text-[10px] font-bold uppercase tracking-widest hover:text-ember-700 transition-colors mt-0.5"
               >
                 Exit Dash
               </button>
@@ -177,16 +177,16 @@ export default function AdminLayout() {
               </svg>
             </button>
             <div className="flex items-center gap-3 font-medium text-sm">
-              <span className="text-[#9B8D74] opacity-50 uppercase font-mono text-[10px] tracking-widest hidden sm:block">Admin Zone</span>
+              <span className="text-[#9B8D74] opacity-50 uppercase font-sans text-[10px] tracking-widest hidden sm:block">Admin Zone</span>
               <span className="text-[#9B8D74] hidden sm:block">/</span>
-              <span className="font-display font-black italic text-lg tracking-tight text-[#1A1410] capitalize">{activeItem.replace(/-/g, ' ')}</span>
+              <span className="font-sans font-bold text-lg tracking-tight text-[#1A1410] capitalize">{activeItem.replace(/-/g, ' ')}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <motion.button
               onClick={() => navigate('/')}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#F5F3EF] text-[#1A1410] text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white border border-transparent hover:border-[rgba(26,20,16,0.06)] transition-all shadow-sm"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#F5F3EF] text-[#1A1410] text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-white border border-transparent hover:border-[rgba(26,20,16,0.06)] transition-all shadow-sm"
               whileTap={{ scale: 0.95 }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -204,7 +204,7 @@ export default function AdminLayout() {
 
             <div className="hidden md:flex items-center gap-2 pr-2 pl-4 h-10 bg-[#F5F3EF] rounded-xl border border-[rgba(26,20,16,0.03)]">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-              <span className="font-mono text-[9px] font-black uppercase tracking-widest text-[#1A1410]">{settings?.restaurantName || 'Pizza Blast'}</span>
+              <span className="font-sans text-[9px] font-bold uppercase tracking-widest text-[#1A1410]">{settings?.restaurantName || 'Pizza Blast'}</span>
             </div>
           </div>
         </header>
@@ -228,7 +228,7 @@ export default function AdminLayout() {
                 }`}
             >
               <span className={`text-xl transition-transform ${activeItem === item.id ? 'scale-110' : ''}`}>{item.icon}</span>
-              <span className="text-[9px] font-black uppercase tracking-tighter truncate w-full text-center">{item.label.split(' ')[0]}</span>
+              <span className="text-[9px] font-bold uppercase tracking-tighter truncate w-full text-center">{item.label.split(' ')[0]}</span>
             </button>
           ))}
           <button

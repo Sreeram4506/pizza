@@ -84,7 +84,7 @@ export default function Dashboard() {
           <div className="absolute inset-0 border-4 border-ember-100 rounded-full" />
           <div className="absolute inset-0 border-4 border-ember-600 border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Synchronizing Data</p>
+        <p className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Synchronizing Data</p>
       </div>
     )
   }
@@ -96,9 +96,9 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-8 h-[1px] bg-ember-600" />
-            <span className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-ember-600">Enterprise Suite</span>
+            <span className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-ember-600">Enterprise Suite</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-display font-black italic text-[#1A1410] leading-tight">
+          <h2 className="text-4xl md:text-5xl font-sans font-bold text-[#1A1410] leading-tight">
             Daily Insights
           </h2>
           <p className="text-[#9B8D74] mt-2 font-medium tracking-tight">Your restaurant operations at a premium glance.</p>
@@ -112,7 +112,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => navigate('/admin/orders')}
-            className="h-12 px-6 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95 flex items-center gap-3"
+            className="h-12 px-6 bg-[#1A1410] text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95 flex items-center gap-3"
           >
             <span className="w-1.5 h-1.5 bg-ember-400 rounded-full animate-pulse" />
             Live Monitor
@@ -132,11 +132,11 @@ export default function Dashboard() {
           >
             <div className="flex items-center justify-between mb-4">
               <span className="text-2xl grayscale group-hover:grayscale-0 transition-all duration-500">{stat.icon}</span>
-              <span className="font-mono text-[9px] font-black tracking-widest text-[#9B8D74] opacity-40 italic">{stat.suffix}</span>
+              <span className="font-sans text-[9px] font-bold tracking-widest text-[#9B8D74] opacity-40">{stat.suffix}</span>
             </div>
             <div className="space-y-0.5">
-              <p className={`text-3xl font-display font-black italic tracking-tight ${stat.color}`}>{stat.value}</p>
-              <label className="block font-mono text-[9px] font-black uppercase tracking-[0.2em] text-[#9B8D74] mt-1">{stat.label}</label>
+              <p className={`text-3xl font-sans font-bold tracking-tight ${stat.color}`}>{stat.value}</p>
+              <label className="block font-sans text-[9px] font-bold uppercase tracking-[0.2em] text-[#9B8D74] mt-1">{stat.label}</label>
             </div>
           </motion.div>
         ))}
@@ -147,16 +147,16 @@ export default function Dashboard() {
         {/* Recent Activity */}
         <div className="lg:col-span-8 space-y-4">
           <div className="flex items-center justify-between mb-2 px-2">
-            <h3 className="font-display font-black text-2xl italic flex items-center gap-3">
+            <h3 className="font-sans font-bold text-2xl flex items-center gap-3">
               Recent Transactions
             </h3>
-            <button onClick={() => navigate('/admin/orders')} className="font-mono text-[10px] font-black uppercase tracking-widest text-ember-600 hover:text-ember-700">Explore Archives →</button>
+            <button onClick={() => navigate('/admin/orders')} className="font-sans text-[10px] font-bold uppercase tracking-widest text-ember-600 hover:text-ember-700">Explore Archives →</button>
           </div>
 
           <div className="bg-white rounded-[2.5rem] border border-[rgba(26,20,16,0.06)] shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-[#FAFAF8] border-b border-[rgba(26,20,16,0.03)] font-mono text-[10px] font-black uppercase tracking-widest text-[#9B8D74]">
+                <thead className="bg-[#FAFAF8] border-b border-[rgba(26,20,16,0.03)] font-sans text-[10px] font-bold uppercase tracking-widest text-[#9B8D74]">
                   <tr>
                     <th className="px-6 py-5">Order #ID</th>
                     <th className="px-6 py-5">Client Profile</th>
@@ -170,7 +170,7 @@ export default function Dashboard() {
                       <td colSpan="4" className="py-20 text-center">
                         <div className="flex flex-col items-center opacity-30">
                           <span className="text-4xl mb-4">📜</span>
-                          <p className="font-mono text-[10px] uppercase font-black tracking-widest">No Recent activity recorded</p>
+                          <p className="font-sans text-[10px] uppercase font-bold tracking-widest">No Recent activity recorded</p>
                         </div>
                       </td>
                     </tr>
@@ -180,13 +180,13 @@ export default function Dashboard() {
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-[#F5F3EF] flex items-center justify-center text-xs font-black text-[#1A1410]">#</div>
-                            <span className="font-mono text-xs font-bold text-[#1A1410]">{order.orderNumber}</span>
+                            <span className="font-sans text-xs font-bold text-[#1A1410]">{order.orderNumber}</span>
                           </div>
                         </td>
                         <td className="px-6 py-5">
                           <div>
                             <p className="font-bold text-sm text-[#1A1410]">{order.customerInfo?.name || 'V.I.P. Guest'}</p>
-                            <p className="text-[10px] font-mono text-[#9B8D74] italic uppercase tracking-tighter opacity-70">{order.type} Service</p>
+                            <p className="text-[10px] font-sans text-[#9B8D74] uppercase tracking-tighter opacity-70">{order.type} Service</p>
                           </div>
                         </td>
                         <td className="px-6 py-5">
@@ -195,7 +195,7 @@ export default function Dashboard() {
                           </span>
                         </td>
                         <td className="px-6 py-5 text-right">
-                          <span className="font-display font-black text-lg italic text-[#1A1410]">${order.total?.toFixed(2)}</span>
+                          <span className="font-sans font-bold text-lg text-[#1A1410]">${order.total?.toFixed(2)}</span>
                         </td>
                       </tr>
                     ))
@@ -209,7 +209,7 @@ export default function Dashboard() {
         {/* Intelligence & Actions */}
         <div className="lg:col-span-4 space-y-8">
           <section>
-            <h4 className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] mb-4 px-2">Quick Commands</h4>
+            <h4 className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] mb-4 px-2">Quick Commands</h4>
             <div className="grid grid-cols-1 gap-3">
               {quickActions.map((action) => (
                 <motion.button
@@ -231,21 +231,21 @@ export default function Dashboard() {
           </section>
 
           <section>
-            <h4 className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] mb-4 px-2">Trending Favorites</h4>
+            <h4 className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] mb-4 px-2">Trending Favorites</h4>
             <div className="bg-white rounded-[2rem] border border-[rgba(26,20,16,0.06)] shadow-sm divide-y divide-[rgba(26,20,16,0.03)] overflow-hidden">
               {popularItems.length === 0 ? (
                 <div className="p-12 text-center opacity-20">
-                  <p className="font-mono text-[9px] font-black">Waiting for Data...</p>
+                  <p className="font-sans text-[9px] font-bold">Waiting for Data...</p>
                 </div>
               ) : (
                 popularItems.map((item, index) => (
                   <div key={index} className="px-6 py-4 flex items-center justify-between group hover:bg-[#FAFAF8] transition-colors">
                     <div className="flex items-center gap-4">
-                      <span className="font-display font-black italic text-ember-600 text-lg">{index + 1}</span>
+                      <span className="font-sans font-bold text-ember-600 text-lg">{index + 1}</span>
                       <span className="font-bold text-sm text-[#1A1410] truncate max-w-[120px]">{item.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] font-black text-[#9B8D74]">{item.count} Sold</span>
+                      <span className="font-sans text-[10px] font-bold text-[#9B8D74]">{item.count} Sold</span>
                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-glow shadow-green-500/50" />
                     </div>
                   </div>

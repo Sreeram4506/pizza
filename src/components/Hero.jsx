@@ -62,15 +62,15 @@ export default function Hero() {
             </div>
 
             {/* Massive display heading */}
-            <div className="mt-8 hero-stagger">
+            <div className="mt-6 sm:mt-8 hero-stagger">
               <h1 className="font-display font-bold leading-[0.9] tracking-tight">
                 <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[96px] text-[#1A1410]">
                   {settings.restaurantName || 'PizzaBlast'}
                 </span>
-                <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl italic text-[#1A1410]/20 mt-4">
+                <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl italic text-[#1A1410]/20 mt-3 sm:mt-4">
                   The Art of
                 </span>
-                <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl mt-2" style={{ WebkitTextStroke: '2px #1A1410', color: 'transparent' }}>
+                <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl mt-1.5 sm:mt-2" style={{ WebkitTextStroke: '1px #1A1410', color: 'transparent' }}>
                   Neapolitan
                 </span>
               </h1>

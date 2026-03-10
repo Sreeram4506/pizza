@@ -59,10 +59,10 @@ export default function ComboDeals() {
   const { openWithIntent } = useChatbot()
 
   return (
-    <section ref={ref} id="deals" className="py-24 lg:py-32 relative bg-[#F5F3EF] overflow-hidden section-grain">
+    <section ref={ref} id="deals" className="py-16 lg:py-32 relative bg-[#F5F3EF] overflow-hidden section-grain">
       <div className="absolute inset-0 ember-glow-bg" />
 
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}

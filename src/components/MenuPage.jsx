@@ -135,12 +135,12 @@ export default function MenuPage() {
     return (
         <div className="h-screen flex flex-col bg-[#FAFAF8] overflow-hidden selection:bg-ember-500/15 selection:text-[#1A1410] font-sans">
             {/* Split Screen Header */}
-            <header className="h-16 sm:h-20 flex-shrink-0 bg-white/80 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] px-4 sm:px-12 flex items-center justify-between z-50">
+            <header className="h-16 sm:h-24 flex-shrink-0 bg-white/90 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] px-3 sm:px-12 flex items-center justify-between z-50">
                 <div
-                    className="flex items-center gap-2 sm:gap-4 cursor-pointer group"
+                    className="flex items-center gap-2 sm:gap-6 cursor-pointer group"
                     onClick={() => navigate('/')}
                 >
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-ember-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-mono font-bold text-lg sm:text-xl shadow-lg shadow-ember-600/20 group-hover:scale-105 transition-transform">
+                    <div className="w-9 h-9 sm:w-14 sm:h-14 bg-ember-600 rounded-xl flex items-center justify-center text-white font-mono font-bold text-xl sm:text-3xl shadow-lg shadow-ember-600/20 group-hover:scale-105 transition-transform">
                         {settings?.restaurantName?.[0] || 'M'}
                     </div>
                     {!showMobileSearch && (
@@ -148,11 +148,11 @@ export default function MenuPage() {
                             <motion.span
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="font-display font-bold text-lg sm:text-2xl tracking-tighter text-[#1A1410] italic truncate max-w-[120px] sm:max-w-none leading-none"
+                                className="font-display font-bold text-xl sm:text-3xl tracking-tighter text-[#1A1410] italic truncate max-w-[140px] sm:max-w-none leading-none"
                             >
                                 {settings?.restaurantName || 'Mustang Pizza'}
                             </motion.span>
-                            <span className="font-mono text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-ember-600 mt-1">Menu Kitchen</span>
+                            <span className="font-mono text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-ember-600 mt-1">Kitchen</span>
                         </div>
                     )}
                 </div>
@@ -244,7 +244,7 @@ export default function MenuPage() {
                 {/* LEFT SIDEBAR: Categories (Responsive Width) */}
                 <aside
                     ref={sidebarScrollRef}
-                    className="w-[75px] sm:w-72 lg:w-96 p-2 sm:p-8 overflow-y-auto border-r border-[rgba(26,20,16,0.06)] bg-[#FAFAF8] scrollbar-hide z-10 flex flex-col transition-all duration-500"
+                    className="w-[85px] sm:w-72 lg:w-96 p-2 sm:p-8 overflow-y-auto border-r border-[rgba(26,20,16,0.06)] bg-[#FAFAF8] scrollbar-hide z-10 flex flex-col transition-all duration-500"
                 >
                     <div className="hidden sm:block mb-10 pt-2">
                         <div className="relative group">
@@ -274,14 +274,14 @@ export default function MenuPage() {
                                         key={cat._id}
                                         data-cat-btn={cat.name}
                                         onClick={() => handleCategoryClick(cat.name)}
-                                        className={`group flex flex-col sm:flex-row items-center sm:justify-between p-3 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] sm:text-[12px] font-bold tracking-[0.02em] sm:tracking-[0.05em] uppercase transition-all duration-300 relative overflow-hidden ${activeCategory === cat.name
+                                        className={`group flex flex-col sm:flex-row items-center sm:justify-between p-2.5 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[12px] font-bold tracking-[0.02em] sm:tracking-[0.05em] uppercase transition-all duration-300 relative overflow-hidden ${activeCategory === cat.name
                                             ? 'bg-[#1A1410] text-[#FAFAFA] shadow-lg sm:shadow-2xl shadow-black/10'
                                             : 'text-[#5C554E] hover:bg-white hover:text-[#1A1410]'
                                             }`}
                                     >
                                         <div className="flex items-center gap-2 sm:gap-4 relative z-10">
-                                            <div className={`w-1 h-1 rounded-full transition-all duration-500 ${activeCategory === cat.name ? 'bg-ember-500 scale-125' : 'bg-transparent'}`} />
-                                            <span className={`text-center sm:text-left leading-tight break-words sm:break-normal transition-colors ${activeCategory === cat.name ? 'text-white' : ''}`}>{cat.name}</span>
+                                            <div className={`w-1 h-1 rounded-full transition-all duration-500 hidden sm:block ${activeCategory === cat.name ? 'bg-ember-500 scale-125' : 'bg-transparent'}`} />
+                                            <span className={`text-center sm:text-left leading-tight break-words sm:break-normal transition-colors duration-300 ${activeCategory === cat.name ? 'text-white' : ''}`}>{cat.name}</span>
                                         </div>
                                         <span className={`hidden sm:block font-mono text-[10px] opacity-40 transition-opacity ${activeCategory === cat.name ? 'text-ember-400' : 'text-[#9B8D74]'}`}>
                                             {catItems.length}

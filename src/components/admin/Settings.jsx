@@ -83,7 +83,7 @@ export default function Settings() {
           <div className="absolute inset-0 border-4 border-amber-100 rounded-full" />
           <div className="absolute inset-0 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Accessing Core Registry</p>
+        <p className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Accessing Core Registry</p>
       </div>
     )
   }
@@ -94,9 +94,9 @@ export default function Settings() {
       <div className="mb-12">
         <div className="flex items-center gap-2 mb-2">
           <span className="w-8 h-[1px] bg-ember-600" />
-          <span className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-ember-600">Core Configuration</span>
+          <span className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-ember-600">Core Configuration</span>
         </div>
-        <h2 className="text-4xl md:text-5xl font-display font-black italic text-[#1A1410] leading-tight">Preferences</h2>
+        <h2 className="text-4xl md:text-5xl font-sans font-bold text-[#1A1410] leading-tight">Preferences</h2>
         <p className="text-[#9B8D74] mt-2 font-medium tracking-tight">Fine-tune your brand's digital presence and foundational logic.</p>
       </div>
 
@@ -106,7 +106,7 @@ export default function Settings() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mb-8 bg-rose-50 border border-rose-100 rounded-2xl p-4 text-rose-600 font-mono text-[9px] font-black uppercase tracking-widest text-center shadow-sm"
+            className="mb-8 bg-rose-50 border border-rose-100 rounded-2xl p-4 text-rose-600 font-sans text-[9px] font-bold uppercase tracking-widest text-center shadow-sm"
           >
             ⚠️ {error}
           </motion.div>
@@ -116,12 +116,12 @@ export default function Settings() {
       <form onSubmit={handleSave} className="space-y-10">
         <section className="bg-white rounded-[3rem] p-12 border border-[rgba(26,20,16,0.06)] shadow-sm space-y-10">
           <div className="space-y-2">
-            <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Brand Identity</label>
+            <label className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Brand Identity</label>
             <input
               type="text"
               value={settings.restaurantName}
               onChange={(e) => handleInputChange('restaurantName', e.target.value)}
-              className={`w-full h-16 px-8 bg-[#FAFAF8] border-2 rounded-2xl text-[#1A1410] outline-none focus:bg-white focus:border-ember-600 transition-all text-lg font-display font-black italic shadow-inner ${validationErrors.restaurantName ? 'border-rose-400' : 'border-[rgba(26,20,16,0.03)]'
+              className={`w-full h-16 px-8 bg-[#FAFAF8] border-2 rounded-2xl text-[#1A1410] outline-none focus:bg-white focus:border-ember-600 transition-all text-lg font-sans font-bold shadow-inner ${validationErrors.restaurantName ? 'border-rose-400' : 'border-[rgba(26,20,16,0.03)]'
                 }`}
             />
           </div>

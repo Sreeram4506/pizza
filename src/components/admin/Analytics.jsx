@@ -57,7 +57,7 @@ export default function AnalyticsDashboard() {
           <div className="absolute inset-0 border-4 border-amber-100 rounded-full" />
           <div className="absolute inset-0 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Aggregating Global Intelligence</p>
+        <p className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Aggregating Global Intelligence</p>
       </div>
     )
   }
@@ -69,16 +69,16 @@ export default function AnalyticsDashboard() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-8 h-[1px] bg-ember-600" />
-            <span className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-ember-600">Business Intelligence</span>
+            <span className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-ember-600">Business Intelligence</span>
           </div>
-          <h2 className="text-4xl md:text-6xl font-display font-black italic text-[#1A1410] leading-none">Insight Engine</h2>
+          <h2 className="text-4xl md:text-6xl font-sans font-bold text-[#1A1410] leading-none">Insight Engine</h2>
           <p className="text-[#9B8D74] mt-2 font-medium tracking-tight">An editorial overview of performance metrics and patron behaviors.</p>
         </div>
         <div className="relative group min-w-[200px]">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="w-full h-14 pl-6 pr-12 bg-white border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-mono text-[10px] font-black uppercase tracking-widest outline-none appearance-none cursor-pointer focus:border-amber-500 transition-all shadow-sm"
+            className="w-full h-14 pl-6 pr-12 bg-white border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-sans text-[10px] font-bold uppercase tracking-widest outline-none appearance-none cursor-pointer focus:border-amber-500 transition-all shadow-sm"
           >
             <option value="24h">L: 24 Hours</option>
             <option value="7d">L: 7 Days</option>
@@ -103,8 +103,8 @@ export default function AnalyticsDashboard() {
               <span className="text-xl group-hover:scale-125 transition-transform duration-500">{stat.icon}</span>
               <span className="w-1.5 h-1.5 bg-ember-100 rounded-full group-hover:bg-ember-600 transition-colors" />
             </div>
-            <p className="font-mono text-[8px] font-black uppercase tracking-[0.2em] text-[#9B8D74] mb-1">{stat.label}</p>
-            <p className={`text-2xl font-display font-black italic ${stat.color}`}>{stat.value}</p>
+            <p className="font-sans text-[8px] font-bold uppercase tracking-[0.2em] text-[#9B8D74] mb-1">{stat.label}</p>
+            <p className={`text-2xl font-sans font-bold ${stat.color}`}>{stat.value}</p>
           </motion.div>
         ))}
       </div>
@@ -114,10 +114,10 @@ export default function AnalyticsDashboard() {
         {/* Revenue Area Chart */}
         <div className="lg:col-span-2 bg-white rounded-[3rem] p-10 border border-[rgba(26,20,16,0.06)] shadow-sm">
           <div className="flex items-center justify-between mb-10">
-            <h3 className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#1A1410]">Fiscal Trajectory</h3>
+            <h3 className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#1A1410]">Fiscal Trajectory</h3>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-ember-600" />
-              <span className="font-mono text-[8px] font-black text-[#9B8D74]">NET REVENUE</span>
+              <span className="font-sans text-[8px] font-bold text-[#9B8D74]">NET REVENUE</span>
             </div>
           </div>
           <div className="h-[350px]">
@@ -134,7 +134,7 @@ export default function AnalyticsDashboard() {
                   dataKey="date"
                   stroke="#9B8D74"
                   fontSize={9}
-                  fontFamily="JetBrains Mono"
+                  fontFamily="Inter, sans-serif"
                   tickLine={false}
                   axisLine={false}
                   dy={10}
@@ -142,7 +142,7 @@ export default function AnalyticsDashboard() {
                 <YAxis
                   stroke="#9B8D74"
                   fontSize={9}
-                  fontFamily="JetBrains Mono"
+                  fontFamily="Inter, sans-serif"
                   tickLine={false}
                   axisLine={false}
                   dx={-10}
@@ -154,8 +154,8 @@ export default function AnalyticsDashboard() {
                     borderRadius: '1.5rem',
                     boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
                   }}
-                  itemStyle={{ fontSize: '10px', color: '#fff', fontFamily: 'JetBrains Mono', fontWeight: 'bold', textTransform: 'uppercase' }}
-                  labelStyle={{ fontSize: '9px', color: '#9B8D74', fontFamily: 'JetBrains Mono', marginBottom: '4px' }}
+                  itemStyle={{ fontSize: '10px', color: '#fff', fontFamily: 'Inter, sans-serif', fontWeight: 'bold', textTransform: 'uppercase' }}
+                  labelStyle={{ fontSize: '9px', color: '#9B8D74', fontFamily: 'Inter, sans-serif', marginBottom: '4px' }}
                 />
                 <Area
                   type="monotone"
@@ -173,7 +173,7 @@ export default function AnalyticsDashboard() {
 
         {/* Order Composition Pie */}
         <div className="bg-white rounded-[3rem] p-10 border border-[rgba(26,20,16,0.06)] shadow-sm flex flex-col">
-          <h3 className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#1A1410] mb-10 text-center">Patronage Pulse</h3>
+          <h3 className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#1A1410] mb-10 text-center">Patronage Pulse</h3>
           <div className="flex-1 min-h-[250px] relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -194,20 +194,20 @@ export default function AnalyticsDashboard() {
                     border: 'none',
                     borderRadius: '1.5rem'
                   }}
-                  itemStyle={{ color: '#fff', fontFamily: 'JetBrains Mono', fontSize: '9px' }}
+                  itemStyle={{ color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: '9px' }}
                 />
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-center flex-col items-center justify-center pointer-events-none">
-              <span className="font-display font-black italic text-3xl text-[#1A1410] leading-none">100%</span>
-              <span className="font-mono text-[7px] font-black text-[#9B8D74] uppercase tracking-widest mt-1">Consistency</span>
+              <span className="font-sans font-bold text-3xl text-[#1A1410] leading-none">100%</span>
+              <span className="font-sans text-[7px] font-bold text-[#9B8D74] uppercase tracking-widest mt-1">Consistency</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 mt-10">
             {analytics.statusDistribution?.slice(0, 4).map((entry, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="w-2.5 h-2.5 rounded-sm shadow-sm" style={{ backgroundColor: THEME_COLORS[i % THEME_COLORS.length] }} />
-                <span className="font-mono text-[8px] font-black uppercase text-[#9B8D74] tracking-tight truncate">{entry._id}</span>
+                <span className="font-sans text-[8px] font-bold uppercase text-[#9B8D74] tracking-tight truncate">{entry._id}</span>
               </div>
             ))}
           </div>
@@ -218,7 +218,7 @@ export default function AnalyticsDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Popular Assets Bar */}
         <div className="bg-white rounded-[3rem] p-10 border border-[rgba(26,20,16,0.06)] shadow-sm">
-          <h3 className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#1A1410] mb-10">Product Dominance</h3>
+          <h3 className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#1A1410] mb-10">Product Dominance</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analytics.popularItems?.slice(0, 5) || []} layout="vertical" margin={{ left: 20 }}>
@@ -283,9 +283,9 @@ export default function AnalyticsDashboard() {
           >
             <div className="flex items-center gap-4 mb-6">
               <span className="text-3xl">{item.icon}</span>
-              <h4 className="font-mono text-[9px] font-black uppercase tracking-[0.3em] opacity-60">{item.title}</h4>
+              <h4 className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] opacity-60">{item.title}</h4>
             </div>
-            <p className="font-display font-medium text-lg leading-relaxed italic">{item.text}</p>
+            <p className="font-sans font-medium text-lg leading-relaxed">{item.text}</p>
           </motion.div>
         ))}
       </div>

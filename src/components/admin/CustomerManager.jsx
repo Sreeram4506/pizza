@@ -79,7 +79,7 @@ export default function CustomerManager() {
           <div className="absolute inset-0 border-4 border-ember-100 rounded-full" />
           <div className="absolute inset-0 border-4 border-ember-600 border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Syncing Registers</p>
+        <p className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Syncing Registers</p>
       </div>
     )
   }
@@ -91,9 +91,9 @@ export default function CustomerManager() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-8 h-[1px] bg-ember-600" />
-            <span className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-ember-600">Clientele Registry</span>
+            <span className="font-sans text-[9px] font-bold uppercase tracking-[0.3em] text-ember-600">Clientele Registry</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-display font-black italic text-[#1A1410] leading-tight">
+          <h2 className="text-4xl md:text-5xl font-sans font-bold text-[#1A1410] leading-tight">
             Customer Base
           </h2>
           <p className="text-[#9B8D74] mt-2 font-medium tracking-tight">Intelligence on your most loyal pizza patrons.</p>
@@ -114,8 +114,8 @@ export default function CustomerManager() {
               <span className="text-2xl group-hover:scale-110 transition-transform duration-500">{stat.icon}</span>
               <span className="w-1.5 h-1.5 bg-ember-100 rounded-full" />
             </div>
-            <p className={`text-3xl font-display font-black italic tracking-tight ${stat.color}`}>{stat.value}</p>
-            <label className="block font-mono text-[9px] font-black uppercase tracking-[0.2em] text-[#9B8D74] mt-1">{stat.label}</label>
+            <p className={`text-3xl font-sans font-bold tracking-tight ${stat.color}`}>{stat.value}</p>
+            <label className="block font-sans text-[9px] font-bold uppercase tracking-[0.2em] text-[#9B8D74] mt-1">{stat.label}</label>
           </motion.div>
         ))}
       </div>
@@ -131,7 +131,7 @@ export default function CustomerManager() {
         />
         <span className="absolute left-6 top-1/2 -translate-y-1/2 text-xl opacity-30 group-focus-within:opacity-100 transition-opacity">🔍</span>
         {search && (
-          <button onClick={() => setSearch('')} className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black uppercase font-mono text-ember-600">Reset</button>
+          <button onClick={() => setSearch('')} className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-bold uppercase font-sans text-ember-600">Reset</button>
         )}
       </div>
 
@@ -141,8 +141,8 @@ export default function CustomerManager() {
           {filteredCustomers.length === 0 ? (
             <motion.div layout className="col-span-full py-32 text-center bg-white rounded-[3rem] border border-[rgba(26,20,16,0.06)] shadow-inner">
               <span className="text-5xl mb-6 block grayscale opacity-30">👤</span>
-              <h3 className="font-display font-black text-2xl italic text-[#1A1410]">Registry Empty</h3>
-              <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#9B8D74] mt-2">No members found matching your query</p>
+              <h3 className="font-sans font-bold text-2xl text-[#1A1410]">Registry Empty</h3>
+              <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-[#9B8D74] mt-2">No members found matching your query</p>
             </motion.div>
           ) : (
             filteredCustomers.map((customer) => (
@@ -157,19 +157,18 @@ export default function CustomerManager() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
-                    <h3 className="text-[#1A1410] font-display font-black text-xl italic group-hover:text-ember-600 transition-colors truncate">{customer.name}</h3>
+                    <h3 className="text-[#1A1410] font-sans font-bold text-xl group-hover:text-ember-600 transition-colors truncate">{customer.name}</h3>
                     {customer.isGuest && (
-                      <span className="font-mono text-[8px] bg-[#F5F3EF] text-[#9B8D74] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border border-[rgba(26,20,16,0.03)]">Guest</span>
+                      <span className="font-sans text-[8px] bg-[#F5F3EF] text-[#9B8D74] px-2 py-0.5 rounded-md font-bold uppercase tracking-widest border border-[rgba(26,20,16,0.03)]">Guest</span>
                     )}
                   </div>
-                  <p className="text-[#9B8D74] font-mono text-[10px] uppercase font-bold tracking-widest mt-1">{customer.phone}</p>
+                  <p className="text-[#9B8D74] font-sans text-[10px] uppercase font-bold tracking-widest mt-1">{customer.phone}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <div className="flex items-center gap-2 justify-end mb-1">
-                    <span className={`w-1.5 h-1.5 rounded-full ${tiers[customer.loyalty?.tier || 'bronze'].color} animate-pulse`} />
-                    <span className="font-mono text-[9px] font-black uppercase tracking-widest text-[#1A1410] italic">{customer.loyalty?.tier || 'Bronze'}</span>
+                    <span className="font-sans text-[9px] font-bold uppercase tracking-widest text-[#1A1410]">{customer.loyalty?.tier || 'Bronze'}</span>
                   </div>
-                  <p className="text-ember-600 font-display font-black text-lg italic leading-none">{customer.loyalty?.points || 0} <span className="text-[10px] font-mono uppercase font-black opacity-30">PTS</span></p>
+                  <p className="text-ember-600 font-sans font-bold text-lg leading-none">{customer.loyalty?.points || 0} <span className="text-[10px] font-sans uppercase font-bold opacity-30">PTS</span></p>
                 </div>
               </motion.div>
             ))
@@ -197,9 +196,10 @@ export default function CustomerManager() {
                     {selectedCustomer.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="text-4xl font-display font-black italic text-[#1A1410] leading-none mb-2">{selectedCustomer.name}</h3>
+                    <h3 className="text-4xl font-sans font-bold text-[#1A1410] leading-none mb-2">{selectedCustomer.name}</h3>
+<h4 className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-[#9B8D74] border-b border-[rgba(26,20,16,0.06)] pb-2">Communications Audit</h4>
                     <div className="flex items-center gap-2">
-                      <span className={`px-4 py-1.5 rounded-full font-mono text-[9px] font-black uppercase tracking-widest border shadow-sm ${tiers[selectedCustomer.loyalty?.tier || 'bronze'].color} text-white`}>
+                      <span className={`px-4 py-1.5 rounded-full font-sans text-[9px] font-bold uppercase tracking-widest border shadow-sm ${tiers[selectedCustomer.loyalty?.tier || 'bronze'].color} text-white`}>
                         {selectedCustomer.loyalty?.tier || 'Bronze'} Member
                       </span>
                     </div>
@@ -226,7 +226,7 @@ export default function CustomerManager() {
                   <p className="text-white font-display font-black italic text-6xl leading-none">{selectedCustomer.loyalty?.points || 0}</p>
                   <button
                     onClick={() => handleAwardPoints(selectedCustomer._id, 50)}
-                    className="h-12 px-8 bg-white text-[#1A1410] rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-ember-400 hover:text-white transition-all shadow-xl shadow-black/20"
+                    className="h-12 px-8 bg-white text-[#1A1410] rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-ember-400 hover:text-white transition-all shadow-xl shadow-black/20"
                   >
                     +50 Manual Bonus
                   </button>
@@ -239,14 +239,14 @@ export default function CustomerManager() {
                   <div className="flex items-center gap-4 bg-[#FAFAF8] p-5 rounded-2xl border border-[rgba(26,20,16,0.03)]">
                     <span className="text-xl">📧</span>
                     <div>
-                      <p className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-[#9B8D74] mb-0.5">Electronic Mail</p>
+                      <p className="font-sans text-[9px] font-bold uppercase tracking-[0.1em] text-[#9B8D74] mb-0.5">Electronic Mail</p>
                       <p className="font-bold text-sm text-[#1A1410]">{selectedCustomer.email || 'None Record'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 bg-[#FAFAF8] p-5 rounded-2xl border border-[rgba(26,20,16,0.03)]">
                     <span className="text-xl">📞</span>
                     <div>
-                      <p className="font-mono text-[9px] font-black uppercase tracking-[0.1em] text-[#9B8D74] mb-0.5">Telephonic Link</p>
+                      <p className="font-sans text-[9px] font-bold uppercase tracking-[0.1em] text-[#9B8D74] mb-0.5">Telephonic Link</p>
                       <p className="font-bold text-sm text-[#1A1410]">{selectedCustomer.phone}</p>
                     </div>
                   </div>
