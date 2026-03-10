@@ -40,19 +40,6 @@ connectDatabase().then(() => {
   runCleanup()
 })
 
-// Health check for Deployment
-app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }))
-
-// Root health check for Render uptime monitoring
-app.get('/health', (req, res) => {
-  res.status(200).send("OK")
-})
-
-// Root API route
-app.get('/', (req, res) => {
-  res.send('API Running')
-})
-
 // Configure CORS
 const allowedOrigins = [
   'http://localhost:5173',
@@ -73,6 +60,21 @@ app.use(cors({
   credentials: true
 }))
 app.use(express.json())
+
+// Health check for Deployment
+app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }))
+
+// Root health check for Render uptime monitoring
+app.get('/health', (req, res) => {
+  res.status(200).send("OK")
+})
+
+// Root API route
+app.get('/', (req, res) => {
+  res.send('API Running')
+})
+
+
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))

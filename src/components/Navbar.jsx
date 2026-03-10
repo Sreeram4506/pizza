@@ -7,12 +7,12 @@ import { useSettings } from '../context/SettingsContext'
 import BannerDisplay from './BannerDisplay'
 
 const navLinks = [
-  { label: 'Home', href: '#home' },
-  { label: 'Menu', href: '#gallery' },
-  { label: 'Atelier', href: '#atelier' },
+  { label: 'Home', href: '/#home' },
+  { label: 'Menu', href: '/menu' },
+  { label: 'Atelier', href: '/#atelier' },
   { label: 'Track', href: '/track' },
-  { label: 'Offers', href: '#deals' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Offers', href: '/#deals' },
+  { label: 'Contact', href: '/#contact' },
 ]
 
 export default function Navbar() {
@@ -34,15 +34,27 @@ export default function Navbar() {
     setIsLoggedIn(!!token)
   }, [])
 
-  const handleNavClick = (link) => {
+  const handleNavClick = (e, link) => {
     if (link.intent) {
       openWithIntent(link.intent)
       setMobileOpen(false)
     } else if (link.href) {
-      if (link.href.startsWith('/')) {
-        window.location.href = link.href
+      if (link.href.startsWith('/#')) {
+        e.preventDefault()
+        const id = link.href.substring(2)
+
+        if (location.pathname === '/') {
+          // Already on home, just scroll
+          const element = document.getElementById(id)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' })
+          }
+        } else {
+          // Navigate home with hash
+          navigate(link.href)
+        }
       } else {
-        document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' })
+        navigate(link.href)
       }
       setMobileOpen(false)
     }
@@ -69,15 +81,18 @@ export default function Navbar() {
       <nav className={`max-w-[1400px] w-full mx-auto px-6 lg:px-12 flex items-center justify-between transition-all duration-500 ${scrolled ? 'py-3' : 'py-6'}`}>
         {/* Logo */}
         <motion.a
-          href="#home"
-          className="flex items-center gap-3 group"
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 group cursor-pointer"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <span className="font-display font-bold text-2xl tracking-tight text-[#1A1410] italic">
-            {settings?.restaurantName?.split(' ')[0] || 'Pizza'}
-            <span className="text-ember-500">{settings?.restaurantName?.split(' ').slice(1).join(' ') || 'Blast'}</span>
-          </span>
+          {settings?.logo ? (
+            <img src={settings.logo} alt="Logo" className="h-10 object-contain" />
+          ) : (
+            <span className="font-sans font-black text-[22px] tracking-tight text-red-600 uppercase">
+              {settings?.restaurantName || 'Mustang Pizza'}
+            </span>
+          )}
         </motion.a>
 
         {/* Desktop Nav */}

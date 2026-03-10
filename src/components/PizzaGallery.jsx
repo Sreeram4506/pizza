@@ -1,13 +1,14 @@
 import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useChatbot } from '../context/ChatbotContext'
+import { useNavigate } from 'react-router-dom'
 import wsService from '../services/websocket.js'
 
 export default function PizzaGallery() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
+  const navigate = useNavigate()
   const { openWithIntent } = useChatbot()
-  const [activeCategory, setActiveCategory] = useState('All')
   const [menuItems, setMenuItems] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,12 +39,6 @@ export default function PizzaGallery() {
     }
   }
 
-  const filteredItems = activeCategory === 'All'
-    ? menuItems
-    : menuItems.filter(item => {
-      const category = categories.find(cat => (cat._id === item.categoryId || cat._id === item.categoryId?._id))
-      return category && category.name === activeCategory
-    })
 
   const getCategoryName = (categoryId) => {
     const category = categories.find(cat => cat._id === categoryId)
@@ -69,27 +64,6 @@ export default function PizzaGallery() {
               Handcrafted with Fire
             </h2>
           </div>
-
-          {/* Category Filters */}
-          <div className="flex flex-wrap gap-6 md:gap-8">
-            <button
-              onClick={() => setActiveCategory('All')}
-              className={`text-xs font-body font-medium tracking-[0.15em] uppercase transition-colors ${activeCategory === 'All' ? 'text-ember-500' : 'text-[#9B8D74] hover:text-[#1A1410]'
-                }`}
-            >
-              All
-            </button>
-            {categories.map((category) => (
-              <button
-                key={category._id}
-                onClick={() => setActiveCategory(category.name)}
-                className={`text-xs font-body font-medium tracking-[0.15em] uppercase transition-colors ${activeCategory === category.name ? 'text-ember-500' : 'text-[#9B8D74] hover:text-[#1A1410]'
-                  }`}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
         </motion.div>
 
         <div className="divider-gold mb-12" />
@@ -97,8 +71,8 @@ export default function PizzaGallery() {
         {/* Menu Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
           {loading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className={`bg-[#F5F3EF] rounded-xl overflow-hidden border border-white flex flex-col relative ${i % 3 === 0 ? 'aspect-[3/4] md:row-span-2' : 'aspect-square'}`}>
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className={`bg-[#F5F3EF] rounded-xl overflow-hidden border border-white flex flex-col relative ${i === 0 ? 'aspect-[3/4] md:row-span-2' : 'aspect-square'}`}>
                 {/* Image Skeleton */}
                 <div className="absolute inset-0 bg-[#E8E3DB] animate-pulse" />
 
@@ -110,7 +84,7 @@ export default function PizzaGallery() {
               </div>
             ))
           ) : (
-            filteredItems.map((item, index) => (
+            menuItems.slice(0, 3).map((item, index) => (
               <MenuCard
                 key={item._id}
                 image={item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || ''}${item.image}`) : 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=600&q=80'}
@@ -122,7 +96,7 @@ export default function PizzaGallery() {
                 dietary={item.dietary}
                 index={index}
                 isInView={isInView}
-                onOrder={() => openWithIntent('order', { item: item.name })}
+                onOrder={() => navigate('/menu')}
               />
             ))
           )}
@@ -138,7 +112,7 @@ export default function PizzaGallery() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => openWithIntent('menu')}
+            onClick={() => navigate('/menu')}
             className="group text-[#1A1410] text-sm font-body font-medium tracking-[0.15em] uppercase inline-flex items-center gap-3 transition-colors hover:text-ember-500"
           >
             View Full Menu

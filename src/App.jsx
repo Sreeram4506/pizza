@@ -33,6 +33,7 @@ import Marketing from './components/admin/Marketing'
 import LoyaltyManager from './components/admin/LoyaltyManager'
 import Settings from './components/admin/Settings'
 import CustomPizzaBuilder from './components/CustomPizzaBuilder'
+import MenuPage from './components/MenuPage'
 
 // Routes where quick login should NOT appear
 const EXCLUDED_ROUTES = [
@@ -40,7 +41,8 @@ const EXCLUDED_ROUTES = [
   '/register',
   '/admin',
   '/admin/login',
-  '/delivery'
+  '/delivery',
+  '/menu'
 ]
 
 // Component to handle quick login popup
@@ -64,6 +66,22 @@ function QuickLoginWrapper() {
 }
 
 function Home() {
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const id = hash.replace('#', '');
+      const element = document.getElementById(id);
+      if (element) {
+        // Wait a bit for the page to render fully
+        const timer = setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [hash]);
+
   return (
     <>
       <Navbar />
@@ -92,7 +110,7 @@ function App() {
   // Auto-wake Render backend
   useEffect(() => {
     const wakeServer = () => {
-      fetch('https://pizzabackend-qzi1.onrender.com/health').catch(() => { })
+      fetch('https://pizzabackend-qzi1.onrender.com/health', { mode: 'no-cors' }).catch(() => { })
     }
 
     wakeServer()
@@ -118,6 +136,8 @@ function App() {
 
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/menu" element={<><MenuPage /><Chatbot /></>} />
+
                 <Route path="/login" element={<><Navbar /><CustomerLogin /><Chatbot /></>} />
                 <Route path="/register" element={<><Navbar /><CustomerRegister /><Chatbot /></>} />
                 <Route path="/track" element={<><Navbar /><OrderTracker /><Chatbot /></>} />

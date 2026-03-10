@@ -1,8 +1,36 @@
+import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
   const { settings } = useSettings()
+  const navigate = useNavigate()
+
+  const navLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'Menu', href: '/menu' },
+    { name: 'Order Online', href: '/menu' },
+    { name: 'Custom Pizza', href: '/#atelier' },
+    { name: 'Track Order', href: '/track' }
+  ]
+
+  const handleLinkClick = (e, href) => {
+    e.preventDefault()
+    if (href.startsWith('/#')) {
+      const id = href.substring(2)
+      if (window.location.pathname === '/') {
+        const element = document.getElementById(id)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' })
+        }
+      } else {
+        navigate(href)
+      }
+    } else {
+      navigate(href)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 
   return (
     <footer className="bg-[#1A1410] relative overflow-hidden section-grain">
@@ -10,7 +38,7 @@ export default function Footer() {
 
         <div className="py-16 lg:py-24">
           <h2 className="font-display italic text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[120px] text-white/[0.06] leading-none tracking-tight select-none text-center">
-            {settings?.restaurantName || 'PizzaBlast'}
+            {settings?.restaurantName || 'Mustang Pizza'}
           </h2>
         </div>
 
@@ -21,11 +49,14 @@ export default function Footer() {
           <div>
             <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">Navigate</h4>
             <ul className="space-y-4">
-              {['Home', 'Menu', 'Order Online', 'Custom Pizza', 'Track Order'].map((link) => (
-                <li key={link}>
-                  <a href="#" className="text-white/50 text-sm font-body hover:text-white transition-colors">
-                    {link}
-                  </a>
+              {navLinks.map((link) => (
+                <li key={link.name}>
+                  <button
+                    onClick={(e) => handleLinkClick(e, link.href)}
+                    className="text-white/50 text-sm font-body hover:text-white transition-colors"
+                  >
+                    {link.name}
+                  </button>
                 </li>
               ))}
             </ul>
@@ -47,9 +78,12 @@ export default function Footer() {
               {settings?.address?.split(',')[0] || '123 Pizza Plaza'}<br />
               {settings?.address?.split(',').slice(1).join(',') || 'New York, NY 10001'}
             </p>
-            <a href="#" className="text-white text-sm font-body hover:text-ember-500 transition-colors">
+            <button
+              onClick={() => navigate('/#contact')}
+              className="text-white text-sm font-body hover:text-ember-500 transition-colors"
+            >
               Get Directions →
-            </a>
+            </button>
           </div>
 
           <div>
@@ -69,11 +103,11 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/10 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/30 text-xs font-body">
-            © {currentYear} {settings?.restaurantName || 'PizzaBlast'} — All rights reserved
+            © {currentYear} {settings?.restaurantName || 'Mustang Pizza'} — All rights reserved
           </p>
           <div className="flex items-center gap-6 text-xs font-body">
-            <a href="#" className="text-white/30 hover:text-white/60 transition-colors">Privacy</a>
-            <a href="#" className="text-white/30 hover:text-white/60 transition-colors">Terms</a>
+            <button className="text-white/30 hover:text-white/60 transition-colors">Privacy</button>
+            <button className="text-white/30 hover:text-white/60 transition-colors">Terms</button>
             <span className="text-white/20">Made with ♥ in New York</span>
           </div>
         </div>

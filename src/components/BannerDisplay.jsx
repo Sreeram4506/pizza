@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 
 export default function BannerDisplay({ position = 'middle' }) {
   const [banners, setBanners] = useState([])
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     loadActiveBanners()
@@ -30,7 +32,11 @@ export default function BannerDisplay({ position = 'middle' }) {
       console.error('Failed to track click:', err)
     }
     if (banner.buttonLink) {
-      window.location.href = banner.buttonLink
+      if (banner.buttonLink.startsWith('/') || banner.buttonLink.startsWith('#')) {
+        navigate(banner.buttonLink)
+      } else {
+        window.location.href = banner.buttonLink
+      }
     }
   }
 

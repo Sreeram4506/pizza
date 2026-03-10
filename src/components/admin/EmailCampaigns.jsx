@@ -77,7 +77,6 @@ export default function EmailCampaigns() {
         toast.success('Campaign launched!')
       }
     } catch (err) {
-      console.error('Campaign error:', err)
       toast.error('Failed to launch campaign')
     } finally {
       setSendingEmail(false)
@@ -102,9 +101,10 @@ export default function EmailCampaigns() {
         setCampaigns([saved, ...campaigns])
         setShowCreateModal(false)
         resetForm()
+        toast.success('Draft saved')
       }
     } catch (err) {
-      console.error('Save draft error:', err)
+      toast.error('Failed to save draft')
     }
   }
 
@@ -123,148 +123,171 @@ export default function EmailCampaigns() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="animate-spin w-10 h-10 border-[3px] border-tomato-500 border-t-transparent rounded-full" />
-        <p className="text-xs font-bold text-wood-400 uppercase tracking-widest animate-pulse">Loading Campaigns...</p>
+      <div className="flex flex-col items-center justify-center min-h-[40vh] gap-6">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 border-2 border-ember-100 rounded-full" />
+          <div className="absolute inset-0 border-2 border-ember-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <p className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Syncing Dispatch History</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8">
+      {/* ── Dispatch Header ─────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h3 className="text-xl font-display font-black text-white uppercase tracking-tight">Email Campaigns</h3>
-          <p className="text-wood-400 text-xs">Direct outreach to your loyal customers</p>
+          <h3 className="text-3xl font-display font-black italic text-[#1A1410] leading-none mb-2">Electronic Dispatch</h3>
+          <p className="text-[#9B8D74] text-xs font-medium">Direct outreach to your elite Mediterranean circle.</p>
         </div>
-        <motion.button
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={() => setShowCreateModal(true)}
-          className="w-full sm:w-auto px-6 py-3 bg-tomato-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-tomato-600/20"
+          className="h-14 px-10 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
         >
-          New Campaign
-        </motion.button>
+          Initialize Transmission
+        </button>
       </div>
 
+      {/* ── Campaign History List ────────────────── */}
       <div className="grid grid-cols-1 gap-4">
-        {campaigns.length === 0 ? (
-          <div className="bg-wood-800 rounded-3xl py-16 text-center border border-wood-700">
-            <span className="text-4xl mb-4 block">✉️</span>
-            <p className="text-xs font-black uppercase tracking-widest text-wood-400">No active campaigns</p>
-          </div>
-        ) : (
-          campaigns.map((campaign) => (
-            <motion.div
-              key={campaign._id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-wood-800 rounded-2xl p-5 border border-wood-700 hover:border-wood-600 transition-colors"
-            >
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h4 className="text-white font-bold truncate text-sm sm:text-base">{campaign.name}</h4>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${campaign.status === 'sent' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-wood-700 text-wood-400 border border-wood-600'}`}>
-                      {campaign.status}
-                    </span>
-                  </div>
-                  <p className="text-wood-400 text-xs italic truncate">"{campaign.subject}"</p>
-                  <div className="flex items-center gap-4 mt-3 text-[10px] text-wood-500 font-bold uppercase tracking-widest">
-                    <span>📅 {new Date(campaign.createdAt).toLocaleDateString()}</span>
-                    {campaign.stats?.totalRecipients > 0 && <span>👥 {campaign.stats.totalRecipients} Recipients</span>}
-                  </div>
-                </div>
-
-                {campaign.stats?.totalRecipients > 0 && (
-                  <div className="flex gap-4 p-3 bg-wood-900/50 rounded-xl border border-wood-700/50">
-                    <div className="text-center min-w-[60px]">
-                      <div className="text-sm font-black text-white">{campaign.stats.totalRecipients}</div>
-                      <div className="text-[8px] text-wood-500 uppercase font-black mt-0.5">Reach</div>
-                    </div>
-                    <div className="text-center min-w-[60px]">
-                      <div className="text-sm font-black text-basil-400">{Math.round((campaign.stats.delivered / campaign.stats.totalRecipients) * 100) || 0}%</div>
-                      <div className="text-[8px] text-wood-500 uppercase font-black mt-0.5">Success</div>
-                    </div>
-                  </div>
-                )}
-              </div>
+        <AnimatePresence mode="popLayout">
+          {campaigns.length === 0 ? (
+            <motion.div layout className="py-24 text-center bg-white rounded-[3rem] border border-[rgba(26,20,16,0.06)] shadow-sm">
+              <span className="text-5xl mb-6 block grayscale opacity-30">✉️</span>
+              <h4 className="font-display font-black text-2xl italic text-[#1A1410]">Registry Clear</h4>
+              <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#9B8D74] mt-2">No active dispatches in queue.</p>
             </motion.div>
-          ))
-        )}
+          ) : (
+            campaigns.map((campaign) => (
+              <motion.div
+                key={campaign._id}
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-3xl p-6 border border-[rgba(26,20,16,0.06)] hover:border-ember-200 hover:shadow-xl hover:shadow-[#1A1410]/5 transition-all group"
+              >
+                <div className="flex flex-col md:flex-row justify-between md:items-center gap-6">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-4 mb-2">
+                      <h4 className="text-[#1A1410] font-display font-black text-xl italic group-hover:text-ember-600 transition-colors truncate">{campaign.name}</h4>
+                      <span className={`px-3 py-1 rounded-full font-mono text-[8px] font-black uppercase tracking-widest border shadow-sm ${campaign.status === 'sent' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-[#FAFAF8] text-[#9B8D74] border-[rgba(26,20,16,0.06)]'
+                        }`}>
+                        {campaign.status}
+                      </span>
+                    </div>
+                    <p className="text-[#9B8D74] text-xs font-medium italic truncate block">Subject: {campaign.subject}</p>
+                    <div className="flex items-center gap-4 mt-4 font-mono text-[9px] font-black uppercase tracking-widest text-[#9B8D74]/60">
+                      <span className="flex items-center gap-1.5"><span className="opacity-40">CAL</span> {new Date(campaign.createdAt).toLocaleDateString()}</span>
+                      {campaign.stats?.totalRecipients > 0 && <span className="flex items-center gap-1.5"><span className="opacity-40">GRP</span> {campaign.stats.totalRecipients} Contacts</span>}
+                    </div>
+                  </div>
+
+                  {campaign.stats?.totalRecipients > 0 && (
+                    <div className="flex gap-6 p-5 bg-[#FAFAF8] rounded-[1.5rem] border border-[rgba(26,20,16,0.03)] shadow-inner">
+                      <div className="text-center min-w-[70px]">
+                        <div className="font-display font-black text-2xl italic text-[#1A1410]">{campaign.stats.totalRecipients}</div>
+                        <div className="font-mono text-[8px] text-[#9B8D74] uppercase font-black mt-1">Cohort</div>
+                      </div>
+                      <div className="text-center min-w-[70px]">
+                        <div className="font-display font-black text-2xl italic text-emerald-600">{Math.round((campaign.stats.delivered / campaign.stats.totalRecipients) * 100) || 0}%</div>
+                        <div className="font-mono text-[8px] text-[#9B8D74] uppercase font-black mt-1">Efficacy</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))
+          )}
+        </AnimatePresence>
       </div>
 
+      {/* ── Composition Studio Modal ──────────────── */}
       <AnimatePresence>
         {showCreateModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] p-3 flex items-end sm:items-center justify-center shadow-2xl" onClick={() => setShowCreateModal(false)}>
+          <div className="fixed inset-0 bg-[#1A1410]/40 backdrop-blur-md z-[210] p-4 flex items-center justify-center shadow-2xl" onClick={() => setShowCreateModal(false)}>
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="bg-wood-800 w-full max-w-2xl rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-wood-700 p-6 sm:p-8 max-h-[95vh] overflow-y-auto"
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 200 }}
+              className="bg-white w-full max-w-3xl rounded-[4rem] border border-[rgba(26,20,16,0.06)] p-12 max-h-[90vh] overflow-y-auto scrollbar-hide shadow-2xl relative"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-display font-black text-white">New Campaign</h3>
-                <button onClick={() => setShowCreateModal(false)} className="w-9 h-9 bg-wood-700 rounded-full flex items-center justify-center text-wood-300">✕</button>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#1A1410]" />
+              <div className="flex justify-between items-center mb-10">
+                <h3 className="text-4xl font-display font-black italic text-[#1A1410] leading-none">Campaign Studio</h3>
+                <button onClick={() => setShowCreateModal(false)} className="w-12 h-12 bg-[#FAFAF8] rounded-full flex items-center justify-center text-[#9B8D74] hover:bg-rose-500 hover:text-white transition-all font-bold">✕</button>
               </div>
 
-              <form className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest pl-1">Campaign ID</label>
-                    <input type="text" value={newCampaign.name} onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })} className="w-full px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500" placeholder="e.g. Summer Weekend Ops" />
+                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Campaign Identifier</label>
+                    <input type="text" value={newCampaign.name} onChange={(e) => setNewCampaign({ ...newCampaign, name: e.target.value })} className="w-full h-14 px-6 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-bold outline-none focus:bg-white focus:border-ember-500 transition-all shadow-sm" placeholder="e.g. Authentic Weekend Vol.1" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest pl-1">Design Vibe</label>
-                    <select value={newCampaign.template} onChange={(e) => setNewCampaign({ ...newCampaign, template: e.target.value })} className="w-full px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500 appearance-none">
-                      <option value="custom">Standard Pizza Blast</option>
-                      <option value="promotion">Flash Deal Layout</option>
-                      <option value="newsletter">Weekly Roundup</option>
-                    </select>
+                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Visual Protocol</label>
+                    <div className="relative">
+                      <select value={newCampaign.template} onChange={(e) => setNewCampaign({ ...newCampaign, template: e.target.value })} className="w-full h-14 px-6 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-black text-[10px] uppercase tracking-widest outline-none appearance-none cursor-pointer focus:bg-white focus:border-emerald-500 transition-all shadow-sm">
+                        <option value="custom">Standard Pizza Selection</option>
+                        <option value="promotion">Elite Offer Blueprint</option>
+                        <option value="newsletter">Weekly Culinary Journal</option>
+                      </select>
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-[#9B8D74] text-[10px]">▼</div>
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest pl-1">Target Subject Line</label>
-                  <input type="text" value={newCampaign.subject} onChange={(e) => setNewCampaign({ ...newCampaign, subject: e.target.value })} className="w-full px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500" placeholder="Free Garlic Knots with any Large Pizza! 🧄" />
+                  <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Target Subject Descriptor</label>
+                  <input type="text" value={newCampaign.subject} onChange={(e) => setNewCampaign({ ...newCampaign, subject: e.target.value })} className="w-full h-14 px-6 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-black font-display text-xl italic outline-none focus:bg-white focus:border-ember-500 transition-all shadow-sm" placeholder="Ancient Flavors Await Your Table... 🍕" />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest pl-1">Message Content</label>
-                  <textarea rows={5} value={newCampaign.message} onChange={(e) => setNewCampaign({ ...newCampaign, message: e.target.value })} className="w-full px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500 resize-none" placeholder="Hey {{ customer_name }}, hope you're hungry!..." />
+                  <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Culinary Invitation (Message)</label>
+                  <textarea rows={5} value={newCampaign.message} onChange={(e) => setNewCampaign({ ...newCampaign, message: e.target.value })} className="w-full px-6 py-4 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-medium text-sm outline-none focus:bg-white focus:border-ember-500 transition-all shadow-sm resize-none" placeholder="Salute {{ customer_name }}, we've lit the ovens just for you..." />
                 </div>
 
-                <section className="space-y-3">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest">Target Audience</label>
-                    <span className="text-[10px] font-black text-tomato-500">{selectedCustomers.length} selected</span>
+                <section className="space-y-4">
+                  <div className="flex justify-between items-center px-1 border-b border-[rgba(26,20,16,0.06)] pb-2">
+                    <label className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74]">Selected Cohort</label>
+                    <span className="font-display font-black text-lg italic text-ember-600">{selectedCustomers.length} <span className="text-[9px] font-mono uppercase font-black opacity-40">Recipients</span></span>
                   </div>
-                  <div className="bg-wood-900/50 rounded-2xl border border-wood-700 overflow-hidden max-h-40 overflow-y-auto space-y-px">
+                  <div className="bg-[#FAFAF8] rounded-[2.5rem] border border-[rgba(26,20,16,0.06)] overflow-hidden max-h-48 overflow-y-auto scrollbar-hide shadow-inner divide-y divide-[rgba(26,20,16,0.03)]">
                     {customers.map((c) => (
-                      <label key={c._id} className="flex items-center gap-3 p-3 hover:bg-wood-700 transition-colors cursor-pointer border-b border-wood-800 last:border-0">
-                        <input type="checkbox" checked={selectedCustomers.some(sc => sc._id === c._id)} onChange={() => toggleCustomerSelection(c)} className="w-4 h-4 rounded border-wood-600 bg-wood-800 accent-tomato-600" />
+                      <label key={c._id} className="flex items-center gap-4 p-5 hover:bg-white transition-all cursor-pointer group">
+                        <div className="relative">
+                          <input type="checkbox" checked={selectedCustomers.some(sc => sc._id === c._id)} onChange={() => toggleCustomerSelection(c)} className="sr-only peer" />
+                          <div className="w-6 h-6 border-2 border-[rgba(26,20,16,0.1)] rounded-lg flex items-center justify-center transition-all peer-checked:bg-[#1A1410] peer-checked:border-black">
+                            <span className="text-white text-[10px] scale-0 peer-checked:scale-100 transition-transform">✓</span>
+                          </div>
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-white truncate">{c.name}</p>
-                          <p className="text-[10px] text-wood-500 truncate">{c.email}</p>
+                          <p className="text-sm font-bold text-[#1A1410] group-hover:text-ember-600 transition-colors truncate">{c.name}</p>
+                          <p className="font-mono text-[9px] uppercase font-black text-[#9B8D74] opacity-50 truncate tracking-tighter">{c.email}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[10px] font-black text-tomato-500">{c.loyalty?.points || 0} PTS</p>
-                          <p className="text-[9px] text-wood-400">$ {(c.totalSpent || 0).toFixed(0)}</p>
+                          <p className="font-display font-black text-lg italic text-ember-600 leading-none">{c.loyalty?.points || 0}</p>
+                          <p className="font-mono text-[8px] font-black uppercase text-[#9B8D74]">PTS</p>
                         </div>
                       </label>
                     ))}
                   </div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => setSelectedCustomers(customers)} className="text-[9px] font-black uppercase text-wood-400 hover:text-white transition-colors">Select All</button>
-                    <button type="button" onClick={() => setSelectedCustomers([])} className="text-[9px] font-black uppercase text-wood-400 hover:text-white transition-colors">Clear</button>
+                  <div className="flex gap-4 px-2">
+                    <button type="button" onClick={() => setSelectedCustomers(customers)} className="font-mono text-[9px] font-black uppercase text-[#9B8D74] hover:text-[#1A1410] transition-colors tracking-widest">Select Entire Pool</button>
+                    <button type="button" onClick={() => setSelectedCustomers([])} className="font-mono text-[9px] font-black uppercase text-[#9B8D74] hover:text-rose-500 transition-colors tracking-widest">Reset Registry</button>
                   </div>
                 </section>
 
-                <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                  <button type="button" onClick={handleSaveDraft} disabled={selectedCustomers.length === 0} className="w-full py-4 bg-wood-700 text-wood-300 rounded-2xl text-[10px] font-black uppercase tracking-widest disabled:opacity-30">Save Draft</button>
-                  <button type="button" onClick={handleSendCampaign} disabled={sendingEmail || selectedCustomers.length === 0} className="w-full sm:flex-[2] py-4 bg-tomato-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-tomato-600/30 flex items-center justify-center gap-2">
-                    {sendingEmail ? '🚀 Launching...' : '📣 Broadcast Campaign'}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                  <button type="button" onClick={handleSaveDraft} disabled={selectedCustomers.length === 0} className="h-16 bg-[#FAFAF8] text-[#9B8D74] rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-[#1A1410] transition-colors border border-[rgba(26,20,16,0.06)] disabled:opacity-30">Archive Draft</button>
+                  <button type="button" onClick={handleSendCampaign} disabled={sendingEmail || selectedCustomers.length === 0} className="md:col-span-2 h-16 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-black/10 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50">
+                    {sendingEmail ? (
+                      <span className="flex items-center gap-3 animate-pulse">Launching Transmission <span className="w-1 h-1 bg-white rounded-full animate-ping" /></span>
+                    ) : (
+                      <>🚀 Commit & Broadcast Dispatch</>
+                    )}
                   </button>
                 </div>
               </form>

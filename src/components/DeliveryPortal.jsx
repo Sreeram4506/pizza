@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { io } from 'socket.io-client'
+import { useNavigate } from 'react-router-dom'
 
 export default function DeliveryPortal() {
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
     const [token, setToken] = useState(localStorage.getItem('adminToken') || '')
     const [isDriver, setIsDriver] = useState(false)
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (!token) {
@@ -78,9 +80,12 @@ export default function DeliveryPortal() {
                     <div className="text-4xl mb-4">🚫</div>
                     <h2 className="text-xl font-black text-white mb-2">Access Denied</h2>
                     <p className="text-sm text-wood-400 mb-6">You must be logged in as a delivery driver to view this portal.</p>
-                    <a href="/admin/login" className="block w-full py-3 bg-tomato-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-tomato-700 transition-colors">
+                    <button
+                        onClick={() => navigate('/admin/login')}
+                        className="block w-full py-3 bg-tomato-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-tomato-700 transition-colors"
+                    >
                         Driver Login
-                    </a>
+                    </button>
                 </div>
             </div>
         )
@@ -97,7 +102,7 @@ export default function DeliveryPortal() {
                 <button
                     onClick={() => {
                         localStorage.removeItem('adminToken')
-                        window.location.href = '/'
+                        navigate('/')
                     }}
                     className="p-2 text-wood-400 hover:text-white transition-colors"
                 >

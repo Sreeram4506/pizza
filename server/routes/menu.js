@@ -88,6 +88,14 @@ router.post('/categories', verifyAdmin, async (req, res) => {
     })
 
     await category.save()
+
+    // Emit WebSocket event
+    emitMenuUpdate(req, 'category_added', {
+      type: 'category_added',
+      category: category,
+      message: `New category "${name}" added`
+    })
+
     res.status(201).json(category)
   } catch (err) {
     res.status(500).json({ error: 'Failed to create category' })
@@ -110,6 +118,13 @@ router.put('/categories/:id', verifyAdmin, async (req, res) => {
       return res.status(404).json({ error: 'Category not found' })
     }
 
+    // Emit WebSocket event
+    emitMenuUpdate(req, 'category_updated', {
+      type: 'category_updated',
+      category: category,
+      message: `Category "${name}" updated`
+    })
+
     res.json(category)
   } catch (err) {
     res.status(500).json({ error: 'Failed to update category' })
@@ -129,6 +144,14 @@ router.delete('/categories/:id', verifyAdmin, async (req, res) => {
     if (!category) {
       return res.status(404).json({ error: 'Category not found' })
     }
+
+    // Emit WebSocket event
+    emitMenuUpdate(req, 'category_removed', {
+      type: 'category_removed',
+      categoryId: category._id,
+      categoryName: category.name,
+      message: `Category "${category.name}" removed`
+    })
 
     res.json({ message: 'Category deleted' })
   } catch (err) {

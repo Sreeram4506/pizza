@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 
 export default function PromotionalBanners() {
   const [banners, setBanners] = useState([])
@@ -11,7 +12,7 @@ export default function PromotionalBanners() {
     subtitle: '',
     description: '',
     imageUrl: '',
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#1A1410',
     textColor: '#FFFFFF',
     buttonText: '',
     buttonLink: '',
@@ -56,9 +57,10 @@ export default function PromotionalBanners() {
         setBanners([data, ...banners])
         setShowCreateModal(false)
         resetForm()
+        toast.success('Promotional asset launched')
       }
     } catch (err) {
-      console.error('Failed to create banner:', err)
+      toast.error('Launch failed')
     }
   }
 
@@ -77,23 +79,27 @@ export default function PromotionalBanners() {
         setShowCreateModal(false)
         setEditingBanner(null)
         resetForm()
+        toast.success('Asset refinements saved')
       }
     } catch (err) {
-      console.error('Failed to update banner:', err)
+      toast.error('Refinement failed')
     }
   }
 
   const handleDeleteBanner = async (id) => {
-    if (!confirm('Delete this promotion?')) return
+    if (!confirm('Liquidate this promotion?')) return
     try {
       const token = localStorage.getItem('adminToken')
       const response = await fetch(`/api/admin/promotional-banners/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      if (response.ok) setBanners(banners.filter(b => b._id !== id))
+      if (response.ok) {
+        setBanners(banners.filter(b => b._id !== id))
+        toast.success('Asset liquidated')
+      }
     } catch (err) {
-      console.error('Failed to delete banner:', err)
+      toast.error('Liquidation failed')
     }
   }
 
@@ -110,7 +116,7 @@ export default function PromotionalBanners() {
   const resetForm = () => {
     setNewBanner({
       title: '', subtitle: '', description: '', imageUrl: '',
-      backgroundColor: '#FF6B6B', textColor: '#FFFFFF',
+      backgroundColor: '#1A1410', textColor: '#FFFFFF',
       buttonText: '', buttonLink: '', position: 'top', size: 'medium',
       startDate: new Date().toISOString().split('T')[0],
       endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -120,168 +126,196 @@ export default function PromotionalBanners() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="animate-spin w-10 h-10 border-[3px] border-tomato-500 border-t-transparent rounded-full" />
-        <p className="text-xs font-bold text-wood-400 uppercase tracking-widest animate-pulse">Loading Banners...</p>
+      <div className="flex flex-col items-center justify-center min-h-[40vh] gap-6">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 border-2 border-amber-100 rounded-full" />
+          <div className="absolute inset-0 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <p className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Syncing Visual Assets</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8">
+      {/* ── Orchestration Header ─────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h3 className="text-xl font-display font-black text-white uppercase tracking-tight">Visual Promotions</h3>
-          <p className="text-wood-400 text-xs">Highlights for your homepage and menu</p>
+          <h3 className="text-3xl font-display font-black italic text-[#1A1410] leading-none mb-2">Visual Orchestration</h3>
+          <p className="text-[#9B8D74] text-xs font-medium">Curate the aesthetic highlights for your patrons.</p>
         </div>
-        <motion.button
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={() => { setEditingBanner(null); resetForm(); setShowCreateModal(true); }}
-          className="w-full sm:w-auto px-6 py-3 bg-tomato-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-tomato-600/20"
+          className="h-14 px-10 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95"
         >
-          New Banner
-        </motion.button>
+          Forge Visual Asset
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {banners.length === 0 ? (
-          <div className="bg-wood-800 rounded-3xl py-16 text-center border border-wood-700">
-            <span className="text-4xl mb-4 block">🖼️</span>
-            <p className="text-xs font-black uppercase tracking-widest text-wood-400">No active banners</p>
-          </div>
-        ) : (
-          banners.map((banner) => (
-            <motion.div
-              key={banner._id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-wood-800 rounded-2xl p-5 border border-wood-700 hover:border-wood-600 transition-all overflow-hidden"
-            >
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${banner.status === 'active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-wood-700 text-wood-400'}`}>
-                      {banner.status}
-                    </span>
-                    <span className="px-2 py-0.5 bg-tomato-600/10 text-tomato-400 border border-tomato-500/20 rounded-full text-[8px] font-black uppercase tracking-widest">
-                      {banner.position}
-                    </span>
-                  </div>
-                  <h4 className="text-lg font-black text-white mb-1">{banner.title}</h4>
-                  <p className="text-wood-400 text-xs line-clamp-2 h-8 leading-snug">{banner.description}</p>
-                  <div className="mt-4 flex items-center gap-4 text-[9px] font-black text-wood-500 uppercase tracking-widest">
-                    <span>📅 {new Date(banner.startDate).toLocaleDateString()} - {new Date(banner.endDate).toLocaleDateString()}</span>
-                    <span>⭐ Priority {banner.priority}</span>
-                  </div>
-                </div>
-
-                <div className="w-full md:w-64 flex flex-col gap-3">
-                  {/* Preview Card */}
-                  <div
-                    className="relative h-24 rounded-xl flex flex-col justify-center px-4 border border-white/10 shadow-inner overflow-hidden"
-                    style={{ backgroundColor: banner.backgroundColor }}
-                  >
-                    <div className="relative z-10">
-                      <p className="font-black text-sm leading-tight" style={{ color: banner.textColor }}>{banner.title}</p>
-                      <p className="text-[10px] opacity-80" style={{ color: banner.textColor }}>{banner.subtitle}</p>
-                    </div>
-                    {banner.buttonText && (
-                      <div className="absolute right-4 bottom-3 px-3 py-1 bg-white rounded-full text-[8px] font-bold" style={{ backgroundColor: banner.textColor, color: banner.backgroundColor }}>
-                        {banner.buttonText}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => handleEditBanner(banner)} className="flex-1 py-2.5 bg-wood-700 text-wood-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-wood-600 transition-colors">Edit</button>
-                    <button onClick={() => handleDeleteBanner(banner._id)} className="flex-1 py-2.5 bg-wood-900/50 text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/10 transition-colors">Del</button>
-                  </div>
-                </div>
-              </div>
+      {/* ── Asset Inventory ──────────────────────── */}
+      <div className="grid grid-cols-1 gap-6">
+        <AnimatePresence mode="popLayout">
+          {banners.length === 0 ? (
+            <motion.div layout className="py-24 text-center bg-white rounded-[3rem] border border-[rgba(26,20,16,0.06)] shadow-sm">
+              <span className="text-5xl mb-6 block grayscale opacity-30">🖼️</span>
+              <h4 className="font-display font-black text-2xl italic text-[#1A1410]">Gallery Empty</h4>
+              <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#9B8D74] mt-2">No active banners in current rotation.</p>
             </motion.div>
-          ))
-        )}
+          ) : (
+            banners.map((banner) => (
+              <motion.div
+                key={banner._id}
+                layout
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-[2.5rem] p-8 border border-[rgba(26,20,16,0.06)] hover:border-amber-200 hover:shadow-2xl hover:shadow-[#1A1410]/5 transition-all overflow-hidden relative group"
+              >
+                <div className="flex flex-col lg:flex-row gap-10">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap gap-3 mb-4">
+                      <span className={`px-3 py-1 rounded-full font-mono text-[8px] font-black uppercase tracking-widest border shadow-sm ${banner.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-[#FAFAF8] text-[#9B8D74] border-[rgba(26,20,16,0.06)]'
+                        }`}>
+                        {banner.status}
+                      </span>
+                      <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-full font-mono text-[8px] font-black uppercase tracking-widest italic shadow-sm">
+                        LOC: {banner.position}
+                      </span>
+                    </div>
+                    <h4 className="text-3xl font-display font-black italic text-[#1A1410] mb-3 group-hover:text-amber-600 transition-colors">{banner.title}</h4>
+                    <p className="text-[#9B8D74] text-xs font-medium line-clamp-2 leading-relaxed mb-6">{banner.description}</p>
+                    <div className="flex items-center gap-6 font-mono text-[9px] font-black uppercase tracking-widest text-[#9B8D74]/60">
+                      <span className="flex items-center gap-1.5"><span className="opacity-40">CAL</span> {new Date(banner.startDate).toLocaleDateString()} - {new Date(banner.endDate).toLocaleDateString()}</span>
+                      <span className="flex items-center gap-1.5"><span className="opacity-40">PRTY</span> {banner.priority}</span>
+                    </div>
+                  </div>
+
+                  {/* High-End Preview */}
+                  <div className="w-full lg:w-72 space-y-4">
+                    <div
+                      className="relative h-32 rounded-3xl flex flex-col justify-center px-6 border border-white/10 shadow-xl overflow-hidden group/preview"
+                      style={{ backgroundColor: banner.backgroundColor }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+                      <div className="relative z-10">
+                        <p className="font-display font-black text-lg italic leading-tight" style={{ color: banner.textColor }}>{banner.title}</p>
+                        <p className="font-mono text-[8px] font-black uppercase tracking-widest opacity-60 mt-1" style={{ color: banner.textColor }}>{banner.subtitle}</p>
+                      </div>
+                      {banner.buttonText && (
+                        <div
+                          className="absolute right-6 bottom-4 px-4 py-1.5 rounded-full font-mono text-[7px] font-black uppercase tracking-widest shadow-lg"
+                          style={{ backgroundColor: banner.textColor, color: banner.backgroundColor }}
+                        >
+                          {banner.buttonText}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleEditBanner(banner)} className="flex-1 h-11 bg-[#FAFAF8] text-[#1A1410] rounded-2xl font-black text-[9px] uppercase tracking-widest hover:bg-[#1A1410] hover:text-white transition-all border border-[rgba(26,20,16,0.06)]">Refine</button>
+                      <button onClick={() => handleDeleteBanner(banner._id)} className="w-11 h-11 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all border border-rose-100 shadow-sm">🗑️</button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </AnimatePresence>
       </div>
 
+      {/* ── Asset Orchestration Modal ────────────── */}
       <AnimatePresence>
         {showCreateModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] p-3 flex items-end sm:items-center justify-center shadow-2xl" onClick={() => setShowCreateModal(false)}>
+          <div className="fixed inset-0 bg-[#1A1410]/40 backdrop-blur-md z-[210] p-4 flex items-center justify-center shadow-2xl" onClick={() => setShowCreateModal(false)}>
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="bg-wood-800 w-full max-w-2xl rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-wood-700 p-6 sm:p-8 max-h-[95vh] overflow-y-auto"
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 200 }}
+              className="bg-white w-full max-w-3xl rounded-[4rem] border border-[rgba(26,20,16,0.06)] p-12 max-h-[90vh] overflow-y-auto scrollbar-hide shadow-2xl relative"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-display font-black text-white">{editingBanner ? 'Refine Offer' : 'Craft Promotion'}</h3>
-                <button onClick={() => setShowCreateModal(false)} className="w-9 h-9 bg-wood-700 rounded-full flex items-center justify-center text-wood-300">✕</button>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-amber-600" />
+              <div className="flex justify-between items-center mb-10">
+                <h3 className="text-4xl font-display font-black italic text-[#1A1410] leading-none">{editingBanner ? 'Refine Asset' : 'Forge Asset'}</h3>
+                <button onClick={() => setShowCreateModal(false)} className="w-12 h-12 bg-[#FAFAF8] rounded-full flex items-center justify-center text-[#9B8D74] hover:bg-rose-500 hover:text-white transition-all font-bold">✕</button>
               </div>
 
-              <form onSubmit={editingBanner ? handleUpdateBanner : handleCreateBanner} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form onSubmit={editingBanner ? handleUpdateBanner : handleCreateBanner} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest pl-1">Primary Title</label>
-                    <input type="text" value={newBanner.title} onChange={(e) => setNewBanner({ ...newBanner, title: e.target.value })} className="w-full px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500" placeholder="e.g. Flash Sale!" required />
+                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Primary Signature (Title)</label>
+                    <input type="text" value={newBanner.title} onChange={(e) => setNewBanner({ ...newBanner, title: e.target.value })} className="w-full h-14 px-6 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-black font-display text-xl italic outline-none focus:bg-white focus:border-amber-500 transition-all shadow-sm" placeholder="e.g. Flash Mediterranean Sale" required />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest pl-1">Secondary Text</label>
-                    <input type="text" value={newBanner.subtitle} onChange={(e) => setNewBanner({ ...newBanner, subtitle: e.target.value })} className="w-full px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500" placeholder="50% Off Everything" />
+                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Secondary Callout</label>
+                    <input type="text" value={newBanner.subtitle} onChange={(e) => setNewBanner({ ...newBanner, subtitle: e.target.value })} className="w-full h-14 px-6 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-bold outline-none focus:bg-white focus:border-amber-500 transition-all shadow-sm" placeholder="Exclusive To Elite Patrons" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest pl-1">Description</label>
-                  <textarea value={newBanner.description} onChange={(e) => setNewBanner({ ...newBanner, description: e.target.value })} className="w-full px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500 resize-none" rows={2} placeholder="Tell them what they're getting..." />
+                  <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Aesthetic Description</label>
+                  <textarea value={newBanner.description} onChange={(e) => setNewBanner({ ...newBanner, description: e.target.value })} className="w-full px-6 py-4 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-medium text-sm outline-none focus:bg-white focus:border-amber-500 transition-all shadow-sm resize-none" rows={2} placeholder="Briefly describe the visual intent..." />
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest">Background</label>
-                    <div className="flex items-center gap-2 bg-wood-700 p-2 border border-wood-600 rounded-xl">
-                      <input type="color" value={newBanner.backgroundColor} onChange={(e) => setNewBanner({ ...newBanner, backgroundColor: e.target.value })} className="w-8 h-8 rounded cursor-pointer p-0 border-none" />
-                      <span className="text-[10px] font-mono text-wood-400 uppercase">{newBanner.backgroundColor}</span>
+                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74]">Palette Base</label>
+                    <div className="flex items-center gap-4 h-14 bg-[#FAFAF8] px-4 border border-[rgba(26,20,16,0.06)] rounded-2xl shadow-inner group">
+                      <div
+                        className="w-10 h-10 rounded-xl cursor-pointer border-2 border-white shadow-lg overflow-hidden relative"
+                        style={{ backgroundColor: newBanner.backgroundColor }}
+                      >
+                        <input type="color" value={newBanner.backgroundColor} onChange={(e) => setNewBanner({ ...newBanner, backgroundColor: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer scale-150" />
+                      </div>
+                      <span className="font-mono text-[9px] font-black text-[#9B8D74] uppercase tracking-tighter">{newBanner.backgroundColor}</span>
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest">Text Color</label>
-                    <div className="flex items-center gap-2 bg-wood-700 p-2 border border-wood-600 rounded-xl">
-                      <input type="color" value={newBanner.textColor} onChange={(e) => setNewBanner({ ...newBanner, textColor: e.target.value })} className="w-8 h-8 rounded cursor-pointer p-0 border-none" />
-                      <span className="text-[10px] font-mono text-wood-400 uppercase">{newBanner.textColor}</span>
+                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74]">Text Tint</label>
+                    <div className="flex items-center gap-4 h-14 bg-[#FAFAF8] px-4 border border-[rgba(26,20,16,0.06)] rounded-2xl shadow-inner group">
+                      <div
+                        className="w-10 h-10 rounded-xl cursor-pointer border-2 border-white shadow-lg overflow-hidden relative"
+                        style={{ backgroundColor: newBanner.textColor }}
+                      >
+                        <input type="color" value={newBanner.textColor} onChange={(e) => setNewBanner({ ...newBanner, textColor: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer scale-150" />
+                      </div>
+                      <span className="font-mono text-[9px] font-black text-[#9B8D74] uppercase tracking-tighter">{newBanner.textColor}</span>
                     </div>
                   </div>
                   <div className="space-y-1.5 col-span-2">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest">Position</label>
-                    <select value={newBanner.position} onChange={(e) => setNewBanner({ ...newBanner, position: e.target.value })} className="w-full px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500 appearance-none">
-                      <option value="top">Top Header Bar</option>
-                      <option value="middle">In-Menu Divider</option>
-                      <option value="bottom">Footer Offer</option>
-                      <option value="hero">Hero Section Overlay</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest">Button Label & Link</label>
-                    <div className="flex gap-2">
-                      <input type="text" value={newBanner.buttonText} onChange={(e) => setNewBanner({ ...newBanner, buttonText: e.target.value })} className="flex-1 px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500" placeholder="Label (Order Now)" />
-                      <input type="text" value={newBanner.buttonLink} onChange={(e) => setNewBanner({ ...newBanner, buttonLink: e.target.value })} className="flex-1 px-4 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-sm outline-none focus:border-tomato-500" placeholder="Link (/menu)" />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-wood-500 uppercase tracking-widest">Validity Period</label>
-                    <div className="flex gap-2">
-                      <input type="date" value={newBanner.startDate} onChange={(e) => setNewBanner({ ...newBanner, startDate: e.target.value })} className="flex-1 px-3 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-[10px] outline-none" />
-                      <input type="date" value={newBanner.endDate} onChange={(e) => setNewBanner({ ...newBanner, endDate: e.target.value })} className="flex-1 px-3 py-3 bg-wood-700 border border-wood-600 rounded-xl text-white text-[10px] outline-none" />
+                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74]">Zonal Placement</label>
+                    <div className="relative">
+                      <select value={newBanner.position} onChange={(e) => setNewBanner({ ...newBanner, position: e.target.value })} className="w-full h-14 px-6 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-black text-[10px] uppercase tracking-widest outline-none appearance-none cursor-pointer focus:bg-white focus:border-amber-500 transition-all shadow-sm">
+                        <option value="top">Celestial Header</option>
+                        <option value="middle">Inter-Menu Nexus</option>
+                        <option value="bottom">Foundational Footer</option>
+                        <option value="hero">Heroic Overlay</option>
+                      </select>
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-[#9B8D74] text-[10px]">▼</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-4 bg-wood-700 text-wood-300 rounded-2xl text-[10px] font-black uppercase tracking-widest">Discard</button>
-                  <button type="submit" className="flex-[2] py-4 bg-tomato-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-tomato-600/30">
-                    {editingBanner ? 'Save Refinements' : 'Launch Promotion'}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-1.5">
+                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Action Registry & URI</label>
+                    <div className="flex gap-4">
+                      <input type="text" value={newBanner.buttonText} onChange={(e) => setNewBanner({ ...newBanner, buttonText: e.target.value })} className="flex-1 h-14 px-6 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-bold outline-none focus:bg-white focus:border-amber-500 transition-all shadow-sm" placeholder="Label (Select)" />
+                      <input type="text" value={newBanner.buttonLink} onChange={(e) => setNewBanner({ ...newBanner, buttonLink: e.target.value })} className="flex-1 h-14 px-6 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-bold outline-none focus:bg-white focus:border-amber-500 transition-all shadow-sm" placeholder="URI (/nexus)" />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Temporal Duration</label>
+                    <div className="flex gap-4">
+                      <input type="date" value={newBanner.startDate} onChange={(e) => setNewBanner({ ...newBanner, startDate: e.target.value })} className="flex-1 h-14 px-4 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-mono text-[10px] outline-none" />
+                      <input type="date" value={newBanner.endDate} onChange={(e) => setNewBanner({ ...newBanner, endDate: e.target.value })} className="flex-1 h-14 px-4 bg-[#FAFAF8] border border-[rgba(26,20,16,0.06)] rounded-2xl text-[#1A1410] font-mono text-[10px] outline-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+                  <button type="button" onClick={() => setShowCreateModal(false)} className="h-16 bg-[#FAFAF8] text-[#9B8D74] rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-rose-500 transition-colors border border-[rgba(26,20,16,0.06)]">Discard</button>
+                  <button type="submit" className="md:col-span-2 h-16 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-black/10 hover:shadow-glow hover:shadow-amber-500/10 active:scale-95">
+                    {editingBanner ? 'Apply Refined Protocols' : 'Commit & Launch Asset'}
                   </button>
                 </div>
               </form>

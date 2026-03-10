@@ -50,172 +50,209 @@ export default function Dashboard() {
     }
   }
 
-  const statusColor = (status) => {
+  const getStatusStyle = (status) => {
     const map = {
-      confirmed: 'bg-blue-500/20 text-blue-400',
-      preparing: 'bg-yellow-500/20 text-yellow-400',
-      ready: 'bg-purple-500/20 text-purple-400',
-      delivered: 'bg-green-500/20 text-green-400',
+      confirmed: 'bg-blue-50 text-blue-700 border-blue-100',
+      preparing: 'bg-amber-50 text-amber-700 border-amber-100',
+      ready: 'bg-purple-50 text-purple-700 border-purple-100',
+      delivered: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+      cancelled: 'bg-rose-50 text-rose-700 border-rose-100',
     }
-    return map[status] || 'bg-red-500/20 text-red-400'
+    return map[status] || 'bg-slate-50 text-slate-700 border-slate-100'
   }
 
   const statCards = [
-    { label: 'Today Revenue', value: `$${stats.todayRevenue.toFixed(2)}`, icon: '💰', color: 'text-green-400', bg: 'bg-green-400/10' },
-    { label: 'Today Orders', value: stats.todayOrders.toString(), icon: '📋', color: 'text-tomato-400', bg: 'bg-tomato-400/10' },
-    { label: 'Avg Order', value: `$${stats.avgOrderValue.toFixed(2)}`, icon: '🛒', color: 'text-amber-400', bg: 'bg-amber-400/10' },
-    { label: 'Total Orders', value: stats.totalOrders.toString(), icon: '📊', color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { label: 'Customers', value: stats.activeCustomers.toString(), icon: '👥', color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { label: 'Pending', value: stats.pendingOrders.toString(), icon: '⏳', color: 'text-orange-400', bg: 'bg-orange-400/10' },
+    { label: 'Today Sales', value: `$${stats.todayRevenue.toFixed(2)}`, icon: '💎', color: 'text-[#1A1410]', suffix: 'USD' },
+    { label: 'Live Orders', value: stats.todayOrders.toString(), icon: '📋', color: 'text-ember-600', suffix: 'Items' },
+    { label: 'Basket Avg', value: `$${stats.avgOrderValue.toFixed(2)}`, icon: '🛒', color: 'text-[#1A1410]', suffix: 'Val' },
+    { label: 'Retention', value: stats.activeCustomers.toString(), icon: '👥', color: 'text-[#1A1410]', suffix: 'Users' },
+    { label: 'Preparation', value: stats.pendingOrders.toString(), icon: '⏳', color: 'text-ember-600', suffix: 'Wait' },
+    { label: 'Performance', value: 'High', icon: '📈', color: 'text-[#1A1410]', suffix: 'Ops' },
   ]
 
   const quickActions = [
-    { label: '+ Add Item', href: '/admin/menu', color: 'bg-green-600 hover:bg-green-700', icon: '🍕' },
-    { label: 'View Orders', href: '/admin/orders', color: 'bg-tomato-600 hover:bg-tomato-700', icon: '📋' },
-    { label: 'Customers', href: '/admin/customers', color: 'bg-wood-700 hover:bg-wood-600', icon: '👥' },
-    { label: 'Analytics', href: '/admin/analytics', color: 'bg-wood-700 hover:bg-wood-600', icon: '📈' },
+    { label: 'Manage Kitchen', href: '/admin/menu', icon: '🍕', desc: 'Update menu & stock' },
+    { label: 'Track Orders', href: '/admin/orders', icon: '📋', desc: 'Live KDS view' },
+    { label: 'Customer Base', href: '/admin/customers', icon: '👥', desc: 'Loyalty & profiles' },
+    { label: 'Business Insights', href: '/admin/analytics', icon: '📈', desc: 'Revenue reports' },
   ]
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="animate-spin w-10 h-10 border-[3px] border-tomato-500 border-t-transparent rounded-full" />
-        <p className="text-xs font-bold text-wood-400 uppercase tracking-widest animate-pulse">Loading...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-4 border-ember-100 rounded-full" />
+          <div className="absolute inset-0 border-4 border-ember-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] animate-pulse">Synchronizing Data</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 pb-20 lg:pb-6">
-      {/* ── Header ───────────────────────── */}
-      <div className="flex items-start justify-between gap-3">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
+      {/* ── Dashboard Invitation ─────────────────── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-display font-black text-white leading-tight">Dashboard</h2>
-          <p className="text-wood-400 mt-1 text-sm">Welcome back! Here's today's overview.</p>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-8 h-[1px] bg-ember-600" />
+            <span className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-ember-600">Enterprise Suite</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-display font-black italic text-[#1A1410] leading-tight">
+            Daily Insights
+          </h2>
+          <p className="text-[#9B8D74] mt-2 font-medium tracking-tight">Your restaurant operations at a premium glance.</p>
         </div>
-        <motion.button
-          onClick={fetchDashboardData}
-          whileTap={{ scale: 0.95 }}
-          className="flex-shrink-0 p-2.5 bg-wood-700 hover:bg-wood-600 rounded-xl transition-colors text-wood-300 hover:text-white"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </motion.button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={fetchDashboardData}
+            className="w-12 h-12 bg-white border border-[rgba(26,20,16,0.06)] rounded-2xl flex items-center justify-center text-[#9B8D74] hover:text-ember-600 transition-all shadow-sm hover:shadow-md active:scale-95"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+          </button>
+          <button
+            onClick={() => navigate('/admin/orders')}
+            className="h-12 px-6 bg-[#1A1410] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all active:scale-95 flex items-center gap-3"
+          >
+            <span className="w-1.5 h-1.5 bg-ember-400 rounded-full animate-pulse" />
+            Live Monitor
+          </button>
+        </div>
       </div>
 
-      {/* ── Stats Grid ───────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      {/* ── Key Performance Indicators (KPIs) ────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {statCards.map((stat, i) => (
           <motion.div
             key={stat.label}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="bg-wood-800 rounded-2xl p-4 border border-wood-700 hover:border-wood-600 transition-colors"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.05, duration: 0.5 }}
+            className="bg-white rounded-3xl p-6 border border-[rgba(26,20,16,0.06)] shadow-sm hover:shadow-xl hover:shadow-[#1A1410]/5 transition-all group"
           >
-            <div className={`w-9 h-9 ${stat.bg} rounded-xl flex items-center justify-center mb-3`}>
-              <span className="text-lg">{stat.icon}</span>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-2xl grayscale group-hover:grayscale-0 transition-all duration-500">{stat.icon}</span>
+              <span className="font-mono text-[9px] font-black tracking-widest text-[#9B8D74] opacity-40 italic">{stat.suffix}</span>
             </div>
-            <p className={`text-xl sm:text-2xl font-black ${stat.color} leading-none`}>{stat.value}</p>
-            <p className="text-wood-400 text-xs mt-1 leading-tight">{stat.label}</p>
+            <div className="space-y-0.5">
+              <p className={`text-3xl font-display font-black italic tracking-tight ${stat.color}`}>{stat.value}</p>
+              <label className="block font-mono text-[9px] font-black uppercase tracking-[0.2em] text-[#9B8D74] mt-1">{stat.label}</label>
+            </div>
           </motion.div>
         ))}
       </div>
 
-      {/* ── Quick Actions ─────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {quickActions.map((action) => (
-          <motion.a
-            key={action.label}
-            href={action.href}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            className={`${action.color} text-white rounded-2xl px-4 py-3.5 font-bold text-sm transition-colors flex items-center gap-2 justify-center`}
-          >
-            <span>{action.icon}</span>
-            <span>{action.label}</span>
-          </motion.a>
-        ))}
-      </div>
-
-      {/* ── Recent Orders + Popular Items ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Recent Orders */}
-        <div className="bg-wood-800 rounded-2xl border border-wood-700 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-wood-700">
-            <h3 className="font-bold text-white flex items-center gap-2">
-              <span>📋</span> Recent Orders
+      {/* ── Interactive Hub ────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Recent Activity */}
+        <div className="lg:col-span-8 space-y-4">
+          <div className="flex items-center justify-between mb-2 px-2">
+            <h3 className="font-display font-black text-2xl italic flex items-center gap-3">
+              Recent Transactions
             </h3>
-            <a href="/admin/orders" className="text-tomato-400 text-xs font-semibold hover:text-tomato-300">
-              View All →
-            </a>
+            <button onClick={() => navigate('/admin/orders')} className="font-mono text-[10px] font-black uppercase tracking-widest text-ember-600 hover:text-ember-700">Explore Archives →</button>
           </div>
-          <div className="divide-y divide-wood-700/60">
-            {recentOrders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-wood-500">
-                <span className="text-4xl mb-2">📭</span>
-                <p className="text-xs font-bold uppercase tracking-wider">No recent orders</p>
-              </div>
-            ) : (
-              recentOrders.map((order) => (
-                <div key={order._id} className="flex items-center justify-between px-5 py-3.5 hover:bg-wood-700/40 transition-colors">
-                  <div className="min-w-0">
-                    <p className="text-white font-bold text-sm truncate flex items-center gap-2">
-                      #{order.orderNumber}
-                      <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-widest ${order.type === 'delivery' ? 'bg-tomato-600/20 text-tomato-400' : 'bg-wood-600 text-wood-400'}`}>
-                        {order.type}
-                      </span>
-                    </p>
-                    <p className="text-wood-400 text-xs truncate mt-0.5">
-                      👤 {order.customerInfo?.name || 'Guest'}
-                      {order.type === 'delivery' && (
-                        <span className="text-wood-500 font-medium italic ml-2">
-                          📍 {typeof order.address === 'string' ? order.address : `${order.address?.street}`}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-3">
-                    <p className="text-tomato-400 font-black text-sm">${order.total?.toFixed(2)}</p>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${statusColor(order.status)}`}>
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
+
+          <div className="bg-white rounded-[2.5rem] border border-[rgba(26,20,16,0.06)] shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-[#FAFAF8] border-b border-[rgba(26,20,16,0.03)] font-mono text-[10px] font-black uppercase tracking-widest text-[#9B8D74]">
+                  <tr>
+                    <th className="px-6 py-5">Order #ID</th>
+                    <th className="px-6 py-5">Client Profile</th>
+                    <th className="px-6 py-5">Status</th>
+                    <th className="px-6 py-5 text-right">Summation</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[rgba(26,20,16,0.03)]">
+                  {recentOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="py-20 text-center">
+                        <div className="flex flex-col items-center opacity-30">
+                          <span className="text-4xl mb-4">📜</span>
+                          <p className="font-mono text-[10px] uppercase font-black tracking-widest">No Recent activity recorded</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    recentOrders.map((order) => (
+                      <tr key={order._id} className="hover:bg-[#FAFAF8] transition-colors group">
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-[#F5F3EF] flex items-center justify-center text-xs font-black text-[#1A1410]">#</div>
+                            <span className="font-mono text-xs font-bold text-[#1A1410]">{order.orderNumber}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div>
+                            <p className="font-bold text-sm text-[#1A1410]">{order.customerInfo?.name || 'V.I.P. Guest'}</p>
+                            <p className="text-[10px] font-mono text-[#9B8D74] italic uppercase tracking-tighter opacity-70">{order.type} Service</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${getStatusStyle(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <span className="font-display font-black text-lg italic text-[#1A1410]">${order.total?.toFixed(2)}</span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        {/* Popular Items */}
-        <div className="bg-wood-800 rounded-2xl border border-wood-700 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-wood-700">
-            <h3 className="font-bold text-white flex items-center gap-2">
-              <span>🔥</span> Popular Items
-            </h3>
-            <a href="/admin/menu" className="text-tomato-400 text-xs font-semibold hover:text-tomato-300">
-              Manage →
-            </a>
-          </div>
-          <div className="divide-y divide-wood-700/60">
-            {popularItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-wood-500">
-                <span className="text-4xl mb-2">📊</span>
-                <p className="text-xs font-bold uppercase tracking-wider">No data available</p>
-              </div>
-            ) : (
-              popularItems.map((item, index) => (
-                <div key={index} className="flex items-center gap-3 px-5 py-3.5 hover:bg-wood-700/40 transition-colors">
-                  <span className="w-7 h-7 bg-tomato-600 rounded-lg flex items-center justify-center text-white font-black text-xs flex-shrink-0">
-                    {index + 1}
-                  </span>
-                  <span className="text-white font-medium text-sm flex-1 truncate">{item.name}</span>
-                  <span className="text-wood-400 text-xs flex-shrink-0 bg-wood-700 px-2.5 py-1 rounded-full">{item.count} orders</span>
+        {/* Intelligence & Actions */}
+        <div className="lg:col-span-4 space-y-8">
+          <section>
+            <h4 className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] mb-4 px-2">Quick Commands</h4>
+            <div className="grid grid-cols-1 gap-3">
+              {quickActions.map((action) => (
+                <motion.button
+                  key={action.label}
+                  onClick={() => navigate(action.href)}
+                  whileHover={{ x: 6 }}
+                  className="bg-white p-5 rounded-3xl border border-[rgba(26,20,16,0.06)] shadow-sm hover:shadow-md transition-all text-left flex items-center gap-4 group"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-[#F5F3EF] flex items-center justify-center text-xl group-hover:bg-[#1A1410] group-hover:text-white transition-all">
+                    {action.icon}
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-[#1A1410]">{action.label}</p>
+                    <p className="text-[10px] font-medium text-[#9B8D74]">{action.desc}</p>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h4 className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#9B8D74] mb-4 px-2">Trending Favorites</h4>
+            <div className="bg-white rounded-[2rem] border border-[rgba(26,20,16,0.06)] shadow-sm divide-y divide-[rgba(26,20,16,0.03)] overflow-hidden">
+              {popularItems.length === 0 ? (
+                <div className="p-12 text-center opacity-20">
+                  <p className="font-mono text-[9px] font-black">Waiting for Data...</p>
                 </div>
-              ))
-            )}
-          </div>
+              ) : (
+                popularItems.map((item, index) => (
+                  <div key={index} className="px-6 py-4 flex items-center justify-between group hover:bg-[#FAFAF8] transition-colors">
+                    <div className="flex items-center gap-4">
+                      <span className="font-display font-black italic text-ember-600 text-lg">{index + 1}</span>
+                      <span className="font-bold text-sm text-[#1A1410] truncate max-w-[120px]">{item.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[10px] font-black text-[#9B8D74]">{item.count} Sold</span>
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-glow shadow-green-500/50" />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
         </div>
       </div>
     </div>

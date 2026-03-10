@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { io } from 'socket.io-client'
+import { useNavigate } from 'react-router-dom'
 import { requestNotificationPermission, showPushNotification, playNotificationSound } from '../utils/notifications'
 
 export default function OrderNotifications() {
   const [notifications, setNotifications] = useState([])
   const [isVisible, setIsVisible] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Connect to WebSocket
@@ -127,7 +129,7 @@ export default function OrderNotifications() {
                 Clear All
               </button>
               <button
-                onClick={() => window.location.href = '/admin/orders'}
+                onClick={() => navigate('/admin/orders')}
                 className="text-tomato-600 hover:text-tomato-700 text-sm font-medium"
               >
                 View Orders →

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 
 export default function OrderTracker() {
   const [orderNumber, setOrderNumber] = useState('')
   const [orderStatus, setOrderStatus] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   const trackOrder = async (e) => {
     e.preventDefault()
@@ -94,7 +96,7 @@ export default function OrderTracker() {
   }
 
   return (
-    <div className="min-h-screen bg-mozzarella-100 py-12">
+    <div className="min-h-screen bg-mozzarella-100 pt-32 pb-12">
       <div className="container mx-auto px-6 max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -209,7 +211,7 @@ export default function OrderTracker() {
                 <h3 className="font-semibold text-wood-700 mb-2">Customer Information</h3>
                 <div className="bg-mozzarella-100 p-4 rounded-lg">
                   <p><strong>Name:</strong> {orderStatus.customerName}</p>
-                  <p><strong>Order Time:</strong> {orderStatus.orderTime.toLocaleString()}</p>
+                  <p><strong>Order Time:</strong> {new Date(orderStatus.orderTime).toLocaleString()}</p>
                 </div>
               </div>
 
@@ -236,13 +238,13 @@ export default function OrderTracker() {
             {/* Action Buttons */}
             <div className="mt-6 flex gap-4">
               <button
-                onClick={() => window.location.href = '/contact'}
+                onClick={() => navigate('/#contact')}
                 className="flex-1 py-3 bg-wood-200 text-wood-800 font-semibold rounded-lg hover:bg-wood-300 transition-colors"
               >
                 Contact Restaurant
               </button>
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => navigate('/')}
                 className="flex-1 py-3 bg-tomato-600 text-white font-semibold rounded-lg hover:bg-tomato-700 transition-colors"
               >
                 Order Again

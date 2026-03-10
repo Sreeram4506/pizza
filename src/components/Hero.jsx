@@ -2,12 +2,14 @@ import { useRef } from 'react'
 import { motion } from 'framer-motion'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
+import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 import BannerDisplay from './BannerDisplay'
 
 export default function Hero() {
   const containerRef = useRef(null)
   const { settings } = useSettings()
+  const navigate = useNavigate()
 
   useGSAP(() => {
     if (!containerRef.current) return
@@ -87,8 +89,8 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => document.querySelector('#gallery')?.scrollIntoView({ behavior: 'smooth' })}
-                className="group px-8 py-3.5 bg-[#C1440E] text-white text-sm font-body font-semibold tracking-[0.1em] uppercase rounded-full flex items-center gap-2 transition-shadow shadow-lg shadow-[#C1440E]/25 hover:shadow-xl hover:shadow-[#C1440E]/40"
+                onClick={() => navigate('/menu')}
+                className="group px-8 py-3.5 bg-red-600 text-white text-sm font-body font-semibold tracking-[0.1em] uppercase rounded-full flex items-center gap-2 transition-shadow shadow-lg shadow-red-600/25 hover:shadow-xl hover:shadow-red-600/40"
               >
                 Explore Menu
                 <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
