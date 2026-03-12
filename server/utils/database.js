@@ -1,12 +1,12 @@
 import mongoose from 'mongoose'
 import { config } from '../config.js'
 
-let isConnected = false
+export let isConnected = false
 
 export async function connectDatabase() {
   if (isConnected) {
     console.log('MongoDB already connected')
-    return
+    return true
   }
 
   try {
@@ -14,32 +14,34 @@ export async function connectDatabase() {
     console.log('Connecting to MongoDB...')
 
     await mongoose.connect(mongoUri, {
-      // Connection options removed as they're deprecated in newer versions
+      serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
+      connectTimeoutMS: 10000,
     })
 
     isConnected = true
     console.log('MongoDB connected successfully')
 
-    // Handle connection errors
+    // Handle connection errors after initial connection
     mongoose.connection.on('error', (err) => {
       console.error('MongoDB connection error:', err)
+      isConnected = false
     })
 
     mongoose.connection.on('disconnected', () => {
       console.log('MongoDB disconnected. Attempting to reconnect...')
       isConnected = false
-      setTimeout(() => {
-        connectDatabase()
-      }, 5000)
     })
 
+    return true
   } catch (error) {
     console.error('Failed to connect to MongoDB:', error.message)
-    console.log('⚠️  MongoDB not available - some features will be limited')
-    console.log('Please ensure MongoDB is running or install MongoDB Community Server')
-
-    // Don't exit the process - allow the app to run with limited functionality
+    console.log('⚠️  MongoDB not available - falling back to mock data mode')
+    
+    // Disable buffering so queries fail immediately instead of hanging
+    mongoose.set('bufferCommands', false)
+    
     isConnected = false
+    return false
   }
 }
 

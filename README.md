@@ -1,129 +1,62 @@
-# Burger Blast - Premium Burger Shop Website
+# Pizza Blast - Premium Neapolitan Pizza Website
 
-A modern, premium fast-food burger restaurant website with smooth animations, responsive design, and an AI-powered chatbot for menu, orders, tracking, and customer support.
+A modern, premium Neapolitan pizza restaurant website with smooth animations, responsive design, and an AI-powered chatbot for menu, orders, tracking, and customer support.
 
-![Burger Blast](https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800)
+![Pizza Blast](https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=800)
 
 ## Features
 
-- **Premium Design**: Dark theme with warm food palette (orange, red, gold)
-- **Smooth Animations**: Framer Motion, GSAP, scroll-based reveals, 3D hover effects
-- **AI Chatbot**: Intent recognition for menu, orders, tracking, gift cards, FAQs
-- **Responsive**: Mobile-first design, works on all devices
-- **Fast**: Vite + React, optimized builds
+- **Premium Design**: Mediterranean aesthetic with high-end typography (Cormorant Garamond)
+- **Smooth Animations**: Framer Motion, GSAP, scroll-based reveals
+- **AI Chatbot**: NVIDIA-powered intent recognition for menu, orders, and support
+- **Real-time Updates**: Socket.io for order status and admin notifications
+- **Secure Payments**: Integrated with Stripe
+- **Admin Dashboard**: Full control over menu, orders, customers, and analytics
 
 ## Tech Stack
 
 - **Frontend**: React 18, Vite, Tailwind CSS, Framer Motion, GSAP
-- **Backend**: Node.js, Express
-- **Data**: JSON menu, in-memory order storage
+- **Backend**: Node.js, Express, Socket.io
+- **Database**: MongoDB (Mongoose)
+- **AI**: NVIDIA NIM (Meta Llama 3)
+- **Payments**: Stripe
 
 ## Quick Start
 
 ### Prerequisites
 
 - Node.js 18+ 
-- npm or yarn
+- MongoDB (Local or Atlas)
+- NVIDIA API Key (for Chatbot)
+- Stripe Keys (for Payments)
 
 ### Installation
 
 ```bash
-# Clone or navigate to project
-cd Website
-
 # Install dependencies
 npm install
+
+# Setup environment variables
+cp .env.example .env
+# Edit .env with your keys
 
 # Run both frontend and backend
 npm run dev
 ```
 
-This starts:
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
+## Production Readiness Checklist
 
-### Alternative: Run separately
+This project is equipped with production-grade features:
 
-```bash
-# Terminal 1 - Frontend
-npm run dev:frontend
+- [x] **Security**: Helmet, Rate Limiting, NoSQL Injection protection
+- [x] **Performance**: Response compression, MongoDB indexing
+- [x] **Reliability**: Centralized error handling, environment validation
+- [x] **Resilience**: Frontend Error Boundaries, Health check routes
+- [x] **Analytics**: Integrated dashboard for sales and customer behavior
 
-# Terminal 2 - Backend
-npm run dev:backend
-```
+## Deployment
 
-## Project Structure
-
-```
-Website/
-├── public/              # Static assets
-├── src/
-│   ├── components/      # React components
-│   │   ├── Navbar.jsx
-│   │   ├── Hero.jsx
-│   │   ├── About.jsx
-│   │   ├── BurgerGallery.jsx
-│   │   ├── ComboDeals.jsx
-│   │   ├── Testimonials.jsx
-│   │   ├── Contact.jsx
-│   │   ├── Footer.jsx
-│   │   └── Chatbot.jsx
-│   ├── context/
-│   │   └── ChatbotContext.jsx
-│   ├── data/
-│   │   └── menu.json    # Menu data
-│   ├── utils/
-│   │   └── chatbotLogic.js
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
-├── server/
-│   ├── routes/
-│   │   ├── menu.js
-│   │   └── orders.js
-│   ├── config.js
-│   └── index.js
-├── package.json
-├── vite.config.js
-├── tailwind.config.js
-└── README.md
-```
-
-## Chatbot Capabilities
-
-| Intent | Triggers | Response |
-|--------|----------|----------|
-| Menu | "menu", "burgers", "what do you have" | Shows burger list with prices |
-| Order | "order", "buy", "place order" | Order flow, popular items |
-| Track | "track", "order status" | Asks for order ID/phone |
-| Gift Cards | "gift card" | Shows amounts ($25-$200) |
-| Hours | "hours", "open" | Mon-Sun 10AM-11PM |
-| Location | "address", "where" | 123 Burger Street |
-| Contact | "phone", "email" | Contact details |
-| Delivery | "delivery" | Fee, min order |
-| Offers | "deals", "combos" | Combo deals |
-
-## API Endpoints
-
-- `GET /api/menu` - Full menu (burgers, combos, sides, drinks)
-- `GET /api/menu/burgers` - Burgers only
-- `POST /api/orders` - Create order
-- `GET /api/orders/:id` - Get order by ID
-- `GET /api/orders/track/:phone` - Track by phone
-
-## Build for Production
-
-```bash
-npm run build
-```
-
-Output in `dist/`. Serve with any static host. For full API support, deploy the Express server.
-
-## Customization
-
-- **Menu**: Edit `src/data/menu.json`
-- **Colors**: Edit `tailwind.config.js` (burger, primary colors)
-- **Restaurant info**: Update `restaurant` in `menu.json`
+Refer to [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions on deploying to **Vercel** (Frontend) and **Render** (Backend).
 
 ## License
 

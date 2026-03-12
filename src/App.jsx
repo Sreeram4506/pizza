@@ -107,14 +107,13 @@ function Home() {
 }
 
 function App() {
-  // Auto-wake Render backend
+  // Ensure backend is reachable (optional local check)
   useEffect(() => {
-    const wakeServer = () => {
-      fetch('https://pizzabackend-qzi1.onrender.com/health', { mode: 'no-cors' }).catch(() => { })
+    const checkServer = () => {
+      fetch('/health').catch(() => { })
     }
 
-    wakeServer()
-    setTimeout(wakeServer, 2000)
+    checkServer()
   }, [])
 
   return (

@@ -73,8 +73,8 @@ export default function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 flex flex-col ${scrolled
-        ? 'bg-white/90 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] shadow-sm'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 flex flex-col ${scrolled
+        ? 'bg-white/95 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] shadow-sm'
         : 'bg-transparent'
         }`}
     >
@@ -90,8 +90,8 @@ export default function Navbar() {
           {settings?.logo ? (
             <img src={settings.logo} alt="Logo" className="h-10 object-contain" />
           ) : (
-            <span className="font-sans font-black text-[22px] tracking-tight text-red-600 uppercase">
-              {settings?.restaurantName || 'Mustang Pizza'}
+            <span className={`font-sans font-black text-[22px] tracking-tight uppercase transition-colors duration-500 ${scrolled ? 'text-red-600' : 'text-white'}`}>
+              {settings?.restaurantName || 'Pizza Blast'}
             </span>
           )}
         </motion.a>
@@ -102,7 +102,11 @@ export default function Navbar() {
             <button
               key={link.label}
               onClick={(e) => handleNavClick(e, link)}
-              className="nav-link text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors duration-300"
+              className={`nav-link text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors duration-300 ${
+                scrolled
+                  ? 'text-[#5C554E] hover:text-[#1A1410]'
+                  : 'text-white/75 hover:text-white'
+              }`}
             >
               {link.label}
             </button>
@@ -113,7 +117,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2 sm:gap-6">
           {/* Cart Icon */}
           <motion.button
-            className="relative w-10 h-10 flex items-center justify-center text-[#5C554E] hover:text-[#1A1410] transition-colors"
+            className={`relative w-10 h-10 flex items-center justify-center transition-colors ${scrolled ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
             whileTap={{ scale: 0.95 }}
             onClick={() => openWithIntent('cart')}
           >
@@ -138,7 +142,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/profile')}
-                className="text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors nav-link"
+                className={`text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors nav-link ${scrolled ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
               >
                 Profile
               </motion.button>
@@ -146,7 +150,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleLogout}
-                className="text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors nav-link"
+                className={`text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors nav-link ${scrolled ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
               >
                 Logout
               </motion.button>
@@ -156,7 +160,7 @@ export default function Navbar() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/login')}
-              className="hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#5C554E] hover:text-[#1A1410] transition-colors nav-link"
+              className={`hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors nav-link ${scrolled ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
             >
               Login
             </motion.button>
@@ -167,14 +171,14 @@ export default function Navbar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/admin/login')}
-            className="hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase text-[#B8AA8F] hover:text-[#5C554E] transition-colors"
+            className={`hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors ${scrolled ? 'text-[#B8AA8F] hover:text-[#5C554E]' : 'text-white/40 hover:text-white/70'}`}
           >
             Admin
           </motion.button>
 
           {/* Mobile menu button */}
           <motion.button
-            className="lg:hidden w-10 h-10 flex items-center justify-center text-[#1A1410]"
+            className={`lg:hidden w-10 h-10 flex items-center justify-center transition-colors ${scrolled ? 'text-[#1A1410]' : 'text-white'}`}
             onClick={() => setMobileOpen(!mobileOpen)}
             whileTap={{ scale: 0.95 }}
           >

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { dirname } from 'path'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
+import mongoose from 'mongoose'
 import menuRoutes from './routes/menu.js'
 import orderRoutes from './routes/orders.js'
 import aiRoutes from './routes/ai.js'
@@ -20,10 +21,21 @@ import { connectDatabase } from './utils/database.js'
 import { runCleanup } from './utils/cleanup.js'
 import { extractTenant, requireTenant } from './middleware/tenant.js'
 import { verifyCustomer } from './middleware/auth.js'
+import { validateEnv } from './utils/envValidator.js'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
+import mongoSanitize from 'express-mongo-sanitize'
+import compression from 'compression'
+import morgan from 'morgan'
+import errorHandler, { AppError } from './middleware/error.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
 const httpServer = createServer(app)
+
+// Validate environment variables
+validateEnv()
+
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.SOCKET_IO_CORS_ORIGIN || 'http://localhost:5173',
@@ -35,10 +47,38 @@ const io = new Server(httpServer, {
 app.set('io', io)
 
 // Connect to MongoDB
-connectDatabase().then(() => {
-  // Run one-time cleanup to fix typos and remove placeholders
-  runCleanup()
+connectDatabase().then((success) => {
+  if (success) {
+    // Run one-time cleanup to fix typos and remove placeholders
+    runCleanup()
+  }
 })
+
+// 1) GLOBAL MIDDLEWARES
+// Set security HTTP headers
+app.use(helmet())
+
+// Development logging
+if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+  app.use(morgan('dev'))
+}
+
+// Limit requests from same API
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!'
+})
+app.use('/api', limiter)
+
+// Body parser, reading data from body into req.body
+app.use(express.json({ limit: '10kb' }))
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize())
+
+// Compress responses
+app.use(compression())
 
 // Configure CORS
 const allowedOrigins = [
@@ -59,14 +99,24 @@ app.use(cors({
   },
   credentials: true
 }))
-app.use(express.json())
 
 // Health check for Deployment
-app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }))
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date(),
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    env: process.env.NODE_ENV || 'development'
+  })
+})
 
 // Root health check for Render uptime monitoring
 app.get('/health', (req, res) => {
-  res.status(200).send("OK")
+  if (mongoose.connection.readyState === 1) {
+    res.status(200).send("OK")
+  } else {
+    res.status(503).send("Service Unavailable: Database Disconnected")
+  }
 })
 
 // Root API route
@@ -100,6 +150,14 @@ app.use('/api/cart', requireTenant, verifyCustomer, cartRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/payments', paymentRoutes)
 app.use('/api/delivery', requireTenant, deliveryRoutes)
+
+// Handle 404 for API routes
+app.all('/api/*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
+})
+
+// Global Error Handling Middleware
+app.use(errorHandler)
 
 // WebSocket connection handling
 io.on('connection', (socket) => {

@@ -26,8 +26,10 @@ export default function MenuPage() {
                     fetch('/api/menu/categories'),
                     fetch('/api/menu/items')
                 ])
-                const cats = await catRes.json()
-                const items = await itemRes.json()
+                const rawCats = await catRes.json()
+                const rawItems = await itemRes.json()
+                const cats = Array.isArray(rawCats) ? rawCats : []
+                const items = Array.isArray(rawItems) ? rawItems : []
 
                 // Inject "Popular" if items exist
                 const hasPopular = items.some(i => i.isPopular)

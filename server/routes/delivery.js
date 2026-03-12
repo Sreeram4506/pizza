@@ -38,70 +38,72 @@ router.get('/orders', verifyDelivery, async (req, res) => {
         console.error('Failed to fetch delivery orders:', err)
         res.status(500).json({ error: 'Failed to fetch delivery orders' })
     }
+})
+
 router.get('/stats', verifyDelivery, async (req, res) => {
-    try {
-        const tenantId = req.tenantId
-        const query = {
-            deliveryPersonId: req.user.id,
-            status: 'delivered',
-            ...(tenantId && { tenantId })
-        }
-        
-        const deliveredOrders = await Order.find(query)
-        const totalEarnings = deliveredOrders.reduce((sum, o) => sum + (o.total || 0), 0)
-        
-        res.json({
-            deliveredCount: deliveredOrders.length,
-            totalEarnings,
-            avgDeliveryTime: 24 // minutes (mocked for demo)
-        })
-    } catch (err) {
-        console.error('Failed to fetch delivery stats:', err)
-        res.status(500).json({ error: 'Failed' })
-    }
-})
-
-// Mark an order as delivered
-router.put('/orders/:id/deliver', verifyDelivery, async (req, res) => {
-    try {
-        const tenantId = req.tenantId
-        const { id } = req.params
-
-        const order = await Order.findOneAndUpdate(
-            {
-                _id: id,
-                deliveryPersonId: req.user.id, // Security: they can only deliver their own assignment
-                ...(tenantId && { tenantId })
-            },
-            {
+        try {
+            const tenantId = req.tenantId
+            const query = {
+                deliveryPersonId: req.user.id,
                 status: 'delivered',
-                actualDeliveredAt: new Date()
-            },
-            { new: true }
-        )
+                ...(tenantId && { tenantId })
+            }
 
-        if (!order) {
-            return res.status(404).json({ error: 'Order not found or not assigned to you' })
-        }
+            const deliveredOrders = await Order.find(query)
+            const totalEarnings = deliveredOrders.reduce((sum, o) => sum + (o.total || 0), 0)
 
-        // Emit WebSocket updates
-        const io = req.app.get('io')
-        if (io) {
-            io.to('admin:orders').emit('order:update', order)
-            io.to(`tenant:${tenantId || 'default'}`).emit('order:update', order)
-            io.to(`order:${order._id}`).emit('order:status_update', {
-                id: order._id,
-                status: order.status,
-                message: `Your order is now ${order.status}!`
+            res.json({
+                deliveredCount: deliveredOrders.length,
+                totalEarnings,
+                avgDeliveryTime: 24 // minutes (mocked for demo)
             })
+        } catch (err) {
+            console.error('Failed to fetch delivery stats:', err)
+            res.status(500).json({ error: 'Failed' })
         }
+    })
 
-        res.json(order)
+    // Mark an order as delivered
+    router.put('/orders/:id/deliver', verifyDelivery, async (req, res) => {
+        try {
+            const tenantId = req.tenantId
+            const { id } = req.params
 
-    } catch (err) {
-        console.error('Failed to mark order delivered:', err)
-        res.status(500).json({ error: 'Failed to mark order as delivered' })
-    }
-})
+            const order = await Order.findOneAndUpdate(
+                {
+                    _id: id,
+                    deliveryPersonId: req.user.id, // Security: they can only deliver their own assignment
+                    ...(tenantId && { tenantId })
+                },
+                {
+                    status: 'delivered',
+                    actualDeliveredAt: new Date()
+                },
+                { new: true }
+            )
 
-export default router
+            if (!order) {
+                return res.status(404).json({ error: 'Order not found or not assigned to you' })
+            }
+
+            // Emit WebSocket updates
+            const io = req.app.get('io')
+            if (io) {
+                io.to('admin:orders').emit('order:update', order)
+                io.to(`tenant:${tenantId || 'default'}`).emit('order:update', order)
+                io.to(`order:${order._id}`).emit('order:status_update', {
+                    id: order._id,
+                    status: order.status,
+                    message: `Your order is now ${order.status}!`
+                })
+            }
+
+            res.json(order)
+
+        } catch (err) {
+            console.error('Failed to mark order delivered:', err)
+            res.status(500).json({ error: 'Failed to mark order as delivered' })
+        }
+    })
+
+    export default router
