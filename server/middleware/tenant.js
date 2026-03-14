@@ -9,6 +9,8 @@ export async function extractTenant(req, res, next) {
     const isBaseDomain = hostname === 'localhost' ||
       hostname === 'www.pizzablast.com' ||
       hostname === 'pizzablast.com' ||
+      hostname === 'www.indraam.com' ||
+      hostname === 'indraam.com' ||
       hostname.includes('onrender.com') ||
       hostname.includes('vercel.app')
 
