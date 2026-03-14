@@ -76,14 +76,32 @@ const handleMulterError = (err, req, res, next) => {
 
 // Login Route
 router.post('/login', async (req, res) => {
-    const { username, password } = req.body
+    try {
+        const { username, password } = req.body
+        console.log('[ADMIN LOGIN] Attempt for user:', username)
+        
+        if (!username || !password) {
+            console.log('[ADMIN LOGIN] Missing credentials')
+            return res.status(400).json({ error: 'Username and password are required' })
+        }
 
-    if (username === ADMIN_USER() && bcrypt.compareSync(password, ADMIN_PASS_HASH)) {
-        const token = jwt.sign({ role: 'admin' }, config.JWT_SECRET, { expiresIn: '1d' })
-        return res.json({ token })
+        const adminUser = ADMIN_USER()
+        const adminHash = ADMIN_PASS_HASH
+
+        console.log('[ADMIN LOGIN] Config user:', adminUser)
+
+        if (username === adminUser && bcrypt.compareSync(password, adminHash)) {
+            console.log('[ADMIN LOGIN] Success')
+            const token = jwt.sign({ role: 'admin' }, config.JWT_SECRET, { expiresIn: '1d' })
+            return res.json({ token })
+        }
+
+        console.log('[ADMIN LOGIN] Invalid credentials')
+        res.status(401).json({ error: 'Invalid credentials' })
+    } catch (err) {
+        console.error('[ADMIN LOGIN] CRITICAL ERROR:', err)
+        res.status(500).json({ error: 'Internal server error during login', details: err.message })
     }
-
-    res.status(401).json({ error: 'Invalid credentials' })
 })
 
 // Get all orders
