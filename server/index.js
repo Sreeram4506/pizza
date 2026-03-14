@@ -97,9 +97,15 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true)
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+    
+    const hostname = new URL(origin).hostname
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1'
+    const isAllowedDomain = origin === process.env.FRONTEND_URL || origin.includes('indraam.com')
+    
+    if (isLocal || isAllowedDomain || process.env.NODE_ENV !== 'production') {
       callback(null, true)
     } else {
+      console.warn(`[CORS] Rejected origin: ${origin}`)
       callback(new Error('Not allowed by CORS'))
     }
   },
