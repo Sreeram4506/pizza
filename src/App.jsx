@@ -11,7 +11,6 @@ import Hero from './components/Hero'
 import MarqueeStrip from './components/MarqueeStrip'
 import About from './components/About'
 import PizzaGallery from './components/PizzaGallery'
-import ComboDeals from './components/ComboDeals'
 import Testimonials from './components/Testimonials'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
@@ -95,7 +94,6 @@ function Home() {
         <PizzaGallery />
         <CustomPizzaBuilder />
         <About />
-        <ComboDeals />
         <Testimonials />
         <Contact />
       </main>

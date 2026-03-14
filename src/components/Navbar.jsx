@@ -11,7 +11,6 @@ const navLinks = [
   { label: 'Menu', href: '/menu' },
   { label: 'Atelier', href: '/#atelier' },
   { label: 'Track', href: '/track' },
-  { label: 'Offers', href: '/#deals' },
   { label: 'Contact', href: '/#contact' },
 ]
 

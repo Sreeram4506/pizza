@@ -2,21 +2,17 @@ import { Tenant } from '../models/Tenant.js'
 
 export async function extractTenant(req, res, next) {
   try {
-    // Get subdomain from hostname (e.g., "pizzapalace.pizzablast.com" -> "pizzapalace")
-    const hostname = req.headers.host || req.hostname
-    const cleanHostname = hostname.split(':')[0] // Remove port if present
-    const subdomain = cleanHostname.split('.')[0]
+    // Get full hostname from header
+    const hostname = (req.headers.host || req.hostname).split(':')[0].toLowerCase()
 
-    // Skip for localhost, main domain, or API health checks
-    const isBaseDomain = subdomain === 'localhost' ||
-      subdomain === 'www' ||
-      subdomain === 'api' ||
-      cleanHostname === 'pizzablast.com' ||
-      cleanHostname.includes('onrender.com') ||
-      cleanHostname.includes('vercel.app')
+    // Skip for localhost (dev), main domain, or API health checks
+    const isBaseDomain = hostname === 'localhost' ||
+      hostname === 'www.pizzablast.com' ||
+      hostname === 'pizzablast.com' ||
+      hostname.includes('onrender.com') ||
+      hostname.includes('vercel.app')
 
     if (isBaseDomain) {
-      // Allow requests without tenant (for admin operations or testing)
       req.tenant = null
       req.tenantId = null
       req.isBaseDomain = true
@@ -25,16 +21,25 @@ export async function extractTenant(req, res, next) {
 
     req.isBaseDomain = false
 
-    // Find tenant by subdomain
-    const tenant = await Tenant.findOne({
-      subdomain: subdomain.toLowerCase(),
+    // Find tenant by custom domain
+    let tenant = await Tenant.findOne({
+      customDomain: hostname,
       isActive: true
     })
+
+    // Fallback: If no custom domain, check if it's a subdomain (optional support)
+    if (!tenant) {
+      const subdomain = hostname.split('.')[0]
+      tenant = await Tenant.findOne({
+        subdomain: subdomain.toLowerCase(),
+        isActive: true
+      })
+    }
 
     if (!tenant) {
       return res.status(404).json({
         error: 'Restaurant not found',
-        message: `No restaurant found for subdomain: ${subdomain}`
+        message: `No restaurant found for domain: ${hostname}`
       })
     }
 

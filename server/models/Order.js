@@ -54,6 +54,7 @@ const orderSchema = new mongoose.Schema({
   estimatedDineInTime: { type: Date },
   actualDeliveredAt: { type: Date },
   notes: { type: String, default: '' },
+  deliveryNotes: { type: String, default: '' },
   source: { type: String, enum: ['website', 'app', 'phone', 'in_person'], default: 'website' }
 }, { timestamps: true })
 

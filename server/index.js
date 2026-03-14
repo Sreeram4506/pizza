@@ -68,9 +68,12 @@ if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
 
 // Limit requests from same API
 const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: 'Too many requests from this IP, please try again in an hour!'
+  max: 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  message: {
+    status: 'error',
+    message: 'Too many requests from this IP, please try again in 15 minutes!'
+  }
 })
 app.use('/api', limiter)
 

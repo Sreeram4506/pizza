@@ -66,9 +66,7 @@ router.get('/stats', verifyDelivery, async (req, res) => {
     // Mark an order as delivered
     router.put('/orders/:id/deliver', verifyDelivery, async (req, res) => {
         try {
-            const tenantId = req.tenantId
-            const { id } = req.params
-
+            const { deliveryNotes } = req.body
             const order = await Order.findOneAndUpdate(
                 {
                     _id: id,
@@ -77,7 +75,8 @@ router.get('/stats', verifyDelivery, async (req, res) => {
                 },
                 {
                     status: 'delivered',
-                    actualDeliveredAt: new Date()
+                    actualDeliveredAt: new Date(),
+                    deliveryNotes: deliveryNotes || ''
                 },
                 { new: true }
             )

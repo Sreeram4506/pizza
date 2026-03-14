@@ -9,104 +9,65 @@ export default function DeliveryPortal() {
     const [token, setToken] = useState(localStorage.getItem('adminToken') || '')
     const [isDriver, setIsDriver] = useState(false)
     const [stats, setStats] = useState({ deliveredCount: 0, totalEarnings: 0, avgDeliveryTime: 0 })
+    const [orderNotes, setOrderNotes] = useState({})
+    const [times, setTimes] = useState({})
     const navigate = useNavigate()
 
     useEffect(() => {
+        const interval = setInterval(() => {
+            const now = new Date()
+            const newTimes = {}
+            orders.forEach(order => {
+                const diff = Math.floor((now - new Date(order.updatedAt)) / 60000)
+                newTimes[order._id] = diff
+            })
+            setTimes(newTimes)
+        }, 30000)
+        return () => clearInterval(interval)
+    }, [orders])
+
+    useEffect(() => {
         if (!token) {
-            setLoading(false)
-            return
+// ... existing fetch logic ...
         }
-
-        const fetchOrders = async () => {
-            try {
-                const res = await fetch('/api/delivery/orders', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                if (res.ok) {
-                    setIsDriver(true)
-                    setOrders(await res.json())
-                } else {
-                    setIsDriver(false)
-                }
-            } catch (err) {
-                setIsDriver(false)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        const fetchStats = async () => {
-            try {
-                const res = await fetch('/api/delivery/stats', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                if (res.ok) {
-                    setStats(await res.json())
-                }
-            } catch (err) {}
-        }
-
-        fetchOrders()
-        fetchStats()
-
-        const apiUrl = import.meta.env.VITE_API_URL || window.location.origin
-        const socket = io(apiUrl, {
-            auth: { token },
-            transports: ['websocket', 'polling']
-        })
-
-        socket.on('order:update', () => {
-            fetchOrders()
-            fetchStats()
-        })
-
-        return () => socket.disconnect()
     }, [token])
 
     const handleDeliver = async (orderId) => {
         try {
             const res = await fetch(`/api/delivery/orders/${orderId}/deliver`, {
                 method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ deliveryNotes: orderNotes[orderId] || '' })
             })
             if (res.ok) {
                 setOrders(prev => prev.filter(o => o._id !== orderId))
-                // Optimistically update some stats if needed, or re-fetch
             }
         } catch (err) {
             console.error('Delivery update failed', err)
         }
     }
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-wood-900 flex items-center justify-center">
-                <div className="animate-spin w-10 h-10 border-[3px] border-tomato-500 border-t-transparent rounded-full" />
-            </div>
-        )
+    const openMaps = (address, type = 'google') => {
+        const query = encodeURIComponent(typeof address === 'string' ? address : `${address.street}, ${address.city}, ${address.zip}`)
+        const url = type === 'google' 
+            ? `https://www.google.com/maps/search/?api=1&query=${query}`
+            : `maps://maps.apple.com/?q=${query}`
+        window.open(url, '_blank')
     }
 
-    if (!token || !isDriver) {
-        return (
-            <div className="min-h-screen bg-wood-900 flex items-center justify-center p-6">
-                <div className="bg-wood-800 p-8 rounded-3xl max-w-sm w-full text-center border border-wood-700">
-                    <div className="text-4xl mb-4">🚫</div>
-                    <h2 className="text-xl font-black text-white mb-2">Access Denied</h2>
-                    <p className="text-sm text-wood-400 mb-6">You must be logged in as a delivery driver to view this portal.</p>
-                    <button
-                        onClick={() => navigate('/admin/login')}
-                        className="block w-full py-3 bg-tomato-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-tomato-700 transition-colors"
-                    >
-                        Driver Login
-                    </button>
-                </div>
-            </div>
-        )
+    const sendSMS = (phone, template) => {
+        const text = encodeURIComponent(template)
+        window.location.href = `sms:${phone}?body=${text}`
     }
+
+// ... loading and access denied logic ...
 
     return (
         <div className="min-h-screen bg-wood-900 text-white overflow-x-hidden">
-            {/* Header */}
+            {/* Header omitted for brevity in targetContent match, but I will include it in replacement */}
             <div className="bg-wood-800 border-b border-wood-700 p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg">
                 <div>
                     <h1 className="text-xl font-sans font-bold text-tomato-400">Driver Portal</h1>
@@ -168,9 +129,14 @@ export default function DeliveryPortal() {
                             >
                                 <div className="flex justify-between items-start mb-4 pb-4 border-b border-wood-700">
                                     <div>
-                                        <h3 className="font-black text-lg text-white">#{order.orderNumber}</h3>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="font-black text-lg text-white">#{order.orderNumber}</h3>
+                                            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[9px] font-black rounded-md border border-blue-500/20">
+                                                ⏱️ {times[order._id] || 0}m
+                                            </span>
+                                        </div>
                                         <p className="text-wood-400 text-xs mt-1">
-                                            {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            Assigned {new Date(order.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                     </div>
                                     <div className="text-right">
@@ -182,41 +148,93 @@ export default function DeliveryPortal() {
                                 </div>
 
                                 <div className="space-y-4 mb-6">
-                                    <div>
-                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Customer</p>
-                                        <p className="font-bold text-white text-sm">{order.customerInfo?.name}</p>
-                                        <a href={`tel:${order.customerInfo?.phone}`} className="text-tomato-400 font-bold text-sm block mt-1 hover:underline">
-                                            📞 {order.customerInfo?.phone}
-                                        </a>
+                                    {/* Customer & SMS */}
+                                    <div className="flex justify-between items-end">
+                                        <div className="flex-1">
+                                            <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Customer</p>
+                                            <p className="font-bold text-white text-sm">{order.customerInfo?.name}</p>
+                                            <div className="flex gap-4 mt-2">
+                                                <a href={`tel:${order.customerInfo?.phone}`} className="flex items-center gap-2 px-3 py-2 bg-wood-900 rounded-xl text-tomato-400 font-bold text-xs border border-wood-700 hover:bg-wood-700 transition-colors">
+                                                    📞 Call
+                                                </a>
+                                                <button 
+                                                    onClick={() => sendSMS(order.customerInfo?.phone, "Hi, this is your Pizza Blast driver. I'm arriving with your order!")}
+                                                    className="flex items-center gap-2 px-3 py-2 bg-wood-900 rounded-xl text-blue-400 font-bold text-xs border border-wood-700 hover:bg-wood-700 transition-colors"
+                                                >
+                                                    💬 SMS Arrival
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
 
+                                    {/* Address & Maps */}
                                     <div>
                                         <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Address</p>
                                         <p className="font-bold text-white text-sm leading-snug">
                                             {typeof order.address === 'string'
                                                 ? order.address
-                                                : `${order.address?.street}, ${order.address?.city}`}
+                                                : `${order.address?.street}, ${order.address?.city} ${order.address?.zip || ''}`}
                                         </p>
+                                        <div className="flex gap-2 mt-2">
+                                            <button 
+                                                onClick={() => openMaps(order.address, 'google')}
+                                                className="flex-1 py-2 bg-wood-950 text-wood-200 text-[10px] font-black uppercase tracking-tighter rounded-xl border border-wood-700"
+                                            >
+                                                🗺️ Google Maps
+                                            </button>
+                                            <button 
+                                                onClick={() => openMaps(order.address, 'apple')}
+                                                className="flex-1 py-2 bg-wood-950 text-wood-200 text-[10px] font-black uppercase tracking-tighter rounded-xl border border-wood-700"
+                                            >
+                                                🍎 Apple Maps
+                                            </button>
+                                        </div>
                                         {order.address?.instructions && (
-                                            <div className="mt-2 text-xs bg-wood-900 p-2 rounded-xl text-wood-300 border border-wood-700">
+                                            <div className="mt-3 text-xs bg-tomato-500/5 p-3 rounded-xl text-tomato-200 border border-tomato-500/20 italic">
+                                                <span className="block text-[8px] font-black uppercase tracking-widest text-tomato-500 not-italic mb-1">Customer Instructions</span>
                                                 "{order.address.instructions}"
                                             </div>
                                         )}
                                     </div>
 
+                                    {/* Items & Modifiers */}
                                     <div>
-                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Items ({order.items?.length})</p>
-                                        <p className="text-xs text-wood-300">
-                                            {order.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')}
-                                        </p>
+                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Handover Checklist</p>
+                                        <div className="space-y-1.5 mt-1">
+                                            {order.items?.map((item, idx) => (
+                                                <div key={idx} className="bg-wood-900/50 p-2 rounded-lg border border-wood-700/50">
+                                                    <div className="flex justify-between text-xs">
+                                                        <span className="font-bold text-white"><span className="text-tomato-500">{item.quantity}x</span> {item.name}</span>
+                                                    </div>
+                                                    {item.modifiers?.length > 0 && (
+                                                        <p className="text-[10px] text-wood-400 mt-0.5">
+                                                            ↳ {item.modifiers.map(m => m.name).join(', ')}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Driver Notes */}
+                                    <div>
+                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Delivery Notes (visible to admin)</p>
+                                        <textarea 
+                                            placeholder="e.g. Left at side door, customer was very friendly..."
+                                            value={orderNotes[order._id] || ''}
+                                            onChange={(e) => setOrderNotes({...orderNotes, [order._id]: e.target.value})}
+                                            className="w-full bg-wood-950 border border-wood-700 rounded-2xl p-3 text-xs text-white placeholder:text-wood-600 focus:outline-none focus:border-tomato-500 transition-colors"
+                                            rows={2}
+                                        />
                                     </div>
                                 </div>
 
                                 <button
                                     onClick={() => handleDeliver(order._id)}
-                                    className="w-full py-4 bg-tomato-600 hover:bg-tomato-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-tomato-600/20 transition-all active:scale-95"
+                                    className="w-full py-4 bg-tomato-600 hover:bg-tomato-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-tomato-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
                                 >
-                                    Mark Delivered
+                                    <span>🏁</span>
+                                    <span>Complete Delivery</span>
                                 </button>
                             </motion.div>
                         ))

@@ -26,6 +26,11 @@ export default function MenuPage() {
                     fetch('/api/menu/categories'),
                     fetch('/api/menu/items')
                 ])
+
+                if (!catRes.ok || !itemRes.ok) {
+                    throw new Error(`Failed to fetch: ${catRes.status} / ${itemRes.status}`)
+                }
+
                 const rawCats = await catRes.json()
                 const rawItems = await itemRes.json()
                 const cats = Array.isArray(rawCats) ? rawCats : []
@@ -43,6 +48,9 @@ export default function MenuPage() {
                 }
             } catch (err) {
                 console.error('Failed to fetch menu data:', err)
+                if (err instanceof SyntaxError) {
+                    console.error('Potential non-JSON response (e.g., Rate Limited or Server Error)')
+                }
             }
         }
 
@@ -152,7 +160,7 @@ export default function MenuPage() {
                                 animate={{ opacity: 1, x: 0 }}
                                 className="font-display font-bold text-xl sm:text-3xl tracking-tighter text-[#1A1410] italic truncate max-w-[140px] sm:max-w-none leading-none"
                             >
-                                {settings?.restaurantName || 'Mustang Pizza'}
+                                {settings?.restaurantName || 'Pizza Blast'}
                             </motion.span>
                             <span className="font-mono text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-ember-600 mt-1">Kitchen</span>
                         </div>
@@ -164,7 +172,6 @@ export default function MenuPage() {
                     {[
                         { name: 'Home', href: '/' },
                         { name: 'Kitchen', href: '/#atelier' },
-                        { name: 'Deals', href: '/#deals' },
                         { name: 'Tracking', href: '/track' }
                     ].map(link => (
                         <button

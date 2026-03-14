@@ -215,11 +215,12 @@ export default function CustomPizzaBuilder() {
           x: xPercent,
           y: yPercent,
           rotation: Math.random() * 360,
-          scale: 0.65 + Math.random() * 0.35,
-          delay: i * 0.12,
+          scale: 0.7 + Math.random() * 0.4, // slight scale variation for realism
+          delay: i * 0.08, // faster stagger
           // Random start position for dramatic falling arc
-          startX: (Math.random() - 0.5) * 120,
+          startX: (Math.random() - 0.5) * 80,
           floatOffset: Math.random() * Math.PI * 2, // for idle floating
+          dropShadowOffset: { x: Math.random() * 2 - 1, y: Math.random() * 2 + 1 }, // dynamic shadow
         })
       }
       setToppingElements(prev => [...prev, ...newEls])
@@ -269,15 +270,11 @@ export default function CustomPizzaBuilder() {
     } else {
       setCurrentStep(prev => Math.min(prev + 1, STEPS.length))
     }
-    const atelier = document.getElementById('atelier')
-    atelier?.scrollIntoView({ behavior: 'auto' })
   }
 
   const prevStep = () => {
     if (currentStep === 4) setIsBaking(false)
     setCurrentStep(prev => Math.max(prev - 1, 1))
-    const atelier = document.getElementById('atelier')
-    atelier?.scrollIntoView({ behavior: 'auto' })
   }
 
   return (
@@ -342,8 +339,6 @@ export default function CustomPizzaBuilder() {
                       setIsBaking(false)
                     }
                     setCurrentStep(step.id)
-                    const atelier = document.getElementById('atelier')
-                    atelier?.scrollIntoView({ behavior: 'auto' })
                   }
                 }}
                 className={`relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 transition-all duration-500 ${currentStep === step.id
@@ -497,15 +492,18 @@ export default function CustomPizzaBuilder() {
                           left: `calc(50% + ${el.x}%)`,
                           top: `calc(50% + ${el.y}%)`,
                           transform: 'translate(-50%, -50%)',
-                          filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.5))',
+                          filter: `drop-shadow(${el.dropShadowOffset.x}px ${el.dropShadowOffset.y}px 2px rgba(0,0,0,0.65)) contrast(1.1) brightness(0.95)`,
                           zIndex: 10,
                         }}
                       >
                         <motion.span
                           className="block"
+                          style={{
+                            transformOrigin: 'center center',
+                          }}
                           animate={{
-                            y: [0, -3, 0, 2, 0],
-                            rotate: [0, 2, -2, 1, 0],
+                            y: [0, -2, 0, 1.5, 0],
+                            rotate: [-1, 1, 0, -0.5, 1],
                           }}
                           transition={{
                             duration: 3 + Math.random() * 2,

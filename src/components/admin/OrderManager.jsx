@@ -448,6 +448,13 @@ export default function OrderManager() {
                           )}
                         </div>
                       )}
+
+                      {selectedOrder.deliveryNotes && (
+                        <div className="mt-6 p-5 bg-blue-50/30 rounded-3xl border border-blue-100/50">
+                          <span className="text-[9px] font-bold uppercase text-blue-600 tracking-widest block mb-2">Driver's Delivery Note</span>
+                          <p className="text-xs italic text-[#5C554E] leading-relaxed">"{selectedOrder.deliveryNotes}"</p>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </div>

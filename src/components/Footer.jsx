@@ -38,7 +38,7 @@ export default function Footer() {
 
         <div className="py-16 lg:py-24">
           <h2 className="font-display italic text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[120px] text-white/[0.06] leading-none tracking-tight select-none text-center">
-            {settings?.restaurantName || 'Mustang Pizza'}
+            {settings?.restaurantName || 'Pizza Blast'}
           </h2>
         </div>
 
@@ -103,7 +103,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/10 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/30 text-xs font-body">
-            © {currentYear} {settings?.restaurantName || 'Mustang Pizza'} — All rights reserved
+            © {currentYear} {settings?.restaurantName || 'Pizza Blast'} — All rights reserved
           </p>
           <div className="flex items-center gap-6 text-xs font-body">
             <button className="text-white/30 hover:text-white/60 transition-colors">Privacy</button>

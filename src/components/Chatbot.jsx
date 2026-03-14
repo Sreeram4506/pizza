@@ -164,6 +164,8 @@ export default function Chatbot() {
         const categoriesData = await categoriesRes.json()
         setCategories(categoriesData)
         console.log('Chatbot: Categories loaded:', categoriesData.length)
+      } else {
+        console.error('Failed to fetch categories:', categoriesRes.status, categoriesRes.statusText)
       }
 
       // Fetch menu items
@@ -172,6 +174,8 @@ export default function Chatbot() {
         const itemsData = await itemsRes.json()
         setMenuItems(itemsData)
         console.log('Chatbot: Menu items loaded:', itemsData.length, itemsData.map(i => i.name))
+      } else {
+        console.error('Failed to fetch menu items:', itemsRes.status, itemsRes.statusText)
       }
     } catch (err) {
       console.error('Failed to fetch menu data:', err)
@@ -213,7 +217,7 @@ export default function Chatbot() {
           const customItem = {
             ...data.item,
             _id: `custom-${Date.now()}`, // Generate unique ID for custom items
-            name: `Custom Pizza (${data.item.base})`,
+            name: `Custom Pizza (${data.item.base.name})`,
             available: true
           }
           addToCart(customItem)
