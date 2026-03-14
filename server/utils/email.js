@@ -23,16 +23,21 @@ export const sendEmail = async (to, subject, html) => {
   })
 
   try {
+    console.log(`[EMAIL] Attempting to send to ${to}...`)
     const info = await transporter.sendMail({
       from: config.smtpFrom,
       to,
       subject,
       html
     })
-    console.log('Email sent:', info.messageId)
+    console.log('[EMAIL] Success:', info.messageId)
     return info
   } catch (error) {
-    console.error(`Email delivery failure to ${to}:`, error.message);
+    console.error(`[EMAIL] CRITICAL FAILURE to ${to}:`)
+    console.error(` - Error Message: ${error.message}`)
+    console.error(` - Host: ${config.smtpHost}`)
+    console.error(` - User: ${config.smtpUser}`)
+    console.error(` - From: ${config.smtpFrom}`)
     throw error
   }
 }
