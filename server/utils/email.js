@@ -15,10 +15,16 @@ export const sendEmail = async (to, subject, html) => {
   const transporter = nodemailer.createTransport({
     host: config.smtpHost,
     port: config.smtpPort,
-    secure: config.smtpPort === 465,
+    secure: config.smtpPort === 465, // true for 465, false for other ports
     auth: {
       user: config.smtpUser,
       pass: config.smtpPass
+    },
+    timeout: 10000, // 10 seconds timeout
+    connectionTimeout: 10000,
+    tls: {
+      // Do not fail on invalid certificates (helpful for some cloud blocks)
+      rejectUnauthorized: false
     }
   })
 
