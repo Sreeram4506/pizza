@@ -105,3 +105,27 @@ export const sendAdminNotification = async (order) => {
 export const sendEmail = async (to, subject, html) => {
   return brevoRequest(to, subject, html)
 }
+
+export const sendMarketingEmail = async (to, subject, message, customerName, template = 'custom') => {
+  const personalizedMessage = message
+    .replace(/\{\{\s*customer_name\s*\}\}/g, customerName || 'Pizza Lover')
+    .replace(/\n/g, '<br>')
+
+  let contentHtml = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
+      <div style="background: #dc2626; color: white; padding: 20px; text-align: center;">
+        <h1 style="margin:0">Pizza Blast!</h1>
+      </div>
+      <div style="padding: 20px;">
+        <h2>Hi ${customerName || 'Pizza Lover'},</h2>
+        <div style="line-height: 1.6; color: #444;">
+          ${personalizedMessage}
+        </div>
+        <div style="text-align:center; margin-top: 30px;">
+          <a href="${config.frontendUrl}/menu" style="background: #dc2626; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Order Now</a>
+        </div>
+      </div>
+    </div>`
+
+  return brevoRequest(to, subject, contentHtml)
+}
