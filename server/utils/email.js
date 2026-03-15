@@ -1,49 +1,47 @@
-import nodemailer from 'nodemailer'
+import fetch from 'node-fetch'
 import { config } from '../config.js'
 
 export const sendEmail = async (to, subject, html) => {
-  if (!config.smtpHost) {
-    console.log('--- EMAIL SIMULATION (SMTP not configured) ---')
+  // If no SMTP_PASS (which we use as API Key), simulate email
+  if (!config.smtpPass) {
+    console.log('--- EMAIL SIMULATION (API Key missing) ---')
     console.log(`To: ${to}`)
     console.log(`Subject: ${subject}`)
-    console.log('--- BODY SNIPPET ---')
-    console.log(html.substring(0, 200) + '...')
-    console.log('-------------------------------------------')
     return { mock: true, success: true }
   }
 
-  const transporter = nodemailer.createTransport({
-    host: config.smtpHost,
-    port: config.smtpPort,
-    secure: config.smtpPort === 465, // true for 465, false for other ports
-    auth: {
-      user: config.smtpUser,
-      pass: config.smtpPass
-    },
-    timeout: 10000, // 10 seconds timeout
-    connectionTimeout: 10000,
-    tls: {
-      // Do not fail on invalid certificates (helpful for some cloud blocks)
-      rejectUnauthorized: false
-    }
-  })
-
   try {
-    console.log(`[EMAIL] Attempting to send to ${to}...`)
-    const info = await transporter.sendMail({
-      from: config.smtpFrom,
-      to,
-      subject,
-      html
+    console.log(`[EMAIL] Attempting to send to ${to} via Brevo API...`)
+    
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': config.smtpPass,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: {
+          name: "Pizza Blast",
+          email: "hello@indraam.com"
+        },
+        to: [{ email: to }],
+        subject: subject,
+        htmlContent: html
+      })
     })
-    console.log('[EMAIL] Success:', info.messageId)
-    return info
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.message || 'API request failed')
+    }
+
+    console.log('[EMAIL] Success! Message ID:', result.messageId)
+    return result
   } catch (error) {
-    console.error(`[EMAIL] CRITICAL FAILURE to ${to}:`)
-    console.error(` - Error Message: ${error.message}`)
-    console.error(` - Host: ${config.smtpHost}`)
-    console.error(` - User: ${config.smtpUser}`)
-    console.error(` - From: ${config.smtpFrom}`)
+    console.error(`[EMAIL] API CRITICAL FAILURE to ${to}:`)
+    console.error(` - Error: ${error.message}`)
     throw error
   }
 }
