@@ -122,7 +122,7 @@ router.put('/categories/:id', verifyAdmin, async (req, res) => {
     const category = await MenuCategory.findOneAndUpdate(
       { _id: req.params.id, tenantId },
       { name, description, sortOrder, isActive },
-      { new: true }
+      { returnDocument: 'after' }
     )
 
     if (!category) {
@@ -291,7 +291,7 @@ router.put('/items/:id', verifyAdmin, upload.single('image'), async (req, res) =
     const item = await MenuItem.findOneAndUpdate(
       { _id: req.params.id, tenantId },
       updateData,
-      { new: true }
+      { returnDocument: 'after' }
     ).populate('categoryId', 'name')
 
     if (!item) {
@@ -349,7 +349,7 @@ router.patch('/items/:id/availability', verifyAdmin, async (req, res) => {
     const item = await MenuItem.findOneAndUpdate(
       { _id: req.params.id, tenantId },
       { available },
-      { new: true }
+      { returnDocument: 'after' }
     ).populate('categoryId', 'name')
 
     if (!item) {

@@ -78,7 +78,7 @@ router.get('/stats', verifyDelivery, async (req, res) => {
                     actualDeliveredAt: new Date(),
                     deliveryNotes: deliveryNotes || ''
                 },
-                { new: true }
+                { returnDocument: 'after' }
             )
 
             if (!order) {

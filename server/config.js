@@ -23,4 +23,6 @@ export const config = {
   get smtpUser() { return process.env.SMTP_USER },
   get smtpPass() { return process.env.SMTP_PASS },
   get smtpFrom() { return process.env.SMTP_FROM || '"Pizza Blast" <order@pizzablast.com>' },
+  get brevoApiKey() { return process.env.BREVO_API_KEY || process.env.SMTP_PASS },
+  get adminEmail() { return process.env.ADMIN_EMAIL || 'sreerammulukuri6@gmail.com' },
 }

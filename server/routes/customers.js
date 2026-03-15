@@ -209,7 +209,7 @@ router.put('/loyalty/config', async (req, res) => {
     const config = await LoyaltyConfig.findOneAndUpdate(
       query,
       req.body,
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     )
     res.json(config)
   } catch (err) {

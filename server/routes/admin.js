@@ -139,7 +139,7 @@ router.put('/orders/:id/status', verifyAdmin, async (req, res) => {
         const order = await Order.findOneAndUpdate(
             { _id: req.params.id, ...(tenantId && { tenantId }) },
             updateData,
-            { new: true }
+            { returnDocument: 'after' }
         )
 
         if (!order) {
@@ -226,7 +226,7 @@ router.put('/orders/:id/assign', verifyAdmin, async (req, res) => {
         const order = await Order.findOneAndUpdate(
             { _id: id, ...(tenantId && { tenantId }) },
             { deliveryPersonId, status: 'out_for_delivery' },
-            { new: true }
+            { returnDocument: 'after' }
         ).populate('deliveryPersonId', 'name phone')
 
         if (!order) {
@@ -467,7 +467,7 @@ router.put('/menu/categories/:id', verifyAdmin, async (req, res) => {
         const category = await MenuCategory.findByIdAndUpdate(
             id,
             { name, description: description || '', sortOrder: sortOrder || 0 },
-            { new: true }
+            { returnDocument: 'after' }
         )
 
         if (!category) {
@@ -595,7 +595,7 @@ router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('ima
         const item = await MenuItem.findByIdAndUpdate(
             id,
             updateData,
-            { new: true }
+            { returnDocument: 'after' }
         )
 
         if (!item) {
@@ -781,14 +781,14 @@ router.post('/settings', verifyAdmin, async (req, res) => {
             settings = await Settings.findOneAndUpdate(
                 { tenantId },
                 { $set: settingsData },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: 'after' }
             )
             console.log('Settings saved to database:', settings)
         } else {
             settings = await Settings.findOneAndUpdate(
                 { tenantId: null },
                 { $set: settingsData },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: 'after' }
             )
             console.log('Settings saved (global mode):', settings)
         }

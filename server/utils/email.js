@@ -2,9 +2,9 @@ import fetch from 'node-fetch'
 import { config } from '../config.js'
 
 export const sendEmail = async (to, subject, html) => {
-  // If no SMTP_PASS (which we use as API Key), simulate email
-  if (!config.smtpPass) {
-    console.log('--- EMAIL SIMULATION (API Key missing) ---')
+  // If no API Key, simulate email
+  if (!config.brevoApiKey) {
+    console.log('--- EMAIL SIMULATION (Brevo API Key missing) ---')
     console.log(`To: ${to}`)
     console.log(`Subject: ${subject}`)
     return { mock: true, success: true }
@@ -12,12 +12,14 @@ export const sendEmail = async (to, subject, html) => {
 
   try {
     console.log(`[EMAIL] Attempting to send to ${to} via Brevo API...`)
+    // Safety log: check if key is loaded (without printing the actual key)
+    console.log(`[EMAIL] API Key present: ${config.brevoApiKey ? 'YES' : 'NO'}`)
     
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
         'accept': 'application/json',
-        'api-key': config.smtpPass,
+        'api-key': config.brevoApiKey,
         'content-type': 'application/json'
       },
       body: JSON.stringify({
@@ -34,6 +36,7 @@ export const sendEmail = async (to, subject, html) => {
     const result = await response.json()
 
     if (!response.ok) {
+      console.error('[EMAIL] Brevo API Error Detail:', result)
       throw new Error(result.message || 'API request failed')
     }
 
@@ -116,7 +119,7 @@ export const sendOrderConfirmation = async (order) => {
 }
 
 export const sendAdminNotification = async (order) => {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@pizzablast.com'
+  const adminEmail = config.adminEmail
   const emailHtml = `
     <div style="font-family: sans-serif; padding: 20px;">
       <h2 style="color: #dc2626;">🔥 New Order Received! 🔥</h2>

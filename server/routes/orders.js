@@ -208,7 +208,7 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       const customer = await Customer.findOneAndUpdate(
         { ...(tenantId && { tenantId }), _id: authenticatedUser.id },
         updateQuery,
-        { new: true }
+        { returnDocument: 'after' }
       )
 
       if (usedRewardCost > 0) {
@@ -245,7 +245,7 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
             isActive: true
           }
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       )
 
       console.log('Guest customer updated/created:', customer._id, customer.name, 'Order count:', customer.orderCount)
@@ -343,7 +343,7 @@ router.delete('/:id', async (req, res) => {
     const order = await Order.findOneAndUpdate(
       { _id: req.params.id, tenantId, status: { $nin: ['delivered', 'cancelled'] } },
       { status: 'cancelled' },
-      { new: true }
+      { returnDocument: 'after' }
     )
 
     if (!order) {
