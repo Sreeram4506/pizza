@@ -1,17 +1,19 @@
 import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
+import { useTranslation } from 'react-i18next'
 
 export default function Footer() {
+  const { t } = useTranslation()
   const currentYear = new Date().getFullYear()
   const { settings } = useSettings()
   const navigate = useNavigate()
 
   const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Menu', href: '/menu' },
-    { name: 'Order Online', href: '/menu' },
-    { name: 'Custom Pizza', href: '/#atelier' },
-    { name: 'Track Order', href: '/track' }
+    { name: t('nav.home'), href: '/' },
+    { name: t('nav.menu'), href: '/menu' },
+    { name: t('footer.orderOnline'), href: '/menu' },
+    { name: t('footer.customPizza'), href: '/#atelier' },
+    { name: t('nav.trackOrder'), href: '/track' }
   ]
 
   const handleLinkClick = (e, href) => {
@@ -47,7 +49,7 @@ export default function Footer() {
         {/* 4 Columns */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 py-16">
           <div>
-            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">Navigate</h4>
+            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">{t('footer.navigateLabel')}</h4>
             <ul className="space-y-4">
               {navLinks.map((link) => (
                 <li key={link.name}>
@@ -63,17 +65,17 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">Hours</h4>
+            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">{t('footer.hoursLabel')}</h4>
             <ul className="space-y-4">
-              <li className="text-white/50 text-sm font-body">Mon – Fri: 10am – 11pm</li>
-              <li className="text-white/50 text-sm font-body">Saturday: 10am – 12am</li>
-              <li className="text-white/50 text-sm font-body">Sunday: 11am – 10pm</li>
-              <li className="text-white text-sm font-body font-medium mt-4">Now Accepting Orders</li>
+              <li className="text-white/50 text-sm font-body">{t('footer.hours.monFri')}</li>
+              <li className="text-white/50 text-sm font-body">{t('footer.hours.sat')}</li>
+              <li className="text-white/50 text-sm font-body">{t('footer.hours.sun')}</li>
+              <li className="text-white text-sm font-body font-medium mt-4">{t('footer.acceptingOrders')}</li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">Location</h4>
+            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">{t('footer.locationLabel')}</h4>
             <p className="text-white/50 text-sm font-body leading-relaxed mb-4">
               {settings?.address?.split(',')[0] || '123 Pizza Plaza'}<br />
               {settings?.address?.split(',').slice(1).join(',') || 'New York, NY 10001'}
@@ -82,12 +84,12 @@ export default function Footer() {
               onClick={() => navigate('/#contact')}
               className="text-white text-sm font-body hover:text-ember-500 transition-colors"
             >
-              Get Directions →
+              {t('footer.getDirections')}
             </button>
           </div>
 
           <div>
-            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">Follow</h4>
+            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">{t('footer.followLabel')}</h4>
             <ul className="space-y-4">
               {['Instagram', 'Facebook', 'Twitter', 'TikTok'].map((social) => (
                 <li key={social}>
@@ -103,12 +105,12 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/10 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/30 text-xs font-body">
-            © {currentYear} {settings?.restaurantName || 'Pizza Blast'} — All rights reserved
+            © {currentYear} {settings?.restaurantName || 'Pizza Blast'} — {t('footer.rightsReserved')}
           </p>
           <div className="flex items-center gap-6 text-xs font-body">
-            <button className="text-white/30 hover:text-white/60 transition-colors">Privacy</button>
-            <button className="text-white/30 hover:text-white/60 transition-colors">Terms</button>
-            <span className="text-white/20">Made with ♥ in New York</span>
+            <button className="text-white/30 hover:text-white/60 transition-colors">{t('footer.privacy')}</button>
+            <button className="text-white/30 hover:text-white/60 transition-colors">{t('footer.terms')}</button>
+            <span className="text-white/20">{t('footer.madeBy')}</span>
           </div>
         </div>
       </div>

@@ -2,27 +2,29 @@ import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { useSettings } from '../context/SettingsContext'
+import { useTranslation } from 'react-i18next'
 
 export default function Contact() {
+  const { t } = useTranslation()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
   const { settings, loading } = useSettings()
 
   const contactInfo = [
     {
-      title: 'Hours',
-      info: 'Mon–Sun: 10 AM – 11 PM',
-      subtext: 'Kitchen closes at 10:30 PM',
+      title: t('contact.hoursLabel'),
+      info: t('contact.hours'),
+      subtext: t('contact.kitchenCloses'),
     },
     {
-      title: 'Location',
+      title: t('contact.locationLabel'),
       info: loading ? '...' : settings.address,
       subtext: '',
     },
     {
-      title: 'Phone',
+      title: t('contact.phoneLabel'),
       info: loading ? '...' : settings.phone,
-      subtext: 'Order online for faster service',
+      subtext: t('contact.orderSubtext'),
     },
   ]
 
@@ -38,10 +40,10 @@ export default function Contact() {
           className="mb-16"
         >
           <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-4">
-            Get in Touch
+            {t('contact.titleLabel')}
           </span>
           <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
-            Contact Us
+            {t('contact.title')}
           </h2>
         </motion.div>
 
@@ -84,19 +86,19 @@ export default function Contact() {
             href={`tel:${settings.phone?.replace(/\D/g, '')}`}
             className="px-8 py-4 bg-ember-500 text-white font-body text-sm font-medium tracking-[0.15em] uppercase transition-all hover:shadow-ember rounded-xl"
           >
-            Call Now
+            {t('contact.call')}
           </a>
           <a
             href={`mailto:${settings.email}`}
             className="px-8 py-4 border border-[rgba(26,20,16,0.1)] text-[#1A1410] font-body text-sm font-medium tracking-[0.15em] uppercase transition-all hover:bg-ember-500 hover:border-ember-500 hover:text-white rounded-xl"
           >
-            Email Us
+            {t('contact.email')}
           </a>
           <button
             className="px-8 py-4 border border-[rgba(26,20,16,0.1)] text-[#1A1410] font-body text-sm font-medium tracking-[0.15em] uppercase transition-all hover:bg-ember-500 hover:border-ember-500 hover:text-white rounded-xl"
-            onClick={() => toast.success('Opening maps...')}
+            onClick={() => toast.success(t('contact.openingMaps'))}
           >
-            Get Directions
+            {t('contact.directions')}
           </button>
         </motion.div>
 
@@ -108,7 +110,7 @@ export default function Contact() {
           className="mt-20"
         >
           <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#9B8D74] block mb-6">
-            Also Available On
+            {t('contact.availableOn')}
           </span>
           <div className="flex flex-wrap gap-6">
             {['Uber Eats', 'DoorDash', 'Grubhub', 'Postmates'].map((partner) => (

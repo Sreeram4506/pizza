@@ -12,10 +12,20 @@ export function ChatbotProvider({ children }) {
     return saved ? JSON.parse(saved) : []
   })
 
-  // Persistence effect
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
+    const saved = localStorage.getItem('chatbot_voice_enabled')
+    return saved === 'true'
+  })
+
+  // Persistence effect for cart
   useEffect(() => {
     localStorage.setItem('pizza_cart', JSON.stringify(cart))
   }, [cart])
+
+  // Persistence effect for voice
+  useEffect(() => {
+    localStorage.setItem('chatbot_voice_enabled', isVoiceEnabled)
+  }, [isVoiceEnabled])
 
   const openWithIntent = (intent, data = {}) => {
     setInitialMessage({ intent, data })
@@ -69,7 +79,9 @@ export function ChatbotProvider({ children }) {
       removeFromCart,
       clearCart,
       cartCount,
-      cartTotal
+      cartTotal,
+      isVoiceEnabled,
+      setIsVoiceEnabled
     }}>
       {children}
     </ChatbotContext.Provider>

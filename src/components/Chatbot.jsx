@@ -6,6 +6,7 @@ import { useSettings } from '../context/SettingsContext'
 import { OrderService } from '../services/OrderService'
 import wsService from '../services/websocket.js'
 import StripePayment from './StripePayment'
+import { useTranslation } from 'react-i18next'
 
 export default function Chatbot() {
   const {
@@ -17,9 +18,11 @@ export default function Chatbot() {
     removeFromCart,
     clearCart,
     cartCount,
-    // cartTotal // Removed from useChatbot as it's now calculated locally
+    isVoiceEnabled,
+    setIsVoiceEnabled
   } = useChatbot()
   const { settings } = useSettings()
+  const { t, i18n } = useTranslation()
 
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -39,6 +42,7 @@ export default function Chatbot() {
   const [guestEmail, setGuestEmail] = useState('')
   const [availableRewards, setAvailableRewards] = useState([])
   const [selectedReward, setSelectedReward] = useState(null)
+  const [isListening, setIsListening] = useState(false)
 
   // Get logged-in customer profile
   useEffect(() => {
@@ -208,6 +212,103 @@ export default function Chatbot() {
   useEffect(() => {
     if (isOpen) setTimeout(() => inputRef.current?.focus(), 300)
   }, [isOpen])
+
+  // Voice Interaction Logic (TTS - Text to Speech)
+  useEffect(() => {
+    if (isVoiceEnabled && messages.length > 0) {
+      const lastMsg = messages[messages.length - 1]
+      if (lastMsg.type === 'bot' && !isTyping) {
+        speak(lastMsg.text)
+      }
+    }
+  }, [messages, isVoiceEnabled, isTyping])
+
+  const speak = (text) => {
+    if (!window.speechSynthesis) return
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel()
+    
+    // Remove markdown formatting for cleaner speech
+    const cleanText = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/`(.*?)`/g, '$1')
+    
+    const utterance = new SpeechSynthesisUtterance(cleanText)
+    utterance.lang = i18n.language
+
+    // Try to find a nice premium-sounding voice for the current language
+    const voices = window.speechSynthesis.getVoices()
+    const langVoice = voices.find(v => v.lang.startsWith(i18n.language.split('-')[0]))
+    utterance.voice = langVoice || voices.find(v => v.name.includes('Google') || v.name.includes('Premium')) || voices[0]
+    utterance.rate = 1.0
+    utterance.pitch = 1.0
+    window.speechSynthesis.speak(utterance)
+  }
+
+  // Voice Interaction Logic (STT - Speech to Text)
+  const toggleListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      toast.error('Voice recognition is not supported in this browser.')
+      return
+    }
+
+    if (isListening) {
+      setIsListening(false)
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = i18n.language
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+
+    recognition.onstart = () => {
+      setIsListening(true)
+      toast.success(t('chatbot.voice.listening'))
+    }
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      setInput(transcript)
+      // Auto-send voice command
+      setTimeout(() => handleVoiceSubmit(transcript), 500)
+    }
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error)
+      setIsListening(false)
+      toast.error(t('chatbot.voice.error', { error: event.error }))
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognition.start()
+  }
+
+  const handleVoiceSubmit = async (transcript) => {
+    if (!transcript.trim()) return
+    setMessages(prev => [...prev, { type: 'user', text: transcript }])
+    setIsTyping(true)
+    try {
+      const res = await OrderService.chat(transcript, {
+        items: cart,
+        customer: getCustomerInfo(),
+        orderType,
+        deliveryAddress,
+        settings
+      })
+      setIsTyping(false)
+      if (res.action === 'PLACE_ORDER') {
+        handleCheckoutIntent()
+      } else {
+        setMessages(prev => [...prev, { type: 'bot', text: res.text || "I'm here to help! 🍕" }])
+      }
+    } catch {
+      setIsTyping(false)
+      setMessages(prev => [...prev, { type: 'bot', text: "I'm having trouble right now. Try again! 🍕" }])
+    }
+  }
 
   const handleIntent = (intent, data) => {
     switch (intent) {
@@ -500,6 +601,24 @@ export default function Chatbot() {
                     </motion.button>
                   ))}
                 </div>
+
+                <motion.button
+                  onClick={() => {
+                    setIsVoiceEnabled(!isVoiceEnabled)
+                    if (isVoiceEnabled) window.speechSynthesis.cancel()
+                  }}
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center transition-all ${isVoiceEnabled ? 'bg-basil-100 border-basil-200 text-basil-700' : 'bg-gray-50 border-gray-200 text-gray-400'}`}
+                  whileTap={{ scale: 0.9 }}
+                  title={isVoiceEnabled ? "Mute Bot Voice" : "Enable Bot Voice"}
+                >
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
+                    {isVoiceEnabled ? (
+                      <path d="M12 3v18c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 2c3.87 0 7 3.13 7 7s-3.13 7-7 7V5zM7.27 10.11l2.73 2.73V7.12l-2.73 2.99z" />
+                    ) : (
+                      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
+                    )}
+                  </svg>
+                </motion.button>
 
                 <motion.button
                   onClick={() => setIsOpen(false)}
@@ -990,7 +1109,7 @@ export default function Chatbot() {
                   <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6 overflow-x-auto scrollbar-hide pb-2">
                     <motion.button type="button" onClick={() => setView('menu')}
                       className="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full border border-crust-100 text-wood-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] hover:text-tomato-600 hover:border-tomato-200 transition-all shadow-sm whitespace-nowrap"
-                      whileTap={{ scale: 0.95 }}>Browse Menu</motion.button>
+                      whileTap={{ scale: 0.95 }}>{t('chatbot.browseMenu')}</motion.button>
                     {cart.length > 0 && (
                       <motion.button type="button" onClick={() => setView('cart')}
                         className="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full bg-tomato-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-tomato-600/10 whitespace-nowrap"
@@ -1003,9 +1122,20 @@ export default function Chatbot() {
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      placeholder="Message Assistant..."
+                      placeholder={t('chatbot.placeholder')}
                       className="flex-1 px-4 sm:px-8 py-4 sm:py-5 rounded-[1.5rem] sm:rounded-[2rem] bg-mozzarella-100 border-none focus:ring-2 focus:ring-tomato-600/10 outline-none text-wood-800 font-bold placeholder:text-wood-300 text-sm sm:text-base transition-all"
                     />
+                    <motion.button
+                      type="button"
+                      onClick={toggleListening}
+                      className={`w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center rounded-full transition-all ${isListening ? 'bg-red-500 text-white animate-pulse shadow-red-500/50' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                      </svg>
+                    </motion.button>
                     <motion.button
                       type="submit"
                       className="w-12 h-12 sm:w-16 sm:h-16 bg-tomato-600 text-white font-black rounded-full shadow-lg shadow-tomato-600/20 flex items-center justify-center shrink-0"

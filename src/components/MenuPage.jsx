@@ -5,8 +5,10 @@ import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
 import wsService from '../services/websocket.js'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 export default function MenuPage() {
+    const { t } = useTranslation()
     const [categories, setCategories] = useState([])
     const [menuItems, setMenuItems] = useState([])
     const [searchQuery, setSearchQuery] = useState('')
@@ -142,6 +144,11 @@ export default function MenuPage() {
 
     const [showMobileSearch, setShowMobileSearch] = useState(false)
 
+    const getLocalizedCatName = (name) => {
+        if (name === 'Popular') return t('menu.categories.popular')
+        return name
+    }
+
     return (
         <div className="h-screen flex flex-col bg-[#FAFAF8] overflow-hidden selection:bg-ember-500/15 selection:text-[#1A1410] font-sans">
             {/* Split Screen Header */}
@@ -162,7 +169,7 @@ export default function MenuPage() {
                             >
                                 {settings?.restaurantName || 'Pizza Blast'}
                             </motion.span>
-                            <span className="font-mono text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-ember-600 mt-1">Kitchen</span>
+                            <span className="font-mono text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-ember-600 mt-1">{t('menu.kitchen')}</span>
                         </div>
                     )}
                 </div>
@@ -170,9 +177,9 @@ export default function MenuPage() {
                 {/* Desktop Nav Links in Menu Page */}
                 <nav className="hidden lg:flex items-center gap-8">
                     {[
-                        { name: 'Home', href: '/' },
-                        { name: 'Kitchen', href: '/#atelier' },
-                        { name: 'Tracking', href: '/track' }
+                        { name: t('nav.home'), href: '/' },
+                        { name: t('nav.kitchen'), href: '/#atelier' },
+                        { name: t('menu.nav.tracking'), href: '/track' }
                     ].map(link => (
                         <button
                             key={link.name}
@@ -195,7 +202,7 @@ export default function MenuPage() {
                             <input
                                 autoFocus
                                 type="text"
-                                placeholder="Search menu..."
+                                placeholder={t('menu.search.placeholder')}
                                 className="w-full pl-4 pr-10 py-2 bg-[#F5F3EF] border-none rounded-full text-sm font-medium focus:ring-2 focus:ring-ember-500/20"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -262,7 +269,7 @@ export default function MenuPage() {
                             </svg>
                             <input
                                 type="text"
-                                placeholder="Search..."
+                                placeholder={t('menu.search.sidebar')}
                                 className="w-full pl-12 pr-4 py-4 bg-white border border-[rgba(26,20,16,0.08)] rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-ember-500/5 transition-all shadow-sm"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -271,7 +278,7 @@ export default function MenuPage() {
                     </div>
 
                     <div className="flex-1 space-y-4 sm:space-y-12">
-                        <span className="hidden sm:block font-mono text-[10px] tracking-[0.3em] uppercase text-ember-600 font-black px-2">Navigation</span>
+                        <span className="hidden sm:block font-mono text-[10px] tracking-[0.3em] uppercase text-ember-600 font-black px-2">{t('menu.categories.navigation')}</span>
                         <nav className="flex flex-col gap-1.5 sm:gap-2">
                             {categories.map((cat) => {
                                 const catItems = filteredMenuItems(groupedItems[cat.name] || [])
@@ -290,7 +297,7 @@ export default function MenuPage() {
                                     >
                                         <div className="flex items-center gap-2 sm:gap-4 relative z-10">
                                             <div className={`w-1 h-1 rounded-full transition-all duration-500 hidden sm:block ${activeCategory === cat.name ? 'bg-ember-500 scale-125' : 'bg-transparent'}`} />
-                                            <span className={`text-center sm:text-left leading-tight break-words sm:break-normal transition-colors duration-300 ${activeCategory === cat.name ? 'text-white' : ''}`}>{cat.name}</span>
+                                            <span className={`text-center sm:text-left leading-tight break-words sm:break-normal transition-colors duration-300 ${activeCategory === cat.name ? 'text-white' : ''}`}>{getLocalizedCatName(cat.name)}</span>
                                         </div>
                                         <span className={`hidden sm:block font-mono text-[10px] opacity-40 transition-opacity ${activeCategory === cat.name ? 'text-ember-400' : 'text-[#9B8D74]'}`}>
                                             {catItems.length}
@@ -313,13 +320,13 @@ export default function MenuPage() {
                                 <div className="w-16 h-16 bg-[#F5F3EF] rounded-full flex items-center justify-center mb-6">
                                     <svg className="w-8 h-8 text-[#9B8D74]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                 </div>
-                                <h3 className="text-xl font-display font-black italic text-[#1A1410]">No items found</h3>
-                                <p className="text-sm text-[#5C554E] opacity-60 mt-2">Try searching for something else like "Cheese" or "Pepperoni"</p>
+                                <h3 className="text-xl font-display font-black italic text-[#1A1410]">{t('menu.search.empty')}</h3>
+                                <p className="text-sm text-[#5C554E] opacity-60 mt-2">{t('menu.search.emptySubtitle')}</p>
                                 <button
                                     onClick={() => setSearchQuery('')}
                                     className="mt-8 text-ember-600 font-mono text-[10px] uppercase font-bold tracking-widest border-b border-ember-600/30 pb-1"
                                 >
-                                    Clear Search
+                                    {t('menu.search.clear')}
                                 </button>
                             </div>
                         )}
@@ -341,15 +348,15 @@ export default function MenuPage() {
                                             <div className="flex items-center gap-2 sm:gap-3 mb-1">
                                                 <div className="w-1 h-1 rounded-full bg-ember-500" />
                                                 <span className="font-mono text-[8px] sm:text-[10px] tracking-[0.3em] uppercase text-ember-600 font-bold opacity-70">
-                                                    {category.name === 'Popular' ? 'Curated' : 'Selection'}
+                                                    {category.name === 'Popular' ? t('menu.categories.curated') : t('menu.categories.selection')}
                                                 </span>
                                             </div>
                                             <h2 className="text-xl sm:text-[56px] font-display font-black italic text-[#1A1410] tracking-tighter leading-none">
-                                                {category.name}
+                                                {getLocalizedCatName(category.name)}
                                             </h2>
                                         </div>
                                         <div className="font-mono text-[9px] sm:text-[11px] text-[#9B8D74] tracking-widest uppercase font-bold">
-                                            {items.length} {items.length === 1 ? 'Item' : 'Items'}
+                                            {items.length} {t('menu.items.count', { count: items.length })}
                                         </div>
                                     </div>
 
@@ -383,10 +390,10 @@ export default function MenuPage() {
 
                                                     <div className="absolute top-1.5 left-1.5 sm:top-4 sm:left-4 flex flex-col gap-1 z-10">
                                                         {item.dietary?.spicy && (
-                                                            <div className="px-1.5 py-0.5 bg-ember-600 text-white text-[6px] sm:text-[9px] font-black uppercase tracking-[0.1em] rounded-md shadow-lg">Spicy</div>
+                                                            <div className="px-1.5 py-0.5 bg-ember-600 text-white text-[6px] sm:text-[9px] font-black uppercase tracking-[0.1em] rounded-md shadow-lg">{t('menu.items.spicy')}</div>
                                                         )}
                                                         {item.dietary?.vegetarian && (
-                                                            <div className="px-1.5 py-0.5 bg-green-600 text-white text-[6px] sm:text-[9px] font-black uppercase tracking-[0.1em] rounded-md shadow-lg">Veg</div>
+                                                            <div className="px-1.5 py-0.5 bg-green-600 text-white text-[6px] sm:text-[9px] font-black uppercase tracking-[0.1em] rounded-md shadow-lg">{t('menu.items.veg')}</div>
                                                         )}
                                                     </div>
 
@@ -400,7 +407,7 @@ export default function MenuPage() {
                                                             className="w-full bg-white text-[#1A1410] font-black text-[10px] uppercase tracking-[0.2em] py-4 rounded-2xl hover:bg-ember-500 hover:text-white transition-all shadow-xl"
                                                             onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
                                                         >
-                                                            Add to Order
+                                                            {t('menu.items.add')}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -408,7 +415,7 @@ export default function MenuPage() {
                                                 <div className="py-2 sm:p-5 flex flex-col flex-1">
                                                     <h3 className="font-display text-[13px] sm:text-2xl font-black italic text-[#1A1410] tracking-tight group-hover:text-ember-600 transition-colors mb-0.5 line-clamp-1">{item.name}</h3>
                                                     <p className="text-[9px] sm:text-[13px] leading-tight sm:leading-relaxed text-[#5C554E] font-medium opacity-70 line-clamp-1 sm:line-clamp-2">
-                                                        {item.description || "Handcrafted fresh daily."}
+                                                        {item.description || t('menu.items.fresh')}
                                                     </p>
                                                 </div>
                                             </motion.div>

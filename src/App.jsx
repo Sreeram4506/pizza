@@ -15,6 +15,7 @@ import Testimonials from './components/Testimonials'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
+import { useTranslation } from 'react-i18next'
 
 import OrderTracker from './components/OrderTracker'
 import CustomerProfile from './components/CustomerProfile'
@@ -105,6 +106,16 @@ function Home() {
 }
 
 function App() {
+  const { i18n } = useTranslation()
+
+  // Sync direction attribute with current language
+  useEffect(() => {
+    const rtlLanguages = ['ar', 'ur']
+    const dir = rtlLanguages.includes(i18n.language) ? 'rtl' : 'ltr'
+    document.documentElement.dir = dir
+    document.documentElement.lang = i18n.language
+  }, [i18n.language])
+
   // Ensure backend is reachable (optional local check)
   useEffect(() => {
     const checkServer = () => {

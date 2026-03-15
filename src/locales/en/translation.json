@@ -1,0 +1,245 @@
+{
+  "nav": {
+    "home": "Home",
+    "menu": "Menu",
+    "about": "About",
+    "contact": "Contact",
+    "gallery": "Gallery",
+    "trackOrder": "Track Order",
+    "deliveryPortal": "Delivery Portal",
+    "admin": "Admin"
+  },
+  "hero": {
+    "title": "Pizza Blast",
+    "subtitle": "Artisan Pizzas, Crafted with Passion",
+    "orderNow": "Order Now",
+    "est": "Est. 2024 &nbsp;·&nbsp; Artisan Kitchen",
+    "type": "Pizza Napoletana",
+    "tagline": "\"Where fire meets flour, and tradition meets tomorrow.\"",
+    "exploreMenu": "Explore Menu",
+    "buildYourOwn": "Build Your Own",
+    "features": {
+      "dough": "48h Fermented Dough",
+      "fired": "900°C Wood-Fired",
+      "tomatoes": "San Marzano Tomatoes",
+      "rating": "⭐ 4.9 Rating"
+    },
+    "reservations": "Reservations"
+  },
+  "chatbot": {
+    "assistant": "Pizza Assistant",
+    "systemActive": "System Active",
+    "browseMenu": "Browse Menu",
+    "refresh": "Refresh",
+    "voice": {
+      "mute": "Mute Bot Voice",
+      "unmute": "Enable Bot Voice",
+      "listening": "Listening...",
+      "error": "Voice error: {{error}}",
+      "notSupported": "Voice recognition is not supported in this browser.",
+      "placeholder": "Message Assistant..."
+    }
+  },
+  "menu": {
+    "kitchen": "Kitchen",
+    "search": {
+      "placeholder": "Search menu...",
+      "sidebar": "Search...",
+      "empty": "No items found",
+      "emptySubtitle": "Try searching for something else like \"Cheese\" or \"Pepperoni\"",
+      "clear": "Clear Search"
+    },
+    "nav": {
+      "tracking": "Tracking"
+    },
+    "categories": {
+      "popular": "Popular",
+      "navigation": "Navigation",
+      "curated": "Curated",
+      "selection": "Selection"
+    },
+    "items": {
+      "add": "Add to Order",
+      "spicy": "Spicy",
+      "veg": "Veg",
+      "count": {
+        "one": "Item",
+        "other": "Items"
+      },
+      "fresh": "Handcrafted fresh daily."
+    }
+  },
+  "about": {
+    "philosophy": "Our Philosophy",
+    "quote": "We don't make food.<br />We make <span class=\"text-ember-500\">memories</span>.",
+    "description1": "At {{restaurantName}}, we believe that the soul of a great pizza lies in its crust. Our dough is fermented for 48 hours using a family recipe passed down through three generations, hand-tossed and baked in our wood-fired ovens imported directly from Naples.",
+    "description2": "We top every pizza with the freshest San Marzano tomatoes, creamy mozzarella di bufala, and aromatic basil hand-picked from our local herb garden. It's not just pizza — it's a slice of Italian tradition.",
+    "signature": "— Chef Marco",
+    "stats": {
+      "pizzas": "Pizzas Served",
+      "dough": "Dough Fermentation",
+      "patrons": "Elite Patrons",
+      "heat": "Wood-Fired Heat"
+    }
+  },
+  "testimonials": {
+    "titleLabel": "Testimonials",
+    "title": "What They Say",
+    "orderedLabel": "Ordered: ",
+    "stats": {
+      "rating": "Average Rating",
+      "customers": "Happy Customers",
+      "recommend": "Would Recommend"
+    },
+    "data": [
+      {
+        "name": "Sarah M.",
+        "text": "Best pizza in town! The Margherita Royale is literally life-changing. The crust is so airy and perfect, and you can taste the quality in every single bite.",
+        "order": "Margherita Royale"
+      },
+      {
+        "name": "James K.",
+        "text": "Authentic wood-fired taste that transports me straight to Naples. Pizza Blast is now my weekly Friday night tradition — nothing else compares.",
+        "order": "Custom Pepperoni"
+      },
+      {
+        "name": "Emily R.",
+        "text": "Finally a place that does vegetarian options right! The Garden Harvest pizza is absolutely divine. My whole family loves it.",
+        "order": "Garden Harvest"
+      },
+      {
+        "name": "Mike T.",
+        "text": "As a chef myself, I'm picky about pizza. The 48-hour fermented dough here is legit — perfect chew and char. Highly recommend.",
+        "order": "Spicy Diavola"
+      }
+    ]
+  },
+  "contact": {
+    "titleLabel": "Get in Touch",
+    "title": "Contact Us",
+    "hoursLabel": "Hours",
+    "hours": "Mon–Sun: 10 AM – 11 PM",
+    "kitchenCloses": "Kitchen closes at 10:30 PM",
+    "locationLabel": "Location",
+    "phoneLabel": "Phone",
+    "orderSubtext": "Order online for faster service",
+    "call": "Call Now",
+    "email": "Email Us",
+    "directions": "Get Directions",
+    "availableOn": "Also Available On",
+    "openingMaps": "Opening maps..."
+  },
+  "footer": {
+    "navigateLabel": "Navigate",
+    "orderOnline": "Order Online",
+    "customPizza": "Custom Pizza",
+    "hoursLabel": "Hours",
+    "hours": {
+      "monFri": "Mon – Fri: 10am – 11pm",
+      "sat": "Saturday: 10am – 12am",
+      "sun": "Sunday: 11am – 10pm"
+    },
+    "acceptingOrders": "Now Accepting Orders",
+    "locationLabel": "Location",
+    "getDirections": "Get Directions →",
+    "followLabel": "Follow",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "madeBy": "Made with ♥ in Naples",
+    "rightsReserved": "All rights reserved"
+  },
+  "gallery": {
+    "titleLabel": "Our Menu",
+    "title": "Handcrafted with Fire",
+    "viewFullMenu": "View Full Menu"
+  },
+  "marquee": {
+    "woodFired": "Wood-Fired",
+    "tomatoes": "San Marzano Tomatoes",
+    "dough": "48h Fermented Dough",
+    "mozzarella": "Imported Mozzarella",
+    "artisan": "Artisan Crafted",
+    "oven": "Stone Oven"
+  },
+  "builder": {
+    "titleLabel": "The Atelier",
+    "title": "Design Your Masterpiece",
+    "subtitle": "Select your canvas and premium ingredients to create a pizza as unique as your palate.",
+    "start": "Enter the Atelier",
+    "canvasLabel": "Your Canvas",
+    "canvasSubtitle": "Select a crust to begin",
+    "total": "Total",
+    "toppingsCount": "{{count}} topping selected",
+    "toppingsCount_plural": "{{count}} toppings selected",
+    "yourCreation": "Your Creation",
+    "included": "Included",
+    "steps": {
+      "foundation": { "title": "Foundation", "subtitle": "Choose your crust" },
+      "canvas": { "title": "Canvas", "subtitle": "Select your sauce" },
+      "artistry": { "title": "Artistry", "subtitle": "Add your toppings" },
+      "bake": { "title": "The Bake", "subtitle": "Cooked to perfection" }
+    },
+    "foundation": {
+      "title": "Choose Your Foundation",
+      "p": "The soul of every great pizza starts here."
+    },
+    "palette": {
+      "title": "Paint Your Canvas",
+      "p": "Every brushstroke of flavor matters."
+    },
+    "artistry": {
+      "title": "Add Your Artistry",
+      "p": "Each topping tells a story. What's yours?"
+    },
+    "bake": {
+      "title": "The Alchemist's Fire",
+      "p": "Patience is the final ingredient.",
+      "baking": "Baking...",
+      "oven": "Traditional Oven",
+      "perfect": "Perfect Bake Achieved"
+    },
+    "actions": {
+      "prev": "Previous",
+      "next": "Continue",
+      "reset": "Reset",
+      "add": "Add to Cart",
+      "order": "Order Now",
+      "back": "Go Back",
+      "simulate": "Bake Simulation"
+    },
+    "config": {
+      "bases": {
+        "thin": { "name": "Thin Crust", "desc": "Crispy & light" },
+        "thick": { "name": "Thick Crust", "desc": "Chewy & satisfying" },
+        "cheese-burst": { "name": "Cheese Burst", "desc": "Molten cheese edge" },
+        "whole-wheat": { "name": "Whole Wheat", "desc": "Hearty & wholesome" }
+      },
+      "sauces": {
+        "tomato": { "name": "San Marzano", "desc": "Classic Neapolitan" },
+        "bbq": { "name": "Smoky BBQ", "desc": "Sweet & smoky" },
+        "white": { "name": "Garlic Cream", "desc": "Rich & velvety" },
+        "pesto": { "name": "Basil Pesto", "desc": "Fresh & aromatic" }
+      },
+      "toppings": {
+        "pepperoni": "Pepperoni",
+        "mushrooms": "Wild Mushrooms",
+        "olives": "Kalamata Olives",
+        "jalapenos": "Jalapeños",
+        "bell-peppers": "Bell Peppers",
+        "onions": "Caramelized Onion",
+        "cheese": "Bufala Mozzarella",
+        "corn": "Sweet Corn",
+        "tomatoes": "Cherry Tomatoes",
+        "pineapple": "Roasted Pineapple"
+      },
+      "categories": {
+        "meat": "Meats",
+        "veggie": "Garden Fresh",
+        "spicy": "Spicy Kick",
+        "cheese": "Extra Cheese",
+        "sweet": "Sweet Touch",
+        "seafood": "Seafood"
+      }
+    }
+  }
+}

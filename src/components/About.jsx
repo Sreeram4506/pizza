@@ -1,8 +1,10 @@
 import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useSettings } from '../context/SettingsContext'
+import { useTranslation } from 'react-i18next'
 
 export default function About() {
+  const { t } = useTranslation()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const { settings } = useSettings()
@@ -16,10 +18,10 @@ export default function About() {
   }, [])
 
   const stats = [
-    { num: `${(statsData.orders / 1000).toFixed(1)}k+`, label: 'Pizzas Served' },
-    { num: '48h', label: 'Dough Fermentation' },
-    { num: statsData.customers > 0 ? `${statsData.customers}+` : '24+', label: 'Elite Patrons' },
-    { num: '900°C', label: 'Wood-Fired Heat' },
+    { num: `${(statsData.orders / 1000).toFixed(1)}k+`, label: t('about.stats.pizzas') },
+    { num: '48h', label: t('about.stats.dough') },
+    { num: statsData.customers > 0 ? `${statsData.customers}+` : '24+', label: t('about.stats.patrons') },
+    { num: '900°C', label: t('about.stats.heat') },
   ]
 
   return (
@@ -41,13 +43,12 @@ export default function About() {
         >
           {/* Label */}
           <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-8">
-            Our Philosophy
+            {t('about.philosophy')}
           </span>
 
           {/* Pull quote */}
           <blockquote className="font-display italic text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-[#1A1410] leading-[1.2] tracking-tight mb-12">
-            "We don't make food.<br />
-            We make <span className="text-ember-500">memories</span>."
+            <span dangerouslySetInnerHTML={{ __html: t('about.quote') }} />
           </blockquote>
 
           {/* Thin rule */}
@@ -56,15 +57,10 @@ export default function About() {
           {/* Description */}
           <div className="grid md:grid-cols-2 gap-12 max-w-3xl">
             <p className="text-[#5C554E] text-base leading-relaxed font-body">
-              At {settings?.restaurantName || 'PizzaBlast'}, we believe that the soul of a great pizza lies in its crust.
-              Our dough is fermented for 48 hours using a family recipe passed down through
-              three generations, hand-tossed and baked in our wood-fired ovens imported
-              directly from Naples.
+              {t('about.description1', { restaurantName: settings?.restaurantName || 'Pizza Blast' })}
             </p>
             <p className="text-[#5C554E] text-base leading-relaxed font-body">
-              We top every pizza with the freshest San Marzano tomatoes, creamy mozzarella
-              di bufala, and aromatic basil hand-picked from our local herb garden. It's not
-              just pizza — it's a slice of Italian tradition.
+              {t('about.description2')}
             </p>
           </div>
 
@@ -75,7 +71,7 @@ export default function About() {
             transition={{ delay: 0.6 }}
             className="mt-16"
           >
-            <span className="font-display italic text-2xl text-[#1A1410]/20">— Chef Marco</span>
+            <span className="font-display italic text-2xl text-[#1A1410]/20">{t('about.signature')}</span>
           </motion.div>
         </motion.div>
 

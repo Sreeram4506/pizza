@@ -5,8 +5,10 @@ import { useGSAP } from '@gsap/react'
 import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 import BannerDisplay from './BannerDisplay'
+import { useTranslation } from 'react-i18next'
 
 export default function Hero() {
+  const { t } = useTranslation()
   const containerRef = useRef(null)
   const videoRef = useRef(null)
   const { settings } = useSettings()
@@ -104,7 +106,7 @@ export default function Hero() {
         <motion.div className="hero-stagger mb-6">
           <span className="inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.35em] uppercase text-white/60">
             <span className="w-8 h-px bg-white/40" />
-            Est. 2024 &nbsp;·&nbsp; Artisan Kitchen
+            <span dangerouslySetInnerHTML={{ __html: t('hero.est') }} />
             <span className="w-8 h-px bg-white/40" />
           </span>
         </motion.div>
@@ -114,7 +116,7 @@ export default function Hero() {
           <h1 className="font-display font-bold leading-none tracking-tight text-white"
             style={{ textShadow: '0 4px 40px rgba(0,0,0,0.4)' }}
           >
-            <span className="block text-[clamp(3.5rem,12vw,9rem)] leading-none">
+            <span className="block text-[clamp(1.5rem,12vw,9rem)] leading-none">
               {settings.restaurantName || 'Pizza Blast'}
             </span>
           </h1>
@@ -123,7 +125,7 @@ export default function Hero() {
         {/* Sub-headline */}
         <div className="hero-stagger mt-4">
           <p className="font-mono text-[11px] tracking-[0.5em] uppercase text-white/70">
-            Pizza Napoletana
+            {t('hero.type')}
           </p>
         </div>
 
@@ -134,7 +136,7 @@ export default function Hero() {
         <p className="hero-stagger mt-6 font-body italic text-white/60 text-base md:text-lg max-w-md leading-relaxed"
           style={{ textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
         >
-          "Where fire meets flour, and tradition meets tomorrow."
+          {t('hero.tagline')}
         </p>
 
         {/* CTA Buttons */}
@@ -145,7 +147,7 @@ export default function Hero() {
             onClick={() => navigate('/menu')}
             className="px-8 py-3.5 bg-[#C1440E] text-white text-[11px] font-body font-bold tracking-[0.2em] uppercase rounded-full flex items-center gap-2 shadow-lg shadow-red-900/40 transition-all"
           >
-            Explore Menu
+            {t('hero.exploreMenu')}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
@@ -157,7 +159,7 @@ export default function Hero() {
             onClick={() => document.querySelector('#atelier')?.scrollIntoView({ behavior: 'smooth' })}
             className="px-8 py-3.5 bg-white/10 backdrop-blur-sm border border-white/30 text-white text-[11px] font-body font-bold tracking-[0.2em] uppercase rounded-full flex items-center gap-2 transition-all"
           >
-            Build Your Own
+            {t('hero.buildYourOwn')}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
@@ -171,7 +173,12 @@ export default function Hero() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.4 }}
         >
-          {['48h Fermented Dough', '900°C Wood-Fired', 'San Marzano Tomatoes', '⭐ 4.9 Rating'].map((feat) => (
+          {[
+            t('hero.features.dough'),
+            t('hero.features.fired'),
+            t('hero.features.tomatoes'),
+            t('hero.features.rating')
+          ].map((feat) => (
             <span
               key={feat}
               className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 font-mono text-[9px] tracking-[0.2em] uppercase text-white/75"
@@ -198,7 +205,7 @@ export default function Hero() {
           onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
           className="font-mono text-[9px] tracking-[0.3em] uppercase text-white/45 hover:text-white/80 transition-colors border-b border-white/20 hover:border-white/50 pb-0.5"
         >
-          Reservations
+          {t('hero.reservations')}
         </motion.button>
       </div>
 

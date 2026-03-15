@@ -3,8 +3,10 @@ import { motion, useInView } from 'framer-motion'
 import { useChatbot } from '../context/ChatbotContext'
 import { useNavigate } from 'react-router-dom'
 import wsService from '../services/websocket.js'
+import { useTranslation } from 'react-i18next'
 
 export default function PizzaGallery() {
+  const { t } = useTranslation()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
   const navigate = useNavigate()
@@ -58,10 +60,10 @@ export default function PizzaGallery() {
         >
           <div>
             <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-4">
-              Our Menu
+              {t('gallery.titleLabel')}
             </span>
             <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
-              Handcrafted with Fire
+              {t('gallery.title')}
             </h2>
           </div>
         </motion.div>
@@ -114,7 +116,7 @@ export default function PizzaGallery() {
             onClick={() => navigate('/menu')}
             className="group text-[#1A1410] text-sm font-body font-medium tracking-[0.15em] uppercase inline-flex items-center gap-3 transition-colors hover:text-ember-500"
           >
-            View Full Menu
+            {t('gallery.viewFullMenu')}
             <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
@@ -126,6 +128,7 @@ export default function PizzaGallery() {
 }
 
 function MenuCard({ image, name, price, description, category, available, dietary, index, isInView, onOrder }) {
+  const { t } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const [imgSrc, setImgSrc] = useState(image)
 
@@ -169,12 +172,12 @@ function MenuCard({ image, name, price, description, category, available, dietar
         <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
           {dietary?.spicy && (
             <span className="font-mono text-[8px] tracking-[0.1em] uppercase text-white bg-ember-500/80 px-1.5 py-0.5 backdrop-blur-sm rounded-sm">
-              Spicy
+              {t('menu.items.spicy')}
             </span>
           )}
           {dietary?.vegetarian && (
             <span className="font-mono text-[8px] tracking-[0.1em] uppercase text-white bg-[#D4922A]/80 px-1.5 py-0.5 backdrop-blur-sm rounded-sm">
-              Veg
+              {t('menu.items.veg')}
             </span>
           )}
         </div>

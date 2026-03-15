@@ -1,0 +1,245 @@
+{
+  "nav": {
+    "home": "Home",
+    "menu": "Menu",
+    "about": "Chi Siamo",
+    "contact": "Contatti",
+    "gallery": "Galleria",
+    "trackOrder": "Traccia Ordine",
+    "deliveryPortal": "Portale Consegne",
+    "admin": "Admin"
+  },
+  "hero": {
+    "title": "Autentici Sapori Mediterranei",
+    "subtitle": "Scopri l'arte della pizza",
+    "orderNow": "Ordina Ora",
+    "est": "Est. 2024 &nbsp;·&nbsp; Cucina Artigianale",
+    "type": "Pizza Napoletana",
+    "tagline": "\"Dove il fuoco incontra la farina, e la tradizione incontra il domani.\"",
+    "exploreMenu": "Esplora il Menu",
+    "buildYourOwn": "Crea la Tua Pizza",
+    "features": {
+      "dough": "Impasto Fermentato 48h",
+      "fired": "Cotta nel Forno a Legna a 900°C",
+      "tomatoes": "Pomodori San Marzano",
+      "rating": "⭐ 4.9 Valutazione"
+    },
+    "reservations": "Prenotazioni"
+  },
+  "chatbot": {
+    "assistant": "Assistente Pizza",
+    "systemActive": "Sistema Attivo",
+    "browseMenu": "Sfoglia Menu",
+    "refresh": "Aggiorna",
+    "voice": {
+      "mute": "Disattiva Voce Bot",
+      "unmute": "Attiva Voce Bot",
+      "listening": "In ascolto...",
+      "error": "Errore vocale: {{error}}",
+      "notSupported": "Il riconoscimento vocale non è supportato in questo browser.",
+      "placeholder": "Scrivi all'assistente..."
+    }
+  },
+  "menu": {
+    "kitchen": "Cucina",
+    "search": {
+      "placeholder": "Cerca nel menu...",
+      "sidebar": "Cerca...",
+      "empty": "Nessun articolo trovato",
+      "emptySubtitle": "Prova a cercare qualcos'altro come \"Formaggio\" o \"Salame\"",
+      "clear": "Cancella Ricerca"
+    },
+    "nav": {
+      "tracking": "Tracciamento"
+    },
+    "categories": {
+      "popular": "Popolari",
+      "navigation": "Navigazione",
+      "curated": "Curata",
+      "selection": "Selezione"
+    },
+    "items": {
+      "add": "Aggiungi all'Ordine",
+      "spicy": "Piccante",
+      "veg": "Veg",
+      "count": {
+        "one": "Articolo",
+        "other": "Articoli"
+      },
+      "fresh": "Prodotto fresco ogni giorno."
+    }
+  },
+  "about": {
+    "philosophy": "La Nostra Filosofia",
+    "quote": "Non facciamo cibo.<br />Creiamo <span class=\"text-ember-500\">ricordi</span>.",
+    "description1": "Da {{restaurantName}}, crediamo che l'anima di una grande pizza risieda nel suo impasto. La nostra pasta viene fermentata per 48 ore seguendo una ricetta di famiglia tramandata da tre generazioni, stesa a mano e cotta nei nostri forni a legna importati direttamente da Napoli.",
+    "description2": "Condiamo ogni pizza con i più freschi pomodori San Marzano, cremosa mozzarella di bufala e basilico aromatico raccolto a mano dal nostro giardino di erbe locali. Non è solo pizza: è un pezzo di tradizione italiana.",
+    "signature": "— Chef Marco",
+    "stats": {
+      "pizzas": "Pizze Servite",
+      "dough": "Fermentazione Impasto",
+      "patrons": "Clienti d'Élite",
+      "heat": "Calore del Forno a Legna"
+    }
+  },
+  "testimonials": {
+    "titleLabel": "Testimonianze",
+    "title": "Cosa Dicono di Noi",
+    "orderedLabel": "Ordinato: ",
+    "stats": {
+      "rating": "Voto Medio",
+      "customers": "Clienti Felici",
+      "recommend": "Ci Raccomandano"
+    },
+    "data": [
+      {
+        "name": "Sarah M.",
+        "text": "La migliore pizza in città! La Margherita Royale ti cambia letteralmente la vita. L'impasto è così arioso e perfetto, e si sente la qualità in ogni singolo morso.",
+        "order": "Margherita Royale"
+      },
+      {
+        "name": "James K.",
+        "text": "Il vero sapore della cottura a legna che mi trasporta direttamente a Napoli. Pizza Blast è diventata la nostra tradizione del venerdì sera: nient'altro regge il confronto.",
+        "order": "Pepperoni Personalizzata"
+      },
+      {
+        "name": "Emily R.",
+        "text": "Finalmente un posto che fa opzioni vegetariane come si deve! La pizza Garden Harvest è assolutamente divina. Tutta la mia famiglia la adora.",
+        "order": "Garden Harvest"
+      },
+      {
+        "name": "Mike T.",
+        "text": "Essendo io stesso uno chef, sono molto esigente sulla pizza. L'impasto fermentato per 48 ore qui è fantastico: consistenza e croccantezza perfette. Lo raccomando vivamente.",
+        "order": "Diavola Piccante"
+      }
+    ]
+  },
+  "contact": {
+    "titleLabel": "Mettiti in Contatto",
+    "title": "Contattaci",
+    "hoursLabel": "Orari",
+    "hours": "Lun–Dom: 10:00 – 23:00",
+    "kitchenCloses": "La cucina chiude alle 22:30",
+    "locationLabel": "Posizione",
+    "phoneLabel": "Telefono",
+    "orderSubtext": "Ordina online per un servizio più veloce",
+    "call": "Chiama Ora",
+    "email": "Mandaci un'Email",
+    "directions": "Ottieni Indicazioni",
+    "availableOn": "Disponibile anche su",
+    "openingMaps": "Apertura mappe..."
+  },
+  "footer": {
+    "navigateLabel": "Navigazione",
+    "orderOnline": "Ordina Online",
+    "customPizza": "Pizza Personalizzata",
+    "hoursLabel": "Orari",
+    "hours": {
+      "monFri": "Lun – Ven: 10:00 – 23:00",
+      "sat": "Sabato: 10:00 – 00:00",
+      "sun": "Domenica: 11:00 – 22:00"
+    },
+    "acceptingOrders": "Si Accettano Ordini",
+    "locationLabel": "Posizione",
+    "getDirections": "Ottieni Indicazioni →",
+    "followLabel": "Seguici",
+    "privacy": "Privacy",
+    "terms": "Termini",
+    "madeBy": "Creato con ♥ a Napoli",
+    "rightsReserved": "Tutti i diritti riservati"
+  },
+  "gallery": {
+    "titleLabel": "Il Nostro Menu",
+    "title": "Fatto a Mano col Fuoco",
+    "viewFullMenu": "Vedi il Menu Completo"
+  },
+  "marquee": {
+    "woodFired": "Cottura a Legna",
+    "tomatoes": "Pomodori San Marzano",
+    "dough": "Impasto 48h",
+    "mozzarella": "Mozzarella di Bufala",
+    "artisan": "Fatto a Mano",
+    "oven": "Forno a Pietra"
+  },
+  "builder": {
+    "titleLabel": "L'Atelier",
+    "title": "Disegna il Tuo Capolavoro",
+    "subtitle": "Seleziona la tua base e ingredienti premium per creare una pizza unica come il tuo palato.",
+    "start": "Entra nell'Atelier",
+    "canvasLabel": "La Tua Tela",
+    "canvasSubtitle": "Seleziona una base per iniziare",
+    "total": "Totale",
+    "toppingsCount": "{{count}} condimento selezionato",
+    "toppingsCount_plural": "{{count}} condimenti selezionati",
+    "yourCreation": "La Tua Creazione",
+    "included": "Incluso",
+    "steps": {
+      "foundation": { "title": "Base", "subtitle": "Scegli il tuo impasto" },
+      "canvas": { "title": "Tela", "subtitle": "Seleziona la salsa" },
+      "artistry": { "title": "Arte", "subtitle": "Aggiungi i condimenti" },
+      "bake": { "title": "Cottura", "subtitle": "Cotto alla perfezione" }
+    },
+    "foundation": {
+      "title": "Scegli la Tua Base",
+      "p": "L'anima di ogni grande pizza inizia qui."
+    },
+    "palette": {
+      "title": "Dipingi la Tua Tela",
+      "p": "Ogni tocco di sapore conta."
+    },
+    "artistry": {
+      "title": "Aggiungi la Tua Arte",
+      "p": "Ogni condimento racconta una storia. Qual è la tua?"
+    },
+    "bake": {
+      "title": "Il Fuoco dell'Alchimista",
+      "p": "La pazienza è l'ultimo ingrediente.",
+      "baking": "In cottura...",
+      "oven": "Forno Tradizionale",
+      "perfect": "Cottura Perfetta Raggiunta"
+    },
+    "actions": {
+      "prev": "Precedente",
+      "next": "Continua",
+      "reset": "Reset",
+      "add": "Aggiungi al Carrello",
+      "order": "Ordina Ora",
+      "back": "Torna Indietro",
+      "simulate": "Simulazione Cottura"
+    },
+    "config": {
+      "bases": {
+        "thin": { "name": "Impasto Sottile", "desc": "Croccante e leggero" },
+        "thick": { "name": "Impasto Alto", "desc": "Soffice e soddisfacente" },
+        "cheese-burst": { "name": "Bordo al Formaggio", "desc": "Cuore di formaggio fuso" },
+        "whole-wheat": { "name": "Integrale", "desc": "Sano e genuino" }
+      },
+      "sauces": {
+        "tomato": { "name": "San Marzano", "desc": "Classico Napoletano" },
+        "bbq": { "name": "BBQ Affumicato", "desc": "Dolce e affumicato" },
+        "white": { "name": "Crema all'Aglio", "desc": "Ricca e vellutata" },
+        "pesto": { "name": "Pesto di Basilico", "desc": "Fresco e aromatico" }
+      },
+      "toppings": {
+        "pepperoni": "Salame Piccante",
+        "mushrooms": "Funghi Selvatici",
+        "olives": "Olive Kalamata",
+        "jalapenos": "Jalapeños",
+        "bell-peppers": "Peperoni",
+        "onions": "Cipolla Caramellata",
+        "cheese": "Mozzarella di Bufala",
+        "corn": "Mais Dolce",
+        "tomatoes": "Pomodorini",
+        "pineapple": "Ananas Arrostito"
+      },
+      "categories": {
+        "meat": "Carni",
+        "veggie": "Verdure",
+        "spicy": "Piccante",
+        "cheese": "Formaggi",
+        "sweet": "Dolce",
+        "seafood": "Frutti di Mare"
+      }
+    }
+  }
+}

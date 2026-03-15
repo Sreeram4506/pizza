@@ -1,0 +1,245 @@
+{
+  "nav": {
+    "home": "Início",
+    "menu": "Cardápio",
+    "about": "Sobre",
+    "contact": "Contato",
+    "gallery": "Galeria",
+    "trackOrder": "Rastrear Pedido",
+    "deliveryPortal": "Portal de Entregas",
+    "admin": "Admin"
+  },
+  "hero": {
+    "title": "Sabores Mediterrâneos Autênticos",
+    "subtitle": "Experimente a arte de fazer pizza",
+    "orderNow": "Pedir Agora",
+    "est": "Est. 2024 &nbsp;·&nbsp; Cozinha Artesanal",
+    "type": "Pizza Napoletana",
+    "tagline": "\"Onde o fogo encontra a farinha, e a tradição encontra o amanhã.\"",
+    "exploreMenu": "Ver Cardápio",
+    "buildYourOwn": "Monte a Sua",
+    "features": {
+      "dough": "Massa Fermentada 48h",
+      "fired": "Forno a Lenha 900°C",
+      "tomatoes": "Tomates San Marzano",
+      "rating": "⭐ 4.9 Avaliação"
+    },
+    "reservations": "Reservas"
+  },
+  "chatbot": {
+    "assistant": "Assistente de Pizza",
+    "systemActive": "Sistema Ativo",
+    "browseMenu": "Ver Cardápio",
+    "refresh": "Atualizar",
+    "voice": {
+      "mute": "Mudar Voz do Bot",
+      "unmute": "Ativar Voz do Bot",
+      "listening": "Ouvindo...",
+      "error": "Erro de voz: {{error}}",
+      "notSupported": "O reconhecimento de voz não é suportado neste navegador.",
+      "placeholder": "Mensagem ao assistente..."
+    }
+  },
+  "menu": {
+    "kitchen": "Cozinha",
+    "search": {
+      "placeholder": "Buscar no cardápio...",
+      "sidebar": "Buscar...",
+      "empty": "Nenhum item encontrado",
+      "emptySubtitle": "Tente buscar por outra coisa como \"Queijo\" ou \"Pepperoni\"",
+      "clear": "Limpar Busca"
+    },
+    "nav": {
+      "tracking": "Rastreamento"
+    },
+    "categories": {
+      "popular": "Populares",
+      "navigation": "Navegação",
+      "curated": "Curados",
+      "selection": "Seleção"
+    },
+    "items": {
+      "add": "Adicionar ao Pedido",
+      "spicy": "Picante",
+      "veg": "Veg",
+      "count": {
+        "one": "Item",
+        "other": "Itens"
+      },
+      "fresh": "Feito à mão fresco diariamente."
+    }
+  },
+  "about": {
+    "philosophy": "Nossa Filosofia",
+    "quote": "Não fazemos comida.<br />Fazemos <span class=\"text-ember-500\">memórias</span>.",
+    "description1": "Na {{restaurantName}}, acreditamos que a alma de uma grande pizza está na sua massa. Nossa massa é fermentada por 48 horas usando uma receita de família passada por três gerações, aberta à mão e assada em nossos fornos a lenha importados diretamente de Nápoles.",
+    "description2": "Cobrimos cada pizza com os tomates San Marzano mais frescos, cremosa mozzarella di bufala e manjericão aromático colhido à mão em nosso jardim de ervas local. Não é apenas pizza — é uma fatia da tradição italiana.",
+    "signature": "— Chef Marco",
+    "stats": {
+      "pizzas": "Pizzas Servidas",
+      "dough": "Fermentação da Massa",
+      "patrons": "Clientes de Elite",
+      "heat": "Calor de Forno a Lenha"
+    }
+  },
+  "testimonials": {
+    "titleLabel": "Depoimentos",
+    "title": "O Que Dizem",
+    "orderedLabel": "Pedido: ",
+    "stats": {
+      "rating": "Avaliação Média",
+      "customers": "Clientes Felizes",
+      "recommend": "Recomendariam"
+    },
+    "data": [
+      {
+        "name": "Sarah M.",
+        "text": "A melhor pizza da cidade! A Margherita Royale é literalmente transformadora. A massa é tão leve e perfeita, e você consegue sentir a qualidade em cada mordida.",
+        "order": "Margherita Royale"
+      },
+      {
+        "name": "James K.",
+        "text": "Sabor autêntico de forno a lenha que me transporta direto para Nápoles. Pizza Blast é agora minha tradição semanal de sexta à noite — nada mais se compara.",
+        "order": "Pepperoni Personalizada"
+      },
+      {
+        "name": "Emily R.",
+        "text": "Finalmente um lugar que faz opções vegetarianas direito! A pizza Garden Harvest é absolutamente divina. Minha família inteira adora.",
+        "order": "Garden Harvest"
+      },
+      {
+        "name": "Mike T.",
+        "text": "Como chef, sou exigente com pizza. A massa fermentada de 48 horas aqui é legítima — textura e aroma perfeitos. Recomendo muito.",
+        "order": "Diavola Piccante"
+      }
+    ]
+  },
+  "contact": {
+    "titleLabel": "Entre em Contato",
+    "title": "Fale Conosco",
+    "hoursLabel": "Horário",
+    "hours": "Seg–Dom: 10h – 23h",
+    "kitchenCloses": "A cozinha fecha às 22:30",
+    "locationLabel": "Localização",
+    "phoneLabel": "Telefone",
+    "orderSubtext": "Peça online para um serviço mais rápido",
+    "call": "Ligar Agora",
+    "email": "Envie um E-mail",
+    "directions": "Como Chegar",
+    "availableOn": "Também Disponível em",
+    "openingMaps": "Abrindo mapas..."
+  },
+  "footer": {
+    "navigateLabel": "Navegação",
+    "orderOnline": "Pedir Online",
+    "customPizza": "Pizza Personalizada",
+    "hoursLabel": "Horário",
+    "hours": {
+      "monFri": "Seg – Sex: 10h – 23h",
+      "sat": "Sábado: 10h – 00h",
+      "sun": "Domingo: 11h – 22h"
+    },
+    "acceptingOrders": "Aceitando Pedidos",
+    "locationLabel": "Localização",
+    "getDirections": "Como Chegar →",
+    "followLabel": "Siga-nos",
+    "privacy": "Privacidade",
+    "terms": "Termos",
+    "madeBy": "Feito com ♥ em Nápoles",
+    "rightsReserved": "Todos os direitos reservados"
+  },
+  "gallery": {
+    "titleLabel": "Nosso Cardápio",
+    "title": "Feito à Mão com Fogo",
+    "viewFullMenu": "Ver Cardápio Completo"
+  },
+  "marquee": {
+    "woodFired": "No Forno a Lenha",
+    "tomatoes": "Tomates San Marzano",
+    "dough": "Massa de 48h",
+    "mozzarella": "Mozzarella Importada",
+    "artisan": "Artesanal",
+    "oven": "Forno de Pedra"
+  },
+  "builder": {
+    "titleLabel": "O Atelier",
+    "title": "Desenhe Sua Obra-Prima",
+    "subtitle": "Selecione sua base e ingredientes premium para criar uma pizza tão única quanto seu paladar.",
+    "start": "Entrar no Atelier",
+    "canvasLabel": "Sua Tela",
+    "canvasSubtitle": "Selecione uma massa para começar",
+    "total": "Total",
+    "toppingsCount": "{{count}} ingrediente selecionado",
+    "toppingsCount_plural": "{{count}} ingredientes selecionados",
+    "yourCreation": "Sua Criação",
+    "included": "Incluído",
+    "steps": {
+      "foundation": { "title": "Base", "subtitle": "Escolha sua massa" },
+      "canvas": { "title": "Tela", "subtitle": "Selecione seu molho" },
+      "artistry": { "title": "Arte", "subtitle": "Adicione ingredientes" },
+      "bake": { "title": "O Forno", "subtitle": "Cozida com perfeição" }
+    },
+    "foundation": {
+      "title": "Escolha Sua Base",
+      "p": "A alma de cada pizza incrível começa aqui."
+    },
+    "palette": {
+      "title": "Pinte Sua Tela",
+      "p": "Cada toque de sabor importa."
+    },
+    "artistry": {
+      "title": "Adicione Sua Arte",
+      "p": "Cada ingrediente conta uma história. Qual é a sua?"
+    },
+    "bake": {
+      "title": "O Fogo do Alquimista",
+      "p": "Paciência é o ingrediente final.",
+      "baking": "Assando...",
+      "oven": "Forno Tradicional",
+      "perfect": "Cozimento Perfeito Alcançado"
+    },
+    "actions": {
+      "prev": "Anterior",
+      "next": "Continuar",
+      "reset": "Reiniciar",
+      "add": "Adicionar ao Carrinho",
+      "order": "Pedir Agora",
+      "back": "Voltar",
+      "simulate": "Simulação de Forno"
+    },
+    "config": {
+      "bases": {
+        "thin": { "name": "Massa Fina", "desc": "Crocante e leve" },
+        "thick": { "name": "Massa Grossa", "desc": "Macia e satisfatória" },
+        "cheese-burst": { "name": "Borda de Queijo", "desc": "Queijo derretido na borda" },
+        "whole-wheat": { "name": "Trigo Integral", "desc": "Saudável e natural" }
+      },
+      "sauces": {
+        "tomato": { "name": "San Marzano", "desc": "Clássico Napolitano" },
+        "bbq": { "name": "BBQ Defumado", "desc": "Doce e defumado" },
+        "white": { "name": "Creme de Alho", "desc": "Rico e aveludado" },
+        "pesto": { "name": "Pesto de Manjericão", "desc": "Fresco e aromático" }
+      },
+      "toppings": {
+        "pepperoni": "Pepperoni",
+        "mushrooms": "Cogumelos Silvestres",
+        "olives": "Azeitonas Kalamata",
+        "jalapenos": "Jalapeños",
+        "bell-peppers": "Pimentões",
+        "onions": "Cebola Caramelizada",
+        "cheese": "Mozzarella de Búfala",
+        "corn": "Milho Doce",
+        "tomatoes": "Tomate Cereja",
+        "pineapple": "Abacaxi Assado"
+      },
+      "categories": {
+        "meat": "Carnes",
+        "veggie": "Vegetais",
+        "spicy": "Picante",
+        "cheese": "Queijos",
+        "sweet": "Doce",
+        "seafood": "Frutos do Mar"
+      }
+    }
+  }
+}

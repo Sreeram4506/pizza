@@ -5,16 +5,11 @@ import { useChatbot } from '../context/ChatbotContext'
 import toast from 'react-hot-toast'
 import { useSettings } from '../context/SettingsContext'
 import BannerDisplay from './BannerDisplay'
-
-const navLinks = [
-  { label: 'Home', href: '/#home' },
-  { label: 'Menu', href: '/menu' },
-  { label: 'Atelier', href: '/#atelier' },
-  { label: 'Track', href: '/track' },
-  { label: 'Contact', href: '/#contact' },
-]
+import { useTranslation } from 'react-i18next'
+import LanguageSelector from './common/LanguageSelector'
 
 export default function Navbar() {
+  const { t } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -22,6 +17,13 @@ export default function Navbar() {
   const { settings } = useSettings()
   const navigate = useNavigate()
   const location = useLocation()
+
+  const navLinks = [
+    { label: t('nav.home'), href: '/#home' },
+    { label: t('nav.menu'), href: '/menu' },
+    { label: t('nav.trackOrder'), href: '/track' },
+    { label: t('nav.contact'), href: '/#contact' },
+  ]
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
@@ -114,6 +116,8 @@ export default function Navbar() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2 sm:gap-6">
+          {/* Language Selector */}
+          <LanguageSelector scrolled={scrolled} />
           {/* Cart Icon */}
           <motion.button
             className={`relative w-10 h-10 flex items-center justify-center transition-colors ${scrolled ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
