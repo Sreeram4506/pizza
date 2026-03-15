@@ -5,7 +5,7 @@ import { config } from '../config.js'
  * CORE SENDER ENGINE
  * Uses HTTPS API instead of SMTP to bypass cloud firewall blocks (Render/Vercel)
  */
-const brevoRequest = async (to, subject, htmlContent) => {
+const brevoRequest = async (to, subject, htmlContent, senderName = "Pizza Blast") => {
   const apiKey = config.brevoApiKey
   if (!apiKey) {
     console.warn('⚠️ [EMAIL] Simulation Mode: No BREVO_API_KEY found.')
@@ -20,7 +20,7 @@ const brevoRequest = async (to, subject, htmlContent) => {
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      sender: { name: "Pizza Blast", email: "hello@indraam.com" },
+      sender: { name: senderName, email: "hello@indraam.com" },
       to: [{ email: to }],
       subject,
       htmlContent
@@ -73,7 +73,54 @@ const templates = {
         <p><strong>Total:</strong> $${order.total.toFixed(2)}</p>
         <a href="${config.frontendUrl}/admin/orders">View in Dashboard</a>
       </div>`
-  })
+  }),
+
+  marketing: (message, customerName, templateType) => {
+    const personalizedMessage = message
+      .replace(/\{\{\s*customer_name\s*\}\}/g, customerName || 'Pizza Lover')
+      .replace(/\n/g, '<br>')
+
+    let contentHtml = ''
+
+    if (templateType === 'promotion' || templateType === 'flash') {
+      contentHtml = `
+        <div style="background: #dc2626; padding: 40px; text-align: center; border-radius: 15px 15px 0 0;">
+          <h1 style="color: #fff; margin: 0; font-size: 32px; text-transform: uppercase;">FLASH DEAL! ⚡️</h1>
+        </div>
+        <div style="padding: 30px; background: white;">
+          <h2 style="color: #1c1917;">Hey ${customerName || 'Pizza Lover'}, don't miss out!</h2>
+          <div style="font-size: 18px; line-height: 1.6; color: #444; margin: 20px 0;">
+            ${personalizedMessage}
+          </div>
+          <a href="${config.frontendUrl}/menu" style="display: block; background: #dc2626; color: white; text-decoration: none; padding: 15px; text-align: center; border-radius: 10px; font-weight: bold; font-size: 18px;">CLAIM MY PIZZA NOW</a>
+        </div>`
+    } else {
+      contentHtml = `
+        <div style="background: #dc2626; padding: 20px; text-align: center; border-radius: 15px 15px 0 0;">
+          <h1 style="color: white; margin:0">Pizza Blast! 🍕</h1>
+        </div>
+        <div style="padding: 30px; background: white;">
+          <h2 style="margin: 0 0 20px;">Hi ${customerName || 'Pizza Lover'},</h2>
+          <div style="line-height: 1.8; color: #444;">
+            ${personalizedMessage}
+          </div>
+          <div style="text-align: center; margin-top: 40px;">
+            <a href="${config.frontendUrl}/menu" style="background: #dc2626; color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold;">Order Your Favorite Pizza</a>
+          </div>
+        </div>`
+    }
+
+    return {
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 20px auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+          ${contentHtml}
+          <div style="background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #999;">
+            <p>© 2024 Pizza Blast. 123 Pizza Plaza, New York, NY 10001</p>
+            <p>You received this because you're a valued customer. <a href="#" style="color: #999;">Unsubscribe</a></p>
+          </div>
+        </div>`
+    }
+  }
 }
 
 /**
@@ -107,25 +154,13 @@ export const sendEmail = async (to, subject, html) => {
 }
 
 export const sendMarketingEmail = async (to, subject, message, customerName, template = 'custom') => {
-  const personalizedMessage = message
-    .replace(/\{\{\s*customer_name\s*\}\}/g, customerName || 'Pizza Lover')
-    .replace(/\n/g, '<br>')
-
-  let contentHtml = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
-      <div style="background: #dc2626; color: white; padding: 20px; text-align: center;">
-        <h1 style="margin:0">Pizza Blast!</h1>
-      </div>
-      <div style="padding: 20px;">
-        <h2>Hi ${customerName || 'Pizza Lover'},</h2>
-        <div style="line-height: 1.6; color: #444;">
-          ${personalizedMessage}
-        </div>
-        <div style="text-align:center; margin-top: 30px;">
-          <a href="${config.frontendUrl}/menu" style="background: #dc2626; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Order Now</a>
-        </div>
-      </div>
-    </div>`
-
-  return brevoRequest(to, subject, contentHtml)
+  try {
+    const { html } = templates.marketing(message, customerName, template)
+    // Marketing emails come from "Pizza Blast Offers"
+    const result = await brevoRequest(to, subject, html, "Pizza Blast Offers")
+    console.log(`📢 [EMAIL] Marketing sent to ${to}`)
+    return result
+  } catch (err) {
+    console.error(`❌ [EMAIL] Marketing Error: ${err.message}`)
+  }
 }
