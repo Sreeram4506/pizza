@@ -15,7 +15,7 @@ import { EmailCampaign } from '../models/EmailCampaign.js'
 import { PromotionalBanner } from '../models/PromotionalBanner.js'
 import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
 import { config } from '../config.js'
-import { sendMarketingEmail, sendReservationConfirmation } from '../utils/email.js'
+import { sendMarketingEmail, sendReservationConfirmation, sendCateringConfirmation } from '../utils/email.js'
 import { verifyAdmin } from '../middleware/auth.js'
 import { isConnected } from '../utils/database.js'
 import { Catering } from '../models/Catering.js'
@@ -1115,6 +1115,11 @@ router.patch('/catering/:id', verifyAdmin, async (req, res) => {
         )
 
         if (!request) return res.status(404).json({ error: 'Catering request not found' })
+
+        // Send confirmation email if status changed to confirmed
+        if (updateData.status === 'confirmed') {
+            await sendCateringConfirmation(request)
+        }
 
         res.json(request)
     } catch (err) {

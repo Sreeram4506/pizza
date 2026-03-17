@@ -154,6 +154,33 @@ const templates = {
           </div>
         </div>`
     }
+  },
+
+  cateringConfirmation: (catering) => {
+    return {
+      subject: `🍕 Catering Inquiry Confirmed - Pizza Blast`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
+          <div style="background: #dc2626; color: white; padding: 20px; text-align: center;">
+            <h1 style="margin:0">Catering Confirmed!</h1>
+          </div>
+          <div style="padding: 20px;">
+            <h2>Hi ${catering.name},</h2>
+            <p>We're thrilled to be part of your event! Your catering inquiry has been confirmed.</p>
+            <div style="background: #f9fafb; padding: 20px; border-radius: 10px; margin: 20px 0;">
+              <p><strong>Event Date:</strong> ${new Date(catering.eventDate).toLocaleDateString()}</p>
+              <p><strong>Guests:</strong> ${catering.guestsCount}</p>
+              <p><strong>Event Type:</strong> ${catering.eventType}</p>
+              <p><strong>Reference ID:</strong> #${catering._id.toString().slice(-6).toUpperCase()}</p>
+            </div>
+            <p>Our team will contact you shortly to finalize the menu and logistics.</p>
+            <p style="margin-top: 30px; font-size: 14px; color: #666;">
+              Questions? Reply to this email or call us.<br>
+              Pizza Blast Catering Team
+            </p>
+          </div>
+        </div>`
+    }
   }
 }
 
@@ -207,5 +234,16 @@ export const sendReservationConfirmation = async (reservation) => {
     return result
   } catch (err) {
     console.error(`❌ [EMAIL] Reservation Email Error: ${err.message}`)
+  }
+}
+
+export const sendCateringConfirmation = async (catering) => {
+  try {
+    const { subject, html } = templates.cateringConfirmation(catering)
+    const result = await brevoRequest(catering.email, subject, html)
+    console.log(`✅ [EMAIL] Catering confirmation sent to ${catering.email}`)
+    return result
+  } catch (err) {
+    console.error(`❌ [EMAIL] Catering Email Error: ${err.message}`)
   }
 }
