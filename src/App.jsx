@@ -16,6 +16,8 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
 import { useTranslation } from 'react-i18next'
+import CateringPage from './components/CateringPage'
+import DiningPage from './components/DiningPage'
 
 import OrderTracker from './components/OrderTracker'
 import CustomerProfile from './components/CustomerProfile'
@@ -30,6 +32,8 @@ import OrderManager from './components/admin/OrderManager'
 import CustomerManager from './components/admin/CustomerManager'
 import AnalyticsDashboard from './components/admin/Analytics'
 import Marketing from './components/admin/Marketing'
+import CateringManager from './components/admin/CateringManager'
+import ReservationManager from './components/admin/ReservationManager'
 import LoyaltyManager from './components/admin/LoyaltyManager'
 import Settings from './components/admin/Settings'
 import CustomPizzaBuilder from './components/CustomPizzaBuilder'
@@ -145,6 +149,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/menu" element={<><MenuPage /><Chatbot /></>} />
+                <Route path="/catering" element={<><Navbar /><CateringPage /><Chatbot /></>} />
+                <Route path="/dining" element={<><Navbar /><DiningPage /><Chatbot /></>} />
 
                 <Route path="/login" element={<><Navbar /><CustomerLogin /><Chatbot /></>} />
                 <Route path="/register" element={<><Navbar /><CustomerRegister /><Chatbot /></>} />
@@ -161,8 +167,10 @@ function App() {
                   <Route path="orders" element={<OrderManager />} />
                   <Route path="customers" element={<CustomerManager />} />
                   <Route path="loyalty" element={<LoyaltyManager />} />
-                  <Route path="analytics" element={<AnalyticsDashboard />} />
+                   <Route path="analytics" element={<AnalyticsDashboard />} />
                   <Route path="marketing" element={<Marketing />} />
+                  <Route path="catering" element={<CateringManager />} />
+                  <Route path="reservations" element={<ReservationManager />} />
                   <Route path="settings" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                 </Route>

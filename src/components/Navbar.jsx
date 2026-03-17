@@ -21,6 +21,8 @@ export default function Navbar() {
   const navLinks = [
     { label: t('nav.home'), href: '/#home' },
     { label: t('nav.menu'), href: '/menu' },
+    { label: t('nav.catering'), href: '/catering' },
+    { label: t('nav.dining'), href: '/dining' },
     { label: t('nav.trackOrder'), href: '/track' },
     { label: t('nav.contact'), href: '/#contact' },
   ]

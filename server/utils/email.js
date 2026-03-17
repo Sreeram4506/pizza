@@ -27,8 +27,15 @@ const brevoRequest = async (to, subject, htmlContent, senderName = "Pizza Blast"
     })
   })
 
-  const result = await response.json()
-  if (!response.ok) throw new Error(result.message || 'Brevo API Failure')
+  let result
+  try {
+    result = await response.json()
+  } catch (parseErr) {
+    const text = await response.text()
+    throw new Error(`Brevo API returned non-JSON: ${text.substring(0, 100)}`)
+  }
+
+  if (!response.ok) throw new Error(result.message || result.code || 'Brevo API Failure')
   return result
 }
 
@@ -120,6 +127,33 @@ const templates = {
           </div>
         </div>`
     }
+  },
+
+  reservationConfirmation: (reservation) => {
+    return {
+      subject: `✅ Table Reservation Confirmed - Pizza Blast`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
+          <div style="background: #1A1410; color: white; padding: 20px; text-align: center;">
+            <h1 style="margin:0">Reservation Confirmed!</h1>
+          </div>
+          <div style="padding: 20px;">
+            <h2>Hi ${reservation.name},</h2>
+            <p>We're excited to host you! Your table reservation has been confirmed.</p>
+            <div style="background: #f9fafb; padding: 20px; border-radius: 10px; margin: 20px 0;">
+              <p><strong>Date:</strong> ${new Date(reservation.date).toLocaleDateString()}</p>
+              <p><strong>Time:</strong> ${reservation.time}</p>
+              <p><strong>Guests:</strong> ${reservation.guestsCount}</p>
+              <p><strong>Reservation ID:</strong> #${reservation._id.toString().slice(-6).toUpperCase()}</p>
+            </div>
+            <p>If you need to change or cancel your reservation, please call us directly.</p>
+            <p style="margin-top: 30px; font-size: 14px; color: #666;">
+              See you soon at Pizza Blast!<br>
+              123 Pizza Plaza, New York, NY 10001
+            </p>
+          </div>
+        </div>`
+    }
   }
 }
 
@@ -162,5 +196,16 @@ export const sendMarketingEmail = async (to, subject, message, customerName, tem
     return result
   } catch (err) {
     console.error(`❌ [EMAIL] Marketing Error: ${err.message}`)
+  }
+}
+
+export const sendReservationConfirmation = async (reservation) => {
+  try {
+    const { subject, html } = templates.reservationConfirmation(reservation)
+    const result = await brevoRequest(reservation.email, subject, html)
+    console.log(`✅ [EMAIL] Reservation confirmation sent to ${reservation.email}`)
+    return result
+  } catch (err) {
+    console.error(`❌ [EMAIL] Reservation Email Error: ${err.message}`)
   }
 }

@@ -16,6 +16,8 @@ import analyticsRoutes from './routes/analytics.js'
 import cartRoutes from './routes/cart.js'
 import paymentRoutes from './routes/payments.js'
 import deliveryRoutes from './routes/delivery.js'
+import cateringRoutes from './routes/catering.js'
+import reservationRoutes from './routes/reservations.js'
 import { config } from './config.js'
 import { connectDatabase } from './utils/database.js'
 import { runCleanup } from './utils/cleanup.js'
@@ -78,7 +80,7 @@ const limiter = rateLimit({
 app.use('/api', limiter)
 
 // Body parser, reading data from body into req.body
-app.use(express.json({ limit: '10kb' }))
+app.use(express.json({ limit: '1MB' })) // Increased from 10kb to 1MB for campaign data
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize())
@@ -154,6 +156,8 @@ app.use('/api/menu', menuRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/ai', aiRoutes)
 app.use('/api/auth', authRoutes)
+app.use('/api/catering', cateringRoutes)
+app.use('/api/reservations', reservationRoutes)
 
 // Protected admin routes (require tenant)
 app.use('/api/customers', requireTenant, customerRoutes)

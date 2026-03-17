@@ -15,9 +15,11 @@ import { EmailCampaign } from '../models/EmailCampaign.js'
 import { PromotionalBanner } from '../models/PromotionalBanner.js'
 import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
 import { config } from '../config.js'
-import { sendMarketingEmail } from '../utils/email.js'
+import { sendMarketingEmail, sendReservationConfirmation } from '../utils/email.js'
 import { verifyAdmin } from '../middleware/auth.js'
 import { isConnected } from '../utils/database.js'
+import { Catering } from '../models/Catering.js'
+import { Reservation } from '../models/Reservation.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -834,6 +836,12 @@ router.post('/email-campaigns', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         const { name, subject, message, template, recipients, sendNow } = req.body
+        console.log(`[CAMPAIGN] Attempting to create campaign: "${name}" for tenant: ${tenantId || 'global'}. Recipients: ${recipients?.length || 0}`)
+
+        if (!name || !subject || !message) {
+            console.warn('[CAMPAIGN] Validation failed: Missing name, subject, or message')
+            return res.status(400).json({ error: 'Missing required campaign fields (name, subject, message)' })
+        }
 
         const campaignData = {
             ...(tenantId && { tenantId }),
@@ -870,8 +878,12 @@ router.post('/email-campaigns', verifyAdmin, async (req, res) => {
 
         res.json(campaign)
     } catch (err) {
-        console.error('Failed to create/send campaign:', err)
-        res.status(500).json({ error: 'Failed to process campaign' })
+        console.error('CRITICAL [CAMPAIGN ERROR]:', err)
+        res.status(500).json({ 
+            error: 'Failed to process campaign', 
+            details: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
+        })
     }
 })
 
@@ -1071,6 +1083,115 @@ router.post('/promotional-banners/:id/click', async (req, res) => {
         res.json({ success: true, clicks: banner.clicks })
     } catch (err) {
         res.status(500).json({ error: 'Failed to track click' })
+    }
+})
+
+// Catering Request Management
+router.get('/catering', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        let query = {}
+        if (tenantId) query.tenantId = tenantId
+
+        const requests = await Catering.find(query)
+            .sort({ eventDate: 1, createdAt: -1 })
+        res.json(requests)
+    } catch (err) {
+        console.error('Failed to fetch catering requests:', err)
+        res.status(500).json({ error: 'Failed to fetch catering requests' })
+    }
+})
+
+router.patch('/catering/:id', verifyAdmin, async (req, res) => {
+    try {
+        const { id } = req.params
+        const tenantId = req.tenantId
+        const updateData = req.body
+
+        const request = await Catering.findOneAndUpdate(
+            { _id: id, ...(tenantId && { tenantId }) },
+            updateData,
+            { returnDocument: 'after' }
+        )
+
+        if (!request) return res.status(404).json({ error: 'Catering request not found' })
+
+        res.json(request)
+    } catch (err) {
+        console.error('Failed to update catering request:', err)
+        res.status(500).json({ error: 'Failed to update catering request' })
+    }
+})
+
+router.delete('/catering/:id', verifyAdmin, async (req, res) => {
+    try {
+        const { id } = req.params
+        const tenantId = req.tenantId
+
+        const request = await Catering.findOneAndDelete({ _id: id, ...(tenantId && { tenantId }) })
+        if (!request) return res.status(404).json({ error: 'Catering request not found' })
+
+        res.json({ message: 'Catering request deleted successfully' })
+    } catch (err) {
+        console.error('Failed to delete catering request:', err)
+        res.status(500).json({ error: 'Failed to delete catering request' })
+    }
+})
+
+// Reservation Management
+router.get('/reservations', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        let query = {}
+        if (tenantId) query.tenantId = tenantId
+
+        const reservations = await Reservation.find(query)
+            .sort({ date: 1, createdAt: -1 })
+        res.json(reservations)
+    } catch (err) {
+        console.error('Failed to fetch reservations:', err)
+        res.status(500).json({ error: 'Failed to fetch reservations' })
+    }
+})
+
+router.patch('/reservations/:id', verifyAdmin, async (req, res) => {
+    try {
+        const { id } = req.params
+        const tenantId = req.tenantId
+        const updateData = req.body
+
+        const reservation = await Reservation.findOneAndUpdate(
+            { _id: id, ...(tenantId && { tenantId }) },
+            updateData,
+            { returnDocument: 'after' }
+        )
+
+        if (!reservation) return res.status(404).json({ error: 'Reservation not found' })
+
+        // Send confirmation email if status changed to confirmed
+        if (updateData.status === 'confirmed') {
+            await sendReservationConfirmation(reservation)
+        }
+
+        res.json(reservation)
+    } catch (err) {
+        console.error('Failed to update reservation:', err)
+        res.status(500).json({ error: 'Failed to update reservation' })
+    }
+})
+
+router.delete('/reservations/:id', verifyAdmin, async (req, res) => {
+    try {
+        const { id } = req.params
+        const tenantId = req.tenantId
+
+        const reservation = await Reservation.findOneAndDelete({ _id: id, ...(tenantId && { tenantId }) })
+        if (!reservation) return res.status(404).json({ error: 'Reservation not found' })
+
+        res.json({ message: 'Reservation deleted successfully' })
+    } catch (err) {
+        console.error('Failed to delete reservation:', err)
+        res.status(500).json({ error: 'Failed to delete reservation' })
     }
 })
 

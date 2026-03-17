@@ -11,6 +11,8 @@ const sidebarItems = [
   { id: 'loyalty', label: 'Rewards', icon: '🏆', path: '/admin/loyalty' },
   { id: 'analytics', label: 'Insights', icon: '📈', path: '/admin/analytics' },
   { id: 'marketing', label: 'Marketing', icon: '📢', path: '/admin/marketing' },
+  { id: 'catering', label: 'Catering', icon: '🍱', path: '/admin/catering' },
+  { id: 'reservations', label: 'Dining', icon: '🍷', path: '/admin/reservations' },
   { id: 'settings', label: 'General', icon: '⚙️', path: '/admin/settings' },
 ]
 
