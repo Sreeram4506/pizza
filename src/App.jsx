@@ -24,6 +24,8 @@ import CustomerProfile from './components/CustomerProfile'
 import CustomerLogin from './components/CustomerLogin'
 import DeliveryPortal from './components/DeliveryPortal'
 import CustomerRegister from './components/CustomerRegister'
+import ForgotPassword from './components/ForgotPassword'
+import ResetPassword from './components/ResetPassword'
 import AdminLogin from './components/AdminLogin'
 import AdminLayout from './components/admin/Layout'
 import Dashboard from './components/admin/Dashboard'
@@ -154,6 +156,8 @@ function App() {
 
                 <Route path="/login" element={<><Navbar /><CustomerLogin /><Chatbot /></>} />
                 <Route path="/register" element={<><Navbar /><CustomerRegister /><Chatbot /></>} />
+                <Route path="/forgot-password" element={<><Navbar /><ForgotPassword /><Chatbot /></>} />
+                <Route path="/reset-password" element={<><Navbar /><ResetPassword /><Chatbot /></>} />
                 <Route path="/track" element={<><Navbar /><OrderTracker /><Chatbot /></>} />
                 <Route path="/profile" element={<><Navbar /><CustomerProfile /><Chatbot /></>} />
                 <Route path="/admin/login" element={<AdminLogin />} />

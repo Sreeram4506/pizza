@@ -7,6 +7,7 @@ import { OrderService } from '../services/OrderService'
 import wsService from '../services/websocket.js'
 import StripePayment from './StripePayment'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
 export default function Chatbot() {
   const {
@@ -23,6 +24,7 @@ export default function Chatbot() {
   } = useChatbot()
   const { settings } = useSettings()
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
 
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -80,8 +82,8 @@ export default function Chatbot() {
       }
     }
     return {
-      name: guestName || 'Guest Customer',
-      phone: guestPhone || '000-000-0000',
+      name: guestName || 'Guest',
+      phone: guestPhone || '',
       email: guestEmail || ''
     }
   }
@@ -162,8 +164,8 @@ export default function Chatbot() {
   const fetchMenuData = async () => {
     setLoading(true)
     try {
-      // Fetch categories
-      const categoriesRes = await fetch('/api/menu/categories')
+      // Fetch categories with cache busting
+      const categoriesRes = await fetch(`/api/menu/categories?t=${Date.now()}`)
       if (categoriesRes.ok) {
         const categoriesData = await categoriesRes.json()
         setCategories(categoriesData)
@@ -171,9 +173,9 @@ export default function Chatbot() {
       } else {
         console.error('Failed to fetch categories:', categoriesRes.status, categoriesRes.statusText)
       }
-
-      // Fetch menu items
-      const itemsRes = await fetch('/api/menu/items')
+ 
+      // Fetch menu items with cache busting
+      const itemsRes = await fetch(`/api/menu/items?t=${Date.now()}`)
       if (itemsRes.ok) {
         const itemsData = await itemsRes.json()
         setMenuItems(itemsData)
@@ -343,10 +345,12 @@ export default function Chatbot() {
         }
         break
       case 'menu':
-        setView('menu')
+        navigate('/menu')
+        setIsOpen(false)
         break
       case 'order':
-        setView('menu')
+        navigate('/menu')
+        setIsOpen(false)
         break
       case 'cart':
         setView('cart')
@@ -423,10 +427,14 @@ export default function Chatbot() {
           localStorage.setItem('activeOrders', JSON.stringify(activeOrders));
         }
 
-        const eta = new Date(order.eta || new Date(Date.now() + 30 * 60000)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        const estimatedTime = order.estimatedDeliveryAt || order.estimatedReadyAt || order.estimatedDineInTime;
+        const eta = estimatedTime 
+          ? new Date(estimatedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : new Date(Date.now() + 30 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
         setMessages(prev => [...prev, {
           type: 'bot',
-          text: `✅ **Order Confirmed!**\n\nOrder ID: \`${dispOrderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated delivery: **${eta}**\n💳 Status: **Paid via Card**`,
+          text: `✅ **Order Confirmed!**\n\nOrder ID: \`${dispOrderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated ${orderType === 'delivery' ? 'delivery' : 'ready'}: **${eta}**\n💳 Status: **Paid via Card**`,
           confirmed: true,
         }])
         clearCart()
@@ -472,7 +480,7 @@ export default function Chatbot() {
         payment: {
           method: paymentMethod,
           status: paymentMethod === 'cash' ? 'pending' : 'paid',
-          transactionId: paymentMethod === 'cash' ? 'cash_order' : 'mock_payment_id'
+          transactionId: paymentMethod === 'cash' ? `CASH-${Date.now()}` : `CARD-${Date.now()}`
         }
       })
       setIsTyping(false)
@@ -487,10 +495,14 @@ export default function Chatbot() {
           localStorage.setItem('activeOrders', JSON.stringify(activeOrders));
         }
 
-        const eta = new Date(order.eta || new Date(Date.now() + 30 * 60000)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        const estimatedTime = order.estimatedDeliveryAt || order.estimatedReadyAt || order.estimatedDineInTime;
+        const eta = estimatedTime 
+          ? new Date(estimatedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : new Date(Date.now() + 30 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
         setMessages(prev => [...prev, {
           type: 'bot',
-          text: `✅ **Order Confirmed!**\n\nOrder ID: \`${dispOrderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated delivery: **${eta}**`,
+          text: `✅ **Order Confirmed!**\n\nOrder ID: \`${dispOrderId}\`\nItems: ${cart.map(i => `${i.qty}× ${i.name}`).join(', ')}\nTotal: $${cartTotal.toFixed(2)}\n⏱️ Estimated ${orderType === 'delivery' ? 'delivery' : 'ready'}: **${eta}**`,
           confirmed: true,
         }])
         clearCart()
@@ -593,7 +605,7 @@ export default function Chatbot() {
                   {['chat', 'menu', 'cart'].map(tab => (
                     <motion.button
                       key={tab}
-                      onClick={() => setView(tab)}
+                      onClick={() => tab === 'menu' ? (navigate('/menu'), setIsOpen(false)) : setView(tab)}
                       className={`px-3 sm:px-8 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${view === tab ? 'bg-tomato-600 text-white shadow-lg shadow-tomato-600/20' : 'text-wood-600 hover:text-tomato-600'}`}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -672,7 +684,7 @@ export default function Chatbot() {
                 <div className="p-6 max-w-4xl mx-auto w-full space-y-6">
                   {messages.map((msg, i) => (
                     <ChatMessage key={i} message={msg}
-                      onMenuOpen={() => setView('menu')}
+                      onMenuOpen={() => { navigate('/menu'); setIsOpen(false); }}
                       onCartOpen={() => setView('cart')}
                       onCheckoutOpen={() => setView('checkout')}
                     />
@@ -757,7 +769,7 @@ export default function Chatbot() {
                       <p className="text-xl font-medium">Your cart is empty!</p>
 
                       <motion.button
-                        onClick={() => setView('menu')}
+                        onClick={() => { navigate('/menu'); setIsOpen(false); }}
                         className="px-10 py-4 rounded-2xl bg-tomato-600 text-white font-bold shadow-pizza"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -805,7 +817,9 @@ export default function Chatbot() {
                             <p className="text-wood-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1 sm:mb-2 text-[8px] sm:text-[10px]">Total Amount Due</p>
                             <h3 className="text-3xl sm:text-5xl font-black tracking-tighter">${cartTotal.toFixed(2)}</h3>
                           </div>
-                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-mozzarella-100 flex items-center justify-center text-2xl sm:text-4xl shadow-inner font-black text-tomato-600 border border-crust-100">PB</div>
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-mozzarella-100 flex items-center justify-center text-2xl sm:text-4xl shadow-inner font-black text-tomato-600 border border-crust-100">
+                            {settings?.restaurantName ? settings.restaurantName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'PB'}
+                          </div>
                         </div>
                         <motion.button
                           onClick={handleCheckoutIntent}
@@ -819,7 +833,7 @@ export default function Chatbot() {
 
 
                         <button
-                          onClick={() => setView('menu')}
+                          onClick={() => { navigate('/menu'); setIsOpen(false); }}
                           className="w-full mt-4 text-sm text-wood-400 font-bold uppercase tracking-widest hover:text-tomato-600 transition-colors"
                         >
                           + Add more items
@@ -1107,7 +1121,7 @@ export default function Chatbot() {
               <div className="p-4 sm:p-8 bg-white border-t border-gray-100">
                 <div className="max-w-4xl mx-auto w-full">
                   <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6 overflow-x-auto scrollbar-hide pb-2">
-                    <motion.button type="button" onClick={() => setView('menu')}
+                    <motion.button type="button" onClick={() => { navigate('/menu'); setIsOpen(false); }}
                       className="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full border border-crust-100 text-wood-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] hover:text-tomato-600 hover:border-tomato-200 transition-all shadow-sm whitespace-nowrap"
                       whileTap={{ scale: 0.95 }}>{t('chatbot.browseMenu')}</motion.button>
                     {cart.length > 0 && (

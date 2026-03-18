@@ -77,8 +77,7 @@ export default function Footer() {
           <div>
             <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">{t('footer.locationLabel')}</h4>
             <p className="text-white/50 text-sm font-body leading-relaxed mb-4">
-              {settings?.address?.split(',')[0] || '123 Pizza Plaza'}<br />
-              {settings?.address?.split(',').slice(1).join(',') || 'New York, NY 10001'}
+              {settings?.address || 'Visit us at our main location'}
             </p>
             <button
               onClick={() => navigate('/#contact')}

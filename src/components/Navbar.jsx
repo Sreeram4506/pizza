@@ -27,6 +27,9 @@ export default function Navbar() {
     { label: t('nav.contact'), href: '/#contact' },
   ]
 
+  const isLightPage = ['/menu', '/catering', '/dining', '/track', '/profile', '/login', '/register'].includes(location.pathname)
+  const isSolid = scrolled || isLightPage || mobileOpen
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -76,7 +79,7 @@ export default function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 flex flex-col ${scrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 flex flex-col ${isSolid
         ? 'bg-white/95 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] shadow-sm'
         : 'bg-transparent'
         }`}
@@ -93,7 +96,7 @@ export default function Navbar() {
           {settings?.logo ? (
             <img src={settings.logo} alt="Logo" className="h-10 object-contain" />
           ) : (
-            <span className={`font-sans font-black text-[22px] tracking-tight uppercase transition-colors duration-500 ${scrolled ? 'text-red-600' : 'text-white'}`}>
+            <span className={`font-sans font-black text-[22px] tracking-tight uppercase transition-colors duration-500 ${isSolid ? 'text-red-600' : 'text-white'}`}>
               {settings?.restaurantName || 'Pizza Blast'}
             </span>
           )}
@@ -106,7 +109,7 @@ export default function Navbar() {
               key={link.label}
               onClick={(e) => handleNavClick(e, link)}
               className={`nav-link text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors duration-300 ${
-                scrolled
+                isSolid
                   ? 'text-[#5C554E] hover:text-[#1A1410]'
                   : 'text-white/75 hover:text-white'
               }`}
@@ -122,7 +125,7 @@ export default function Navbar() {
           <LanguageSelector scrolled={scrolled} />
           {/* Cart Icon */}
           <motion.button
-            className={`relative w-10 h-10 flex items-center justify-center transition-colors ${scrolled ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
+            className={`relative w-10 h-10 flex items-center justify-center transition-colors ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
             whileTap={{ scale: 0.95 }}
             onClick={() => openWithIntent('cart')}
           >
@@ -147,7 +150,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/profile')}
-                className={`text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors nav-link ${scrolled ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
+                className={`text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors nav-link ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
               >
                 Profile
               </motion.button>
@@ -155,7 +158,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleLogout}
-                className={`text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors nav-link ${scrolled ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
+                className={`text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors nav-link ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
               >
                 Logout
               </motion.button>
@@ -165,7 +168,7 @@ export default function Navbar() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/login')}
-              className={`hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors nav-link ${scrolled ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
+              className={`hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors nav-link ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
             >
               Login
             </motion.button>
@@ -176,14 +179,14 @@ export default function Navbar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/admin/login')}
-            className={`hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors ${scrolled ? 'text-[#B8AA8F] hover:text-[#5C554E]' : 'text-white/40 hover:text-white/70'}`}
+            className={`hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors ${isSolid ? 'text-[#B8AA8F] hover:text-[#5C554E]' : 'text-white/40 hover:text-white/70'}`}
           >
             Admin
           </motion.button>
 
           {/* Mobile menu button */}
           <motion.button
-            className={`lg:hidden w-10 h-10 flex items-center justify-center transition-colors ${scrolled ? 'text-[#1A1410]' : 'text-white'}`}
+            className={`lg:hidden w-10 h-10 flex items-center justify-center transition-colors ${isSolid ? 'text-[#1A1410]' : 'text-white'}`}
             onClick={() => setMobileOpen(!mobileOpen)}
             whileTap={{ scale: 0.95 }}
           >
@@ -210,7 +213,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:hidden overflow-hidden bg-white/98 backdrop-blur-xl border-t border-[rgba(26,20,16,0.06)]"
+            className="lg:hidden overflow-hidden bg-white/95 backdrop-blur-xl border-t border-[rgba(26,20,16,0.06)]"
           >
             <div className="max-w-[1400px] mx-auto px-6 py-8 flex flex-col gap-2">
               {navLinks.map((link, i) => (

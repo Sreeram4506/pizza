@@ -19,7 +19,7 @@ export default function LoyaltyManager() {
     const fetchLoyaltyConfig = async () => {
         try {
             const token = localStorage.getItem('adminToken')
-            const res = await fetch('/api/customers/loyalty/config', {
+            const res = await fetch('/api/admin/loyalty-config', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
@@ -37,8 +37,8 @@ export default function LoyaltyManager() {
         e.preventDefault()
         try {
             const token = localStorage.getItem('adminToken')
-            const res = await fetch('/api/customers/loyalty/config', {
-                method: 'PUT',
+            const res = await fetch('/api/admin/loyalty-config', {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ export default function LoyaltyManager() {
         e.preventDefault()
         try {
             const token = localStorage.getItem('adminToken')
-            const res = await fetch('/api/customers/loyalty/rewards', {
+            const res = await fetch('/api/admin/loyalty-config/rewards', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -93,13 +93,11 @@ export default function LoyaltyManager() {
         try {
             const token = localStorage.getItem('adminToken')
             const updatedRewards = (loyaltyConfig?.rewards || []).filter(r => r._id !== rewardId)
-            const res = await fetch('/api/customers/loyalty/config', {
-                method: 'PUT',
+            const res = await fetch(`/api/admin/loyalty-config/rewards/${rewardId}`, {
+                method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ ...loyaltyConfig, rewards: updatedRewards })
+                    'Authorization': `Bearer ${token}`
+                }
             })
             if (res.ok) {
                 toast.success('Asset liquidated')

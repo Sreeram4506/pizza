@@ -158,7 +158,7 @@ export default function DeliveryPortal() {
                                                     📞 Call
                                                 </a>
                                                 <button 
-                                                    onClick={() => sendSMS(order.customerInfo?.phone, "Hi, this is your Pizza Blast driver. I'm arriving with your order!")}
+                                                    onClick={() => sendSMS(order.customerInfo?.phone, `Hi, this is your ${settings?.restaurantName || 'Pizza Blast'} driver. I'm arriving with your order!`)}
                                                     className="flex items-center gap-2 px-3 py-2 bg-wood-900 rounded-xl text-blue-400 font-bold text-xs border border-wood-700 hover:bg-wood-700 transition-colors"
                                                 >
                                                     💬 SMS Arrival

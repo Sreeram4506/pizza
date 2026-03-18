@@ -32,7 +32,9 @@ export default function OrderTracker() {
       setOrderStatus({
         orderNumber: order.orderNumber,
         status: order.status,
-        estimatedTime: ['confirmed', 'preparing', 'ready'].includes(order.status) ? '15-25 mins' :
+        estimatedTime: (order.estimatedDeliveryAt || order.estimatedReadyAt || order.estimatedDineInTime) 
+          ? new Date(order.estimatedDeliveryAt || order.estimatedReadyAt || order.estimatedDineInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : ['confirmed', 'preparing', 'ready'].includes(order.status) ? '15-25 mins' :
           order.status === 'out_for_delivery' ? 'On the way!' : 'Completed',
         items: order.items,
         total: order.total,

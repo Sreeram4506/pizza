@@ -5,7 +5,7 @@ import { config } from '../config.js'
  * CORE SENDER ENGINE
  * Uses HTTPS API instead of SMTP to bypass cloud firewall blocks (Render/Vercel)
  */
-const brevoRequest = async (to, subject, htmlContent, senderName = "Pizza Blast") => {
+const brevoRequest = async (to, subject, htmlContent, senderName = config.restaurantName) => {
   const apiKey = config.brevoApiKey
   if (!apiKey) {
     console.warn('⚠️ [EMAIL] Simulation Mode: No BREVO_API_KEY found.')
@@ -20,7 +20,7 @@ const brevoRequest = async (to, subject, htmlContent, senderName = "Pizza Blast"
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      sender: { name: senderName, email: "hello@indraam.com" },
+      sender: { name: senderName, email: config.senderEmail },
       to: [{ email: to }],
       subject,
       htmlContent
@@ -50,7 +50,7 @@ const templates = {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
           <div style="background: #dc2626; color: white; padding: 20px; text-align: center;">
-            <h1 style="margin:0">Pizza Blast!</h1>
+            <h1 style="margin:0">${config.restaurantName}!</h1>
             <p>Order #${order.orderNumber}</p>
           </div>
           <div style="padding: 20px;">
@@ -104,7 +104,7 @@ const templates = {
     } else {
       contentHtml = `
         <div style="background: #dc2626; padding: 20px; text-align: center; border-radius: 15px 15px 0 0;">
-          <h1 style="color: white; margin:0">Pizza Blast! 🍕</h1>
+          <h1 style="color: white; margin:0">${config.restaurantName}! 🍕</h1>
         </div>
         <div style="padding: 30px; background: white;">
           <h2 style="margin: 0 0 20px;">Hi ${customerName || 'Pizza Lover'},</h2>
@@ -122,7 +122,7 @@ const templates = {
         <div style="font-family: sans-serif; max-width: 600px; margin: 20px auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
           ${contentHtml}
           <div style="background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #999;">
-            <p>© 2024 Pizza Blast. 123 Pizza Plaza, New York, NY 10001</p>
+            <p>© ${new Date().getFullYear()} ${config.restaurantName}. ${config.restaurantAddress}</p>
             <p>You received this because you're a valued customer. <a href="#" style="color: #999;">Unsubscribe</a></p>
           </div>
         </div>`
@@ -131,7 +131,7 @@ const templates = {
 
   reservationConfirmation: (reservation) => {
     return {
-      subject: `✅ Table Reservation Confirmed - Pizza Blast`,
+      subject: `✅ Table Reservation Confirmed - ${config.restaurantName}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
           <div style="background: #1A1410; color: white; padding: 20px; text-align: center;">
@@ -148,8 +148,8 @@ const templates = {
             </div>
             <p>If you need to change or cancel your reservation, please call us directly.</p>
             <p style="margin-top: 30px; font-size: 14px; color: #666;">
-              See you soon at Pizza Blast!<br>
-              123 Pizza Plaza, New York, NY 10001
+              See you soon at ${config.restaurantName}!<br>
+              ${config.restaurantAddress}
             </p>
           </div>
         </div>`
@@ -158,7 +158,7 @@ const templates = {
 
   cateringConfirmation: (catering) => {
     return {
-      subject: `🍕 Catering Inquiry Confirmed - Pizza Blast`,
+      subject: `🍕 Catering Inquiry Confirmed - ${config.restaurantName}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 15px; overflow: hidden;">
           <div style="background: #dc2626; color: white; padding: 20px; text-align: center;">
@@ -176,7 +176,7 @@ const templates = {
             <p>Our team will contact you shortly to finalize the menu and logistics.</p>
             <p style="margin-top: 30px; font-size: 14px; color: #666;">
               Questions? Reply to this email or call us.<br>
-              Pizza Blast Catering Team
+              ${config.restaurantName} Catering Team
             </p>
           </div>
         </div>`
@@ -217,8 +217,8 @@ export const sendEmail = async (to, subject, html) => {
 export const sendMarketingEmail = async (to, subject, message, customerName, template = 'custom') => {
   try {
     const { html } = templates.marketing(message, customerName, template)
-    // Marketing emails come from "Pizza Blast Offers"
-    const result = await brevoRequest(to, subject, html, "Pizza Blast Offers")
+    // Marketing emails come from "Offers"
+    const result = await brevoRequest(to, subject, html, `${config.restaurantName} Offers`)
     console.log(`📢 [EMAIL] Marketing sent to ${to}`)
     return result
   } catch (err) {

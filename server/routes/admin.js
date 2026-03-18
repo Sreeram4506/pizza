@@ -663,12 +663,12 @@ router.get('/public/settings', async (req, res) => {
             if (!isConnected) {
                 console.log('Using mock settings (DB disconnected)')
                 return res.json({
-                    restaurantName: 'Pizza Blast (Mock)',
-                    email: 'contact@pizzablast.com',
-                    phone: '+1 (555) 123-4567',
-                    address: '123 Pizza Plaza, New York, NY 10001',
+                    restaurantName: 'Restaurant Name',
+                    email: 'contact@example.com',
+                    phone: '+1 (555) 000-0000',
+                    address: 'Main Street, City, State',
                     currency: 'USD',
-                    timezone: 'America/New_York'
+                    timezone: 'UTC'
                 })
             }
             settings = await Settings.findOne({ tenantId: null }) || await Settings.findOne({ tenantId: { $exists: false } })
@@ -1197,6 +1197,82 @@ router.delete('/reservations/:id', verifyAdmin, async (req, res) => {
     } catch (err) {
         console.error('Failed to delete reservation:', err)
         res.status(500).json({ error: 'Failed to delete reservation' })
+    }
+})
+
+// Loyalty Configuration CRUD
+router.get('/loyalty-config', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
+        let config = await LoyaltyConfig.findOne(query)
+        
+        if (!config) {
+            config = new LoyaltyConfig({ tenantId: tenantId || undefined })
+            await config.save()
+        }
+        
+        res.json(config)
+    } catch (err) {
+        console.error('Failed to fetch loyalty config:', err)
+        res.status(500).json({ error: 'Failed to fetch loyalty config' })
+    }
+})
+
+router.post('/loyalty-config', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        const updateData = req.body
+        
+        const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
+        const config = await LoyaltyConfig.findOneAndUpdate(
+            query,
+            { ...updateData, updatedAt: new Date() },
+            { upsert: true, new: true, runValidators: true }
+        )
+        
+        res.json(config)
+    } catch (err) {
+        console.error('Failed to update loyalty config:', err)
+        res.status(500).json({ error: 'Failed to update loyalty config' })
+    }
+})
+
+router.post('/loyalty-config/rewards', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        const rewardData = req.body
+        
+        const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
+        const config = await LoyaltyConfig.findOne(query)
+        
+        if (!config) return res.status(404).json({ error: 'Loyalty config not found' })
+        
+        config.rewards.push(rewardData)
+        await config.save()
+        
+        res.json(config)
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to add reward' })
+    }
+})
+
+router.delete('/loyalty-config/rewards/:rewardId', verifyAdmin, async (req, res) => {
+    try {
+        const tenantId = req.tenantId
+        const { rewardId } = req.params
+        
+        const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
+        const config = await LoyaltyConfig.findOne(query)
+        
+        if (!config) return res.status(404).json({ error: 'Loyalty config not found' })
+        
+        config.rewards = config.rewards.filter(r => r._id.toString() !== rewardId)
+        await config.save()
+        
+        res.json(config)
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to delete reward' })
     }
 })
 

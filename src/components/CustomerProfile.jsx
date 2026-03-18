@@ -48,12 +48,19 @@ export default function CustomerProfile() {
     }
 
     const handleReorder = (pastOrder) => {
-        const reorderItems = pastOrder.items.map(item => `${item.quantity}x ${item.menuItem?.name || 'Custom Pizza'}`).join(', ')
-        toast.success(`Reordering: ${reorderItems}`, { duration: 4000 })
-        openWithIntent('checkout', {
-            item: `Reorder #${pastOrder.orderNumber}`,
-            price: pastOrder.total.toFixed(2)
+        // Add all items from the past order to the chatbot cart
+        pastOrder.items.forEach(item => {
+            openWithIntent('add_to_cart', {
+                itemId: item.itemId,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                modifiers: item.modifiers || [],
+                notes: item.notes || ''
+            })
         })
+        toast.success(`Items from Order #${pastOrder.orderNumber} added to cart!`)
+        openWithIntent('cart')
     }
 
     if (loading) {
@@ -241,9 +248,17 @@ export default function CustomerProfile() {
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-lg font-black text-tomato-600 tracking-tighter">${order.total?.toFixed(2)}</p>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white text-wood-600 border border-crust-100 mt-1 inline-block">
-                                                        {order.status}
-                                                    </span>
+                                                    <div className="flex flex-col items-end gap-1 mt-1">
+                                                        <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white text-wood-600 border border-crust-100 inline-block">
+                                                            {order.status}
+                                                        </span>
+                                                        {order.pointsEarned > 0 && (
+                                                            <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest">+ {order.pointsEarned} pts earned</span>
+                                                        )}
+                                                        {order.pointsRedeemed > 0 && (
+                                                            <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">- {order.pointsRedeemed} pts used</span>
+                                                        )}
+                                                    </div>
                                                     <motion.button
                                                         whileHover={{ scale: 1.05 }}
                                                         whileTap={{ scale: 0.95 }}

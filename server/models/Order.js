@@ -55,6 +55,8 @@ const orderSchema = new mongoose.Schema({
   actualDeliveredAt: { type: Date },
   notes: { type: String, default: '' },
   deliveryNotes: { type: String, default: '' },
+  pointsEarned: { type: Number, default: 0 },
+  pointsRedeemed: { type: Number, default: 0 },
   source: { type: String, enum: ['website', 'app', 'phone', 'in_person'], default: 'website' }
 }, { timestamps: true })
 

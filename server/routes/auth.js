@@ -2,8 +2,13 @@ import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { Customer } from '../models/Customer.js'
+import { User } from '../models/User.js'
 import { Order } from '../models/Order.js'
 import { LoyaltyConfig } from '../models/Loyalty.js'
+import { OTP } from '../models/OTP.js'
+import { config } from '../config.js'
+import { sendEmail } from '../utils/email.js'
+import crypto from 'crypto'
 
 const router = Router()
 
@@ -63,49 +68,192 @@ router.post('/register', async (req, res) => {
   }
 })
 
-// Customer login
+// Unified login (Customer + Admin/Staff)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required' })
 
-    // For localhost development, skip tenant requirement
-    const tenantId = req.tenantId
     const key = email.toLowerCase()
+    const tenantId = req.tenantId
 
-    // Find customer (with or without tenant)
-    let customer = null
-    if (tenantId) {
-      customer = await Customer.findOne({ tenantId, email: key })
-    } else {
-      customer = await Customer.findOne({ email: key })
-    }
+    // 1. Try to find the user in Customer model
+    let customer = await Customer.findOne(tenantId ? { tenantId, email: key } : { email: key })
 
-    if (!customer) return res.status(404).json({ error: 'User not found' })
-
-    if (!bcrypt.compareSync(password, customer.passwordHash)) {
-      return res.status(401).json({ error: 'Invalid credentials' })
-    }
-
-    const token = jwt.sign({
-      role: 'customer',
-      email: key,
-      id: customer._id,
-      customerId: customer._id
-    }, JWT_SECRET, { expiresIn: '7d' })
-
-    res.json({
-      token,
-      user: {
-        id: customer._id,
-        name: customer.name,
-        email: customer.email,
-        phone: customer.phone
+    if (customer) {
+      if (!bcrypt.compareSync(password, customer.passwordHash)) {
+        return res.status(401).json({ error: 'Invalid credentials' })
       }
-    })
+
+      const token = jwt.sign({
+        role: 'customer',
+        email: key,
+        id: customer._id,
+        customerId: customer._id
+      }, JWT_SECRET, { expiresIn: '7d' })
+
+      return res.json({
+        token,
+        role: 'customer',
+        user: {
+          id: customer._id,
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone
+        }
+      })
+    }
+
+    // 2. Try to find the user in User model (Staff/Admins stored in DB)
+    let staff = await User.findOne(tenantId ? { tenantId, email: key } : { email: key })
+    if (staff) {
+      if (!bcrypt.compareSync(password, staff.passwordHash)) {
+        return res.status(401).json({ error: 'Invalid credentials' })
+      }
+
+      const token = jwt.sign({
+        role: staff.role || 'staff',
+        email: key,
+        id: staff._id
+      }, JWT_SECRET, { expiresIn: '1d' })
+
+      return res.json({
+        token,
+        role: staff.role || 'staff',
+        user: {
+          id: staff._id,
+          name: staff.name,
+          email: staff.email,
+          role: staff.role
+        }
+      })
+    }
+
+    // 3. Fallback to global admin from config
+    if (key === config.adminUsername.toLowerCase() && password === config.adminPassword) {
+      const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '1d' })
+      return res.json({
+        token,
+        role: 'admin',
+        user: {
+          name: 'Global Admin',
+          email: key,
+          role: 'admin'
+        }
+      })
+    }
+
+    res.status(401).json({ error: 'Invalid credentials' })
   } catch (err) {
     console.error('Login error:', err)
     res.status(500).json({ error: 'Failed to login' })
+  }
+})
+
+// Forgot Password - Step 1: Request OTP
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body
+    if (!email) return res.status(400).json({ error: 'Email is required' })
+
+    const key = email.toLowerCase()
+    
+    // Check if user exists (Customer or User)
+    const customer = await Customer.findOne({ email: key })
+    const staff = await User.findOne({ email: key })
+    
+    if (!customer && !staff) {
+      // For security, don't reveal if email exists, but we need to stop here
+      return res.json({ message: 'If an account exists with this email, an OTP has been sent.' })
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString()
+    const expiresAt = new Date(Date.now() + 10 * 60000) // 10 minutes
+
+    // Save/Update OTP in DB
+    await OTP.findOneAndUpdate(
+      { email: key },
+      { otp, expiresAt },
+      { upsert: true }
+    )
+
+    // Send email
+    await sendEmail(
+      key,
+      'Your Password Reset OTP - Pizza Blast',
+      `<div style="font-family: sans-serif; padding: 20px;">
+        <h2>Password Reset Request</h2>
+        <p>Your one-time password (OTP) is:</p>
+        <h1 style="color: #dc2626; font-size: 40px; letter-spacing: 5px;">${otp}</h1>
+        <p>This OTP is valid for 10 minutes. If you did not request this, please ignore this email.</p>
+      </div>`
+    )
+
+    res.json({ message: 'OTP sent to your email.' })
+  } catch (err) {
+    console.error('Forgot password error:', err)
+    res.status(500).json({ error: 'Failed to process request' })
+  }
+})
+
+// Forgot Password - Step 2: Verify OTP
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body
+    if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' })
+
+    const key = email.toLowerCase()
+    const record = await OTP.findOne({ email: key, otp })
+
+    if (!record || record.expiresAt < new Date()) {
+      return res.status(400).json({ error: 'Invalid or expired OTP' })
+    }
+
+    // Generate a temporary reset token
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    record.token = resetToken
+    await record.save()
+
+    res.json({ resetToken })
+  } catch (err) {
+    console.error('Verify OTP error:', err)
+    res.status(500).json({ error: 'Failed to verify OTP' })
+  }
+})
+
+// Forgot Password - Step 3: Reset Password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, resetToken, newPassword } = req.body
+    if (!email || !resetToken || !newPassword) {
+      return res.status(400).json({ error: 'Email, reset token, and new password are required' })
+    }
+
+    const key = email.toLowerCase()
+    const record = await OTP.findOne({ email: key, token: resetToken })
+
+    if (!record) {
+      return res.status(400).json({ error: 'Invalid reset token' })
+    }
+
+    const hash = bcrypt.hashSync(newPassword, 10)
+
+    // Update password in Customer or User model
+    const customer = await Customer.findOneAndUpdate({ email: key }, { passwordHash: hash })
+    const staff = await User.findOneAndUpdate({ email: key }, { passwordHash: hash })
+
+    if (!customer && !staff) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    // Clean up OTP record
+    await OTP.deleteOne({ email: key })
+
+    res.json({ message: 'Password reset successfully. You can now log in.' })
+  } catch (err) {
+    console.error('Reset password error:', err)
+    res.status(500).json({ error: 'Failed to reset password' })
   }
 })
 

@@ -3,10 +3,12 @@ import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
+import { useSettings } from '../context/SettingsContext'
 
 export default function DiningPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { settings } = useSettings()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -68,7 +70,7 @@ export default function DiningPage() {
           Reserve Your Table
         </h1>
         <p className="text-[#9B8D74] text-lg font-medium max-w-2xl mx-auto">
-          Experience the art of wood-fired pizza in our cozy artisan kitchen. Book your spot today.
+          Experience the art of wood-fired pizza in the cozy artisan kitchen of {settings?.restaurantName || 'our restaurant'}. Book your spot today.
         </p>
       </motion.div>
 

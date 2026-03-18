@@ -25,8 +25,14 @@ export default function CustomerLogin() {
       clearTimeout(timeout)
       const data = await res.json()
       if (res.ok) {
-        localStorage.setItem('customerToken', data.token)
-        navigate('/')
+        if (data.role === 'customer') {
+          localStorage.setItem('customerToken', data.token)
+          navigate('/profile')
+        } else {
+          // Admin or Staff
+          localStorage.setItem('adminToken', data.token)
+          navigate('/admin/dashboard')
+        }
       } else {
         setError(data.error || 'Login failed')
       }
@@ -42,7 +48,7 @@ export default function CustomerLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] section-grain">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] section-grain pt-20">
       {/* Background glows */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-ember-500/5 rounded-full blur-[100px] -mr-64 -mt-64" />
@@ -52,8 +58,7 @@ export default function CustomerLogin() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-noir-850 border border-[rgba(242,235,217,0.06)] p-12 relative z-10"
-        style={{ borderRadius: '2px' }}
+        className="w-full max-w-md bg-white border border-[rgba(26,20,16,0.06)] p-12 relative z-10 shadow-2xl rounded-[3rem]"
       >
         <div className="text-center mb-10">
           <span className="font-display italic text-3xl text-[#1A1410] block mb-2">
@@ -69,8 +74,7 @@ export default function CustomerLogin() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="p-4 bg-ember-500/10 border border-ember-500/20 text-ember-500 mb-8 text-xs font-mono tracking-widest text-center"
-              style={{ borderRadius: '2px' }}
+              className="p-4 bg-ember-500/10 border border-ember-500/20 text-ember-500 mb-8 text-xs font-mono tracking-widest text-center rounded-xl"
             >
               {error}
             </motion.div>
@@ -84,20 +88,23 @@ export default function CustomerLogin() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="w-full px-5 py-4 bg-white border border-[rgba(26,20,16,0.1)] text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/40 transition-all font-body text-sm rounded-xl"
-              style={{ borderRadius: '2px' }}
+              className="w-full px-5 py-4 bg-[#F5F3EF] border border-transparent text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/20 focus:bg-white transition-all font-body text-sm rounded-2xl"
               required
             />
           </div>
           <div className="space-y-2">
-            <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Password</label>
+            <div className="flex justify-between items-center">
+              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Password</label>
+              <Link to="/forgot-password" size="sm" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ember-500 hover:text-ember-600 font-bold">
+                Forgot?
+              </Link>
+            </div>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-5 py-4 bg-white border border-[rgba(26,20,16,0.1)] text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/40 transition-all font-body text-sm rounded-xl"
-              style={{ borderRadius: '2px' }}
+              className="w-full px-5 py-4 bg-[#F5F3EF] border border-transparent text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/20 focus:bg-white transition-all font-body text-sm rounded-2xl"
               required
             />
           </div>
@@ -107,22 +114,18 @@ export default function CustomerLogin() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               disabled={loading}
-              className="w-full py-5 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all disabled:opacity-50 rounded-xl"
-              style={{ borderRadius: '2px' }}
+              className="w-full py-5 bg-[#1A1410] text-white font-body font-semibold text-sm tracking-[0.15em] uppercase shadow-xl shadow-black/5 hover:bg-black transition-all disabled:opacity-50 rounded-2xl"
             >
               {loading ? 'Authenticating...' : 'Sign In'}
             </motion.button>
           </div>
         </form>
 
-        <div className="mt-10 text-center border-t border-[rgba(242,235,217,0.06)] pt-8">
+        <div className="mt-10 text-center border-t border-[rgba(26,20,16,0.06)] pt-8">
           <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-parchment-700">
             New to Pizza Blast?{' '}
-            <Link to="/register" className="text-ember-500 hover:text-ember-400 ml-1">Join the family</Link>
+            <Link to="/register" className="text-ember-500 font-bold hover:text-ember-600 ml-1">Join the family</Link>
           </p>
-          <div className="mt-4">
-            <Link to="/admin/login" className="font-mono text-[10px] tracking-[0.15em] uppercase text-parchment-700/40 hover:text-parchment-700 transition-colors">Admin Portal →</Link>
-          </div>
         </div>
       </motion.div>
     </div>

@@ -3,10 +3,12 @@ import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
+import { useSettings } from '../context/SettingsContext'
 
 export default function CateringPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { settings } = useSettings()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -69,7 +71,7 @@ export default function CateringPage() {
           Elevate Your Event
         </h1>
         <p className="text-[#9B8D74] text-lg font-medium max-w-2xl mx-auto">
-          From corporate lunches to wedding celebrations, bring the authentic wood-fired taste of Pizza Blast to your special occasion.
+          From corporate lunches to wedding celebrations, bring the authentic wood-fired taste of {settings?.restaurantName || 'our kitchen'} to your special occasion.
         </p>
       </motion.div>
 

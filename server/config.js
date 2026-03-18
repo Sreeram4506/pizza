@@ -25,4 +25,7 @@ export const config = {
   get smtpFrom() { return process.env.SMTP_FROM || '"Pizza Blast" <order@pizzablast.com>' },
   get brevoApiKey() { return process.env.BREVO_API_KEY || process.env.SMTP_PASS },
   get adminEmail() { return process.env.ADMIN_EMAIL || 'sreerammulukuri6@gmail.com' },
+  get restaurantName() { return process.env.RESTAURANT_NAME || 'Pizza Blast' },
+  get restaurantAddress() { return process.env.RESTAURANT_ADDRESS || 'Main Street, City, State' },
+  get senderEmail() { return process.env.SENDER_EMAIL || 'hello@indraam.com' },
 }

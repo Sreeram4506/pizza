@@ -75,12 +75,14 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
     let usedRewardCost = 0
     let usedRewardName = ''
 
-    // Process Loyalty Reward
+    let pointsEarned = 0
+    const configQuery = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] };
+    const loyaltyCfg = await LoyaltyConfig.findOne(configQuery);
+
+    // Process Loyalty Reward (Redemption)
     if (appliedReward && authenticatedUser) {
-      const configQuery = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] };
-      const config = await LoyaltyConfig.findOne(configQuery);
-      if (config) {
-        const reward = config.rewards.find(r => r._id.toString() === appliedReward);
+      if (loyaltyCfg) {
+        const reward = loyaltyCfg.rewards.find(r => r._id.toString() === appliedReward);
 
         // Validate customer has enough points
         const customerData = await Customer.findById(authenticatedUser.id);
@@ -99,6 +101,11 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
     }
 
     const total = Math.max(0, subtotal - discount) + tax + deliveryFee
+
+    // Calculate Points Earned
+    if (authenticatedUser && loyaltyCfg) {
+      pointsEarned = Math.floor(total * (loyaltyCfg.pointsPerDollar || 1))
+    }
 
     // Use authenticated user info or provided customerInfo
     let finalCustomerInfo
@@ -175,6 +182,8 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       deliveryFee: type === 'delivery' ? 3.99 : 0,
       discount,
       total,
+      pointsEarned,
+      pointsRedeemed: usedRewardCost,
       status: 'confirmed',
       customerInfo: finalCustomerInfo,
       address: address || { street: 'Pickup', city: '', zip: '' },
@@ -193,16 +202,16 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       console.log('Updating authenticated customer:', authenticatedUser.name)
 
       const updateQuery = {
-        $inc: { orderCount: 1, totalSpent: total },
+        $inc: { 
+          orderCount: 1, 
+          totalSpent: total,
+          'loyalty.points': pointsEarned - usedRewardCost,
+          'loyalty.lifetimePoints': pointsEarned
+        },
         $set: {
           lastOrderAt: new Date(),
           isGuest: false
         }
-      }
-
-      if (usedRewardCost > 0) {
-        if (!updateQuery.$inc) updateQuery.$inc = {}
-        updateQuery.$inc['loyalty.points'] = -usedRewardCost
       }
 
       const customer = await Customer.findOneAndUpdate(
