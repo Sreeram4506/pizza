@@ -13,6 +13,7 @@ export default function CustomerProfile() {
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
     const { openWithIntent } = useChatbot()
+    const [expandedOrderId, setExpandedOrderId] = useState(null)
 
     const [loyaltyConfig, setLoyaltyConfig] = useState(null)
 
@@ -226,38 +227,79 @@ export default function CustomerProfile() {
                                         </div>
                                     ) : (
                                         orders.map((order, idx) => (
-                                            <div key={idx} className="flex items-center justify-between p-6 bg-crust-50 rounded-3xl hover:bg-crust-100 transition-all group border border-transparent hover:border-crust-200">
-                                                <div className="flex items-center gap-6">
-                                                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-crust-100 group-hover:scale-110 transition-transform">
-                                                        🍕
+                                            <div key={idx} className="flex flex-col bg-crust-50 rounded-3xl hover:bg-crust-100 transition-all group border border-transparent hover:border-crust-200 overflow-hidden">
+                                                <div 
+                                                    onClick={() => setExpandedOrderId(expandedOrderId === order._id ? null : order._id)}
+                                                    className="flex items-center justify-between p-6 cursor-pointer"
+                                                >
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-crust-100 group-hover:scale-110 transition-transform">
+                                                            🍕
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-black text-wood-800 uppercase tracking-tight text-sm">Order #{order.orderNumber}</p>
+                                                            <p className="text-xs text-wood-500 font-bold uppercase tracking-widest mt-1">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="font-black text-wood-800 uppercase tracking-tight text-sm">Order #{order.orderNumber}</p>
-                                                        <p className="text-xs text-wood-500 font-bold uppercase tracking-widest mt-1">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="text-right">
+                                                            <p className="text-lg font-black text-tomato-600 tracking-tighter">${order.total?.toFixed(2)}</p>
+                                                            <div className="flex flex-col items-end gap-1 mt-1">
+                                                                <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white text-wood-600 border border-crust-100 inline-block">
+                                                                    {order.status}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className={`w-8 h-8 rounded-full border border-crust-200 flex items-center justify-center transition-transform ${expandedOrderId === order._id ? 'rotate-180' : ''}`}>
+                                                            ↓
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p className="text-lg font-black text-tomato-600 tracking-tighter">${order.total?.toFixed(2)}</p>
-                                                    <div className="flex flex-col items-end gap-1 mt-1">
-                                                        <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white text-wood-600 border border-crust-100 inline-block">
-                                                            {order.status}
-                                                        </span>
-                                                        {order.pointsEarned > 0 && (
-                                                            <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest">+ {order.pointsEarned} pts earned</span>
-                                                        )}
-                                                        {order.pointsRedeemed > 0 && (
-                                                            <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">- {order.pointsRedeemed} pts used</span>
-                                                        )}
-                                                    </div>
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.05 }}
-                                                        whileTap={{ scale: 0.95 }}
-                                                        onClick={(e) => { e.stopPropagation(); handleReorder(order); }}
-                                                        className="ml-3 px-4 py-1.5 bg-tomato-50 text-tomato-600 border border-tomato-200 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-tomato-600 hover:text-white transition-colors"
-                                                    >
-                                                        Reorder
-                                                    </motion.button>
-                                                </div>
+
+                                                <AnimatePresence>
+                                                    {expandedOrderId === order._id && (
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            className="px-6 pb-6"
+                                                        >
+                                                            <div className="pt-4 border-t border-crust-100 space-y-3">
+                                                                <p className="text-[10px] font-black uppercase tracking-widest text-wood-400 mb-2">Order Items</p>
+                                                                {order.items.map((item, i) => (
+                                                                    <div key={i} className="flex justify-between items-center text-sm">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <span className="w-6 h-6 rounded-lg bg-white border border-crust-100 flex items-center justify-center text-[10px] font-black text-tomato-500">
+                                                                                {item.quantity}x
+                                                                            </span>
+                                                                            <span className="font-bold text-wood-700">{item.name}</span>
+                                                                        </div>
+                                                                        <span className="font-black text-wood-800">${(item.price * item.quantity).toFixed(2)}</span>
+                                                                    </div>
+                                                                ))}
+                                                                
+                                                                <div className="flex justify-between items-center pt-4 mt-2 border-t border-crust-100 border-dashed">
+                                                                    <div className="flex flex-col gap-1">
+                                                                        {order.pointsEarned > 0 && (
+                                                                            <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest">+ {order.pointsEarned} pts earned</span>
+                                                                        )}
+                                                                        {order.pointsRedeemed > 0 && (
+                                                                            <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">- {order.pointsRedeemed} pts used</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <motion.button
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                        whileTap={{ scale: 0.95 }}
+                                                                        onClick={(e) => { e.stopPropagation(); handleReorder(order); }}
+                                                                        className="px-6 py-2 bg-tomato-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-tomato-600/20 hover:bg-tomato-700 transition-colors"
+                                                                    >
+                                                                        Reorder This
+                                                                    </motion.button>
+                                                                </div>
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
                                             </div>
                                         ))
                                     )}

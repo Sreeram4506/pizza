@@ -85,27 +85,27 @@ export default function DeliveryPortal() {
             </div>
 
             {/* Metrics Dashboard */}
-            <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-wood-950 border-b border-wood-700 sticky top-[73px] z-10 shadow-md">
-                <div className="bg-wood-800/50 p-4 rounded-2xl border border-wood-700 text-center">
-                    <p className="text-[9px] font-black text-tomato-400 uppercase tracking-widest mb-1">Active</p>
-                    <p className="text-2xl font-black">{orders.length}</p>
+            <div className="p-4 grid grid-cols-2 lg:grid-cols-4 gap-2 bg-wood-950 border-b border-wood-700 sticky top-[73px] z-10 shadow-md">
+                <div className="bg-wood-800/50 p-3 rounded-2xl border border-wood-700 text-center">
+                    <p className="text-[8px] font-black text-tomato-400 uppercase tracking-widest mb-1">Active</p>
+                    <p className="text-xl font-black">{orders.length}</p>
                 </div>
-                <div className="bg-wood-800/50 p-4 rounded-2xl border border-wood-700 text-center">
-                    <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">Done Today</p>
-                    <p className="text-2xl font-black">{stats.deliveredCount}</p>
+                <div className="bg-wood-800/50 p-3 rounded-2xl border border-wood-700 text-center">
+                    <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-1">Delivered</p>
+                    <p className="text-xl font-black">{stats.deliveredCount}</p>
                 </div>
-                <div className="bg-wood-800/50 p-4 rounded-2xl border border-wood-700 text-center">
-                    <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Earnings</p>
-                    <p className="text-2xl font-black">${stats.totalEarnings?.toFixed(0)}</p>
+                <div className="bg-wood-800/50 p-3 rounded-2xl border border-wood-700 text-center">
+                    <p className="text-[8px] font-black text-amber-400 uppercase tracking-widest mb-1">Earned</p>
+                    <p className="text-xl font-black">${stats.totalEarnings?.toFixed(0)}</p>
                 </div>
-                <div className="bg-wood-800/50 p-4 rounded-2xl border border-wood-700 text-center">
-                    <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Avg Time</p>
-                    <p className="text-2xl font-black">{stats.avgDeliveryTime}m</p>
+                <div className="bg-wood-800/50 p-3 rounded-2xl border border-wood-700 text-center">
+                    <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest mb-1">Avg Time</p>
+                    <p className="text-xl font-black">{stats.avgDeliveryTime}m</p>
                 </div>
             </div>
 
             {/* Orders List */}
-            <div className="p-4 space-y-4 max-w-md mx-auto pb-24">
+            <div className="p-3 sm:p-4 space-y-4 max-w-md mx-auto pb-24">
                 <AnimatePresence>
                     {orders.length === 0 ? (
                         <motion.div
@@ -125,23 +125,23 @@ export default function DeliveryPortal() {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95, x: -100 }}
-                                className="bg-wood-800 rounded-3xl p-5 border border-wood-700 shadow-xl"
+                                className="bg-wood-800 rounded-2xl md:rounded-3xl p-4 md:p-5 border border-wood-700 shadow-xl"
                             >
                                 <div className="flex justify-between items-start mb-4 pb-4 border-b border-wood-700">
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <h3 className="font-black text-lg text-white">#{order.orderNumber}</h3>
-                                            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[9px] font-black rounded-md border border-blue-500/20">
+                                    <div className="flex-1 pr-2">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h3 className="font-black text-base md:text-lg text-white">#{order.orderNumber}</h3>
+                                            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[8px] md:text-[9px] font-black rounded-md border border-blue-500/20 whitespace-nowrap">
                                                 ⏱️ {times[order._id] || 0}m
                                             </span>
                                         </div>
-                                        <p className="text-wood-400 text-xs mt-1">
-                                            Assigned {new Date(order.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        <p className="text-wood-400 text-[10px] md:text-xs mt-1">
+                                            {new Date(order.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="text-tomato-400 font-black">${order.total?.toFixed(2)}</span>
-                                        <span className="block mt-1 px-2 py-0.5 bg-tomato-600/20 text-tomato-400 text-[10px] font-black uppercase tracking-widest rounded-md border border-tomato-500/30">
+                                    <div className="text-right shrink-0">
+                                        <span className="text-tomato-400 font-black text-sm md:text-base">${order.total?.toFixed(2)}</span>
+                                        <span className="block mt-1 px-2 py-0.5 bg-tomato-600/20 text-tomato-400 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-md border border-tomato-500/30">
                                             PAID
                                         </span>
                                     </div>

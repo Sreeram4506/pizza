@@ -170,41 +170,40 @@ export default function OrderTracker() {
             </div>
 
             {/* Progress Bar */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4 relative z-10 px-2 sm:px-6">
+            <div className="mb-12 relative">
+              <div className="flex justify-between items-center mb-4 relative z-10 px-0 sm:px-6">
                 {/* Step 1 */}
                 <div className={`flex flex-col items-center gap-2 ${['confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
                   <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">1</div>
-                  <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">Confirmed</span>
+                  <span className="text-[9px] font-black uppercase text-wood-600 text-center w-16 leading-tight block">Confirmed</span>
                 </div>
                 {/* Step 2 */}
                 <div className={`flex flex-col items-center gap-2 ${['preparing', 'ready', 'out_for_delivery', 'delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
                   <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">2</div>
-                  <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">Getting Ready</span>
+                  <span className="text-[9px] font-black uppercase text-wood-600 text-center w-16 leading-tight block">Prep</span>
                 </div>
                 {/* Step 3 */}
                 {orderStatus.type === 'delivery' && (
                   <div className={`flex flex-col items-center gap-2 ${['out_for_delivery', 'delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
                     <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">3</div>
-                    <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">Out for Delivery</span>
+                    <span className="text-[9px] font-black uppercase text-wood-600 text-center w-16 leading-tight block">Way</span>
                   </div>
                 )}
                 {/* Step 4 */}
                 <div className={`flex flex-col items-center gap-2 ${['delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
                   <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">{orderStatus.type === 'delivery' ? '4' : '3'}</div>
-                  <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">{orderStatus.type === 'delivery' ? 'Delivered' : 'Ready'}</span>
+                  <span className="text-[9px] font-black uppercase text-wood-600 text-center w-16 leading-tight block">{orderStatus.type === 'delivery' ? 'End' : 'Ready'}</span>
                 </div>
               </div>
 
-              <div className="w-full bg-wood-200 rounded-full h-3 relative overflow-hidden -mt-[44px] sm:-mt-[44px] mx-8 sm:mx-14 w-[calc(100%-4rem)] sm:w-[calc(100%-7rem)]">
+              <div className="absolute top-4 left-0 right-0 h-1 bg-wood-200 z-0 mx-6 sm:mx-14">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: getStepPercentage(orderStatus.status) }}
                   transition={{ duration: 1, ease: 'easeOut' }}
-                  className="bg-tomato-500 h-3 rounded-full relative z-0"
+                  className="bg-tomato-500 h-full rounded-full"
                 />
               </div>
-              <div className="h-[44px]"></div>
             </div>
 
             {/* Order Details */}
