@@ -174,15 +174,6 @@ export default function Navbar() {
             </motion.button>
           )}
 
-          {/* Admin */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/admin/login')}
-            className={`hidden lg:block text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-colors ${isSolid ? 'text-[#B8AA8F] hover:text-[#5C554E]' : 'text-white/40 hover:text-white/70'}`}
-          >
-            Admin
-          </motion.button>
 
           {/* Mobile menu button */}
           <motion.button
