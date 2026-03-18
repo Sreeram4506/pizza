@@ -6,7 +6,12 @@ import toast from 'react-hot-toast'
 export default function ResetPassword() {
   const navigate = useNavigate()
   const { state } = useLocation()
-  const email = state?.email || ''
+  const email = state?.email || localStorage.getItem('reset_email') || ''
+
+  // Persist email in case of refresh
+  if (state?.email) {
+    localStorage.setItem('reset_email', state.email)
+  }
 
   const [otp, setOtp] = useState('')
   const [newPassword, setNewPassword] = useState('')

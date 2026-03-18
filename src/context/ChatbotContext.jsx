@@ -43,11 +43,29 @@ export function ChatbotProvider({ children }) {
   // Cart Methods
   const addToCart = (item) => {
     setCart(prev => {
-      const existing = prev.find(i => i._id === item._id)
+      const itemId = item._id || item.itemId
+      const existing = prev.find(i => (i._id || i.itemId) === itemId)
       if (existing) {
-        return prev.map(i => i._id === item._id ? { ...i, qty: i.qty + 1 } : i)
+        return prev.map(i => (i._id || i.itemId) === itemId ? { ...i, qty: (i.qty || 1) + (item.qty || 1) } : i)
       }
-      return [...prev, { ...item, qty: 1 }]
+      return [...prev, { ...item, _id: itemId, qty: item.qty || 1 }]
+    })
+  }
+
+  const addMultipleToCart = (items) => {
+    setCart(prev => {
+      let newCart = [...prev]
+      items.forEach(newItem => {
+        const itemId = newItem._id || newItem.itemId
+        const existingIdx = newCart.findIndex(i => (i._id || i.itemId) === itemId)
+        if (existingIdx > -1) {
+          const existingItem = newCart[existingIdx]
+          newCart[existingIdx] = { ...existingItem, qty: (existingItem.qty || 1) + (newItem.qty || newItem.quantity || 1) }
+        } else {
+          newCart.push({ ...newItem, _id: itemId, qty: newItem.qty || newItem.quantity || 1 })
+        }
+      })
+      return newCart
     })
   }
 
@@ -78,6 +96,7 @@ export function ChatbotProvider({ children }) {
       addToCart,
       removeFromCart,
       clearCart,
+      addMultipleToCart,
       cartCount,
       cartTotal,
       isVoiceEnabled,

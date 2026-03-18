@@ -48,19 +48,9 @@ export default function CustomerProfile() {
     }
 
     const handleReorder = (pastOrder) => {
-        // Add all items from the past order to the chatbot cart
-        pastOrder.items.forEach(item => {
-            openWithIntent('add_to_cart', {
-                itemId: item.itemId,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                modifiers: item.modifiers || [],
-                notes: item.notes || ''
-            })
-        })
+        // Send all items at once to the chatbot for reordering
+        openWithIntent('reorder', { items: pastOrder.items })
         toast.success(`Items from Order #${pastOrder.orderNumber} added to cart!`)
-        openWithIntent('cart')
     }
 
     if (loading) {

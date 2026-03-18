@@ -15,7 +15,9 @@ export default function Chatbot() {
     setIsOpen,
     initialMessage,
     cart,
+    setCart,
     addToCart,
+    addMultipleToCart,
     removeFromCart,
     clearCart,
     cartCount,
@@ -354,6 +356,17 @@ export default function Chatbot() {
         break
       case 'cart':
         setView('cart')
+        break
+      case 'reorder':
+        if (data.items && Array.isArray(data.items)) {
+          addMultipleToCart(data.items)
+          setMessages(prev => [...prev, {
+            type: 'bot',
+            text: `🍕 **Order Added to Cart!**\n\nI've added all items from your past order. Would you like to add anything else or proceed to checkout?`,
+            cartAction: true,
+          }])
+          setView('chat')
+        }
         break
       case 'checkout':
         if (data.item && typeof data.item === 'object') {
