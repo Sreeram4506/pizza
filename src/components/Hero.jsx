@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { useNavigate } from 'react-router-dom'
@@ -14,7 +14,10 @@ export default function Hero() {
   const { settings } = useSettings()
   const navigate = useNavigate()
   const [videoLoaded, setVideoLoaded] = useState(false)
-  const [videoError, setVideoError] = useState(false)
+  const [, setVideoError] = useState(false)
+  const restaurantName = settings?.restaurantName || 'Mustang Pizza'
+  const [brandFirst, ...brandRest] = restaurantName.split(' ')
+  const brandSecond = brandRest.join(' ') || 'Pizza'
 
   useGSAP(() => {
     if (!containerRef.current) return
@@ -31,7 +34,7 @@ export default function Hero() {
     return () => ctx.revert()
   }, [])
 
-  // Extended timeout for video load
+  // Extended timeout for video load.
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!videoLoaded) setVideoError(true)
@@ -45,9 +48,9 @@ export default function Hero() {
       ref={containerRef}
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* ── Background Video ── */}
+      {/* Background Video */}
       <div className="absolute inset-0 z-0">
-        {/* Always-visible pizza background image (shown until/if video loads) */}
+        {/* Always-visible pizza background image shown until the video loads. */}
         <div
           className="absolute inset-0"
           style={{
@@ -57,7 +60,7 @@ export default function Hero() {
           }}
         />
 
-        {/* Video layer: LOCAL file served from /public — no CORS issues */}
+        {/* Video layer served from /public to avoid external CORS issues. */}
         <video
           ref={videoRef}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
@@ -68,13 +71,14 @@ export default function Hero() {
           onCanPlay={() => setVideoLoaded(true)}
           onError={() => setVideoError(true)}
         >
-          {/* Local pizza video — downloaded from Mixkit (free license) */}
+          {/* Local pizza video downloaded from Mixkit under its free license. */}
           <source src="/pizza-hero.mp4" type="video/mp4" />
         </video>
       </div>
 
-      {/* ── Cinematic Gradient Overlay ── */}
-      <div className="absolute inset-0 z-10"
+      {/* Cinematic Gradient Overlay */}
+      <div
+        className="absolute inset-0 z-10"
         style={{
           background: `
             linear-gradient(to bottom,
@@ -87,21 +91,21 @@ export default function Hero() {
         }}
       />
 
-      {/* ── Subtle vignette edges ── */}
-      <div className="absolute inset-0 z-10 pointer-events-none"
+      {/* Subtle vignette edges */}
+      <div
+        className="absolute inset-0 z-10 pointer-events-none"
         style={{
           background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%)'
         }}
       />
 
-      {/* ── Banner (top position) ── */}
+      {/* Banner (top position) */}
       <div className="absolute top-0 left-0 right-0 z-30">
         <BannerDisplay position="hero" />
       </div>
 
-      {/* ── Main Centered Content ── */}
+      {/* Main Centered Content */}
       <div className="relative z-20 flex flex-col items-center justify-center text-center px-6 min-h-screen w-full">
-
         {/* Top label */}
         <motion.div className="hero-stagger mb-6">
           <span className="inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.35em] uppercase text-white/60">
@@ -111,15 +115,19 @@ export default function Hero() {
           </span>
         </motion.div>
 
-        {/* Restaurant Name — large cinematic display */}
-        <div className="hero-stagger">
-          <h1 className="font-display font-bold leading-none tracking-tight text-white"
+        {/* Restaurant Name - large cinematic display */}
+        <div className="hero-stagger flex flex-col items-center">
+          <h1
+            className="font-serif-1947 font-black leading-none tracking-tight text-white mb-2"
             style={{ textShadow: '0 4px 40px rgba(0,0,0,0.4)' }}
           >
-            <span className="block text-[clamp(1.5rem,12vw,9rem)] leading-none">
-              {settings.restaurantName || 'Pizza Blast'}
+            <span className="block text-[clamp(2.5rem,15vw,10rem)] leading-none">
+              {brandFirst}
             </span>
           </h1>
+          <span className="text-sm md:text-xl font-black uppercase tracking-[0.5em] text-white/80 -mt-2 md:-mt-4">
+            {brandSecond}
+          </span>
         </div>
 
         {/* Sub-headline */}
@@ -133,7 +141,8 @@ export default function Hero() {
         <div className="hero-stagger w-12 h-px bg-[#C1440E] mt-8 mx-auto" />
 
         {/* Tagline */}
-        <p className="hero-stagger mt-6 font-body italic text-white/60 text-base md:text-lg max-w-md leading-relaxed"
+        <p
+          className="hero-stagger mt-6 font-serif-1947 italic text-white/80 text-lg md:text-2xl max-w-xl leading-relaxed"
           style={{ textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
         >
           {t('hero.tagline')}
@@ -142,13 +151,13 @@ export default function Hero() {
         {/* CTA Buttons */}
         <div className="hero-stagger flex flex-wrap justify-center items-center gap-4 mt-10">
           <motion.button
-            whileHover={{ scale: 1.05, boxShadow: '0 8px 32px rgba(193,68,14,0.5)' }}
+            whileHover={{ scale: 1.05, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
             whileTap={{ scale: 0.97 }}
             onClick={() => navigate('/menu')}
-            className="px-8 py-3.5 bg-[#C1440E] text-white text-[11px] font-body font-bold tracking-[0.2em] uppercase rounded-full flex items-center gap-2 shadow-lg shadow-red-900/40 transition-all"
+            className="px-10 py-4 glass-button-dark text-white text-[10px] sm:text-[11px] font-black tracking-[0.25em] uppercase rounded-full flex items-center gap-2 transition-all"
           >
             {t('hero.exploreMenu')}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
           </motion.button>
@@ -157,7 +166,7 @@ export default function Hero() {
             whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.15)' }}
             whileTap={{ scale: 0.97 }}
             onClick={() => document.querySelector('#atelier')?.scrollIntoView({ behavior: 'smooth' })}
-            className="px-8 py-3.5 bg-white/10 backdrop-blur-sm border border-white/30 text-white text-[11px] font-body font-bold tracking-[0.2em] uppercase rounded-full flex items-center gap-2 transition-all"
+            className="px-8 py-3.5 glass-button-light text-white text-[11px] font-body font-bold tracking-[0.2em] uppercase rounded-full flex items-center gap-2 transition-all border-white/25 bg-white/12"
           >
             {t('hero.buildYourOwn')}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -166,7 +175,7 @@ export default function Hero() {
           </motion.button>
         </div>
 
-        {/* ── Feature Pills ── */}
+        {/* Feature Pills */}
         <motion.div
           className="hero-stagger flex flex-wrap justify-center gap-3 mt-10"
           initial={{ opacity: 0 }}
@@ -181,7 +190,7 @@ export default function Hero() {
           ].map((feat) => (
             <span
               key={feat}
-              className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 font-mono text-[9px] tracking-[0.2em] uppercase text-white/75"
+              className="px-4 py-1.5 rounded-full glass-pill text-white/80 font-mono text-[9px] tracking-[0.2em] uppercase bg-white/10 border-white/20"
             >
               {feat}
             </span>
@@ -189,10 +198,10 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      {/* ── Bottom corner elements (like reference image) ── */}
+      {/* Bottom corner elements (like reference image) */}
       {/* Bottom left: address */}
       <div className="absolute bottom-8 left-8 z-20 hidden md:block">
-        <p className="font-mono text-[9px] tracking-[0.25em] uppercase text-white/45 leading-relaxed">
+        <p className="font-mono text-[9px] tracking-[0.25em] uppercase text-white/55 leading-relaxed glass-pill px-5 py-3 bg-white/8 border border-white/12">
           {settings.address ? settings.address.split(',').slice(0, 2).join('\n') : '123 Pizza Plaza\nNew York, NY'}
         </p>
       </div>
@@ -203,7 +212,7 @@ export default function Hero() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
-          className="font-mono text-[9px] tracking-[0.3em] uppercase text-white/45 hover:text-white/80 transition-colors border-b border-white/20 hover:border-white/50 pb-0.5"
+          className="font-mono text-[9px] tracking-[0.3em] uppercase text-white/60 hover:text-white transition-colors glass-pill px-5 py-3 bg-white/8 border border-white/15"
         >
           {t('hero.reservations')}
         </motion.button>

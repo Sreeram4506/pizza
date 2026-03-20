@@ -1,10 +1,17 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { BrowserRouter } from 'react-router-dom'
 import OrderTracker from './OrderTracker'
 
 // Mock fetch
 global.fetch = jest.fn()
+
+const renderWithRouter = (component) => render(
+  <BrowserRouter>
+    {component}
+  </BrowserRouter>
+)
 
 describe('OrderTracker Component', () => {
   beforeEach(() => {
@@ -12,7 +19,7 @@ describe('OrderTracker Component', () => {
   })
 
   test('renders order tracking form', () => {
-    render(<OrderTracker />)
+    renderWithRouter(<OrderTracker />)
     
     expect(screen.getByText('Track Your Order')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Enter order number (e.g., ORD001)')).toBeInTheDocument()
@@ -21,7 +28,7 @@ describe('OrderTracker Component', () => {
 
   test('shows validation error for empty order number', async () => {
     const user = userEvent.setup()
-    render(<OrderTracker />)
+    renderWithRouter(<OrderTracker />)
     
     const trackButton = screen.getByRole('button', { name: 'Track Order' })
     await user.click(trackButton)
@@ -31,7 +38,7 @@ describe('OrderTracker Component', () => {
 
   test('tracks order successfully', async () => {
     // Test basic functionality without complex assertions
-    render(<OrderTracker />)
+    renderWithRouter(<OrderTracker />)
     
     const orderInput = screen.getByPlaceholderText('Enter order number (e.g., ORD001)')
     const trackButton = screen.getByRole('button', { name: 'Track Order' })
@@ -46,7 +53,7 @@ describe('OrderTracker Component', () => {
 
   test('handles order not found error', async () => {
     // Test basic error handling
-    render(<OrderTracker />)
+    renderWithRouter(<OrderTracker />)
     
     const orderInput = screen.getByPlaceholderText('Enter order number (e.g., ORD001)')
     const trackButton = screen.getByRole('button', { name: 'Track Order' })
@@ -60,7 +67,7 @@ describe('OrderTracker Component', () => {
 
   test('handles network error', async () => {
     // Test network error handling
-    render(<OrderTracker />)
+    renderWithRouter(<OrderTracker />)
     
     const orderInput = screen.getByPlaceholderText('Enter order number (e.g., ORD001)')
     const trackButton = screen.getByRole('button', { name: 'Track Order' })
@@ -74,7 +81,7 @@ describe('OrderTracker Component', () => {
 
   test('displays correct status colors', async () => {
     // Test that component renders without crashing
-    render(<OrderTracker />)
+    renderWithRouter(<OrderTracker />)
     
     const orderInput = screen.getByPlaceholderText('Enter order number (e.g., ORD001)')
     const trackButton = screen.getByRole('button', { name: 'Track Order' })
@@ -85,7 +92,7 @@ describe('OrderTracker Component', () => {
 
   test('displays order status correctly', async () => {
     // Test basic component functionality
-    render(<OrderTracker />)
+    renderWithRouter(<OrderTracker />)
     
     expect(screen.getByText('Track Your Order')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Enter order number (e.g., ORD001)')).toBeInTheDocument()

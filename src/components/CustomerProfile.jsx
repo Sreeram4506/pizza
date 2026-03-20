@@ -147,7 +147,7 @@ export default function CustomerProfile() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="bg-wood-800 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl group"
+                                className="bg-[#1A1410] rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl group shadow-black/20"
                             >
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-tomato-500/10 rounded-full blur-[100px] -mr-32 -mt-32 transition-transform group-hover:scale-125" />
                                 <div className="relative z-10">

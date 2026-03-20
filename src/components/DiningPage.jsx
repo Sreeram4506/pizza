@@ -65,12 +65,12 @@ export default function DiningPage() {
         transition={{ duration: 0.6 }}
         className="text-center mb-12"
       >
-        <span className="font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-ember-600 block mb-4">Reservations</span>
-        <h1 className="text-4xl md:text-6xl font-display font-black text-[#1A1410] mb-4">
+        <span className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-ember-600 block mb-4">Reservations</span>
+        <h1 className="text-4xl md:text-6xl font-serif-1947 font-black text-[#1A1410] mb-4">
           Reserve Your Table
         </h1>
-        <p className="text-[#9B8D74] text-lg font-medium max-w-2xl mx-auto">
-          Experience the art of wood-fired pizza in the cozy artisan kitchen of {settings?.restaurantName || 'our restaurant'}. Book your spot today.
+        <p className="text-[#9B8D74] text-lg font-body max-w-2xl mx-auto">
+          Experience the art of authentic artisan pizza in the heart of our kitchen at <span className="text-ember-500 font-bold">{settings?.restaurantName || 'Mustang Pizza'}</span>. Book your spot today.
         </p>
       </motion.div>
 
@@ -78,9 +78,9 @@ export default function DiningPage() {
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="bg-white rounded-[2.5rem] border border-[rgba(26,20,16,0.06)] shadow-xl p-8 md:p-12 overflow-hidden relative"
+        className="glass-panel-strong glass-highlight-ring rounded-[3rem] p-8 md:p-12 overflow-hidden relative"
       >
-        <div className="absolute top-0 right-0 p-8 opacity-5 text-8xl pointer-events-none">🍕</div>
+        <div className="absolute top-0 right-0 p-8 opacity-5 text-8xl pointer-events-none font-serif-1947 italic">{settings?.restaurantName?.[0] || 'M'}</div>
         
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
           <div className="space-y-1.5 md:col-span-2">
@@ -174,7 +174,7 @@ export default function DiningPage() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             disabled={loading}
-            className="md:col-span-2 w-full py-5 bg-[#1A1410] text-white rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all disabled:opacity-50 mt-4"
+            className="md:col-span-2 w-full py-5 glass-button-dark text-white rounded-2xl font-body text-[10px] font-black uppercase tracking-[0.25em] transition-all disabled:opacity-50 mt-4"
           >
             {loading ? 'Booking...' : 'Confirm Table Reservation'}
           </motion.button>

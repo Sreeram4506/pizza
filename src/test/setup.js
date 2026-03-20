@@ -27,6 +27,25 @@ global.sessionStorage = sessionStorageMock
 // Mock fetch
 global.fetch = jest.fn()
 
+// Mock websocket service used by settings/chatbot contexts
+jest.mock('../services/websocket.js', () => ({
+  __esModule: true,
+  wsService: {
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    on: jest.fn(),
+    off: jest.fn(),
+    send: jest.fn()
+  },
+  default: {
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    on: jest.fn(),
+    off: jest.fn(),
+    send: jest.fn()
+  }
+}))
+
 // Mock WebSocket
 class WebSocketMock {
   constructor(url) {

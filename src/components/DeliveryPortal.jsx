@@ -66,41 +66,41 @@ export default function DeliveryPortal() {
 // ... loading and access denied logic ...
 
     return (
-        <div className="min-h-screen bg-wood-900 text-white overflow-x-hidden">
+        <div className="min-h-screen bg-[#FAFAF8] text-[#1A1410] overflow-x-hidden">
             {/* Header omitted for brevity in targetContent match, but I will include it in replacement */}
-            <div className="bg-wood-800 border-b border-wood-700 p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg">
+            <div className="bg-white border-b border-[rgba(26,20,16,0.06)] p-4 sticky top-0 z-20 flex justify-between items-center shadow-sm">
                 <div>
-                    <h1 className="text-xl font-sans font-bold text-tomato-400">Driver Portal</h1>
-                    <p className="text-[10px] text-wood-400 font-bold uppercase tracking-widest">Enterprise Mobile View</p>
+                    <h1 className="text-xl font-sans font-bold text-[#1A1410]">Driver Portal</h1>
+                    <p className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest mt-1">Enterprise Mobile View</p>
                 </div>
                 <button
                     onClick={() => {
                         localStorage.removeItem('adminToken')
                         navigate('/')
                     }}
-                    className="p-2 text-wood-400 hover:text-white transition-colors"
+                    className="p-2 text-[#9B8D74] hover:text-[#1A1410] hover:bg-[#F5F3EF] rounded-xl transition-all"
                 >
                     Logout
                 </button>
             </div>
 
             {/* Metrics Dashboard */}
-            <div className="p-4 grid grid-cols-2 lg:grid-cols-4 gap-2 bg-wood-950 border-b border-wood-700 sticky top-[73px] z-10 shadow-md">
-                <div className="bg-wood-800/50 p-3 rounded-2xl border border-wood-700 text-center">
-                    <p className="text-[8px] font-black text-tomato-400 uppercase tracking-widest mb-1">Active</p>
-                    <p className="text-xl font-black">{orders.length}</p>
+            <div className="p-4 grid grid-cols-2 lg:grid-cols-4 gap-2 bg-[#F5F3EF] border-b border-[rgba(26,20,16,0.06)] sticky top-[73px] z-10 shadow-sm">
+                <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
+                    <p className="text-[8px] font-black text-ember-600 uppercase tracking-widest mb-1">Active</p>
+                    <p className="text-xl font-black text-[#1A1410]">{orders.length}</p>
                 </div>
-                <div className="bg-wood-800/50 p-3 rounded-2xl border border-wood-700 text-center">
-                    <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-1">Delivered</p>
-                    <p className="text-xl font-black">{stats.deliveredCount}</p>
+                <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
+                    <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-1">Delivered</p>
+                    <p className="text-xl font-black text-[#1A1410]">{stats.deliveredCount}</p>
                 </div>
-                <div className="bg-wood-800/50 p-3 rounded-2xl border border-wood-700 text-center">
-                    <p className="text-[8px] font-black text-amber-400 uppercase tracking-widest mb-1">Earned</p>
-                    <p className="text-xl font-black">${stats.totalEarnings?.toFixed(0)}</p>
+                <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
+                    <p className="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-1">Earned</p>
+                    <p className="text-xl font-black text-[#1A1410]">${stats.totalEarnings?.toFixed(0)}</p>
                 </div>
-                <div className="bg-wood-800/50 p-3 rounded-2xl border border-wood-700 text-center">
-                    <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest mb-1">Avg Time</p>
-                    <p className="text-xl font-black">{stats.avgDeliveryTime}m</p>
+                <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
+                    <p className="text-[8px] font-black text-blue-600 uppercase tracking-widest mb-1">Avg Time</p>
+                    <p className="text-xl font-black text-[#1A1410]">{stats.avgDeliveryTime}m</p>
                 </div>
             </div>
 
@@ -114,8 +114,8 @@ export default function DeliveryPortal() {
                             className="text-center py-20"
                         >
                             <div className="text-6xl mb-4 opacity-50">🛵</div>
-                            <p className="text-wood-400 font-bold uppercase tracking-widest">No active deliveries</p>
-                            <p className="text-xs text-wood-500 mt-2">Wait for assignments from the kitchen.</p>
+                            <p className="text-[#9B8D74] font-bold uppercase tracking-widest">No active deliveries</p>
+                            <p className="text-xs text-[#5C554E] mt-2">Wait for assignments from the kitchen.</p>
                         </motion.div>
                     ) : (
                         orders.map(order => (
@@ -125,23 +125,23 @@ export default function DeliveryPortal() {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95, x: -100 }}
-                                className="bg-wood-800 rounded-2xl md:rounded-3xl p-4 md:p-5 border border-wood-700 shadow-xl"
+                                className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-5 border border-[rgba(26,20,16,0.06)] shadow-xl shadow-black/5"
                             >
-                                <div className="flex justify-between items-start mb-4 pb-4 border-b border-wood-700">
+                                <div className="flex justify-between items-start mb-4 pb-4 border-b border-[rgba(26,20,16,0.06)]">
                                     <div className="flex-1 pr-2">
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <h3 className="font-black text-base md:text-lg text-white">#{order.orderNumber}</h3>
-                                            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[8px] md:text-[9px] font-black rounded-md border border-blue-500/20 whitespace-nowrap">
+                                            <h3 className="font-black text-base md:text-lg text-[#1A1410]">#{order.orderNumber}</h3>
+                                            <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[8px] md:text-[9px] font-black rounded-md border border-blue-200 whitespace-nowrap">
                                                 ⏱️ {times[order._id] || 0}m
                                             </span>
                                         </div>
-                                        <p className="text-wood-400 text-[10px] md:text-xs mt-1">
+                                        <p className="text-[#9B8D74] text-[10px] md:text-xs mt-1">
                                             {new Date(order.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                     </div>
                                     <div className="text-right shrink-0">
-                                        <span className="text-tomato-400 font-black text-sm md:text-base">${order.total?.toFixed(2)}</span>
-                                        <span className="block mt-1 px-2 py-0.5 bg-tomato-600/20 text-tomato-400 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-md border border-tomato-500/30">
+                                        <span className="text-[#1A1410] font-black text-sm md:text-base">${order.total?.toFixed(2)}</span>
+                                        <span className="block mt-1 px-2 py-0.5 bg-ember-50 text-ember-600 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-md border border-ember-200">
                                             PAID
                                         </span>
                                     </div>
@@ -151,15 +151,15 @@ export default function DeliveryPortal() {
                                     {/* Customer & SMS */}
                                     <div className="flex justify-between items-end">
                                         <div className="flex-1">
-                                            <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Customer</p>
-                                            <p className="font-bold text-white text-sm">{order.customerInfo?.name}</p>
+                                            <p className="text-[10px] text-[#9B8D74] font-black uppercase tracking-widest mb-1">Customer</p>
+                                            <p className="font-bold text-[#1A1410] text-sm">{order.customerInfo?.name}</p>
                                             <div className="flex gap-4 mt-2">
-                                                <a href={`tel:${order.customerInfo?.phone}`} className="flex items-center gap-2 px-3 py-2 bg-wood-900 rounded-xl text-tomato-400 font-bold text-xs border border-wood-700 hover:bg-wood-700 transition-colors">
+                                                <a href={`tel:${order.customerInfo?.phone}`} className="flex items-center gap-2 px-3 py-2 bg-[#F5F3EF] rounded-xl text-[#1A1410] font-bold text-xs border border-[rgba(26,20,16,0.06)] hover:bg-white hover:shadow-sm transition-all">
                                                     📞 Call
                                                 </a>
                                                 <button 
                                                     onClick={() => sendSMS(order.customerInfo?.phone, `Hi, this is your ${settings?.restaurantName || 'Pizza Blast'} driver. I'm arriving with your order!`)}
-                                                    className="flex items-center gap-2 px-3 py-2 bg-wood-900 rounded-xl text-blue-400 font-bold text-xs border border-wood-700 hover:bg-wood-700 transition-colors"
+                                                    className="flex items-center gap-2 px-3 py-2 bg-[#F5F3EF] rounded-xl text-blue-600 font-bold text-xs border border-[rgba(26,20,16,0.06)] hover:bg-white hover:shadow-sm transition-all"
                                                 >
                                                     💬 SMS Arrival
                                                 </button>
@@ -169,8 +169,8 @@ export default function DeliveryPortal() {
 
                                     {/* Address & Maps */}
                                     <div>
-                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Address</p>
-                                        <p className="font-bold text-white text-sm leading-snug">
+                                        <p className="text-[10px] text-[#9B8D74] font-black uppercase tracking-widest mb-1">Address</p>
+                                        <p className="font-bold text-[#1A1410] text-sm leading-snug">
                                             {typeof order.address === 'string'
                                                 ? order.address
                                                 : `${order.address?.street}, ${order.address?.city} ${order.address?.zip || ''}`}
@@ -178,20 +178,20 @@ export default function DeliveryPortal() {
                                         <div className="flex gap-2 mt-2">
                                             <button 
                                                 onClick={() => openMaps(order.address, 'google')}
-                                                className="flex-1 py-2 bg-wood-950 text-wood-200 text-[10px] font-black uppercase tracking-tighter rounded-xl border border-wood-700"
+                                                className="flex-1 py-2 bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all text-[10px] font-black uppercase tracking-tighter rounded-xl border border-[rgba(26,20,16,0.06)] hover:shadow-sm"
                                             >
                                                 🗺️ Google Maps
                                             </button>
                                             <button 
                                                 onClick={() => openMaps(order.address, 'apple')}
-                                                className="flex-1 py-2 bg-wood-950 text-wood-200 text-[10px] font-black uppercase tracking-tighter rounded-xl border border-wood-700"
+                                                className="flex-1 py-2 bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all text-[10px] font-black uppercase tracking-tighter rounded-xl border border-[rgba(26,20,16,0.06)] hover:shadow-sm"
                                             >
                                                 🍎 Apple Maps
                                             </button>
                                         </div>
                                         {order.address?.instructions && (
-                                            <div className="mt-3 text-xs bg-tomato-500/5 p-3 rounded-xl text-tomato-200 border border-tomato-500/20 italic">
-                                                <span className="block text-[8px] font-black uppercase tracking-widest text-tomato-500 not-italic mb-1">Customer Instructions</span>
+                                            <div className="mt-3 text-xs bg-ember-50 p-3 rounded-xl text-ember-700 border border-ember-200 italic">
+                                                <span className="block text-[8px] font-black uppercase tracking-widest text-ember-600 not-italic mb-1">Customer Instructions</span>
                                                 "{order.address.instructions}"
                                             </div>
                                         )}
@@ -199,15 +199,15 @@ export default function DeliveryPortal() {
 
                                     {/* Items & Modifiers */}
                                     <div>
-                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Handover Checklist</p>
+                                        <p className="text-[10px] text-[#9B8D74] font-black uppercase tracking-widest mb-1">Handover Checklist</p>
                                         <div className="space-y-1.5 mt-1">
                                             {order.items?.map((item, idx) => (
-                                                <div key={idx} className="bg-wood-900/50 p-2 rounded-lg border border-wood-700/50">
+                                                <div key={idx} className="bg-[#FAFAF8] p-2 rounded-lg border border-[rgba(26,20,16,0.06)]">
                                                     <div className="flex justify-between text-xs">
-                                                        <span className="font-bold text-white"><span className="text-tomato-500">{item.quantity}x</span> {item.name}</span>
+                                                        <span className="font-bold text-[#1A1410]"><span className="text-ember-600">{item.quantity}x</span> {item.name}</span>
                                                     </div>
                                                     {item.modifiers?.length > 0 && (
-                                                        <p className="text-[10px] text-wood-400 mt-0.5">
+                                                        <p className="text-[10px] text-[#9B8D74] mt-0.5">
                                                             ↳ {item.modifiers.map(m => m.name).join(', ')}
                                                         </p>
                                                     )}
@@ -218,12 +218,12 @@ export default function DeliveryPortal() {
 
                                     {/* Driver Notes */}
                                     <div>
-                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Delivery Notes (visible to admin)</p>
+                                        <p className="text-[10px] text-[#9B8D74] font-black uppercase tracking-widest mb-1">Delivery Notes (visible to admin)</p>
                                         <textarea 
                                             placeholder="e.g. Left at side door, customer was very friendly..."
                                             value={orderNotes[order._id] || ''}
                                             onChange={(e) => setOrderNotes({...orderNotes, [order._id]: e.target.value})}
-                                            className="w-full bg-wood-950 border border-wood-700 rounded-2xl p-3 text-xs text-white placeholder:text-wood-600 focus:outline-none focus:border-tomato-500 transition-colors"
+                                            className="w-full bg-[#FAFAF8] border border-transparent focus:bg-white focus:border-ember-500/30 rounded-2xl p-3 text-xs text-[#1A1410] placeholder:text-[#9B8D74] focus:outline-none transition-all shadow-sm"
                                             rows={2}
                                         />
                                     </div>
@@ -231,7 +231,7 @@ export default function DeliveryPortal() {
 
                                 <button
                                     onClick={() => handleDeliver(order._id)}
-                                    className="w-full py-4 bg-tomato-600 hover:bg-tomato-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-tomato-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                                    className="w-full py-4 bg-[#1A1410] hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 transition-all active:scale-95 flex items-center justify-center gap-2"
                                 >
                                     <span>🏁</span>
                                     <span>Complete Delivery</span>

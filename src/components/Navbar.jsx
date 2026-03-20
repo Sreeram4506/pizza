@@ -29,6 +29,7 @@ export default function Navbar() {
 
   const isLightPage = ['/menu', '/catering', '/dining', '/track', '/profile', '/login', '/register'].includes(location.pathname)
   const isSolid = scrolled || isLightPage || mobileOpen
+  const restaurantName = settings?.restaurantName || 'Mustang Pizza'
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
@@ -36,10 +37,31 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const [points, setPoints] = useState(0)
+
   useEffect(() => {
     const token = localStorage.getItem('customerToken')
-    setIsLoggedIn(!!token)
-  }, [])
+    if (token) {
+      setIsLoggedIn(true)
+      fetchPoints(token)
+    } else {
+      setIsLoggedIn(false)
+    }
+  }, [location.pathname]) // Refresh on navigation
+
+  const fetchPoints = async (token) => {
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setPoints(data.user?.loyalty?.points || 0)
+      }
+    } catch (err) {
+      console.error('Failed to fetch points:', err)
+    }
+  }
 
   const handleNavClick = (e, link) => {
     if (link.intent) {
@@ -80,12 +102,12 @@ export default function Navbar() {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 flex flex-col ${isSolid
-        ? 'bg-white/95 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] shadow-sm'
+        ? 'glass-panel-strong border-b border-white/60 shadow-[0_18px_50px_rgba(26,20,16,0.08)]'
         : 'bg-transparent'
         }`}
     >
       <BannerDisplay position="top" />
-      <nav className={`max-w-[1400px] w-full mx-auto px-6 lg:px-12 flex items-center justify-between transition-all duration-500 ${scrolled ? 'py-3' : 'py-6'}`}>
+      <nav className={`max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 flex items-center justify-between transition-all duration-500 rounded-[2rem] ${isSolid ? 'mt-2 mb-2 glass-card glass-highlight-ring' : ''} ${scrolled ? 'py-3' : 'py-5'}`}>
         {/* Logo */}
         <motion.a
           onClick={() => navigate('/')}
@@ -96,9 +118,14 @@ export default function Navbar() {
           {settings?.logo ? (
             <img src={settings.logo} alt="Logo" className="h-10 object-contain" />
           ) : (
-            <span className={`font-sans font-black text-[22px] tracking-tight uppercase transition-colors duration-500 ${isSolid ? 'text-red-600' : 'text-white'}`}>
-              {settings?.restaurantName || 'Pizza Blast'}
-            </span>
+            <div className="flex flex-col">
+              <span className={`font-serif-1947 text-[28px] tracking-tight leading-none transition-colors duration-500 ${isSolid ? 'text-[#1A1410]' : 'text-white'}`}>
+                {restaurantName.split(' ')[0]}
+              </span>
+              <span className={`text-[8px] uppercase tracking-[0.3em] font-black -mt-0.5 transition-colors duration-500 ${isSolid ? 'text-ember-600' : 'text-white/60'}`}>
+                {restaurantName.split(' ').slice(1).join(' ') || 'Pizza'}
+              </span>
+            </div>
           )}
         </motion.a>
 
@@ -125,7 +152,7 @@ export default function Navbar() {
           <LanguageSelector scrolled={scrolled} />
           {/* Cart Icon */}
           <motion.button
-            className={`relative w-10 h-10 flex items-center justify-center transition-colors ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
+            className={`relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center transition-colors rounded-full ${isSolid ? 'glass-pill text-[#5C554E] hover:text-[#1A1410]' : 'bg-white/10 backdrop-blur-sm border border-white/20 text-white/75 hover:text-white'}`}
             whileTap={{ scale: 0.95 }}
             onClick={() => openWithIntent('cart')}
           >
@@ -142,6 +169,7 @@ export default function Navbar() {
               </motion.span>
             )}
           </motion.button>
+
 
           {/* Profile / Auth */}
           {isLoggedIn ? (
@@ -177,7 +205,7 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <motion.button
-            className={`lg:hidden w-10 h-10 flex items-center justify-center transition-colors ${isSolid ? 'text-[#1A1410]' : 'text-white'}`}
+            className={`lg:hidden w-10 h-10 flex items-center justify-center transition-colors rounded-full ${isSolid ? 'glass-pill text-[#1A1410]' : 'bg-white/10 backdrop-blur-sm border border-white/20 text-white'}`}
             onClick={() => setMobileOpen(!mobileOpen)}
             whileTap={{ scale: 0.95 }}
           >
@@ -204,7 +232,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:hidden overflow-hidden bg-white/95 backdrop-blur-xl border-t border-[rgba(26,20,16,0.06)]"
+            className="lg:hidden overflow-hidden glass-panel-strong border-t border-white/60 mx-3 mb-3 rounded-[2rem]"
           >
             <div className="max-w-[1400px] mx-auto px-6 py-8 flex flex-col gap-2">
               {navLinks.map((link, i) => (
@@ -214,7 +242,7 @@ export default function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 * i }}
                   onClick={(e) => handleNavClick(e, link)}
-                  className="text-left text-lg font-display italic text-[#1A1410]/70 hover:text-[#1A1410] py-3 px-4 transition-all border-b border-[rgba(26,20,16,0.04)] last:border-none"
+                  className="text-left text-lg font-display italic text-[#1A1410]/70 hover:text-[#1A1410] py-3 px-4 transition-all border-b border-[rgba(26,20,16,0.04)] last:border-none rounded-2xl hover:bg-white/50"
                 >
                   {link.label}
                 </motion.button>
@@ -226,7 +254,7 @@ export default function Navbar() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.3 }}
-                      className="w-full py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
+                      className="w-full py-4 glass-button-dark text-white font-body font-semibold text-[10px] tracking-[0.2em] uppercase rounded-xl"
                       onClick={() => { setMobileOpen(false); navigate('/profile'); }}
                     >
                       Profile
@@ -235,7 +263,7 @@ export default function Navbar() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.35 }}
-                      className="w-full py-4 border border-[rgba(26,20,16,0.1)] text-[#1A1410] font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
+                      className="w-full py-4 glass-button-light text-[#1A1410] font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
                       onClick={() => { setMobileOpen(false); handleLogout(); }}
                     >
                       Logout
@@ -247,7 +275,7 @@ export default function Navbar() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.3 }}
-                      className="w-full py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
+                      className="w-full py-4 glass-button-dark text-white font-body font-semibold text-[10px] tracking-[0.2em] uppercase rounded-xl"
                       onClick={() => { setMobileOpen(false); navigate('/login'); }}
                     >
                       Login
@@ -256,7 +284,7 @@ export default function Navbar() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.35 }}
-                      className="w-full py-4 border border-[rgba(26,20,16,0.1)] text-[#1A1410] font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
+                      className="w-full py-4 glass-button-light text-[#1A1410] font-body font-semibold text-sm tracking-[0.1em] uppercase rounded-xl"
                       onClick={() => { setMobileOpen(false); navigate('/register'); }}
                     >
                       Register

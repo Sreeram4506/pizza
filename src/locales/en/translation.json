@@ -12,24 +12,24 @@
     "admin": "Admin"
   },
   "hero": {
-    "title": "Pizza Blast",
-    "subtitle": "Artisan Pizzas, Crafted with Passion",
+    "title": "Mustang Pizza",
+    "subtitle": "Artisan Pizza Crafted with Passion",
     "orderNow": "Order Now",
-    "est": "Est. 2024 &nbsp;·&nbsp; Artisan Kitchen",
-    "type": "Pizza Napoletana",
-    "tagline": "\"Where fire meets flour, and tradition meets tomorrow.\"",
+    "est": "Est. 1994 &nbsp;·&nbsp; Authentic Oven",
+    "type": "Artisan Pizza",
+    "tagline": "\"The ride to the perfect slice starts here.\"",
     "exploreMenu": "Explore Menu",
-    "buildYourOwn": "Build Your Own",
+    "buildYourOwn": "Our Specials",
     "features": {
-      "dough": "48h Fermented Dough",
-      "fired": "900°C Wood-Fired",
+      "dough": "Hand-Tossed Dough",
+      "fired": "Wood-Fired Oven",
       "tomatoes": "San Marzano Tomatoes",
       "rating": "⭐ 4.9 Rating"
     },
     "reservations": "Reservations"
   },
   "chatbot": {
-    "assistant": "Pizza Assistant",
+    "assistant": "Mustang Assistant",
     "systemActive": "System Active",
     "browseMenu": "Browse Menu",
     "refresh": "Refresh",
@@ -72,16 +72,16 @@
     }
   },
   "about": {
-    "philosophy": "Our Philosophy",
-    "quote": "We don't make food.<br />We make <span class=\"text-ember-500\">memories</span>.",
-    "description1": "At {{restaurantName}}, we believe that the soul of a great pizza lies in its crust. Our dough is fermented for 48 hours using a family recipe passed down through three generations, hand-tossed and baked in our wood-fired ovens imported directly from Naples.",
-    "description2": "We top every pizza with the freshest San Marzano tomatoes, creamy mozzarella di bufala, and aromatic basil hand-picked from our local herb garden. It's not just pizza — it's a slice of Italian tradition.",
-    "signature": "— Chef Marco",
+    "philosophy": "Our Heritage",
+    "quote": "We don't just bake pizza.<br />We serve <span class=\"text-ember-500\">craftsmanship</span>.",
+    "description1": "At {{restaurantName}}, we believe that the soul of a great pizza lies in its dough. Our 48-hour fermentation process develops a complex flavor and airy texture that defines the authentic Neapolitan style.",
+    "description2": "From our wood-fired oven to your table, we use only the finest San Marzano tomatoes, imported Mozzarella di Bufala, and fresh, locally sourced toppings. It's not just a meal — it's a testament to artisan quality.",
+    "signature": "— The Mustang Family",
     "stats": {
-      "pizzas": "Pizzas Served",
-      "dough": "Dough Fermentation",
-      "patrons": "Elite Patrons",
-      "heat": "Wood-Fired Heat"
+      "pizzas": "Artisanal Pizzas",
+      "dough": "Dough Hydration",
+      "patrons": "Loyal Connoisseurs",
+      "heat": "900°F Stone Oven"
     }
   },
   "testimonials": {
@@ -101,7 +101,7 @@
       },
       {
         "name": "James K.",
-        "text": "Authentic wood-fired taste that transports me straight to Naples. Pizza Blast is now my weekly Friday night tradition — nothing else compares.",
+        "text": "Authentic wood-fired taste that transports me straight to Naples. Mustang Pizza is now my weekly Friday night tradition — nothing else compares.",
         "order": "Custom Pepperoni"
       },
       {

@@ -13,7 +13,7 @@ export default function MenuPage() {
     const [menuItems, setMenuItems] = useState([])
     const [searchQuery, setSearchQuery] = useState('')
     const [activeCategory, setActiveCategory] = useState('')
-    const { openWithIntent, cartCount, addToCart, setIsOpen } = useChatbot()
+    const { openWithIntent, cartCount, addToCart, setIsOpen, orderType, setOrderType } = useChatbot()
     const { settings } = useSettings()
     const navigate = useNavigate()
 
@@ -143,6 +143,9 @@ export default function MenuPage() {
     const hasSearchResults = allFilteredItems.length > 0 || !searchQuery
 
     const [showMobileSearch, setShowMobileSearch] = useState(false)
+    const restaurantName = settings?.restaurantName || 'Mustang Pizza'
+    const [brandFirst, ...brandRest] = restaurantName.split(' ')
+    const brandSecond = brandRest.join(' ') || 'Pizza'
 
     const getLocalizedCatName = (name) => {
         if (name === 'Popular') return t('menu.categories.popular')
@@ -150,290 +153,173 @@ export default function MenuPage() {
     }
 
     return (
-        <div className="h-screen flex flex-col bg-[#FAFAF8] overflow-hidden selection:bg-ember-500/15 selection:text-[#1A1410] font-sans">
-            {/* Split Screen Header */}
-            <header className="h-16 sm:h-24 flex-shrink-0 bg-white/90 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] px-3 sm:px-12 flex items-center justify-between z-50">
-                <div
-                    className="flex items-center gap-2 sm:gap-6 cursor-pointer group"
-                    onClick={() => navigate('/')}
-                >
-                    <div className="w-9 h-9 sm:w-14 sm:h-14 bg-ember-600 rounded-xl flex items-center justify-center text-white font-mono font-bold text-xl sm:text-3xl shadow-lg shadow-ember-600/20 group-hover:scale-105 transition-transform">
+        <div className="glass-shell min-h-screen bg-[#FAFAF8] text-[#1A1410] selection:bg-ember-500/15 font-sans overflow-x-hidden">
+            {/* ── TOP NAVIGATION ── */}
+            <header className="fixed top-0 left-0 right-0 h-20 glass-panel-strong border-b border-white/60 z-[100] flex items-center justify-between px-6 lg:px-12">
+                <div onClick={() => navigate('/')} className="flex items-center gap-4 cursor-pointer">
+                    <div className="w-12 h-12 glass-button-dark rounded-2xl flex items-center justify-center text-white font-serif-1947 font-black text-2xl">
                         {settings?.restaurantName?.[0] || 'M'}
                     </div>
-                    {!showMobileSearch && (
-                        <div className="flex flex-col">
-                            <motion.span
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="font-display font-bold text-xl sm:text-3xl tracking-tighter text-[#1A1410] italic truncate max-w-[140px] sm:max-w-none leading-none"
-                            >
-                                {settings?.restaurantName || 'Pizza Blast'}
-                            </motion.span>
-                            <span className="font-mono text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-ember-600 mt-1">{t('menu.kitchen')}</span>
-                        </div>
-                    )}
+                    <div>
+                      <h1 className="font-serif-1947 text-2xl tracking-tight text-[#1A1410] leading-tight">{brandFirst}</h1>
+                      <p className="text-[8px] uppercase tracking-[0.3em] text-[#9B8D74] -mt-1 font-bold">{brandSecond}</p>
+                    </div>
                 </div>
 
-                {/* Desktop Nav Links in Menu Page */}
-                <nav className="hidden lg:flex items-center gap-8">
-                    {[
-                        { name: t('nav.home'), href: '/' },
-                        { name: t('nav.kitchen'), href: '/#atelier' },
-                        { name: t('menu.nav.tracking'), href: '/track' }
-                    ].map(link => (
-                        <button
-                            key={link.name}
-                            onClick={() => navigate(link.href)}
-                            className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-[#9B8D74] hover:text-[#1A1410] transition-colors relative group"
-                        >
-                            {link.name}
-                            <span className="absolute -bottom-1 left-0 w-0 h-[1.5px] bg-ember-500 transition-all group-hover:w-full" />
-                        </button>
+                <div className="hidden lg:flex items-center gap-10">
+                    {['Home', 'Order Online', 'Track Order', 'More'].map(link => (
+                        <button key={link} className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9B8D74] hover:text-[#1A1410] transition-colors">{link}</button>
                     ))}
-                </nav>
+                </div>
 
-                {showMobileSearch && (
-                    <motion.div
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: 'auto' }}
-                        className="flex-1 max-w-md mx-4"
-                    >
-                        <div className="relative">
-                            <input
-                                autoFocus
-                                type="text"
-                                placeholder={t('menu.search.placeholder')}
-                                className="w-full pl-4 pr-10 py-2 bg-[#F5F3EF] border-none rounded-full text-sm font-medium focus:ring-2 focus:ring-ember-500/20"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                            <button
-                                onClick={() => { setShowMobileSearch(false); setSearchQuery(''); }}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9B8D74]"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-
-                <div className="flex items-center gap-2 sm:gap-6">
-                    <button
-                        onClick={() => setShowMobileSearch(!showMobileSearch)}
-                        className="sm:hidden p-2 rounded-full hover:bg-[#F5F3EF] text-[#1A1410]"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </button>
-
-                    <button
-                        onClick={() => openWithIntent('cart')}
-                        className="relative p-2 sm:p-2.5 rounded-full bg-[#1A1410] text-white shadow-xl shadow-black/10 hover:bg-ember-600 transition-colors group"
-                    >
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 10-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
+                <div className="flex items-center gap-3 sm:gap-4">
+                    
+                    <button onClick={() => openWithIntent('cart')} className="w-11 h-11 sm:w-12 sm:h-12 glass-button-dark rounded-2xl flex items-center justify-center relative transition-all group">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 10-8 0v4M5 9h14l1 12H4L5 9z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         {cartCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-ember-500 text-white text-[8px] sm:text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white">
+                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-ember-500 text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-[#FAFAF8]">
                                 {cartCount}
                             </span>
                         )}
                     </button>
-
-                    <button
-                        onClick={() => navigate('/')}
-                        className="flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all shadow-sm border border-[rgba(26,20,16,0.04)]"
-                    >
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                    <button onClick={() => navigate('/')} className="w-11 h-11 sm:w-12 sm:h-12 glass-button-light rounded-2xl flex items-center justify-center lg:hidden">
+                        <svg className="w-5 h-5 text-[#1A1410]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </button>
                 </div>
             </header>
 
-            <div className="flex flex-1 overflow-hidden relative">
-                {/* Slim Side Texture Overlays */}
-                <div className="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[#FAFAF8] to-transparent z-20 pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-[#FAFAF8] to-transparent z-20 pointer-events-none" />
-
-                {/* LEFT SIDEBAR: Categories (Responsive Width) */}
-                <aside
-                    ref={sidebarScrollRef}
-                    className="w-[85px] sm:w-72 lg:w-96 p-2 sm:p-8 overflow-y-auto border-r border-[rgba(26,20,16,0.06)] bg-[#FAFAF8] scrollbar-hide z-10 flex flex-col transition-all duration-500"
-                >
-                    <div className="hidden sm:block mb-10 pt-2">
-                        <div className="relative group">
-                            <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#9B8D74] opacity-50 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            <input
-                                type="text"
-                                placeholder={t('menu.search.sidebar')}
-                                className="w-full pl-12 pr-4 py-4 bg-white border border-[rgba(26,20,16,0.08)] rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-ember-500/5 transition-all shadow-sm"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
+            <div className="flex pt-20 h-screen overflow-hidden">
+                {/* ── LEFT SIDEBAR ── */}
+                <aside className="w-[300px] border-r border-white/40 overflow-y-auto scrollbar-hide hidden lg:flex flex-col p-6 space-y-8 glass-panel-strong rounded-r-[2rem]">
+                    <div className="relative mb-2">
+                        <input 
+                            type="text" 
+                            placeholder="Search menu"
+                            className="w-full h-12 glass-input px-12 text-sm font-medium focus:ring-4 focus:ring-ember-500/5 outline-none transition-all placeholder:text-[#9B8D74]/50"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#9B8D74] opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </div>
 
-                    <div className="flex-1 space-y-4 sm:space-y-12">
-                        <span className="hidden sm:block font-mono text-[10px] tracking-[0.3em] uppercase text-ember-600 font-black px-2">{t('menu.categories.navigation')}</span>
-                        <nav className="flex flex-col gap-1.5 sm:gap-2">
-                            {categories.map((cat) => {
-                                const catItems = filteredMenuItems(groupedItems[cat.name] || [])
-                                const isVisible = catItems.length > 0
-                                if (!isVisible && searchQuery) return null
-
-                                return (
-                                    <button
-                                        key={cat._id}
-                                        data-cat-btn={cat.name}
-                                        onClick={() => handleCategoryClick(cat.name)}
-                                        className={`group flex flex-col sm:flex-row items-center sm:justify-between p-2.5 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl text-[10px] sm:text-[12px] font-bold tracking-[0.02em] sm:tracking-[0.05em] uppercase transition-all duration-300 relative overflow-hidden ${activeCategory === cat.name
-                                            ? 'bg-[#1A1410] text-[#FAFAFA] shadow-lg sm:shadow-2xl shadow-black/10'
-                                            : 'text-[#5C554E] hover:bg-white hover:text-[#1A1410]'
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-2 sm:gap-4 relative z-10">
-                                            <div className={`w-1 h-1 rounded-full transition-all duration-500 hidden sm:block ${activeCategory === cat.name ? 'bg-ember-500 scale-125' : 'bg-transparent'}`} />
-                                            <span className={`text-center sm:text-left leading-tight break-words sm:break-normal transition-colors duration-300 ${activeCategory === cat.name ? 'text-white' : ''}`}>{getLocalizedCatName(cat.name)}</span>
-                                        </div>
-                                        <span className={`hidden sm:block font-mono text-[10px] opacity-40 transition-opacity ${activeCategory === cat.name ? 'text-ember-400' : 'text-[#9B8D74]'}`}>
-                                            {catItems.length}
-                                        </span>
-                                    </button>
-                                )
-                            })}
+                    <div className="space-y-6">
+                        <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-600 font-black px-4">{t('menu.categories.navigation')}</span>
+                        <nav className="space-y-1.5">
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat._id}
+                                    onClick={() => handleCategoryClick(cat.name)}
+                                    className={`w-full text-left px-5 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all ${activeCategory === cat.name ? 'glass-button-dark text-white' : 'glass-button-light text-[#5C554E] hover:text-[#1A1410]'}`}
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
                         </nav>
                     </div>
                 </aside>
 
-                {/* RIGHT CONTENT Area */}
-                <main
-                    ref={mainScrollRef}
-                    className="flex-1 overflow-y-auto p-3 sm:p-12 bg-white/40 backdrop-blur-3xl scroll-smooth"
-                >
-                    <div className="max-w-6xl mx-auto space-y-10 sm:space-y-24 pb-32">
-                        {!hasSearchResults && (
-                            <div className="flex flex-col items-center justify-center pt-20 text-center">
-                                <div className="w-16 h-16 bg-[#F5F3EF] rounded-full flex items-center justify-center mb-6">
-                                    <svg className="w-8 h-8 text-[#9B8D74]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                </div>
-                                <h3 className="text-xl font-display font-black italic text-[#1A1410]">{t('menu.search.empty')}</h3>
-                                <p className="text-sm text-[#5C554E] opacity-60 mt-2">{t('menu.search.emptySubtitle')}</p>
-                                <button
-                                    onClick={() => setSearchQuery('')}
-                                    className="mt-8 text-ember-600 font-mono text-[10px] uppercase font-bold tracking-widest border-b border-ember-600/30 pb-1"
+                {/* ── MAIN CONTENT ── */}
+                <main ref={mainScrollRef} className="flex-1 overflow-y-auto pt-10 px-4 sm:px-12 pb-32 scroll-smooth scrollbar-hide bg-white/20 backdrop-blur-3xl">
+                    {/* Location Header */}
+                    <div className="mb-12 glass-panel glass-highlight-ring p-6 sm:p-8">
+                        <h2 className="text-4xl sm:text-6xl font-serif-1947 italic mb-4 text-[#1A1410] tracking-tight">{restaurantName} Menu</h2>
+                        <div className="flex flex-col gap-2 text-[#9B8D74] font-black text-[10px] uppercase tracking-[0.2em]">
+                            <span className="flex items-center gap-2">📍 {settings?.address || '997 Boston Providence Hwy, Norwood, MA'}</span>
+                            <span className="flex items-center gap-2 text-ember-600">🌙 Opens 11:00 AM EDT</span>
+                        </div>
+
+                        <div className="mt-8 flex flex-wrap gap-3">
+                            <div className="glass-pill p-1 flex">
+                                <button 
+                                    onClick={() => setOrderType('pickup')}
+                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${orderType === 'pickup' ? 'glass-button-light text-[#1A1410]' : 'text-[#9B8D74] hover:text-[#1A1410]'}`}
                                 >
-                                    {t('menu.search.clear')}
+                                    Pickup
+                                </button>
+                                <button 
+                                    onClick={() => setOrderType('delivery')}
+                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${orderType === 'delivery' ? 'glass-button-light text-[#1A1410]' : 'text-[#9B8D74] hover:text-[#1A1410]'}`}
+                                >
+                                    Delivery
                                 </button>
                             </div>
-                        )}
+                            
+                            <button className="glass-pill px-6 py-2.5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#5C554E] transition-all">
+                                🕒 {orderType === 'pickup' ? 'Pickup' : 'Delivery'} time...
+                                <svg className="w-3 h-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            </button>
 
-                        {categories.map((category) => {
-                            const items = filteredMenuItems(groupedItems[category.name] || [])
-                            if (items.length === 0) return null
+                            
+                        </div>
+                    </div>
 
-                            return (
-                                <section
-                                    key={category._id}
-                                    data-category={category.name}
-                                    ref={el => categoryRefs.current[category.name] = el}
-                                    className="relative flex flex-col pt-2 sm:pt-4"
-                                >
-                                    {/* SECTION HEADER: STICKY */}
-                                    <div className="sticky top-0 z-30 -mx-4 px-4 py-3 sm:py-6 bg-white/60 backdrop-blur-xl mb-6 sm:mb-12 flex items-baseline justify-between border-b border-[rgba(26,20,16,0.04)]">
-                                        <div className="flex flex-col">
-                                            <div className="flex items-center gap-2 sm:gap-3 mb-1">
-                                                <div className="w-1 h-1 rounded-full bg-ember-500" />
-                                                <span className="font-mono text-[8px] sm:text-[10px] tracking-[0.3em] uppercase text-ember-600 font-bold opacity-70">
-                                                    {category.name === 'Popular' ? t('menu.categories.curated') : t('menu.categories.selection')}
-                                                </span>
-                                            </div>
-                                            <h2 className="text-xl sm:text-[56px] font-display font-black italic text-[#1A1410] tracking-tighter leading-none">
-                                                {getLocalizedCatName(category.name)}
-                                            </h2>
-                                        </div>
-                                        <div className="font-mono text-[9px] sm:text-[11px] text-[#9B8D74] tracking-widest uppercase font-bold">
-                                            {items.length} {t('menu.items.count', { count: items.length })}
-                                        </div>
+                    {categories.map((category) => {
+                        const items = filteredMenuItems(groupedItems[category.name] || [])
+                        if (items.length === 0) return null
+
+                        return (
+                            <section
+                                key={category._id}
+                                data-category={category.name}
+                                ref={el => categoryRefs.current[category.name] = el}
+                                className="mb-20"
+                            >
+                                <div className="flex justify-between items-end mb-10 border-b border-white/50 pb-6 sticky top-0 glass-panel-strong z-20 -mx-4 px-4 pt-3 rounded-[2rem]">
+                                    <h3 className="text-3xl font-serif-1947 text-[#1A1410] italic">{category.name}</h3>
+                                    <div className="flex gap-2">
+                                        <button className="w-10 h-10 bg-[#F5F3EF] rounded-full flex items-center justify-center border border-[rgba(26,20,16,0.04)] text-[#9B8D74] hover:text-[#1A1410] transition-colors hover:scale-105">←</button>
+                                        <button className="w-10 h-10 bg-[#F5F3EF] rounded-full flex items-center justify-center border border-[rgba(26,20,16,0.04)] text-[#9B8D74] hover:text-[#1A1410] transition-colors hover:scale-105">→</button>
                                     </div>
+                                </div>
 
-                                    {/* ITEM GRID */}
-                                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
+                                {category.name === 'Discounts' ? (
+                                    <div className="max-w-md glass-panel glass-highlight-ring p-8 mb-12 relative overflow-hidden group hover:shadow-xl transition-all">
+                                        <div className="relative z-10">
+                                            <p className="font-mono text-[9px] tracking-widest font-black text-ember-600 mb-2 uppercase">Limited Offer</p>
+                                            <h4 className="text-xl font-bold tracking-tight text-[#1A1410]">Get 10% off on our new items</h4>
+                                        </div>
+                                        <button className="absolute right-6 bottom-6 w-12 h-12 glass-button-dark text-white rounded-2xl flex items-center justify-center transition-all">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-10">
                                         {items.map((item) => (
                                             <motion.div
                                                 key={item._id}
-                                                layout
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                className="group relative flex flex-col"
+                                                whileHover={{ y: -5 }}
+                                                className="group cursor-pointer flex flex-col"
+                                                onClick={() => handleOrder(item)}
                                             >
-                                                <div
-                                                    className="relative aspect-[4/5] sm:aspect-square rounded-xl sm:rounded-3xl overflow-hidden bg-[#F5F3EF] border border-white shadow-sm transition-all duration-700 hover:shadow-2xl cursor-pointer"
-                                                    onClick={() => handleOrder(item)}
-                                                >
+                                                <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden glass-card glass-highlight-ring mb-5 group-hover:shadow-2xl transition-all duration-700">
                                                     <img
-                                                        src={item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || ''}${item.image}`) : 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad50'}
+                                                        src={item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || ''}${item.image}`) : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'}
                                                         alt={item.name}
                                                         className="w-full h-full object-cover img-noir group-hover:scale-110 transition-transform duration-1000"
                                                     />
-
-                                                    <div className="absolute top-1.5 right-1.5 sm:top-4 sm:right-4 z-10">
-                                                        <div className="px-1.5 py-0.5 sm:px-4 sm:py-2 bg-white/90 backdrop-blur-md rounded-lg sm:rounded-2xl shadow-xl border border-white/50">
-                                                            <span className="font-mono text-[9px] sm:text-sm font-black text-[#1A1410] tracking-tighter">
-                                                                ${item.price?.toFixed(2)}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="absolute top-1.5 left-1.5 sm:top-4 sm:left-4 flex flex-col gap-1 z-10">
-                                                        {item.dietary?.spicy && (
-                                                            <div className="px-1.5 py-0.5 bg-ember-600 text-white text-[6px] sm:text-[9px] font-black uppercase tracking-[0.1em] rounded-md shadow-lg">{t('menu.items.spicy')}</div>
-                                                        )}
-                                                        {item.dietary?.vegetarian && (
-                                                            <div className="px-1.5 py-0.5 bg-green-600 text-white text-[6px] sm:text-[9px] font-black uppercase tracking-[0.1em] rounded-md shadow-lg">{t('menu.items.veg')}</div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Quick Add Overlay Mobile Hint */}
-                                                    <div className="sm:hidden absolute bottom-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-[#1A1410] shadow-md">
-                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
-                                                    </div>
-
-                                                    <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 via-black/20 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col justify-end">
-                                                        <button
-                                                            className="w-full bg-white text-[#1A1410] font-black text-[10px] uppercase tracking-[0.2em] py-4 rounded-2xl hover:bg-ember-500 hover:text-white transition-all shadow-xl"
-                                                            onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
-                                                        >
-                                                            {t('menu.items.add')}
-                                                        </button>
-                                                    </div>
+                                                    <button className="absolute right-4 bottom-4 w-10 h-10 glass-button-light rounded-xl flex items-center justify-center text-[#1A1410] group-hover:bg-[#1A1410] group-hover:text-white transition-all shadow-xl">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                                    </button>
                                                 </div>
-
-                                                <div className="py-2 sm:p-5 flex flex-col flex-1">
-                                                    <h3 className="font-display text-[13px] sm:text-2xl font-black italic text-[#1A1410] tracking-tight group-hover:text-ember-600 transition-colors mb-0.5 line-clamp-1">{item.name}</h3>
-                                                    <p className="text-[9px] sm:text-[13px] leading-tight sm:leading-relaxed text-[#5C554E] font-medium opacity-70 line-clamp-1 sm:line-clamp-2">
-                                                        {item.description || t('menu.items.fresh')}
-                                                    </p>
+                                                <div className="px-1">
+                                                    <h4 className="font-bold text-sm mb-1 tracking-tight text-[#1A1410] group-hover:text-ember-600 transition-colors line-clamp-1">{item.name}</h4>
+                                                    <p className="text-ember-600 font-black tracking-tighter text-sm">${item.price?.toFixed(2)}</p>
                                                 </div>
                                             </motion.div>
                                         ))}
                                     </div>
-                                </section>
-                            )
-                        })}
-                    </div>
+                                )}
+                            </section>
+                        )
+                    })}
                 </main>
             </div>
 
-            <style dangerouslySetInnerHTML={{
-                __html: `
+            <style dangerouslySetInnerHTML={{ __html: `
                 .scrollbar-hide::-webkit-scrollbar { display: none; }
                 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-                #mainScrollRef::-webkit-scrollbar { width: 4px; }
             `}} />
         </div>
     )
 }
+

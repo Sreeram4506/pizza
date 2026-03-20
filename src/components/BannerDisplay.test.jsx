@@ -1,9 +1,16 @@
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import BannerDisplay from './BannerDisplay'
 
 // Mock fetch
 global.fetch = jest.fn()
+
+const renderWithRouter = (component) => render(
+  <BrowserRouter>
+    {component}
+  </BrowserRouter>
+)
 
 describe('BannerDisplay Component', () => {
   beforeEach(() => {
@@ -16,7 +23,7 @@ describe('BannerDisplay Component', () => {
       json: async () => []
     })
 
-    render(<BannerDisplay position="middle" />)
+    renderWithRouter(<BannerDisplay position="middle" />)
     
     await waitFor(() => {
       expect(screen.queryByTestId('banner')).not.toBeInTheDocument()
@@ -50,7 +57,7 @@ describe('BannerDisplay Component', () => {
       json: async () => mockBanners
     })
 
-    render(<BannerDisplay position="middle" />)
+    renderWithRouter(<BannerDisplay position="middle" />)
     
     await waitFor(() => {
       expect(screen.getByText('Weekend Special')).toBeInTheDocument()
@@ -79,7 +86,7 @@ describe('BannerDisplay Component', () => {
       json: async () => mockBanners
     })
 
-    render(<BannerDisplay position="middle" />)
+    renderWithRouter(<BannerDisplay position="middle" />)
     
     await waitFor(() => {
       expect(screen.getByText('Test Banner')).toBeInTheDocument()
@@ -109,7 +116,7 @@ describe('BannerDisplay Component', () => {
       json: async () => mockBanners
     })
 
-    render(<BannerDisplay position="middle" />)
+    renderWithRouter(<BannerDisplay position="middle" />)
     
     await waitFor(() => {
       expect(screen.getByText('Clickable Banner')).toBeInTheDocument()
@@ -146,7 +153,7 @@ describe('BannerDisplay Component', () => {
       json: async () => mockBanners
     })
 
-    render(<BannerDisplay position="middle" />)
+    renderWithRouter(<BannerDisplay position="middle" />)
     
     await waitFor(() => {
       expect(screen.getByText('Active Banner')).toBeInTheDocument()
@@ -172,7 +179,7 @@ describe('BannerDisplay Component', () => {
       json: async () => mockBanners
     })
 
-    render(<BannerDisplay position="middle" />)
+    renderWithRouter(<BannerDisplay position="middle" />)
     
     await waitFor(() => {
       expect(screen.getByText('Trackable Banner')).toBeInTheDocument()
@@ -184,7 +191,7 @@ describe('BannerDisplay Component', () => {
   test('handles API errors gracefully', async () => {
     fetch.mockRejectedValue(new Error('Network error'))
 
-    render(<BannerDisplay position="middle" />)
+    renderWithRouter(<BannerDisplay position="middle" />)
     
     await waitFor(() => {
       expect(screen.queryByTestId('banner')).not.toBeInTheDocument()

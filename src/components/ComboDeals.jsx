@@ -77,7 +77,7 @@ export default function ComboDeals() {
             <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold-400 block mb-4">
               Private Offers
             </span>
-            <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
+            <h2 className="font-serif-1947 font-bold text-4xl md:text-5xl lg:text-7xl text-[#1A1410] tracking-tight italic">
               Exclusive Deals
             </h2>
           </div>
@@ -112,7 +112,7 @@ export default function ComboDeals() {
                 </span>
 
                 {/* Name */}
-                <h3 className="font-display text-3xl italic text-[#1A1410] mt-4 mb-6 relative z-10">
+                <h3 className="font-serif-1947 text-3xl italic text-[#1A1410] mt-4 mb-6 relative z-10">
                   {combo.name}
                 </h3>
 
@@ -137,10 +137,10 @@ export default function ComboDeals() {
 
                 {/* CTA */}
                 <button
-                  onClick={() => openWithIntent('order', { item: combo.name })}
-                  className={`relative z-10 w-full py-4 text-center font-body text-sm font-medium tracking-[0.15em] uppercase transition-all duration-300 rounded-xl ${combo.featured
-                    ? 'bg-ember-500 text-white hover:shadow-ember'
-                    : 'border border-[rgba(26,20,16,0.1)] text-[#1A1410] hover:bg-ember-500 hover:border-ember-500 hover:text-white'
+                  onClick={() => openWithIntent('add_to_cart', { item: { ...combo, _id: `combo-${combo.name.replace(/\s+/g, '-').toLowerCase()}`, available: true } })}
+                  className={`relative z-10 w-full py-5 text-center font-body text-[10px] font-black tracking-[0.25em] uppercase transition-all duration-300 rounded-xl ${combo.featured
+                    ? 'bg-[#1A1410] text-white shadow-xl shadow-black/10'
+                    : 'border border-[rgba(26,20,16,0.1)] text-[#1A1410] hover:bg-[#1A1410] hover:text-white'
                     }`}
                   style={{ borderRadius: '12px' }}
                 >

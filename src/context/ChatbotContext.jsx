@@ -17,6 +17,11 @@ export function ChatbotProvider({ children }) {
     return saved === 'true'
   })
 
+  // Persistence for Order Type (pickup/delivery)
+  const [orderType, setOrderType] = useState(() => {
+    return localStorage.getItem('pizza_order_type') || 'delivery'
+  })
+
   // Persistence effect for cart
   useEffect(() => {
     localStorage.setItem('pizza_cart', JSON.stringify(cart))
@@ -26,6 +31,11 @@ export function ChatbotProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('chatbot_voice_enabled', isVoiceEnabled)
   }, [isVoiceEnabled])
+
+  // Persistence for Order Type
+  useEffect(() => {
+    localStorage.setItem('pizza_order_type', orderType)
+  }, [orderType])
 
   const openWithIntent = (intent, data = {}) => {
     setInitialMessage({ intent, data })
@@ -80,6 +90,11 @@ export function ChatbotProvider({ children }) {
 
   const clearCart = () => setCart([])
 
+  const clearOrderType = () => {
+    setOrderType('delivery')
+    localStorage.removeItem('pizza_order_type')
+  }
+
   const cartCount = cart.reduce((sum, i) => sum + (i.qty || 0), 0)
   const cartTotal = cart.reduce((sum, i) => sum + (i.price * (i.qty || 0)), 0)
 
@@ -100,7 +115,10 @@ export function ChatbotProvider({ children }) {
       cartCount,
       cartTotal,
       isVoiceEnabled,
-      setIsVoiceEnabled
+      setIsVoiceEnabled,
+      orderType,
+      setOrderType,
+      clearOrderType
     }}>
       {children}
     </ChatbotContext.Provider>

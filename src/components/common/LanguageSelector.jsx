@@ -66,7 +66,7 @@ export default function LanguageSelector({ scrolled }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-xl border border-[rgba(26,20,16,0.06)] rounded-2xl shadow-2xl py-2 overflow-hidden z-50"
+            className="absolute right-0 mt-2 w-48 glass-panel-strong glass-highlight-ring rounded-2xl shadow-2xl py-2 overflow-hidden z-50"
           >
             {languages.map((lang) => (
               <button
@@ -74,7 +74,7 @@ export default function LanguageSelector({ scrolled }) {
                 onClick={() => handleLanguageChange(lang)}
                 className={`w-full flex items-center justify-between px-4 py-2 text-sm transition-colors ${
                   i18n.language === lang.code 
-                    ? 'bg-red-50 text-red-600 font-bold' 
+                    ? 'bg-ember-50 text-ember-600 font-bold' 
                     : 'text-[#5C554E] hover:bg-[#1A1410]/5'
                 }`}
               >

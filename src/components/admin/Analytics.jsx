@@ -6,7 +6,7 @@ import {
   ResponsiveContainer, AreaChart, Area
 } from 'recharts'
 
-const THEME_COLORS = ['#B45309', '#1A1410', '#92400E', '#451A03', '#78350F', '#F59E0B']
+const THEME_COLORS = ['#C1440E', '#1A1410', '#9B8D74', '#F5F3EF', '#EAE7E1', '#D4C5A1']
 
 export default function AnalyticsDashboard() {
   const [timeRange, setTimeRange] = useState('7d')
@@ -160,7 +160,7 @@ export default function AnalyticsDashboard() {
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#B45309"
+                  stroke="#C1440E"
                   strokeWidth={4}
                   fillOpacity={1}
                   fill="url(#colorRev)"

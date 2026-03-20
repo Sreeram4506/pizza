@@ -29,7 +29,7 @@ export default function Testimonials() {
   if (testimonialsData.length === 0) return null
 
   return (
-    <section ref={ref} className="py-24 lg:py-32 relative bg-white overflow-hidden section-grain">
+    <section ref={ref} className="py-24 lg:py-32 relative overflow-hidden section-grain glass-shell">
       <div className="absolute inset-0 gold-glow-bg" />
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
@@ -42,7 +42,7 @@ export default function Testimonials() {
           <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold-400 block mb-4">
             {t('testimonials.titleLabel')}
           </span>
-          <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
+          <h2 className="font-serif-1947 font-bold text-4xl md:text-5xl lg:text-7xl text-[#1A1410] tracking-tight italic">
             {t('testimonials.title')}
           </h2>
         </motion.div>
@@ -56,7 +56,7 @@ export default function Testimonials() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
-              className="text-center"
+            className="text-center glass-panel glass-highlight-ring px-6 py-10 md:px-12"
             >
               {/* Stars — thin accent lines, not emoji */}
               <div className="flex justify-center gap-2 mb-10">
@@ -74,8 +74,8 @@ export default function Testimonials() {
                 ))}
               </div>
 
-              {/* Quote — Cormorant italic, large */}
-              <p className="font-display italic text-2xl md:text-3xl lg:text-4xl text-[#1A1410] leading-relaxed mb-10 px-4">
+              {/* Quote — serif-1947 italic, large */}
+              <p className="font-serif-1947 italic text-2xl md:text-4xl lg:text-5xl text-[#1A1410] leading-relaxed mb-10 px-4">
                 "{testimonialsData[active].text}"
               </p>
 
@@ -111,10 +111,10 @@ export default function Testimonials() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ delay: 0.5 }}
-          className="mt-20 flex flex-wrap justify-center gap-16"
+          className="mt-20 flex flex-wrap justify-center gap-6"
         >
           {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
+            <div key={stat.label} className="text-center glass-card px-8 py-6 min-w-[160px]">
               <div className="font-mono text-2xl text-ember-500 mb-2 tracking-wider">{stat.value}</div>
               <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#9B8D74]">{stat.label}</div>
             </div>

@@ -25,10 +25,10 @@ export default function About() {
   ]
 
   return (
-    <section ref={ref} className="py-20 lg:py-40 relative bg-white overflow-hidden section-grain">
+    <section ref={ref} className="py-20 lg:py-40 relative overflow-hidden section-grain glass-shell">
       {/* Huge ghost number */}
-      <div className="absolute top-1/2 -translate-y-1/2 right-0 font-display text-[25vw] leading-none text-[#1A1410]/[0.03] select-none pointer-events-none hidden lg:block">
-        01
+      <div className="absolute top-1/2 -translate-y-1/2 right-0 font-serif-1947 font-black text-[25vw] leading-none text-[#1A1410]/[0.03] select-none pointer-events-none hidden lg:block">
+        Mustang
       </div>
 
       {/* Ember glow */}
@@ -47,7 +47,7 @@ export default function About() {
           </span>
 
           {/* Pull quote */}
-          <blockquote className="font-display italic text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-[#1A1410] leading-[1.2] tracking-tight mb-12">
+          <blockquote className="font-serif-1947 italic text-2xl sm:text-4xl md:text-5xl lg:text-7xl text-[#1A1410] leading-[1.1] tracking-tight mb-12">
             <span dangerouslySetInnerHTML={{ __html: t('about.quote') }} />
           </blockquote>
 
@@ -55,9 +55,9 @@ export default function About() {
           <div className="w-16 h-px bg-gold-400/40 mb-10" />
 
           {/* Description */}
-          <div className="grid md:grid-cols-2 gap-12 max-w-3xl">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl glass-panel glass-highlight-ring p-8 md:p-10">
             <p className="text-[#5C554E] text-base leading-relaxed font-body">
-              {t('about.description1', { restaurantName: settings?.restaurantName || 'Pizza Blast' })}
+              {t('about.description1', { restaurantName: settings?.restaurantName || 'Mustang Pizza' })}
             </p>
             <p className="text-[#5C554E] text-base leading-relaxed font-body">
               {t('about.description2')}
@@ -71,7 +71,7 @@ export default function About() {
             transition={{ delay: 0.6 }}
             className="mt-16"
           >
-            <span className="font-display italic text-2xl text-[#1A1410]/20">{t('about.signature')}</span>
+            <span className="font-serif-1947 italic text-4xl text-[#1A1410]/30">{t('about.signature')}</span>
           </motion.div>
         </motion.div>
 
@@ -80,7 +80,7 @@ export default function About() {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.4 }}
-          className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-px bg-[rgba(26,20,16,0.06)]"
+          className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-4"
         >
           {stats.map((stat, i) => (
             <motion.div
@@ -88,7 +88,7 @@ export default function About() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.1 * i + 0.5 }}
-              className="bg-white p-8 lg:p-10 text-center"
+              className="glass-card glass-highlight-ring p-8 lg:p-10 text-center"
             >
               <div className="font-mono text-2xl md:text-3xl text-ember-500 mb-3 tracking-wider">{stat.num}</div>
               <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#9B8D74]">{stat.label}</div>

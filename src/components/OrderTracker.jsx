@@ -196,7 +196,7 @@ export default function OrderTracker() {
                 </div>
               </div>
 
-              <div className="absolute top-4 left-0 right-0 h-1 bg-wood-200 z-0 mx-6 sm:mx-14">
+              <div className="absolute top-4 left-0 right-0 h-1 bg-[#F5F3EF] z-0 mx-6 sm:mx-14">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: getStepPercentage(orderStatus.status) }}
@@ -240,7 +240,7 @@ export default function OrderTracker() {
             <div className="mt-6 flex gap-4">
               <button
                 onClick={() => navigate('/#contact')}
-                className="flex-1 py-3 bg-wood-200 text-wood-800 font-semibold rounded-lg hover:bg-wood-300 transition-colors"
+                className="flex-1 py-3 bg-[#F5F3EF] text-[#1A1410] font-semibold rounded-lg hover:bg-white border border-[rgba(26,20,16,0.06)] shadow-sm transition-all"
               >
                 Contact Restaurant
               </button>

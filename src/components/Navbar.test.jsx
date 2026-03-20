@@ -4,6 +4,20 @@ import { BrowserRouter } from 'react-router-dom'
 import { SettingsProvider } from '../context/SettingsContext'
 import Navbar from './Navbar'
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key) => ({
+      'nav.home': 'Home',
+      'nav.menu': 'Menu',
+      'nav.catering': 'Catering',
+      'nav.dining': 'Dining',
+      'nav.trackOrder': 'Track Order',
+      'nav.contact': 'Contact'
+    }[key] || key),
+    i18n: { language: 'en' }
+  })
+}))
+
 // Mock the SettingsContext
 jest.mock('../context/SettingsContext', () => ({
   SettingsProvider: ({ children }) => children,
@@ -57,9 +71,8 @@ describe('Navbar Component', () => {
 
   test('renders restaurant name from settings', () => {
     renderWithProviders(<Navbar />)
-    // Navbar renders "Pizza" and "Blast" separately
-    expect(screen.getByText('Pizza')).toBeInTheDocument()
-    expect(screen.getByText('Blast')).toBeInTheDocument()
+    expect(screen.getByText('Test')).toBeInTheDocument()
+    expect(screen.getByText('Restaurant')).toBeInTheDocument()
   })
 
   test('renders navigation links', () => {
@@ -67,9 +80,9 @@ describe('Navbar Component', () => {
 
     expect(screen.getByText('Home')).toBeInTheDocument()
     expect(screen.getByText('Menu')).toBeInTheDocument()
-    expect(screen.getByText('Atelier')).toBeInTheDocument()
-    expect(screen.getByText('Track')).toBeInTheDocument()
-    expect(screen.getByText('Offers')).toBeInTheDocument()
+    expect(screen.getByText('Catering')).toBeInTheDocument()
+    expect(screen.getByText('Dining')).toBeInTheDocument()
+    expect(screen.getByText('Track Order')).toBeInTheDocument()
     expect(screen.getByText('Contact')).toBeInTheDocument()
   })
 
@@ -88,7 +101,6 @@ describe('Navbar Component', () => {
     if (profileButton) {
       expect(profileButton).toBeInTheDocument()
     } else {
-      // Fallback: at least Login button should be present
       expect(screen.getByText('Login')).toBeInTheDocument()
     }
   })
@@ -115,11 +127,10 @@ describe('Navbar Component', () => {
     const menuLink = screen.getByText('Menu')
     expect(menuLink).toBeInTheDocument()
 
-    // Test Custom Pizza link which has an href
-    const customPizzaLink = screen.getByText('Atelier')
-    expect(customPizzaLink).toBeInTheDocument()
+    const cateringLink = screen.getByText('Catering')
+    expect(cateringLink).toBeInTheDocument()
 
-    const trackLink = screen.getByText('Track')
+    const trackLink = screen.getByText('Track Order')
     expect(trackLink).toBeInTheDocument()
   })
 

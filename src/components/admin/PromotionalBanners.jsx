@@ -12,7 +12,7 @@ export default function PromotionalBanners() {
     subtitle: '',
     description: '',
     imageUrl: '',
-    backgroundColor: '#1A1410',
+    backgroundColor: '#C1440E',
     textColor: '#FFFFFF',
     buttonText: '',
     buttonLink: '',
@@ -116,7 +116,7 @@ export default function PromotionalBanners() {
   const resetForm = () => {
     setNewBanner({
       title: '', subtitle: '', description: '', imageUrl: '',
-      backgroundColor: '#1A1410', textColor: '#FFFFFF',
+      backgroundColor: '#C1440E', textColor: '#FFFFFF',
       buttonText: '', buttonLink: '', position: 'top', size: 'medium',
       startDate: new Date().toISOString().split('T')[0],
       endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],

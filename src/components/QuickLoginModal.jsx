@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSettings } from '../context/SettingsContext'
 
 
 // Inline SVG Icons
@@ -53,6 +54,8 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [isVisible, setIsVisible] = useState(false)
+  const { settings } = useSettings()
+  const restaurantName = settings?.restaurantName || 'Mustang Pizza'
 
   // Handle body scroll lock
   useEffect(() => {
@@ -196,7 +199,7 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+            className="fixed inset-0 bg-[#1A1410]/55 backdrop-blur-md z-[9998]"
             onClick={handleClose}
             aria-hidden="true"
           />
@@ -213,16 +216,16 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
             className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden pointer-events-auto"
+              className="glass-panel-strong glass-highlight-ring rounded-[2rem] w-full max-w-md overflow-hidden pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="bg-tomato-600 px-6 py-4 flex items-center justify-between">
+              <div className="glass-panel-dark rounded-b-none px-6 py-6 flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-display font-bold text-white">
-                    Quick Login
+                  <h2 className="text-xl font-serif-1947 italic text-[#D4922A]">
+                    {restaurantName}
                   </h2>
-                  <p className="text-tomato-100 text-sm">
+                  <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-0.5">
                     Order faster with an account
                   </p>
                 </div>
@@ -242,7 +245,7 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2"
+                    className="bg-red-50/80 border border-red-200 rounded-lg p-3 flex items-start gap-2 backdrop-blur-sm"
                   >
                     <AlertIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-red-700">{submitError}</p>
@@ -262,8 +265,8 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     onChange={handleInputChange}
                     disabled={isLoading}
                     className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${errors.name
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-wood-200 focus:border-tomato-500'
+                        ? 'border-red-300 focus:border-red-500 bg-red-50/90'
+                        : 'glass-input border-white/60 focus:border-tomato-500'
                       }`}
                     placeholder="John Doe"
                   />
@@ -285,8 +288,8 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     onChange={handleInputChange}
                     disabled={isLoading}
                     className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${errors.email
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-wood-200 focus:border-tomato-500'
+                        ? 'border-red-300 focus:border-red-500 bg-red-50/90'
+                        : 'glass-input border-white/60 focus:border-tomato-500'
                       }`}
                     placeholder="john@example.com"
                   />
@@ -308,8 +311,8 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     onChange={handleInputChange}
                     disabled={isLoading}
                     className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${errors.phone
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-wood-200 focus:border-tomato-500'
+                        ? 'border-red-300 focus:border-red-500 bg-red-50/90'
+                        : 'glass-input border-white/60 focus:border-tomato-500'
                       }`}
                     placeholder="+1 (555) 123-4567"
                   />
@@ -332,8 +335,8 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                       onChange={handleInputChange}
                       disabled={isLoading}
                       className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none pr-10 ${errors.password
-                          ? 'border-red-300 focus:border-red-500 bg-red-50'
-                          : 'border-wood-200 focus:border-tomato-500'
+                          ? 'border-red-300 focus:border-red-500 bg-red-50/90'
+                          : 'glass-input border-white/60 focus:border-tomato-500'
                         }`}
                       placeholder="••••••••"
                     />
@@ -361,7 +364,7 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                   disabled={isLoading}
                   whileHover={{ scale: isLoading ? 1 : 1.02 }}
                   whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                  className="w-full btn-tomato py-3 rounded-lg font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full glass-button-dark py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-widest text-white flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
                 >
                   {isLoading ? (
                     <>

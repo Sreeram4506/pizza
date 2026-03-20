@@ -48,7 +48,7 @@ export default function PizzaGallery() {
   }
 
   return (
-    <section ref={ref} id="gallery" className="py-16 lg:py-32 relative overflow-hidden bg-[#FAFAF8] section-grain">
+    <section ref={ref} id="gallery" className="py-16 lg:py-32 relative overflow-hidden section-grain glass-shell">
       <div className="absolute inset-0 gold-glow-bg" />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
@@ -62,19 +62,19 @@ export default function PizzaGallery() {
             <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-4">
               {t('gallery.titleLabel')}
             </span>
-            <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
+            <h2 className="font-serif-1947 font-bold text-4xl md:text-5xl lg:text-7xl text-[#1A1410] tracking-tight italic">
               {t('gallery.title')}
             </h2>
           </div>
         </motion.div>
 
-        <div className="divider-gold mb-12" />
+        <div className="glass-section-divider mb-12" />
 
         {/* Menu Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-[#F5F3EF] rounded-xl overflow-hidden border border-white flex flex-col relative aspect-square">
+              <div key={i} className="glass-card overflow-hidden flex flex-col relative aspect-square">
                 {/* Image Skeleton */}
                 <div className="absolute inset-0 bg-[#E8E3DB] animate-pulse" />
 
@@ -137,7 +137,7 @@ function MenuCard({ image, name, price, description, category, available, dietar
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ delay: 0.05 * index, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className={`group cursor-pointer relative overflow-hidden rounded-xl shadow-sm hover:shadow-card-hover transition-all ${!available ? 'opacity-40' : ''}`}
+      className={`group cursor-pointer relative overflow-hidden glass-card glass-highlight-ring hover:shadow-card-hover transition-all ${!available ? 'opacity-40' : ''}`}
       onClick={onOrder}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -163,7 +163,7 @@ function MenuCard({ image, name, price, description, category, available, dietar
 
         {/* Price — top-right */}
         <div className="absolute top-2 right-2 z-10">
-          <span className="font-mono text-[10px] sm:text-xs tracking-wider text-white bg-black/40 px-2 py-1 backdrop-blur-sm rounded-md">
+          <span className="font-mono text-[10px] sm:text-xs tracking-wider text-white bg-black/40 px-2 py-1 backdrop-blur-sm rounded-md border border-white/10">
             ${price?.toFixed(2)}
           </span>
         </div>
@@ -191,7 +191,7 @@ function MenuCard({ image, name, price, description, category, available, dietar
         >
           <div className="flex items-center justify-between gap-2">
             <div className="flex-1 min-w-0">
-               <h3 className="font-display text-sm sm:text-base italic text-white truncate">{name}</h3>
+               <h3 className="font-serif-1947 text-sm sm:text-base italic text-white truncate">{name}</h3>
                {category && (
                 <span className="font-mono text-[8px] tracking-[0.1em] uppercase text-ember-300 block">
                   {category}
@@ -207,7 +207,7 @@ function MenuCard({ image, name, price, description, category, available, dietar
           animate={{ opacity: isHovered ? 0 : 1 }}
           transition={{ duration: 0.3 }}
         >
-          <h3 className="font-display text-xs sm:text-sm italic text-white truncate">{name}</h3>
+          <h3 className="font-serif-1947 text-xs sm:text-sm italic text-white truncate">{name}</h3>
         </motion.div>
       </div>
     </motion.div>

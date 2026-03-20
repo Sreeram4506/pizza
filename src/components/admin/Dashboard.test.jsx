@@ -3,6 +3,14 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import Dashboard from './Dashboard'
 
+jest.mock('../../context/SettingsContext', () => ({
+  useSettings: () => ({
+    settings: {
+      restaurantName: 'Test Restaurant'
+    }
+  })
+}))
+
 // Mock fetch
 global.fetch = jest.fn()
 
@@ -26,6 +34,10 @@ const renderWithRouter = (component) => {
 describe('Dashboard Component', () => {
   beforeEach(() => {
     fetch.mockClear()
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({})
+    })
   })
 
   test('renders dashboard without crashing', () => {

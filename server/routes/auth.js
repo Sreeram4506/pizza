@@ -259,23 +259,17 @@ router.post('/reset-password', async (req, res) => {
 
 // Customer authentication middleware
 export const authenticateCustomer = async (req, res, next) => {
-  console.log('=== AUTHENTICATION MIDDLEWARE CALLED ===')
   try {
-    console.log('Auth middleware - Request headers:', req.headers.authorization)
     const token = req.headers.authorization?.replace('Bearer ', '')
 
     if (!token) {
-      console.log('No token provided - continuing as guest')
       req.user = null
       return next()
     }
 
-    console.log('Token found, verifying...')
     const decoded = jwt.verify(token, JWT_SECRET)
-    console.log('Token decoded:', decoded)
 
     if (decoded.role !== 'customer') {
-      console.log('Not a customer token - continuing as guest')
       req.user = null
       return next()
     }
@@ -291,7 +285,6 @@ export const authenticateCustomer = async (req, res, next) => {
     }
 
     if (!customer) {
-      console.log('Customer not found - continuing as guest')
       req.user = null
       return next()
     }
@@ -304,10 +297,8 @@ export const authenticateCustomer = async (req, res, next) => {
       isGuest: false
     }
 
-    console.log('Authentication successful - user:', req.user)
     next()
   } catch (err) {
-    console.log('Authentication error:', err.message)
     // Invalid token - continue as guest
     req.user = null
     next()

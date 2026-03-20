@@ -71,6 +71,18 @@ function QuickLoginWrapper() {
   )
 }
 
+function GlobalChatbot() {
+  const location = useLocation()
+  const hiddenPrefixes = ['/admin', '/delivery']
+  const shouldHide = hiddenPrefixes.some(prefix =>
+    location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
+  )
+
+  if (shouldHide) return null
+
+  return <Chatbot />
+}
+
 function Home() {
   const { hash } = useLocation();
 
@@ -96,7 +108,6 @@ function Home() {
 
       <main>
         <Hero />
-        <MarqueeStrip />
         <BannerDisplay position="middle" />
         <PizzaGallery />
         <CustomPizzaBuilder />
@@ -106,7 +117,6 @@ function Home() {
       </main>
       <BannerDisplay position="bottom" />
       <Footer />
-      <Chatbot />
     </>
   )
 }
@@ -135,7 +145,12 @@ function App() {
     <BrowserRouter>
       <SettingsProvider>
         <ChatbotProvider>
-          <div className="min-h-screen bg-[#FAFAF8] relative overflow-x-hidden selection:bg-ember-500/15 selection:text-[#1A1410]">
+          <div className="glass-shell min-h-screen bg-[#FAFAF8] relative overflow-x-hidden selection:bg-ember-500/15 selection:text-[#1A1410]">
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute left-[-12rem] top-[-10rem] h-[28rem] w-[28rem] rounded-full bg-ember-500/8 blur-[120px]" />
+              <div className="absolute right-[-10rem] top-[18rem] h-[24rem] w-[24rem] rounded-full bg-gold-400/10 blur-[130px]" />
+              <div className="absolute bottom-[-14rem] left-1/3 h-[26rem] w-[26rem] rounded-full bg-white/70 blur-[150px]" />
+            </div>
             <div className="relative z-10 text-[#1A1410]">
               <Toaster position="top-center" toastOptions={{
                 className: 'font-body',
@@ -150,16 +165,16 @@ function App() {
 
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/menu" element={<><MenuPage /><Chatbot /></>} />
-                <Route path="/catering" element={<><Navbar /><CateringPage /><Chatbot /></>} />
-                <Route path="/dining" element={<><Navbar /><DiningPage /><Chatbot /></>} />
+                <Route path="/menu" element={<MenuPage />} />
+                <Route path="/catering" element={<><Navbar /><CateringPage /></>} />
+                <Route path="/dining" element={<><Navbar /><DiningPage /></>} />
 
-                <Route path="/login" element={<><Navbar /><CustomerLogin /><Chatbot /></>} />
-                <Route path="/register" element={<><Navbar /><CustomerRegister /><Chatbot /></>} />
-                <Route path="/forgot-password" element={<><Navbar /><ForgotPassword /><Chatbot /></>} />
-                <Route path="/reset-password" element={<><Navbar /><ResetPassword /><Chatbot /></>} />
-                <Route path="/track" element={<><Navbar /><OrderTracker /><Chatbot /></>} />
-                <Route path="/profile" element={<><Navbar /><CustomerProfile /><Chatbot /></>} />
+                <Route path="/login" element={<><Navbar /><CustomerLogin /></>} />
+                <Route path="/register" element={<><Navbar /><CustomerRegister /></>} />
+                <Route path="/forgot-password" element={<><Navbar /><ForgotPassword /></>} />
+                <Route path="/reset-password" element={<><Navbar /><ResetPassword /></>} />
+                <Route path="/track" element={<><Navbar /><OrderTracker /></>} />
+                <Route path="/profile" element={<CustomerProfile />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/delivery" element={<DeliveryPortal />} />
 
@@ -181,6 +196,7 @@ function App() {
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+              <GlobalChatbot />
             </div>
           </div>
         </ChatbotProvider>

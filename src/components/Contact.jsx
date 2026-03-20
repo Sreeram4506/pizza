@@ -29,7 +29,7 @@ export default function Contact() {
   ]
 
   return (
-    <section id="contact" ref={ref} className="py-24 lg:py-32 relative bg-[#F5F3EF] overflow-hidden section-grain">
+    <section id="contact" ref={ref} className="py-24 lg:py-32 relative overflow-hidden section-grain glass-shell">
       <div className="absolute inset-0 ember-glow-bg" />
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
@@ -42,19 +42,19 @@ export default function Contact() {
           <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-4">
             {t('contact.titleLabel')}
           </span>
-          <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
+          <h2 className="font-serif-1947 font-bold text-4xl md:text-5xl lg:text-7xl text-[#1A1410] tracking-tight italic">
             {t('contact.title')}
           </h2>
         </motion.div>
 
-        <div className="divider-gold mb-12" />
+        <div className="glass-section-divider mb-12" />
 
         {/* Contact Grid */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.2 }}
-          className="grid md:grid-cols-3 gap-px bg-[rgba(26,20,16,0.06)]"
+          className="grid md:grid-cols-3 gap-4"
         >
           {contactInfo.map((item, i) => (
             <motion.div
@@ -62,7 +62,7 @@ export default function Contact() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.3 + i * 0.1 }}
-              className="bg-[#F5F3EF] p-8 lg:p-12"
+              className="glass-card glass-highlight-ring p-8 lg:p-12"
             >
               <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 block mb-6">
                 {item.title}
@@ -84,18 +84,18 @@ export default function Contact() {
         >
           <a
             href={`tel:${settings.phone?.replace(/\D/g, '')}`}
-            className="px-8 py-4 bg-ember-500 text-white font-body text-sm font-medium tracking-[0.15em] uppercase transition-all hover:shadow-ember rounded-xl"
+            className="px-10 py-5 glass-button-dark text-white font-body text-[10px] font-black tracking-[0.25em] uppercase transition-all rounded-xl"
           >
             {t('contact.call')}
           </a>
           <a
             href={`mailto:${settings.email}`}
-            className="px-8 py-4 border border-[rgba(26,20,16,0.1)] text-[#1A1410] font-body text-sm font-medium tracking-[0.15em] uppercase transition-all hover:bg-ember-500 hover:border-ember-500 hover:text-white rounded-xl"
+            className="px-8 py-4 glass-button-light text-[#1A1410] font-body text-sm font-medium tracking-[0.15em] uppercase transition-all rounded-xl"
           >
             {t('contact.email')}
           </a>
           <button
-            className="px-8 py-4 border border-[rgba(26,20,16,0.1)] text-[#1A1410] font-body text-sm font-medium tracking-[0.15em] uppercase transition-all hover:bg-ember-500 hover:border-ember-500 hover:text-white rounded-xl"
+            className="px-8 py-4 glass-button-light text-[#1A1410] font-body text-sm font-medium tracking-[0.15em] uppercase transition-all rounded-xl"
             onClick={() => toast.success(t('contact.openingMaps'))}
           >
             {t('contact.directions')}
@@ -112,11 +112,11 @@ export default function Contact() {
           <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#9B8D74] block mb-6">
             {t('contact.availableOn')}
           </span>
-          <div className="flex flex-wrap gap-6">
+          <div className="flex flex-wrap gap-3">
             {['Uber Eats', 'DoorDash', 'Grubhub', 'Postmates'].map((partner) => (
               <span
                 key={partner}
-                className="font-mono text-xs tracking-[0.1em] uppercase text-[#1A1410]/25 hover:text-[#1A1410] transition-colors cursor-pointer"
+                className="font-mono text-xs tracking-[0.1em] uppercase text-[#1A1410]/60 hover:text-[#1A1410] transition-colors cursor-pointer glass-pill px-4 py-2"
               >
                 {partner}
               </span>

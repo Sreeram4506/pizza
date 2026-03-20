@@ -71,7 +71,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-6 flex items-center justify-center bg-[#F5F3EF]">
+    <div className="min-h-screen pt-32 pb-20 px-6 flex items-center justify-center bg-[#FAFAF8]">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -140,7 +140,7 @@ export default function ResetPassword() {
             <motion.button
               whileTap={{ scale: 0.98 }}
               disabled={loading}
-              className="w-full py-5 bg-ember-500 text-white rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-ember-500/20 hover:bg-ember-600 transition-all disabled:opacity-50"
+              className="w-full py-5 bg-[#1A1410] text-white rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all disabled:opacity-50"
             >
               {loading ? 'Updating...' : 'Reset Password'}
             </motion.button>

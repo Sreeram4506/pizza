@@ -67,11 +67,11 @@ export default function CateringPage() {
         transition={{ duration: 0.6 }}
         className="text-center mb-8 md:mb-12"
       >
-        <h1 className="text-3xl md:text-6xl font-display font-black text-[#1A1410] mb-4 leading-tight">
+        <h1 className="text-3xl md:text-6xl font-serif-1947 font-black text-[#1A1410] mb-4 leading-tight">
           Elevate Your Event
         </h1>
-        <p className="text-[#9B8D74] text-base md:text-lg font-medium max-w-2xl mx-auto px-2">
-          From corporate lunches to wedding celebrations, bring the authentic wood-fired taste of {settings?.restaurantName || 'our kitchen'} to your special occasion.
+        <p className="text-[#9B8D74] text-base md:text-lg font-body max-w-2xl mx-auto px-2">
+          From corporate lunches to wedding celebrations, bring the artisan flavors of <span className="text-ember-500 font-bold">{settings?.restaurantName || 'Mustang Pizza'}</span> to your special occasion.
         </p>
       </motion.div>
 
@@ -79,7 +79,7 @@ export default function CateringPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="bg-white rounded-3xl md:rounded-[2.5rem] border border-[rgba(26,20,16,0.06)] shadow-xl p-6 md:p-12"
+        className="glass-panel-strong glass-highlight-ring rounded-3xl md:rounded-[2.5rem] p-6 md:p-12"
       >
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1.5">
@@ -187,7 +187,7 @@ export default function CateringPage() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             disabled={loading}
-            className="md:col-span-2 w-full py-5 bg-[#1A1410] text-white rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-black transition-all disabled:opacity-50 mt-4"
+            className="md:col-span-2 w-full py-5 glass-button-dark text-white rounded-2xl font-body text-[10px] font-black uppercase tracking-[0.25em] transition-all disabled:opacity-50 mt-4"
           >
             {loading ? 'Submitting...' : 'Send Inquiry'}
           </motion.button>
