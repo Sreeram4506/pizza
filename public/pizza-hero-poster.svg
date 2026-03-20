@@ -1,0 +1,46 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#120D0A"/>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <g opacity="0.9">
+    <circle cx="1150" cy="390" r="290" fill="url(#pizzaGlow)"/>
+    <circle cx="1150" cy="390" r="210" fill="url(#pizzaBase)"/>
+    <circle cx="1150" cy="390" r="182" fill="#C1440E" fill-opacity="0.18"/>
+    <circle cx="1090" cy="320" r="22" fill="#8B2F0A"/>
+    <circle cx="1225" cy="468" r="18" fill="#8B2F0A"/>
+    <circle cx="1190" cy="290" r="24" fill="#8B2F0A"/>
+    <circle cx="1036" cy="438" r="20" fill="#8B2F0A"/>
+    <circle cx="1166" cy="392" r="18" fill="#8B2F0A"/>
+    <path d="M1030 286C1068 260 1117 245 1164 250C1218 256 1270 289 1303 338" stroke="#F5D7A1" stroke-opacity="0.5" stroke-width="10" stroke-linecap="round"/>
+    <path d="M1005 412C1016 465 1054 517 1109 544C1160 568 1221 569 1278 544" stroke="#F5D7A1" stroke-opacity="0.42" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g opacity="0.95">
+    <path d="M184 668C270 514 378 390 512 298C617 226 743 178 896 152" stroke="#D4922A" stroke-opacity="0.25" stroke-width="2"/>
+    <path d="M168 718C243 582 337 473 448 392C548 319 671 271 810 238" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="1.5"/>
+  </g>
+  <g filter="url(#softBlur)">
+    <circle cx="256" cy="180" r="118" fill="#C1440E" fill-opacity="0.22"/>
+    <circle cx="612" cy="126" r="76" fill="#D4922A" fill-opacity="0.16"/>
+    <circle cx="1390" cy="712" r="150" fill="#C1440E" fill-opacity="0.18"/>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="190" y1="72" x2="1402" y2="884" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1B1410"/>
+      <stop offset="0.45" stop-color="#241914"/>
+      <stop offset="1" stop-color="#090705"/>
+    </linearGradient>
+    <radialGradient id="pizzaGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1150 390) rotate(90) scale(290)">
+      <stop stop-color="#F3B251" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#F3B251" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pizzaBase" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1150 390) rotate(90) scale(210)">
+      <stop stop-color="#F4D39B"/>
+      <stop offset="0.7" stop-color="#D4922A"/>
+      <stop offset="1" stop-color="#A86C16"/>
+    </radialGradient>
+    <filter id="softBlur" x="18" y="-112" width="1522" height="1050" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="40" result="effect1_foregroundBlur_41_4"/>
+    </filter>
+  </defs>
+</svg>

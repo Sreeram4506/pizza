@@ -85,6 +85,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  line-height: 1.5;
 }
 
 /* ═══ Typography Classes ═══ */
@@ -372,6 +373,20 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
+:where(
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  summary,
+  [role='button'],
+  [tabindex]:not([tabindex='-1'])
+):focus-visible {
+  outline: 2px solid rgba(193, 68, 14, 0.46);
+  outline-offset: 3px;
+}
+
 .glass-shell {
   position: relative;
   isolation: isolate;
@@ -449,6 +464,20 @@ a {
   background: rgba(255, 255, 255, 0.72);
 }
 
+.glass-input:focus-visible,
+.glass-button-dark:focus-visible,
+.glass-button-light:focus-visible,
+.glass-pill:focus-visible,
+.glass-card:focus-visible,
+.glass-panel:focus-visible,
+.glass-nav:focus-visible,
+.nav-link:focus-visible {
+  border-color: rgba(193, 68, 14, 0.28);
+  box-shadow:
+    0 0 0 4px rgba(193, 68, 14, 0.12),
+    var(--glass-shadow-strong);
+}
+
 .glass-button-dark {
   border: 1px solid rgba(26, 20, 16, 0.1);
   background:
@@ -478,6 +507,10 @@ a {
   transform: translateY(-2px);
   box-shadow: 0 14px 28px rgba(26, 20, 16, 0.1);
   background: rgba(255, 255, 255, 0.95);
+}
+
+.nav-link:focus-visible::after {
+  width: 100%;
 }
 
 .glass-section-divider {
@@ -523,6 +556,15 @@ a {
 }
 
 @media (max-width: 640px) {
+  .section-title {
+    font-size: clamp(2.2rem, 12vw, 3.5rem);
+  }
+
+  .section-copy {
+    font-size: 0.95rem;
+    line-height: 1.68;
+  }
+
   .btn-mobile-full {
     width: 100%;
     justify-content: center;
@@ -533,11 +575,46 @@ a {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .glass-card:hover,
+  .glass-button-dark:hover,
+  .glass-button-light:hover,
+  .chatbot-glass-card:hover,
+  .chatbot-btn-primary:hover,
+  .chatbot-btn-secondary:hover,
+  .chatbot-surface-card:hover {
+    transform: none;
+  }
 }
 
 @media (max-width: 1024px) {
   .admin-page-wrap {
     padding-bottom: 5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .glass-card:hover,
+  .glass-button-dark:hover,
+  .glass-button-light:hover,
+  .chatbot-glass-card:hover,
+  .chatbot-btn-primary:hover,
+  .chatbot-btn-secondary:hover,
+  .chatbot-surface-card:hover {
+    transform: none;
   }
 }
 

@@ -46,6 +46,20 @@ export default function Navbar() {
     }
   }, [location.pathname]) // Refresh on navigation
 
+  useEffect(() => {
+    if (!mobileOpen) {
+      document.body.style.overflow = ''
+      return undefined
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [mobileOpen])
+
   const handleNavClick = (e, link) => {
     if (link.intent) {
       openWithIntent(link.intent)
@@ -92,33 +106,35 @@ export default function Navbar() {
       <BannerDisplay position="top" />
       <nav className={`max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 flex items-center justify-between transition-all duration-500 ${scrolled ? 'py-3' : 'py-4'}`}>
         {/* Logo */}
-        <motion.a
+        <motion.button
+          type="button"
           onClick={() => navigate('/')}
           className="flex items-center gap-3 group cursor-pointer"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
           {settings?.logo ? (
-            <img src={settings.logo} alt="Logo" className="h-10 object-contain" />
+            <img src={settings.logo} alt="Logo" className="h-9 sm:h-10 object-contain" />
           ) : (
             <div className="flex flex-col">
-              <span className={`font-serif-1947 text-[28px] tracking-tight leading-none transition-colors duration-500 ${isSolid ? 'text-[#1A1410]' : 'text-white'}`}>
+              <span className={`font-serif-1947 text-[25px] sm:text-[28px] tracking-tight leading-none transition-colors duration-500 ${isSolid ? 'text-[#1A1410]' : 'text-white'}`}>
                 {restaurantName.split(' ')[0]}
               </span>
-              <span className={`text-[10px] uppercase tracking-[0.18em] font-black transition-colors duration-500 ${isSolid ? 'text-ember-600' : 'text-white/68'}`}>
+              <span className={`text-[11px] uppercase tracking-[0.16em] font-black transition-colors duration-500 ${isSolid ? 'text-ember-600' : 'text-white/68'}`}>
                 {restaurantName.split(' ').slice(1).join(' ') || 'Pizza'}
               </span>
             </div>
           )}
-        </motion.a>
+        </motion.button>
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-10">
           {navLinks.map((link) => (
             <button
+              type="button"
               key={link.label}
               onClick={(e) => handleNavClick(e, link)}
-              className={`nav-link text-xs font-body font-medium tracking-[0.08em] uppercase transition-colors duration-300 ${
+              className={`nav-link text-[11px] font-body font-medium tracking-[0.08em] uppercase transition-colors duration-300 ${
                 isSolid
                   ? 'text-[#5C554E] hover:text-[#1A1410]'
                   : 'text-white/75 hover:text-white'
@@ -135,6 +151,8 @@ export default function Navbar() {
           <LanguageSelector scrolled={scrolled} />
           {/* Cart Icon */}
           <motion.button
+            type="button"
+            aria-label="Open cart"
             className={`relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center transition-colors rounded-full ${isSolid ? 'glass-pill text-[#5C554E] hover:text-[#1A1410]' : 'bg-white/10 backdrop-blur-sm border border-white/18 text-white/75 hover:text-white'}`}
             whileTap={{ scale: 0.95 }}
             onClick={() => openWithIntent('cart')}
@@ -158,28 +176,31 @@ export default function Navbar() {
           {isLoggedIn ? (
             <div className="hidden md:flex items-center gap-3">
               <motion.button
+                type="button"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/profile')}
-                className={`text-xs font-body font-medium tracking-[0.08em] uppercase transition-colors nav-link ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
+                className={`text-[11px] font-body font-medium tracking-[0.08em] uppercase transition-colors nav-link ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
               >
                 Profile
               </motion.button>
               <motion.button
+                type="button"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleLogout}
-                className={`text-xs font-body font-medium tracking-[0.08em] uppercase transition-colors nav-link ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
+                className={`text-[11px] font-body font-medium tracking-[0.08em] uppercase transition-colors nav-link ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
               >
                 Logout
               </motion.button>
             </div>
           ) : (
             <motion.button
+              type="button"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/login')}
-              className={`hidden lg:block text-xs font-body font-medium tracking-[0.08em] uppercase transition-colors nav-link ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
+              className={`hidden lg:block text-[11px] font-body font-medium tracking-[0.08em] uppercase transition-colors nav-link ${isSolid ? 'text-[#5C554E] hover:text-[#1A1410]' : 'text-white/75 hover:text-white'}`}
             >
               Login
             </motion.button>
@@ -188,7 +209,11 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <motion.button
-            className={`lg:hidden w-10 h-10 flex items-center justify-center transition-colors rounded-full ${isSolid ? 'glass-pill text-[#1A1410]' : 'bg-white/10 backdrop-blur-sm border border-white/18 text-white'}`}
+            type="button"
+            aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
+            className={`lg:hidden w-10 h-10 touch-target flex items-center justify-center transition-colors rounded-full ${isSolid ? 'glass-pill text-[#1A1410]' : 'bg-white/10 backdrop-blur-sm border border-white/18 text-white'}`}
             onClick={() => setMobileOpen(!mobileOpen)}
             whileTap={{ scale: 0.95 }}
           >
@@ -211,29 +236,34 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:hidden overflow-hidden glass-panel-strong border-t border-white/60 mx-3 mb-3 rounded-[1.5rem]"
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            id="mobile-navigation"
+            role="dialog"
+            aria-label="Mobile navigation"
+            className="lg:hidden overflow-hidden glass-panel-strong border-t border-white/60 mx-3 mb-3 rounded-[1.5rem] max-h-[calc(100vh-5.5rem)] overflow-y-auto scroll-smooth-ios"
           >
-            <div className="max-w-[1400px] mx-auto px-6 py-8 flex flex-col gap-2">
+            <div className="max-w-[1400px] mx-auto px-5 sm:px-6 py-6 sm:py-8 flex flex-col gap-2">
               {navLinks.map((link, i) => (
                 <motion.button
+                  type="button"
                   key={link.label}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 * i }}
                   onClick={(e) => handleNavClick(e, link)}
-                  className="text-left text-lg font-display italic text-[#1A1410]/74 hover:text-[#1A1410] py-3 px-4 transition-all border-b border-[rgba(26,20,16,0.04)] last:border-none rounded-xl hover:bg-white/45"
+                  className="touch-target text-left text-[1.05rem] sm:text-lg font-display italic text-[#1A1410]/74 hover:text-[#1A1410] py-3.5 px-4 transition-all border-b border-[rgba(26,20,16,0.04)] last:border-none rounded-xl hover:bg-white/45"
                 >
                   {link.label}
                 </motion.button>
               ))}
-              <div className="border-t border-[rgba(212,146,42,0.15)] pt-6 mt-4 space-y-3">
+              <div className="border-t border-[rgba(212,146,42,0.15)] pt-5 mt-4 space-y-3">
                 {isLoggedIn ? (
                   <>
                     <motion.button
+                      type="button"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.3 }}
@@ -243,6 +273,7 @@ export default function Navbar() {
                       Profile
                     </motion.button>
                     <motion.button
+                      type="button"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.35 }}
@@ -255,6 +286,7 @@ export default function Navbar() {
                 ) : (
                   <>
                     <motion.button
+                      type="button"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.3 }}
@@ -264,6 +296,7 @@ export default function Navbar() {
                       Login
                     </motion.button>
                     <motion.button
+                      type="button"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.35 }}
