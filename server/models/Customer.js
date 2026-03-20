@@ -32,6 +32,6 @@ const customerSchema = new mongoose.Schema({
 
 customerSchema.index({ tenantId: 1, email: 1 })
 customerSchema.index({ tenantId: 1, phone: 1 })
-customerSchema.index({ tenantId: 1, loyaltyPoints: -1 })
+customerSchema.index({ tenantId: 1, 'loyalty.points': -1 })
 
 export const Customer = mongoose.model('Customer', customerSchema)

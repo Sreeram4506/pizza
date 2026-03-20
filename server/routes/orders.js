@@ -99,10 +99,13 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
 
     // Calculate totals
     const subtotal = normalizedItems.reduce((sum, item) => {
-      const price = item.price
-      const quantity = item.quantity
-      const modifiersTotal = item.modifiers?.reduce((mSum, m) => mSum + (Number(m.price) || 0), 0) || 0
-      return sum + (price + modifiersTotal) * quantity
+      const price = Number(item.price) || 0
+      const quantity = Number(item.quantity) || 1
+      const modifiersTotal = Array.isArray(item.modifiers) 
+        ? item.modifiers.reduce((mSum, m) => mSum + (Number(m.price) || 0), 0) 
+        : 0
+      const itemTotal = (price + modifiersTotal) * quantity
+      return sum + (Number(itemTotal) || 0)
     }, 0)
     const tax = subtotal * 0.08 // 8% tax
     const deliveryFee = normalizedType === 'delivery' ? 3.99 : 0
@@ -319,8 +322,9 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
     console.error('CRITICAL Order creation error:', err)
     console.error('Error Stack:', err.stack)
     res.status(500).json({
-      error: 'Failed to create order',
+      error: 'Order placement failed on server',
       details: err.message,
+      code: err.name,
       stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     })
   }
