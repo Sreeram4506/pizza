@@ -64,7 +64,11 @@ router.post('/register', async (req, res) => {
     })
   } catch (err) {
     console.error('Registration error:', err)
-    res.status(500).json({ error: 'Failed to register user' })
+    res.status(500).json({ 
+      error: 'Failed to register user',
+      details: err.message,
+      code: err.name || err.code
+    })
   }
 })
 
@@ -146,7 +150,11 @@ router.post('/login', async (req, res) => {
     res.status(401).json({ error: 'Invalid credentials' })
   } catch (err) {
     console.error('Login error:', err)
-    res.status(500).json({ error: 'Failed to login' })
+    res.status(500).json({ 
+      error: 'Failed to login',
+      details: err.message,
+      code: err.name || err.code
+    })
   }
 })
 
@@ -436,7 +444,11 @@ router.post('/quick-auth', async (req, res) => {
     }
   } catch (err) {
     console.error('Quick auth error:', err)
-    res.status(500).json({ error: 'Authentication failed' })
+    res.status(500).json({ 
+      error: 'Authentication failed',
+      details: err.message,
+      code: err.name || err.code
+    })
   }
 })
 

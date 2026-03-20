@@ -102,7 +102,10 @@ app.use(cors({
     
     const hostname = new URL(origin).hostname
     const isLocal = hostname === 'localhost' || hostname === '127.0.0.1'
-    const isAllowedDomain = origin === process.env.FRONTEND_URL || origin.includes('indraam.com')
+    const isAllowedDomain = origin === process.env.FRONTEND_URL || 
+                           origin.includes('indraam.com') || 
+                           origin.includes('vercel.app') || 
+                           origin.includes('onrender.com')
     
     if (isLocal || isAllowedDomain || process.env.NODE_ENV !== 'production') {
       callback(null, true)
