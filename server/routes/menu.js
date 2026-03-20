@@ -225,7 +225,7 @@ router.get('/items/category/:categoryId', async (req, res) => {
 router.post('/items', verifyAdmin, upload.single('image'), async (req, res) => {
   try {
     const tenantId = req.tenantId
-    const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
+    const { name, description, price, categoryId, available, modifiers, tags, dietary, image } = req.body
 
     // Build item data
     const itemData = {
@@ -243,6 +243,8 @@ router.post('/items', verifyAdmin, upload.single('image'), async (req, res) => {
     // Add image path if uploaded
     if (req.file) {
       itemData.image = `/uploads/menu/${req.file.filename}`
+    } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
+      itemData.image = image
     }
 
     const item = new MenuItem(itemData)
@@ -269,7 +271,7 @@ router.post('/items', verifyAdmin, upload.single('image'), async (req, res) => {
 router.put('/items/:id', verifyAdmin, upload.single('image'), async (req, res) => {
   try {
     const tenantId = req.tenantId
-    const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
+    const { name, description, price, categoryId, available, modifiers, tags, dietary, image } = req.body
 
     // Build update data
     const updateData = {
@@ -286,6 +288,8 @@ router.put('/items/:id', verifyAdmin, upload.single('image'), async (req, res) =
     // Add image path if new image uploaded
     if (req.file) {
       updateData.image = `/uploads/menu/${req.file.filename}`
+    } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
+      updateData.image = image
     }
 
     const item = await MenuItem.findOneAndUpdate(

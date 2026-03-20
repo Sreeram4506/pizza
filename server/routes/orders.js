@@ -35,23 +35,22 @@ router.get('/', async (req, res) => {
 router.post('/', optionalVerifyCustomer, async (req, res) => {
   console.log('=== ORDER ROUTE CALLED ===')
 
-  // Apply authentication (handled by optionalVerifyCustomer)
-  let authenticatedUser = null
-  if (req.customerId && req.customerRole === 'customer') {
-    // Attempt to locate customer profile
-    const customer = await Customer.findById(req.customerId)
-    if (customer) {
-      authenticatedUser = {
-        id: customer._id,
-        name: customer.name,
-        email: customer.email,
-        phone: customer.phone,
-        isGuest: false
+  try {
+    // Apply authentication (handled by optionalVerifyCustomer)
+    let authenticatedUser = null
+    if (req.customerId && req.customerRole === 'customer') {
+      const customer = await Customer.findById(req.customerId)
+      if (customer) {
+        authenticatedUser = {
+          id: customer._id,
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone,
+          isGuest: false
+        }
       }
     }
-  }
 
-  try {
     const tenantId = req.tenantId
     const { items, customerInfo, address, type, payment, pickupDateTime, dineInTime, appliedReward } = req.body
 
@@ -62,15 +61,51 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       return res.status(400).json({ error: 'Items required' })
     }
 
+    const normalizedType = type || 'delivery'
+    const validTypes = ['delivery', 'pickup', 'dine_in']
+    if (!validTypes.includes(normalizedType)) {
+      return res.status(400).json({ error: 'Invalid order type' })
+    }
+
+    const normalizedPayment = {
+      method: payment?.method || 'cash',
+      status: payment?.status || 'pending',
+      transactionId: payment?.transactionId || ''
+    }
+    const validPaymentMethods = ['cash', 'card', 'online']
+    const validPaymentStatuses = ['pending', 'paid', 'failed', 'refunded']
+
+    if (!validPaymentMethods.includes(normalizedPayment.method)) {
+      return res.status(400).json({ error: `Invalid payment method: ${normalizedPayment.method}` })
+    }
+
+    if (!validPaymentStatuses.includes(normalizedPayment.status)) {
+      return res.status(400).json({ error: `Invalid payment status: ${normalizedPayment.status}` })
+    }
+
+    const normalizedItems = items.map((item, index) => ({
+      itemId: item.itemId || item._id || `custom-${index + 1}-${uuidv4().slice(0, 8)}`,
+      name: item.name,
+      price: Number(item.price) || 0,
+      quantity: Number(item.quantity) || 1,
+      modifiers: Array.isArray(item.modifiers) ? item.modifiers : [],
+      notes: item.notes || ''
+    }))
+
+    const invalidItem = normalizedItems.find(item => !item.name || item.price < 0 || item.quantity < 1)
+    if (invalidItem) {
+      return res.status(400).json({ error: 'One or more order items are invalid' })
+    }
+
     // Calculate totals
-    const subtotal = items.reduce((sum, item) => {
-      const price = Number(item.price) || 0
-      const quantity = Number(item.quantity) || 1
+    const subtotal = normalizedItems.reduce((sum, item) => {
+      const price = item.price
+      const quantity = item.quantity
       const modifiersTotal = item.modifiers?.reduce((mSum, m) => mSum + (Number(m.price) || 0), 0) || 0
       return sum + (price + modifiersTotal) * quantity
     }, 0)
     const tax = subtotal * 0.08 // 8% tax
-    const deliveryFee = type === 'delivery' ? 3.99 : 0
+    const deliveryFee = normalizedType === 'delivery' ? 3.99 : 0
     let discount = 0
     let usedRewardCost = 0
     let usedRewardName = ''
@@ -123,11 +158,15 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       return res.status(400).json({ error: 'Customer information required' })
     }
 
+    if (!finalCustomerInfo.name || !finalCustomerInfo.phone) {
+      return res.status(400).json({ error: 'Customer name and phone are required' })
+    }
+
     // Calculate time estimates based on order type
     const now = new Date()
     let estimatedReadyAt, estimatedDeliveryAt, estimatedDineInTime
 
-    switch (type || 'delivery') {
+    switch (normalizedType) {
       case 'delivery':
         estimatedReadyAt = new Date(now.getTime() + 25 * 60 * 1000) // 25 min for prep
         estimatedDeliveryAt = new Date(now.getTime() + 40 * 60 * 1000) // 40 min total (25 prep + 15 delivery)
@@ -169,7 +208,7 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       tenantId: tenantId || undefined,
       customerId: authenticatedUser ? authenticatedUser.id : undefined,
       orderNumber: `ORD-${uuidv4().replace(/-/g, '').substring(0, 6).toUpperCase()}`,
-      items: items.map(item => ({
+      items: normalizedItems.map(item => ({
         itemId: item.itemId,
         name: item.name,
         price: item.price,
@@ -179,7 +218,7 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       })),
       subtotal,
       tax,
-      deliveryFee: type === 'delivery' ? 3.99 : 0,
+      deliveryFee: normalizedType === 'delivery' ? 3.99 : 0,
       discount,
       total,
       pointsEarned,
@@ -187,8 +226,8 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       status: 'confirmed',
       customerInfo: finalCustomerInfo,
       address: address || { street: 'Pickup', city: '', zip: '' },
-      type: type || 'delivery',
-      payment: payment || { method: 'cash', status: 'pending' },
+      type: normalizedType,
+      payment: normalizedPayment,
       estimatedReadyAt,
       estimatedDeliveryAt,
       estimatedDineInTime

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-label="pizz">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#F4E8D8" />
+          <stop offset="100%" stop-color="#FFF8EF" />
+        </linearGradient>
+        <linearGradient id="glow" x1="20%" y1="10%" x2="80%" y2="90%">
+          <stop offset="0%" stop-color="#E18D5C" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#E6BB58" stop-opacity="0.35" />
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="1200" rx="72" fill="url(#bg)" />
+      <circle cx="222" cy="210" r="188" fill="url(#glow)" opacity="0.42" />
+      <circle cx="1015" cy="1030" r="260" fill="#B8502E" opacity="0.08" />
+      <path d="M0 910c140-76 253-114 410-90 95 14 168 42 281 38 134-6 227-40 509-146v488H0V910Z" fill="#FFF8EF" opacity="0.72" />
+      <g opacity="0.2">
+        <path d="M146 188c64 11 104 39 130 88" fill="none" stroke="#B8502E" stroke-width="8" stroke-linecap="round" />
+        <path d="M999 189c-64 11-104 39-130 88" fill="none" stroke="#547446" stroke-width="8" stroke-linecap="round" />
+      </g>
+      <g>
+        
+    <ellipse cx="600" cy="610" rx="250" ry="165" fill="#E3D6C5" opacity="0.48" />
+    <circle cx="600" cy="550" r="220" fill="#FFF9F1" />
+    <circle cx="600" cy="550" r="174" fill="#E0A15B" />
+    <circle cx="600" cy="550" r="156" fill="#B8502E" opacity="0.86" />
+    <circle cx="510" cy="506" r="22" fill="#E6BB58" />
+    <circle cx="695" cy="514" r="18" fill="#F4E5C1" />
+    <circle cx="626" cy="640" r="20" fill="#547446" />
+    <circle cx="525" cy="620" r="16" fill="#C74E31" />
+    <circle cx="662" cy="602" r="18" fill="#E6BB58" />
+    <circle cx="575" cy="468" r="15" fill="#547446" />
+  
+      </g>
+      <rect x="96" y="84" width="184" height="46" rx="23" fill="#FFFFFF" opacity="0.82" />
+      <text x="188" y="114" text-anchor="middle" font-family="Georgia, serif" font-size="22" letter-spacing="3" fill="#B8502E">WOOD FIRED</text>
+      <text x="96" y="898" font-family="Georgia, serif" font-size="72" font-weight="700" fill="#1A1410">pizz</text>
+      <text x="96" y="950" font-family="Arial, sans-serif" font-size="26" letter-spacing="4" fill="#B8502E">69ADC40AA670022B51FD748A</text>
+      <text x="96" y="1012" font-family="Arial, sans-serif" font-size="28" fill="#4B433B">fgh</text>
+      <text x="96" y="1098" font-family="Arial, sans-serif" font-size="24" letter-spacing="5" fill="#7C6B59">HOUSE MADE IMAGE</text>
+      <text x="1104" y="1096" text-anchor="end" font-family="Georgia, serif" font-size="46" font-weight="700" fill="#B8502E">$11.00</text>
+    </svg>

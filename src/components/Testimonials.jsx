@@ -37,15 +37,17 @@ export default function Testimonials() {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          className="text-center mb-20"
+          className="text-center mb-10 max-w-3xl mx-auto"
         >
-          <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold-400 block mb-4">
+          <span className="section-eyebrow block mb-4">
             {t('testimonials.titleLabel')}
           </span>
-          <h2 className="font-serif-1947 font-bold text-4xl md:text-5xl lg:text-7xl text-[#1A1410] tracking-tight italic">
+          <h2 className="section-title">
             {t('testimonials.title')}
           </h2>
         </motion.div>
+
+        <div className="section-rule mb-14" />
 
         {/* Testimonial — One at a time, centered, auto-rotate */}
         <div className="max-w-3xl mx-auto">
@@ -59,7 +61,7 @@ export default function Testimonials() {
             className="text-center glass-panel glass-highlight-ring px-6 py-10 md:px-12"
             >
               {/* Stars — thin accent lines, not emoji */}
-              <div className="flex justify-center gap-2 mb-10">
+              <div className="flex justify-center gap-2 mb-8">
                 {[...Array(5)].map((_, i) => (
                   <motion.div
                     key={i}
@@ -75,7 +77,7 @@ export default function Testimonials() {
               </div>
 
               {/* Quote — serif-1947 italic, large */}
-              <p className="font-serif-1947 italic text-2xl md:text-4xl lg:text-5xl text-[#1A1410] leading-relaxed mb-10 px-4">
+              <p className="font-serif-1947 italic text-2xl md:text-[2.35rem] lg:text-[2.9rem] text-[#1A1410] leading-[1.35] mb-10 px-4">
                 "{testimonialsData[active].text}"
               </p>
 
@@ -84,8 +86,8 @@ export default function Testimonials() {
 
               {/* Customer — mono small caps */}
               <div>
-                <p className="font-mono text-xs tracking-[0.2em] uppercase text-[#1A1410] mb-1">{testimonialsData[active].name}</p>
-                <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-[#9B8D74]">{t('testimonials.orderedLabel')}{testimonialsData[active].order}</p>
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-[#1A1410] mb-1">{testimonialsData[active].name}</p>
+                <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-[#9B8D74]">{t('testimonials.orderedLabel')}{testimonialsData[active].order}</p>
               </div>
             </motion.div>
           </AnimatePresence>
@@ -111,12 +113,12 @@ export default function Testimonials() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ delay: 0.5 }}
-          className="mt-20 flex flex-wrap justify-center gap-6"
+          className="mt-16 flex flex-wrap justify-center gap-6"
         >
           {stats.map((stat) => (
             <div key={stat.label} className="text-center glass-card px-8 py-6 min-w-[160px]">
-              <div className="font-mono text-2xl text-ember-500 mb-2 tracking-wider">{stat.value}</div>
-              <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#9B8D74]">{stat.label}</div>
+              <div className="font-mono text-2xl text-ember-500 mb-2 tracking-[0.08em]">{stat.value}</div>
+              <div className="font-mono text-[11px] tracking-[0.12em] uppercase text-[#9B8D74]">{stat.label}</div>
             </div>
           ))}
         </motion.div>

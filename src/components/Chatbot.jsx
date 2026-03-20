@@ -436,8 +436,8 @@ I've added all items from your past order. Would you like to add anything else o
     try {
       const customerInfo = getCustomerInfo()
       const order = await OrderService.placeOrder({
-        items: cart.map(i => ({
-          itemId: i._id,
+        items: cart.map((i, index) => ({
+          itemId: i.itemId || i._id || `custom-checkout-${index}-${Date.now()}`,
           name: i.name,
           quantity: i.qty,
           price: i.price,
@@ -512,8 +512,8 @@ I've added all items from your past order. Would you like to add anything else o
     try {
       const customerInfo = getCustomerInfo()
       const order = await OrderService.placeOrder({
-        items: cart.map(i => ({
-          itemId: i._id,
+        items: cart.map((i, index) => ({
+          itemId: i.itemId || i._id || `custom-checkout-${index}-${Date.now()}`,
           name: i.name,
           quantity: i.qty,
           price: i.price,

@@ -26,6 +26,17 @@ const __dirname = dirname(__filename)
 
 const router = Router()
 
+const emitPromotionalBannerUpdate = (req, eventName, payload) => {
+    const io = req.app.get('io')
+    if (!io) return
+
+    io.emit(eventName, payload)
+    io.emit('promotional_banners_updated', {
+        type: eventName,
+        banner: payload
+    })
+}
+
 // Configure multer for image uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -521,7 +532,7 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
         console.log('File:', req.file)
 
         const tenantId = req.tenantId
-        const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
+        const { name, description, price, categoryId, available, modifiers, tags, dietary, image } = req.body
 
         // Build item data
         const itemData = {
@@ -540,6 +551,8 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
         if (req.file) {
             itemData.image = `/uploads/menu/${req.file.filename}`
             console.log('Image saved:', itemData.image)
+        } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
+            itemData.image = image
         }
 
         console.log('Creating item with data:', itemData)
@@ -569,7 +582,7 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
 router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('image'), async (req, res) => {
     try {
         const { id } = req.params
-        const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
+        const { name, description, price, categoryId, available, modifiers, tags, dietary, image } = req.body
 
         // Build update data
         const updateData = {
@@ -586,6 +599,8 @@ router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('ima
         // Add image path if new image uploaded
         if (req.file) {
             updateData.image = `/uploads/menu/${req.file.filename}`
+        } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
+            updateData.image = image
         }
 
         const item = await MenuItem.findByIdAndUpdate(
@@ -964,6 +979,7 @@ router.post('/promotional-banners', verifyAdmin, async (req, res) => {
         const banner = await PromotionalBanner.create(bannerData)
 
         console.log('Promotional banner created:', banner)
+        emitPromotionalBannerUpdate(req, 'promotional_banner_created', banner)
         res.json(banner)
     } catch (err) {
         console.error('Failed to create promotional banner:', err)
@@ -994,6 +1010,7 @@ router.put('/promotional-banners/:id', verifyAdmin, async (req, res) => {
         }
 
         console.log('Promotional banner updated:', banner)
+        emitPromotionalBannerUpdate(req, 'promotional_banner_updated', banner)
         res.json(banner)
     } catch (err) {
         console.error('Failed to update promotional banner:', err)
@@ -1015,6 +1032,7 @@ router.delete('/promotional-banners/:id', verifyAdmin, async (req, res) => {
         }
 
         console.log('Promotional banner deleted:', id)
+        emitPromotionalBannerUpdate(req, 'promotional_banner_deleted', { _id: id })
         res.json({ message: 'Banner deleted successfully' })
     } catch (err) {
         console.error('Failed to delete promotional banner:', err)

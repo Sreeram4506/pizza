@@ -82,10 +82,10 @@ export default function Hero() {
         style={{
           background: `
             linear-gradient(to bottom,
-              rgba(15,10,8,0.55) 0%,
-              rgba(15,10,8,0.25) 40%,
-              rgba(15,10,8,0.35) 70%,
-              rgba(15,10,8,0.80) 100%
+              rgba(15,10,8,0.48) 0%,
+              rgba(15,10,8,0.22) 38%,
+              rgba(15,10,8,0.32) 68%,
+              rgba(15,10,8,0.72) 100%
             )
           `
         }}
@@ -95,20 +95,19 @@ export default function Hero() {
       <div
         className="absolute inset-0 z-10 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%)'
+          background: 'radial-gradient(ellipse at center, transparent 54%, rgba(0,0,0,0.36) 100%)'
         }}
       />
 
-      {/* Banner (top position) */}
       <div className="absolute top-0 left-0 right-0 z-30">
         <BannerDisplay position="hero" />
       </div>
 
       {/* Main Centered Content */}
-      <div className="relative z-20 flex flex-col items-center justify-center text-center px-6 min-h-screen w-full">
+      <div className="relative z-20 flex flex-col items-center justify-center text-center px-6 min-h-screen w-full max-w-5xl mx-auto">
         {/* Top label */}
-        <motion.div className="hero-stagger mb-6">
-          <span className="inline-flex items-center gap-3 font-mono text-[10px] tracking-[0.35em] uppercase text-white/60">
+        <motion.div className="hero-stagger mb-5">
+          <span className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.24em] uppercase text-white/65">
             <span className="w-8 h-px bg-white/40" />
             <span dangerouslySetInnerHTML={{ __html: t('hero.est') }} />
             <span className="w-8 h-px bg-white/40" />
@@ -119,20 +118,20 @@ export default function Hero() {
         <div className="hero-stagger flex flex-col items-center">
           <h1
             className="font-serif-1947 font-black leading-none tracking-tight text-white mb-2"
-            style={{ textShadow: '0 4px 40px rgba(0,0,0,0.4)' }}
+            style={{ textShadow: '0 4px 28px rgba(0,0,0,0.28)' }}
           >
             <span className="block text-[clamp(2.5rem,15vw,10rem)] leading-none">
               {brandFirst}
             </span>
           </h1>
-          <span className="text-sm md:text-xl font-black uppercase tracking-[0.5em] text-white/80 -mt-2 md:-mt-4">
+          <span className="text-sm md:text-lg font-black uppercase tracking-[0.28em] text-white/78 -mt-1 md:-mt-2">
             {brandSecond}
           </span>
         </div>
 
         {/* Sub-headline */}
         <div className="hero-stagger mt-4">
-          <p className="font-mono text-[11px] tracking-[0.5em] uppercase text-white/70">
+          <p className="font-mono text-[12px] tracking-[0.22em] uppercase text-white/72">
             {t('hero.type')}
           </p>
         </div>
@@ -142,8 +141,8 @@ export default function Hero() {
 
         {/* Tagline */}
         <p
-          className="hero-stagger mt-6 font-serif-1947 italic text-white/80 text-lg md:text-2xl max-w-xl leading-relaxed"
-          style={{ textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
+          className="hero-stagger mt-6 font-serif-1947 italic text-white/85 text-lg md:text-[1.65rem] max-w-2xl leading-relaxed"
+          style={{ textShadow: '0 2px 10px rgba(0,0,0,0.35)' }}
         >
           {t('hero.tagline')}
         </p>
@@ -154,7 +153,7 @@ export default function Hero() {
             whileHover={{ scale: 1.05, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
             whileTap={{ scale: 0.97 }}
             onClick={() => navigate('/menu')}
-            className="px-10 py-4 glass-button-dark text-white text-[10px] sm:text-[11px] font-black tracking-[0.25em] uppercase rounded-full flex items-center gap-2 transition-all"
+            className="px-9 py-4 glass-button-dark text-white text-[11px] sm:text-xs font-black tracking-[0.18em] uppercase rounded-full flex items-center gap-2 transition-all"
           >
             {t('hero.exploreMenu')}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -166,7 +165,7 @@ export default function Hero() {
             whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.15)' }}
             whileTap={{ scale: 0.97 }}
             onClick={() => document.querySelector('#atelier')?.scrollIntoView({ behavior: 'smooth' })}
-            className="px-8 py-3.5 glass-button-light text-white text-[11px] font-body font-bold tracking-[0.2em] uppercase rounded-full flex items-center gap-2 transition-all border-white/25 bg-white/12"
+            className="px-8 py-3.5 glass-button-light text-white text-[11px] font-body font-bold tracking-[0.16em] uppercase rounded-full flex items-center gap-2 transition-all border-white/25 bg-white/12"
           >
             {t('hero.buildYourOwn')}
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -185,37 +184,16 @@ export default function Hero() {
           {[
             t('hero.features.dough'),
             t('hero.features.fired'),
-            t('hero.features.tomatoes'),
             t('hero.features.rating')
           ].map((feat) => (
             <span
               key={feat}
-              className="px-4 py-1.5 rounded-full glass-pill text-white/80 font-mono text-[9px] tracking-[0.2em] uppercase bg-white/10 border-white/20"
+              className="px-4 py-2 rounded-full glass-pill text-white/82 font-mono text-[10px] tracking-[0.14em] uppercase bg-white/10 border-white/20"
             >
               {feat}
             </span>
           ))}
         </motion.div>
-      </div>
-
-      {/* Bottom corner elements (like reference image) */}
-      {/* Bottom left: address */}
-      <div className="absolute bottom-8 left-8 z-20 hidden md:block">
-        <p className="font-mono text-[9px] tracking-[0.25em] uppercase text-white/55 leading-relaxed glass-pill px-5 py-3 bg-white/8 border border-white/12">
-          {settings.address ? settings.address.split(',').slice(0, 2).join('\n') : '123 Pizza Plaza\nNew York, NY'}
-        </p>
-      </div>
-
-      {/* Bottom right: reservation CTA */}
-      <div className="absolute bottom-8 right-8 z-20 hidden md:block">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
-          className="font-mono text-[9px] tracking-[0.3em] uppercase text-white/60 hover:text-white transition-colors glass-pill px-5 py-3 bg-white/8 border border-white/15"
-        >
-          {t('hero.reservations')}
-        </motion.button>
       </div>
 
       {/* Scroll indicator */}

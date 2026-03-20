@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const ChatbotContext = createContext()
 
+const createCartItemId = () => `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+
 export function ChatbotProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false)
   const [initialMessage, setInitialMessage] = useState(null)
@@ -53,12 +55,12 @@ export function ChatbotProvider({ children }) {
   // Cart Methods
   const addToCart = (item) => {
     setCart(prev => {
-      const itemId = item._id || item.itemId
+      const itemId = item._id || item.itemId || createCartItemId()
       const existing = prev.find(i => (i._id || i.itemId) === itemId)
       if (existing) {
         return prev.map(i => (i._id || i.itemId) === itemId ? { ...i, qty: (i.qty || 1) + (item.qty || 1) } : i)
       }
-      return [...prev, { ...item, _id: itemId, qty: item.qty || 1 }]
+      return [...prev, { ...item, _id: itemId, itemId, qty: item.qty || 1 }]
     })
   }
 
@@ -66,13 +68,13 @@ export function ChatbotProvider({ children }) {
     setCart(prev => {
       let newCart = [...prev]
       items.forEach(newItem => {
-        const itemId = newItem._id || newItem.itemId
+        const itemId = newItem._id || newItem.itemId || createCartItemId()
         const existingIdx = newCart.findIndex(i => (i._id || i.itemId) === itemId)
         if (existingIdx > -1) {
           const existingItem = newCart[existingIdx]
           newCart[existingIdx] = { ...existingItem, qty: (existingItem.qty || 1) + (newItem.qty || newItem.quantity || 1) }
         } else {
-          newCart.push({ ...newItem, _id: itemId, qty: newItem.qty || newItem.quantity || 1 })
+          newCart.push({ ...newItem, _id: itemId, itemId, qty: newItem.qty || newItem.quantity || 1 })
         }
       })
       return newCart

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { resolveMenuItemImage } from '../../utils/menuArtwork'
 
 export default function MenuManager() {
   const [categories, setCategories] = useState([])
@@ -235,15 +236,13 @@ export default function MenuManager() {
                 className="bg-white rounded-[2rem] p-6 border border-[rgba(26,20,16,0.06)] shadow-sm hover:shadow-xl hover:shadow-[#1A1410]/5 transition-all group overflow-hidden relative"
               >
                 <div className="flex gap-6">
-                  {item.image && (
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shadow-md flex-shrink-0 border border-[rgba(26,20,16,0.03)] group-hover:scale-105 transition-transform duration-500">
-                      <img
-                        src={item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || ''}${item.image}`}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shadow-md flex-shrink-0 border border-[rgba(26,20,16,0.03)] group-hover:scale-105 transition-transform duration-500">
+                    <img
+                      src={resolveMenuItemImage(item)}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-start mb-1">
@@ -251,7 +250,7 @@ export default function MenuManager() {
                           {item.name}
                         </h3>
                         <div className="flex gap-2">
-                          <button onClick={() => { setEditingItem(item); setItemForm({ ...item, dietary: item.dietary || { vegetarian: false, vegan: false, glutenFree: false, spicy: false } }); setImagePreview(item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || ''}${item.image}`) : null); setShowItemModal(true); }} className="w-8 h-8 rounded-lg bg-[#FAFAF8] flex items-center justify-center text-xs hover:bg-[#1A1410] hover:text-white transition-all shadow-sm">✏️</button>
+                          <button onClick={() => { setEditingItem(item); setItemForm({ ...item, dietary: item.dietary || { vegetarian: false, vegan: false, glutenFree: false, spicy: false } }); setImagePreview(resolveMenuItemImage(item)); setShowItemModal(true); }} className="w-8 h-8 rounded-lg bg-[#FAFAF8] flex items-center justify-center text-xs hover:bg-[#1A1410] hover:text-white transition-all shadow-sm">✏️</button>
                           <button onClick={() => handleDeleteItem(item._id)} className="w-8 h-8 rounded-lg bg-[#FAFAF8] flex items-center justify-center text-xs hover:bg-rose-500 hover:text-white transition-all shadow-sm">🗑️</button>
                         </div>
                       </div>

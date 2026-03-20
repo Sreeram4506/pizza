@@ -4,6 +4,7 @@ import { useChatbot } from '../context/ChatbotContext'
 import { useNavigate } from 'react-router-dom'
 import wsService from '../services/websocket.js'
 import { useTranslation } from 'react-i18next'
+import { resolveMenuItemImage } from '../utils/menuArtwork'
 
 export default function PizzaGallery() {
   const { t } = useTranslation()
@@ -48,7 +49,7 @@ export default function PizzaGallery() {
   }
 
   return (
-    <section ref={ref} id="gallery" className="py-16 lg:py-32 relative overflow-hidden section-grain glass-shell">
+    <section ref={ref} id="gallery" className="py-24 lg:py-32 relative overflow-hidden section-grain glass-shell">
       <div className="absolute inset-0 gold-glow-bg" />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
@@ -56,19 +57,30 @@ export default function PizzaGallery() {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8"
+          className="flex flex-col lg:flex-row lg:items-end justify-between mb-10 gap-8"
         >
-          <div>
-            <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-4">
+          <div className="max-w-3xl">
+            <span className="section-eyebrow block mb-4">
               {t('gallery.titleLabel')}
             </span>
-            <h2 className="font-serif-1947 font-bold text-4xl md:text-5xl lg:text-7xl text-[#1A1410] tracking-tight italic">
+            <h2 className="section-title">
               {t('gallery.title')}
             </h2>
           </div>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/menu')}
+            className="self-start lg:self-auto glass-button-light px-6 py-3 rounded-full text-[#1A1410] text-[11px] font-semibold tracking-[0.12em] uppercase inline-flex items-center gap-2"
+          >
+            {t('gallery.viewFullMenu')}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </motion.button>
         </motion.div>
 
-        <div className="glass-section-divider mb-12" />
+        <div className="section-rule mb-12" />
 
         {/* Menu Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
@@ -88,7 +100,7 @@ export default function PizzaGallery() {
             menuItems.slice(0, 8).map((item, index) => (
               <MenuCard
                 key={item._id}
-                image={item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || ''}${item.image}`) : 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=600&q=80'}
+                image={resolveMenuItemImage(item)}
                 name={item.name}
                 price={item.price}
                 description={item.description}
@@ -103,25 +115,6 @@ export default function PizzaGallery() {
           )}
         </div>
 
-        {/* View Full Menu */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.6 }}
-          className="text-center mt-16"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/menu')}
-            className="group text-[#1A1410] text-sm font-body font-medium tracking-[0.15em] uppercase inline-flex items-center gap-3 transition-colors hover:text-ember-500"
-          >
-            {t('gallery.viewFullMenu')}
-            <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>
-          </motion.button>
-        </motion.div>
       </div>
     </section>
   )
@@ -131,6 +124,10 @@ function MenuCard({ image, name, price, description, category, available, dietar
   const { t } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const [imgSrc, setImgSrc] = useState(image)
+
+  useEffect(() => {
+    setImgSrc(image)
+  }, [image])
 
   return (
     <motion.div
@@ -150,7 +147,7 @@ function MenuCard({ image, name, price, description, category, available, dietar
           className="w-full h-full object-cover img-noir"
           animate={{ scale: isHovered ? 1.1 : 1 }}
           transition={{ duration: 0.6 }}
-          onError={() => setImgSrc('https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=600&q=80')}
+          onError={() => setImgSrc(image)}
         />
 
         {/* Dark overlay on hover */}

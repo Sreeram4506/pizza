@@ -8,7 +8,6 @@ import QuickLoginModal from './components/QuickLoginModal'
 import Navbar from './components/Navbar'
 import BannerDisplay from './components/BannerDisplay'
 import Hero from './components/Hero'
-import MarqueeStrip from './components/MarqueeStrip'
 import About from './components/About'
 import PizzaGallery from './components/PizzaGallery'
 import Testimonials from './components/Testimonials'
@@ -40,6 +39,7 @@ import LoyaltyManager from './components/admin/LoyaltyManager'
 import Settings from './components/admin/Settings'
 import CustomPizzaBuilder from './components/CustomPizzaBuilder'
 import MenuPage from './components/MenuPage'
+import LegalPage from './components/LegalPage'
 
 // Routes where quick login should NOT appear
 const EXCLUDED_ROUTES = [
@@ -147,9 +147,9 @@ function App() {
         <ChatbotProvider>
           <div className="glass-shell min-h-screen bg-[#FAFAF8] relative overflow-x-hidden selection:bg-ember-500/15 selection:text-[#1A1410]">
             <div className="pointer-events-none absolute inset-0">
-              <div className="absolute left-[-12rem] top-[-10rem] h-[28rem] w-[28rem] rounded-full bg-ember-500/8 blur-[120px]" />
-              <div className="absolute right-[-10rem] top-[18rem] h-[24rem] w-[24rem] rounded-full bg-gold-400/10 blur-[130px]" />
-              <div className="absolute bottom-[-14rem] left-1/3 h-[26rem] w-[26rem] rounded-full bg-white/70 blur-[150px]" />
+              <div className="absolute left-[-10rem] top-[-9rem] h-[24rem] w-[24rem] rounded-full bg-ember-500/6 blur-[140px]" />
+              <div className="absolute right-[-8rem] top-[22rem] h-[20rem] w-[20rem] rounded-full bg-gold-400/7 blur-[150px]" />
+              <div className="absolute bottom-[-12rem] left-1/3 h-[20rem] w-[20rem] rounded-full bg-white/55 blur-[160px]" />
             </div>
             <div className="relative z-10 text-[#1A1410]">
               <Toaster position="top-center" toastOptions={{
@@ -174,6 +174,8 @@ function App() {
                 <Route path="/forgot-password" element={<><Navbar /><ForgotPassword /></>} />
                 <Route path="/reset-password" element={<><Navbar /><ResetPassword /></>} />
                 <Route path="/track" element={<><Navbar /><OrderTracker /></>} />
+                <Route path="/privacy" element={<><Navbar /><LegalPage variant="privacy" /><Footer /></>} />
+                <Route path="/terms" element={<><Navbar /><LegalPage variant="terms" /><Footer /></>} />
                 <Route path="/profile" element={<CustomerProfile />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/delivery" element={<DeliveryPortal />} />

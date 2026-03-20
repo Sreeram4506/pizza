@@ -1,17 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import wsService from '../services/websocket.js'
 
 export default function BannerDisplay({ position = 'middle' }) {
   const [banners, setBanners] = useState([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    loadActiveBanners()
-  }, [])
-
-  const loadActiveBanners = async () => {
+  const loadActiveBanners = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/public/promotional-banners')
       if (response.ok) {
@@ -23,7 +20,28 @@ export default function BannerDisplay({ position = 'middle' }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    loadActiveBanners()
+    wsService.connect()
+
+    const refreshBanners = () => {
+      loadActiveBanners()
+    }
+
+    wsService.on('promotional_banner_created', refreshBanners)
+    wsService.on('promotional_banner_updated', refreshBanners)
+    wsService.on('promotional_banner_deleted', refreshBanners)
+    wsService.on('promotional_banners_updated', refreshBanners)
+
+    return () => {
+      wsService.off('promotional_banner_created', refreshBanners)
+      wsService.off('promotional_banner_updated', refreshBanners)
+      wsService.off('promotional_banner_deleted', refreshBanners)
+      wsService.off('promotional_banners_updated', refreshBanners)
+    }
+  }, [loadActiveBanners])
 
   const handleBannerClick = async (banner) => {
     try {
@@ -31,6 +49,7 @@ export default function BannerDisplay({ position = 'middle' }) {
     } catch (err) {
       console.error('Failed to track click:', err)
     }
+
     if (banner.buttonLink) {
       if (banner.buttonLink.startsWith('/') || banner.buttonLink.startsWith('#')) {
         navigate(banner.buttonLink)
@@ -54,22 +73,22 @@ export default function BannerDisplay({ position = 'middle' }) {
               key={banner._id}
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
-              className="w-full relative z-[60] py-2 px-4 shadow-sm"
+              className="w-full relative z-[60] py-2.5 px-4 shadow-sm"
               style={{ backgroundColor: banner.backgroundColor || '#C1440E' }}
             >
               <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center">
-                <span className="font-body text-xs sm:text-sm font-semibold tracking-wide" style={{ color: banner.textColor || '#FFFFFF' }}>
+                <span className="font-body text-sm font-semibold tracking-[0.02em]" style={{ color: banner.textColor || '#FFFFFF' }}>
                   {banner.title}
                 </span>
                 {banner.subtitle && (
-                  <span className="font-body text-[10px] sm:text-xs opacity-90 hidden md:inline" style={{ color: banner.textColor || '#FFFFFF' }}>
-                    — {banner.subtitle}
+                  <span className="font-body text-xs opacity-90 hidden md:inline" style={{ color: banner.textColor || '#FFFFFF' }}>
+                    - {banner.subtitle}
                   </span>
                 )}
                 {banner.buttonText && (
                   <button
                     onClick={() => handleBannerClick(banner)}
-                    className="mt-1 sm:mt-0 px-3 py-1 bg-white/20 hover:bg-white/30 transition-colors rounded-full text-[10px] font-bold tracking-widest uppercase ml-0 sm:ml-4"
+                    className="mt-1 sm:mt-0 px-3 py-1 bg-white/20 hover:bg-white/30 transition-colors rounded-full text-[11px] font-bold tracking-[0.08em] uppercase ml-0 sm:ml-4"
                     style={{ color: banner.textColor || '#FFFFFF', border: `1px solid ${banner.textColor || '#FFFFFF'}40` }}
                   >
                     {banner.buttonText}
@@ -123,7 +142,6 @@ export default function BannerDisplay({ position = 'middle' }) {
               className={`relative overflow-hidden ${position === 'bottom' ? 'rounded-3xl mx-4 sm:mx-6 lg:mx-12 my-12 shadow-xl' : 'border-y border-[rgba(212,146,42,0.12)]'}`}
               style={{ backgroundColor: banner.backgroundColor || '#1A1410' }}
             >
-              {/* Subtle grain */}
               <div className="absolute inset-0 opacity-[0.03]" style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`
               }} />
