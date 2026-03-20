@@ -26,8 +26,12 @@ router.post('/create-payment-intent', async (req, res) => {
             publishableKey: config.stripePublishableKey
         })
     } catch (err) {
-        console.error('Payment Intent Error:', err.message)
-        res.status(500).json({ error: 'Failed to create payment intent' })
+        console.error('CRITICAL Payment Intent Error:', err)
+        res.status(500).json({
+            error: 'Failed to create payment intent',
+            details: err.message,
+            code: err.type || err.code
+        })
     }
 })
 

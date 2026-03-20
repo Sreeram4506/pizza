@@ -324,7 +324,7 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
     res.status(500).json({
       error: 'Order placement failed on server',
       details: err.message,
-      code: err.name,
+      code: err.name || err.code,
       stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     })
   }
