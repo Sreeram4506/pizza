@@ -304,7 +304,19 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
 
     // Send order confirmation email (non-blocking)
     if (order.customerInfo.email) {
-      sendOrderConfirmation(order).catch(err => console.error('Customer email failed:', err))
+      let totalPoints = 0
+      let isGuest = true
+      if (authenticatedUser) {
+        isGuest = false
+        try {
+          const latestCustomer = await Customer.findById(authenticatedUser.id)
+          totalPoints = latestCustomer?.loyalty?.points || 0
+        } catch (err) {
+          console.error('Failed to fetch customer points for email:', err)
+        }
+      }
+      console.log(`[EMAIL] Sending confirmation - Points earned: ${order.pointsEarned}, Total balance: ${totalPoints}, isGuest: ${isGuest}`)
+      sendOrderConfirmation(order, totalPoints, isGuest).catch(err => console.error('Customer email failed:', err))
     }
 
     // Notify admin (non-blocking)
