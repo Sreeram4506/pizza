@@ -11,7 +11,14 @@ export async function connectDatabase() {
 
   try {
     const mongoUri = config.mongoUri
-    console.log('Connecting to MongoDB...')
+    
+    // Diagnostic logging for production (masked)
+    if (mongoUri) {
+      const maskedUri = mongoUri.replace(/\/\/.*?:.*?@/, '//***:***@')
+      console.log(`Connecting to MongoDB at ${maskedUri}...`)
+    } else {
+      console.error('CRITICAL: MONGODB_URI is not defined in environment variables.')
+    }
 
     await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
@@ -19,23 +26,23 @@ export async function connectDatabase() {
     })
 
     isConnected = true
-    console.log('MongoDB connected successfully')
+    console.log('✅ MongoDB connected successfully')
 
     // Handle connection errors after initial connection
     mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err)
+      console.error('❌ MongoDB connection error:', err)
       isConnected = false
     })
 
     mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected. Attempting to reconnect...')
+      console.log('⚠️ MongoDB disconnected. Attempting to reconnect...')
       isConnected = false
     })
 
     return true
   } catch (error) {
-    console.error('Failed to connect to MongoDB:', error.message)
-    console.log('⚠️  MongoDB not available - falling back to mock data mode')
+    console.error('❌ Failed to connect to MongoDB:', error.message)
+    console.log('⚠️  FALLBACK: Database not available - switching to mock data mode')
     
     // Disable buffering so queries fail immediately instead of hanging
     mongoose.set('bufferCommands', false)

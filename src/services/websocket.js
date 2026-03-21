@@ -6,10 +6,24 @@ class WebSocketService {
     this.listeners = new Map()
   }
 
+  get baseUrl() {
+    const envUrl = import.meta.env.VITE_WS_URL
+    const currentOrigin = window.location.origin
+    const isProduction = import.meta.env.PROD || !currentOrigin.includes('localhost')
+
+    // If in production and envUrl is localhost, use origin (proxied)
+    if (isProduction && envUrl && (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+        console.log('WS: Production detected, bypassing local development URL fallback.')
+        return currentOrigin
+    }
+
+    return envUrl || currentOrigin
+  }
+
   connect() {
     if (this.socket?.connected) return
 
-    const url = import.meta.env.VITE_WS_URL || window.location.origin
+    const url = this.baseUrl
     console.log('[WS] Connecting to:', url)
 
     this.socket = io(url, {

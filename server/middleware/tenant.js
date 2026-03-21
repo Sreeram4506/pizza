@@ -9,8 +9,7 @@ export async function extractTenant(req, res, next) {
     const isBaseDomain = hostname === 'localhost' ||
       hostname === 'www.pizzablast.com' ||
       hostname === 'pizzablast.com' ||
-      hostname === 'www.indraam.com' ||
-      hostname === 'indraam.com' ||
+      hostname === 'pizza-ruby.vercel.app' ||
       hostname.includes('onrender.com') ||
       hostname.includes('vercel.app')
 

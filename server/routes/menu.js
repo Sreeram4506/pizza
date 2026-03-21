@@ -66,7 +66,7 @@ router.get('/categories', async (req, res) => {
 
     // Mock data fallback if DB is down
     if (!isConnected) {
-      console.log('Using mock categories (DB disconnected)')
+      console.warn('⚠️ [MENU] FALLBACK: Serving mock categories because Database is disconnected.')
       return res.json([
         { _id: '1', name: 'Signature Pizzas', description: 'Classic handcrafted pizzas', sortOrder: 1, isActive: true },
         { _id: '2', name: 'Pastas', description: 'Fresh Italian pasta', sortOrder: 2, isActive: true },
@@ -186,7 +186,7 @@ router.get('/items', async (req, res) => {
 
     // Mock data fallback if DB is down
     if (!isConnected) {
-      console.log('Using mock items (DB disconnected)')
+      console.warn('⚠️ [MENU] FALLBACK: Serving mock items because Database is disconnected.')
       return res.json([
         { _id: '101', categoryId: '1', name: 'Margherita', price: 12.99, description: 'Fresh basil and mozzarella', isPopular: true, image: 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad50' },
         { _id: '102', categoryId: '1', name: 'Pepperoni', price: 14.99, description: 'Spicy pepperoni slices', isPopular: true, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e' },

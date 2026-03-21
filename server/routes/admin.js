@@ -670,7 +670,7 @@ router.get('/public/settings', async (req, res) => {
         } else {
             // Mock settings if DB is down
             if (!isConnected) {
-                console.log('Using mock settings (DB disconnected)')
+                console.warn('⚠️ [SETTINGS] FALLBACK: Serving mock settings because Database is disconnected.')
                 return res.json({
                     restaurantName: 'Restaurant Name',
                     email: 'contact@example.com',
