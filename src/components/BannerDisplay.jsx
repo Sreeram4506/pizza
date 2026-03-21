@@ -139,7 +139,7 @@ export default function BannerDisplay({ position = 'middle' }) {
             className={`w-full ${index > 0 ? 'mt-4' : ''}`}
           >
             <div
-              className={`relative overflow-hidden ${position === 'bottom' ? 'rounded-3xl mx-4 sm:mx-6 lg:mx-12 my-12 shadow-xl' : 'border-y border-[rgba(212,146,42,0.12)]'}`}
+              className={`relative overflow-hidden ${position === 'bottom' ? 'mt-12 shadow-xl' : 'border-y border-[rgba(212,146,42,0.12)]'}`}
               style={{ backgroundColor: banner.backgroundColor || '#1A1410' }}
             >
               <div className="absolute inset-0 opacity-[0.03]" style={{

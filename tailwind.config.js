@@ -118,11 +118,12 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Cormorant Garamond"', 'serif'],
-        sub: ['"Libre Baskerville"', 'serif'],
-        body: ['"DM Sans"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
-        marquee: ['"Bebas Neue"', 'sans-serif'],
+        display: ['"Outfit"', 'sans-serif'],
+        sub: ['"Outfit"', 'sans-serif'],
+        body: ['"Outfit"', 'system-ui', 'sans-serif'],
+        mono: ['"Outfit"', 'sans-serif'],
+        marquee: ['"Outfit"', 'sans-serif'],
+        sans: ['"Outfit"', 'system-ui', 'sans-serif'],
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',

@@ -243,5 +243,24 @@
         "seafood": "Seafood"
       }
     }
+  },
+  "loyalty": {
+    "pointsBalance": "Points Balance",
+    "pts": "pts",
+    "instructionsTitle": "How to Use Points",
+    "step1": {
+      "title": "Earn Points",
+      "desc": "Earn 1 point for every $1 spent on your favorite pizzas and sides."
+    },
+    "step2": {
+      "title": "Reach Tiers",
+      "desc": "Unlock higher tiers (Silver, Gold, Platinum) for exclusive bonuses and faster earning."
+    },
+    "step3": {
+      "title": "Redeem Rewards",
+      "desc": "Use your points during checkout to get discounts or free items from our rewards shop."
+    },
+    "loginToSee": "Login to view points",
+    "gotIt": "Got it!"
   }
 }

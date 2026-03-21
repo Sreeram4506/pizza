@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useTransform, useInView } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useChatbot } from '../context/ChatbotContext'
@@ -285,25 +285,46 @@ export default function CustomPizzaBuilder() {
     setCurrentStep(prev => Math.max(prev - 1, 1))
   }
 
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: '-10% 0px -20% 0px' })
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 1, ease: [0.16, 1, 0.3, 1] }
+    }
+  }
+
   return (
-    <section id="atelier" className="min-h-screen py-24 lg:py-32 bg-white relative overflow-hidden">
+    <section ref={ref} id="atelier" className="min-h-screen py-24 lg:py-40 bg-white relative overflow-hidden">
       {/* Grain */}
       <div className="grain-overlay" />
 
       {/* Background glows */}
-      <div className="absolute inset-0 ember-glow-bg" />
-      <div className="absolute inset-0 gold-glow-bg" />
-
-
+      <div className="absolute inset-0 ember-glow-bg opacity-30" />
+      <div className="absolute inset-0 gold-glow-bg opacity-20" />
 
       {/* Main Content */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-16 sm:pt-24 pb-32 relative z-10">
         {/* Cinematic Header */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-16"
+           variants={containerVariants}
+           initial="hidden"
+           animate={isInView ? "visible" : "hidden"}
+           className="text-center mb-16"
         >
           <motion.span
             initial={{ opacity: 0, y: 10 }}
@@ -381,13 +402,16 @@ export default function CustomPizzaBuilder() {
         </motion.div>
 
         {/* Two-Panel Layout */}
-        <div className="grid lg:grid-cols-[1fr,1.1fr] gap-12 lg:gap-16 items-start">
+        <motion.div
+           variants={containerVariants}
+           initial="hidden"
+           animate={isInView ? "visible" : "hidden"}
+           className="grid lg:grid-cols-[1fr,1.1fr] gap-12 lg:gap-16 items-start"
+        >
 
           {/* ═══ LEFT: Pizza Canvas — 3D Perspective ═══ */}
           <motion.div
-            initial={{ opacity: 0, x: -60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            variants={itemVariants}
             className="order-1"
           >
             <div
@@ -638,9 +662,7 @@ export default function CustomPizzaBuilder() {
 
           {/* ═══ RIGHT: Controls Panel ═══ */}
           <motion.div
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            variants={itemVariants}
             className="order-2"
           >
             {/* Step Content — Animated Transitions */}
@@ -973,7 +995,7 @@ export default function CustomPizzaBuilder() {
               </div>
             </motion.div>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

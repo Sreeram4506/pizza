@@ -67,7 +67,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <button
                     onClick={(e) => handleLinkClick(e, link.href)}
-                    className="text-white/58 text-[15px] font-body hover:text-white transition-colors"
+                    className="text-white/70 text-[15px] font-body hover:text-white transition-colors"
                   >
                     {link.name}
                   </button>
@@ -79,16 +79,16 @@ export default function Footer() {
           <div className="glass-panel-dark rounded-[2rem] p-6">
             <h4 className="font-mono text-[11px] tracking-[0.14em] uppercase text-gold-400 mb-6">{t('footer.hoursLabel')}</h4>
             <ul className="space-y-4">
-              <li className="text-white/58 text-[15px] font-body">{t('footer.hours.monFri')}</li>
-              <li className="text-white/58 text-[15px] font-body">{t('footer.hours.sat')}</li>
-              <li className="text-white/58 text-[15px] font-body">{t('footer.hours.sun')}</li>
+              <li className="text-white/70 text-[15px] font-body">{t('footer.hours.monFri')}</li>
+              <li className="text-white/70 text-[15px] font-body">{t('footer.hours.sat')}</li>
+              <li className="text-white/70 text-[15px] font-body">{t('footer.hours.sun')}</li>
               <li className="text-white text-[15px] font-body font-medium mt-4">{t('footer.acceptingOrders')}</li>
             </ul>
           </div>
 
           <div className="glass-panel-dark rounded-[2rem] p-6">
             <h4 className="font-mono text-[11px] tracking-[0.14em] uppercase text-gold-400 mb-6">{t('footer.locationLabel')}</h4>
-            <p className="text-white/58 text-[15px] font-body leading-relaxed mb-4">
+            <p className="text-white/70 text-[15px] font-body leading-relaxed mb-4">
               {settings?.address || 'Visit us at our main location'}
             </p>
             <a
@@ -111,7 +111,7 @@ export default function Footer() {
                     onClick={link.external ? undefined : (e) => handleLinkClick(e, link.href)}
                     target={link.external ? '_blank' : undefined}
                     rel={link.external ? 'noreferrer' : undefined}
-                    className="text-white/58 text-[15px] font-body hover:text-white transition-colors"
+                    className="text-white/70 text-[15px] font-body hover:text-white transition-colors"
                   >
                     {link.name}
                   </a>

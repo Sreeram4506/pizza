@@ -6,8 +6,9 @@ import { useTranslation } from 'react-i18next'
 export default function Contact() {
   const { t } = useTranslation()
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-50px' })
+  const isInView = useInView(ref, { once: true, margin: '-10% 0px -20% 0px' })
   const { settings, loading } = useSettings()
+  
   const phoneHref = settings?.phone ? `tel:${settings.phone.replace(/\D/g, '')}` : null
   const emailHref = settings?.email ? `mailto:${settings.email}` : null
   const directionsHref = settings?.address
@@ -19,117 +20,144 @@ export default function Contact() {
       title: t('contact.hoursLabel'),
       info: t('contact.hours'),
       subtext: t('contact.kitchenCloses'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
     },
     {
       title: t('contact.locationLabel'),
       info: loading ? '...' : settings.address,
-      subtext: '',
+      subtext: t('contact.directions'),
+      href: directionsHref,
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      )
     },
     {
       title: t('contact.phoneLabel'),
       info: loading ? '...' : settings.phone,
       subtext: t('contact.orderSubtext'),
+      href: phoneHref,
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </svg>
+      )
     },
   ]
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } 
+    }
+  }
+
   return (
-    <section id="contact" ref={ref} className="py-24 lg:py-32 relative overflow-hidden section-grain glass-shell">
-      <div className="absolute inset-0 ember-glow-bg" />
+    <section id="contact" ref={ref} className="py-24 lg:py-40 relative overflow-hidden section-grain glass-shell">
+      <div className="absolute inset-0 ember-glow-bg z-0" />
+      
+      {/* Abstract large background text */}
+      <div className="absolute -bottom-20 -right-20 font-serif-1947 font-black text-[25vw] leading-none text-[#1A1410]/[0.015] select-none pointer-events-none z-0">
+        VISIT
+      </div>
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          className="mb-10 max-w-3xl"
+           variants={containerVariants}
+           initial="hidden"
+           animate={isInView ? "visible" : "hidden"}
+           className="mb-16 max-w-3xl"
         >
-          <span className="font-mono text-[11px] tracking-[0.18em] uppercase text-ember-500 block mb-4">
+          <motion.span variants={itemVariants} className="section-eyebrow block mb-4 tracking-[0.3em]">
             {t('contact.titleLabel')}
-          </span>
-          <h2 className="section-title">
+          </motion.span>
+          <motion.h2 variants={itemVariants} className="section-title mb-10">
             {t('contact.title')}
-          </h2>
+          </motion.h2>
+          <motion.div 
+            initial={{ scaleX: 0 }}
+            animate={isInView ? { scaleX: 1 } : {}}
+            transition={{ duration: 1, ease: "circOut" }}
+            className="section-rule origin-left" 
+          />
         </motion.div>
 
-        <div className="section-rule mb-12" />
-
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.2 }}
-          className="grid md:grid-cols-3 gap-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          className="grid md:grid-cols-3 gap-6 lg:gap-8"
         >
           {contactInfo.map((item, i) => (
             <motion.div
               key={item.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.3 + i * 0.1 }}
-              className="glass-card glass-highlight-ring p-8 lg:p-12"
+              variants={itemVariants}
+              whileHover={{ y: -5 }}
+              className="glass-card glass-highlight-ring p-10 lg:p-12 relative group"
             >
-              <span className="font-mono text-[11px] tracking-[0.14em] uppercase text-gold-400 block mb-5">
+              <div className="text-ember-500 mb-8 opacity-60 group-hover:opacity-100 transition-opacity">
+                {item.icon}
+              </div>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#9B8D74] block mb-4">
                 {item.title}
               </span>
-              <p className="text-[#1A1410] font-sub text-lg md:text-xl mb-2 leading-snug">{item.info}</p>
-              {item.subtext && (
-                <p className="text-[#9B8D74] text-sm md:text-[15px] font-body">{item.subtext}</p>
+              <p className="text-[#1A1410] font-serif-1947 italic text-2xl mb-3 leading-tight">
+                {item.info}
+              </p>
+              {item.href ? (
+                 <a 
+                   href={item.href} 
+                   target={item.href.startsWith('http') ? "_blank" : undefined}
+                   className="text-ember-600 font-mono text-[10px] tracking-[0.1em] uppercase hover:underline inline-flex items-center gap-2"
+                 >
+                   {item.subtext}
+                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                   </svg>
+                 </a>
+              ) : (
+                <p className="text-[#9B8D74] text-xs font-mono tracking-wider">{item.subtext}</p>
               )}
             </motion.div>
           ))}
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.5 }}
-          className="flex flex-wrap gap-6 mt-12"
+          variants={containerVariants}
+          initial="hidden"
+           animate={isInView ? "visible" : "hidden"}
+          className="mt-20 pt-16 border-t border-[#1A1410]/[0.06]"
         >
-          {phoneHref && (
-            <a
-              href={phoneHref}
-              className="px-10 py-5 glass-button-dark text-white font-body text-[11px] font-black tracking-[0.16em] uppercase transition-all rounded-xl"
-            >
-              {t('contact.call')}
-            </a>
-          )}
-          {emailHref && (
-            <a
-              href={emailHref}
-              className="px-8 py-4 glass-button-light text-[#1A1410] font-body text-sm font-medium tracking-[0.1em] uppercase transition-all rounded-xl"
-            >
-              {t('contact.email')}
-            </a>
-          )}
-          {directionsHref && (
-            <a
-              href={directionsHref}
-              target="_blank"
-              rel="noreferrer"
-              className="px-8 py-4 glass-button-light text-[#1A1410] font-body text-sm font-medium tracking-[0.1em] uppercase transition-all rounded-xl"
-            >
-              {t('contact.directions')}
-            </a>
-          )}
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.6 }}
-          className="mt-20"
-        >
-          <span className="font-mono text-[11px] tracking-[0.12em] uppercase text-[#9B8D74] block mb-6">
+          <motion.span variants={itemVariants} className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#9B8D74] block mb-8 text-center">
             {t('contact.availableOn')}
-          </span>
-          <div className="flex flex-wrap gap-3">
+          </motion.span>
+          <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-4">
             {['Uber Eats', 'DoorDash', 'Grubhub', 'Postmates'].map((partner) => (
-              <span
+              <motion.span
                 key={partner}
-                className="font-mono text-sm tracking-[0.05em] uppercase text-[#1A1410]/70 glass-pill px-4 py-2"
+                whileHover={{ scale: 1.05, backgroundColor: 'rgba(26,20,16,0.04)' }}
+                className="font-mono text-[11px] tracking-[0.12em] uppercase text-[#1A1410] glass-pill px-6 py-3 border-[#1A1410]/10 cursor-default"
               >
                 {partner}
-              </span>
+              </motion.span>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>

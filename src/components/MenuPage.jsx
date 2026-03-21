@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
@@ -20,6 +20,8 @@ export default function MenuPage() {
     const mainScrollRef = useRef(null)
     const categoryRefs = useRef({})
     const sidebarScrollRef = useRef(null)
+    const [profile, setProfile] = useState(null)
+    const [showPointsInstructions, setShowPointsInstructions] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -53,6 +55,14 @@ export default function MenuPage() {
         }
 
         fetchData()
+
+        const token = localStorage.getItem('customerToken')
+        if (token) {
+            fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(data => { if (data.user) setProfile(data.user) })
+                .catch(err => console.error('Failed to fetch profile:', err))
+        }
 
         const handleUpdate = () => fetchData()
         wsService.on('item_added', handleUpdate)
@@ -209,6 +219,21 @@ export default function MenuPage() {
                 </div>
 
                 <div className="flex items-center gap-3 sm:gap-4">
+                    <button 
+                        onClick={() => setShowPointsInstructions(true)}
+                        className="h-11 sm:h-12 px-4 glass-pill flex items-center gap-2.5 hover:bg-white/40 transition-all group"
+                    >
+                        <div className="w-6 h-6 bg-ember-600 rounded-lg flex items-center justify-center text-[10px] font-black text-white shadow-sm group-hover:scale-110 transition-transform italic">PB</div>
+                        <div className="hidden sm:block">
+                            <p className="text-[9px] font-black tracking-widest text-[#9B8D74] uppercase leading-none mb-0.5">
+                                {profile ? t('loyalty.pointsBalance') : t('loyalty.loginToSee')}
+                            </p>
+                            <p className="text-[11px] font-bold text-[#1A1410] leading-none">
+                                {profile ? `${profile.loyalty?.points || 0} ${t('loyalty.pts')}` : 'Join PB'}
+                            </p>
+                        </div>
+                    </button>
+
                     <button onClick={() => openWithIntent('cart')} className="w-11 h-11 sm:w-12 sm:h-12 glass-button-dark rounded-2xl flex items-center justify-center relative transition-all group">
                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 10-8 0v4M5 9h14l1 12H4L5 9z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         {cartCount > 0 && (
@@ -409,6 +434,73 @@ export default function MenuPage() {
                 .scrollbar-hide::-webkit-scrollbar { display: none; }
                 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
             `}} />
+
+            {/* Points Instructions Modal */}
+            <AnimatePresence>
+                {showPointsInstructions && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowPointsInstructions(false)}
+                            className="absolute inset-0 bg-[#1A1410]/40 backdrop-blur-md"
+                        />
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-lg glass-panel-strong rounded-[2.5rem] p-8 sm:p-12 shadow-2xl border border-white/60"
+                        >
+                            <button 
+                                onClick={() => setShowPointsInstructions(false)}
+                                className="absolute top-6 right-6 w-10 h-10 glass-pill flex items-center justify-center hover:bg-white/40 transition-colors"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            </button>
+
+                            <div className="text-center mb-10">
+                                <div className="w-16 h-16 bg-ember-600 rounded-2xl flex items-center justify-center text-3xl font-serif-1947 italic text-white shadow-xl mx-auto mb-6">PB</div>
+                                <h2 className="text-3xl font-serif-1947 italic text-[#1A1410] tracking-tight">{t('loyalty.instructionsTitle')}</h2>
+                            </div>
+
+                            <div className="space-y-6">
+                                {[1, 2, 3].map((step) => (
+                                    <div key={step} className="flex gap-5">
+                                        <div className="w-8 h-8 rounded-full bg-ember-500/15 flex items-center justify-center text-ember-600 font-black text-xs shrink-0">{step}</div>
+                                        <div>
+                                            <h4 className="font-bold text-[#1A1410] mb-1">{t(`loyalty.step${step}.title`)}</h4>
+                                            <p className="text-sm text-[#5C554E] leading-relaxed">{t(`loyalty.step${step}.desc`)}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mt-10">
+                                {profile ? (
+                                    <div className="bg-ember-500/5 rounded-2xl p-5 border border-ember-500/10 mb-6 flex items-center justify-between">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-[#9B8D74]">{t('loyalty.pointsBalance')}</span>
+                                        <span className="text-lg font-black text-ember-600 tracking-tight">{profile.loyalty?.points || 0} PTS</span>
+                                    </div>
+                                ) : (
+                                    <button 
+                                        onClick={() => navigate('/login')}
+                                        className="w-full h-14 glass-button-dark rounded-xl text-white font-black text-[11px] uppercase tracking-widest mb-4"
+                                    >
+                                        Login to Start Earning
+                                    </button>
+                                )}
+                                <button 
+                                    onClick={() => setShowPointsInstructions(false)}
+                                    className="w-full h-14 bg-[#1A1410] text-white rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all"
+                                >
+                                    {t('loyalty.gotIt')}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

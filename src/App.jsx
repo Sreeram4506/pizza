@@ -114,9 +114,9 @@ function Home() {
         <About />
         <Testimonials />
         <Contact />
+        <BannerDisplay position="bottom" />
+        <Footer />
       </main>
-      <BannerDisplay position="bottom" />
-      <Footer />
     </>
   )
 }
@@ -145,11 +145,11 @@ function App() {
     <BrowserRouter>
       <SettingsProvider>
         <ChatbotProvider>
-          <div className="glass-shell min-h-screen bg-[#FAFAF8] relative overflow-x-hidden selection:bg-ember-500/15 selection:text-[#1A1410]">
+          <div className="glass-shell bg-[#FAFAF8] relative overflow-x-hidden selection:bg-ember-500/15 selection:text-[#1A1410]">
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute left-[-10rem] top-[-9rem] h-[24rem] w-[24rem] rounded-full bg-ember-500/6 blur-[140px]" />
               <div className="absolute right-[-8rem] top-[22rem] h-[20rem] w-[20rem] rounded-full bg-gold-400/7 blur-[150px]" />
-              <div className="absolute bottom-[-12rem] left-1/3 h-[20rem] w-[20rem] rounded-full bg-white/55 blur-[160px]" />
+              <div className="absolute bottom-0 left-1/3 h-[20rem] w-[20rem] rounded-full bg-white/55 blur-[160px]" />
             </div>
             <div className="relative z-10 text-[#1A1410]">
               <Toaster position="top-center" toastOptions={{

@@ -5,123 +5,157 @@ import { useTranslation } from 'react-i18next'
 export default function Testimonials() {
   const { t } = useTranslation()
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-50px' })
-  const [active, setActive] = useState(0)
+  const isInView = useInView(ref, { once: true, margin: '-10% 0px -20% 0px' })
 
-  // Get localized testimonials from translation files
-  const testimonialsData = t('testimonials.data', { returnObjects: true }) || []
-
-  // Auto-rotate
-  useEffect(() => {
-    if (testimonialsData.length === 0) return
-    const interval = setInterval(() => {
-      setActive(prev => (prev + 1) % testimonialsData.length)
-    }, 6000)
-    return () => clearInterval(interval)
-  }, [testimonialsData.length])
-
+  const testimonials = t('testimonials.data', { returnObjects: true }) || []
   const stats = [
-    { value: '4.9', label: t('testimonials.stats.rating') },
-    { value: '2,500+', label: t('testimonials.stats.customers') },
-    { value: '98%', label: t('testimonials.stats.recommend') },
+    { value: "4.9/5", label: t('testimonials.stats.rating') },
+    { value: "10k+", label: t('testimonials.stats.customers') },
+    { value: "98%", label: t('testimonials.stats.recommend') }
   ]
 
-  if (testimonialsData.length === 0) return null
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [direction, setDirection] = useState(0)
+
+  // Auto-scroll
+  useEffect(() => {
+    if (testimonials.length === 0) return
+    const timer = setInterval(() => {
+      setDirection(1)
+      setActiveIndex((prev) => (prev + 1) % testimonials.length)
+    }, 8000)
+    return () => clearInterval(timer)
+  }, [testimonials.length])
+
+  const paginate = (newDirection) => {
+    if (testimonials.length === 0) return
+    setDirection(newDirection)
+    setActiveIndex((prev) => (prev + newDirection + testimonials.length) % testimonials.length)
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15, delayChildren: 0.2 }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30, filter: 'blur(8px)' },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      filter: 'blur(0px)',
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+    }
+  }
+
+  if (testimonials.length === 0) return null
 
   return (
-    <section ref={ref} className="py-24 lg:py-32 relative overflow-hidden section-grain glass-shell">
-      <div className="absolute inset-0 gold-glow-bg" />
+    <section ref={ref} id="testimonials" className="py-24 lg:py-40 relative overflow-hidden section-grain glass-shell bg-[#FAFAF8]/50">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-gold-400/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-[40vw] h-[40vw] bg-ember-500/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2" />
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
-        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          className="text-center mb-10 max-w-3xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          className="text-center mb-20 lg:mb-32"
         >
-          <span className="section-eyebrow block mb-4">
+          <motion.span variants={itemVariants} className="section-eyebrow mb-6 block">
             {t('testimonials.titleLabel')}
-          </span>
-          <h2 className="section-title">
+          </motion.span>
+          <motion.h2 variants={itemVariants} className="section-title text-[#1A1410]">
             {t('testimonials.title')}
-          </h2>
+          </motion.h2>
         </motion.div>
 
-        <div className="section-rule mb-14" />
+        <div className="grid lg:grid-cols-[1fr,450px] gap-16 lg:gap-24 items-center">
+          {/* Active Testimonial Card */}
+          <div className="relative">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={activeIndex}
+                custom={direction}
+                initial={{ opacity: 0, x: direction > 0 ? 50 : -50, filter: 'blur(10px)' }}
+                animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, x: direction > 0 ? -50 : 50, filter: 'blur(10px)' }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                className="glass-card glass-panel-strong p-10 sm:p-16 lg:p-20 relative overflow-hidden min-h-[400px] flex flex-col justify-center"
+              >
+                {/* Large quote icon */}
+                <div className="absolute top-10 left-10 text-[180px] font-serif-1947 italic text-ember-500/5 leading-none select-none pointer-events-none">
+                  “
+                </div>
 
-        {/* Testimonial — One at a time, centered, auto-rotate */}
-        <div className="max-w-3xl mx-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-            className="text-center glass-panel glass-highlight-ring px-6 py-10 md:px-12"
-            >
-              {/* Stars — thin accent lines, not emoji */}
-              <div className="flex justify-center gap-2 mb-8">
-                {[...Array(5)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.08 * i, type: 'spring' }}
-                  >
-                    <svg className="w-4 h-4 text-ember-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  </motion.div>
-                ))}
-              </div>
+                <div className="relative z-10">
+                  <p className="font-serif-1947 text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] leading-[1.3] text-[#1A1410] italic mb-12">
+                    {testimonials[activeIndex].text}
+                  </p>
+                  
+                  <div className="flex items-center justify-between border-t border-[#1A1410]/5 pt-10">
+                    <div>
+                      <h4 className="font-display text-xl text-[#1A1410] mb-1">{testimonials[activeIndex].name}</h4>
+                      <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#9B8D74]">
+                        {t('testimonials.orderedLabel')}{testimonials[activeIndex].order}
+                      </p>
+                    </div>
 
-              {/* Quote — serif-1947 italic, large */}
-              <p className="font-serif-1947 italic text-2xl md:text-[2.35rem] lg:text-[2.9rem] text-[#1A1410] leading-[1.35] mb-10 px-4">
-                "{testimonialsData[active].text}"
-              </p>
+                    <div className="flex gap-4">
+                      <button 
+                        onClick={() => paginate(-1)}
+                        className="w-12 h-12 rounded-full glass-button-light flex items-center justify-center text-[#1A1410] hover:bg-ember-500 hover:text-white transition-all"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeWidth={2} stroke="currentColor" /></svg>
+                      </button>
+                      <button 
+                        onClick={() => paginate(1)}
+                        className="w-12 h-12 rounded-full glass-button-light flex items-center justify-center text-[#1A1410] hover:bg-ember-500 hover:text-white transition-all"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeWidth={2} stroke="currentColor" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
-              {/* Thin divider */}
-              <div className="w-12 h-px bg-gold-400/30 mx-auto mb-8" />
+            {/* Pagination dots */}
+            <div className="flex gap-3 justify-center mt-12">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => { setDirection(i > activeIndex ? 1 : -1); setActiveIndex(i); }}
+                  className={`h-1.5 transition-all duration-500 rounded-full ${i === activeIndex ? 'w-12 bg-ember-500' : 'w-4 bg-[#1A1410]/10 hover:bg-[#1A1410]/20'}`}
+                />
+              ))}
+            </div>
+          </div>
 
-              {/* Customer — mono small caps */}
-              <div>
-                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-[#1A1410] mb-1">{testimonialsData[active].name}</p>
-                <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-[#9B8D74]">{t('testimonials.orderedLabel')}{testimonialsData[active].order}</p>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation dots — minimal */}
-          <div className="flex justify-center gap-3 mt-12">
-            {testimonialsData.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActive(i)}
-                className={`transition-all duration-500 ${i === active
-                  ? 'w-8 h-1 bg-ember-500 rounded'
-                  : 'w-4 h-1 bg-[#1A1410]/10 hover:bg-[#1A1410]/20 rounded'
-                  }`}
-                style={{ borderRadius: '1px' }}
-              />
+          {/* Side Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 lg:gap-8">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                variants={itemVariants}
+                className="glass-card glass-highlight-ring p-8 lg:p-12 relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
+                  <span className="text-6xl font-serif-1947 italic font-black">0{index + 1}</span>
+                </div>
+                <div className="relative z-10">
+                  <div className="font-mono text-3xl lg:text-5xl text-ember-500 mb-2 font-black tracking-tight">{stat.value}</div>
+                  <div className="font-mono text-[10px] lg:text-[11px] tracking-[0.2em] uppercase text-[#9B8D74] font-black">{stat.label}</div>
+                  <div className="w-8 h-px bg-ember-500/30 mt-6 group-hover:w-16 transition-all duration-500" />
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
-
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.5 }}
-          className="mt-16 flex flex-wrap justify-center gap-6"
-        >
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center glass-card px-8 py-6 min-w-[160px]">
-              <div className="font-mono text-2xl text-ember-500 mb-2 tracking-[0.08em]">{stat.value}</div>
-              <div className="font-mono text-[11px] tracking-[0.12em] uppercase text-[#9B8D74]">{stat.label}</div>
-            </div>
-          ))}
-        </motion.div>
       </div>
     </section>
   )

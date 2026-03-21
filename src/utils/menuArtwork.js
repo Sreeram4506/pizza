@@ -232,12 +232,12 @@ export function buildMenuArtworkSvg(item) {
         ${renderDish(theme, seed)}
       </g>
       <rect x="96" y="84" width="184" height="46" rx="23" fill="#FFFFFF" opacity="0.82" />
-      <text x="188" y="114" text-anchor="middle" font-family="Georgia, serif" font-size="22" letter-spacing="3" fill="${theme.accent}">${badge.toUpperCase()}</text>
-      <text x="96" y="898" font-family="Georgia, serif" font-size="72" font-weight="700" fill="#1A1410">${title}</text>
-      <text x="96" y="950" font-family="Arial, sans-serif" font-size="26" letter-spacing="4" fill="${theme.accent}">${category.toUpperCase()}</text>
-      <text x="96" y="1012" font-family="Arial, sans-serif" font-size="28" fill="#4B433B">${subtitle}</text>
-      <text x="96" y="1098" font-family="Arial, sans-serif" font-size="24" letter-spacing="5" fill="#7C6B59">HOUSE MADE IMAGE</text>
-      <text x="1104" y="1096" text-anchor="end" font-family="Georgia, serif" font-size="46" font-weight="700" fill="${theme.accent}">${escapeXml(price)}</text>
+      <text x="188" y="114" text-anchor="middle" font-family="Outfit, sans-serif" font-size="22" letter-spacing="3" fill="${theme.accent}">${badge.toUpperCase()}</text>
+      <text x="96" y="898" font-family="Outfit, sans-serif" font-size="72" font-weight="700" fill="#1A1410">${title}</text>
+      <text x="96" y="950" font-family="Outfit, sans-serif" font-size="26" letter-spacing="4" fill="${theme.accent}">${category.toUpperCase()}</text>
+      <text x="96" y="1012" font-family="Outfit, sans-serif" font-size="28" fill="#4B433B">${subtitle}</text>
+      <text x="96" y="1098" font-family="Outfit, sans-serif" font-size="24" letter-spacing="5" fill="#7C6B59">HOUSE MADE IMAGE</text>
+      <text x="1104" y="1096" text-anchor="end" font-family="Outfit, sans-serif" font-size="46" font-weight="700" fill="${theme.accent}">${escapeXml(price)}</text>
     </svg>
   `.trim()
 }

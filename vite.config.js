@@ -6,15 +6,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://pizzabackend-qzi1.onrender.com',
         changeOrigin: true
       },
       '/uploads': {
-        target: 'http://localhost:5000',
+        target: 'https://pizzabackend-qzi1.onrender.com',
         changeOrigin: true
       },
       '/socket.io': {
-        target: 'http://localhost:5000',
+        target: 'https://pizzabackend-qzi1.onrender.com',
         ws: true,
         changeOrigin: true
       }
