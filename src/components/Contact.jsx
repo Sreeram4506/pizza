@@ -69,11 +69,9 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" ref={ref} className="py-24 lg:py-40 relative overflow-hidden section-grain glass-shell">
-      <div className="absolute inset-0 ember-glow-bg z-0" />
-      
+    <section id="contact" ref={ref} className="py-24 lg:py-40 relative overflow-hidden bg-[#FAFAF8]">
       {/* Abstract large background text */}
-      <div className="absolute -bottom-20 -right-20 font-serif-1947 font-black text-[25vw] leading-none text-[#1A1410]/[0.015] select-none pointer-events-none z-0">
+      <div className="absolute -bottom-20 -right-20 font-serif font-black text-[25vw] leading-none text-[#1A1410]/[0.02] select-none pointer-events-none z-0">
         VISIT
       </div>
 
@@ -84,17 +82,17 @@ export default function Contact() {
            animate={isInView ? "visible" : "hidden"}
            className="mb-16 max-w-3xl"
         >
-          <motion.span variants={itemVariants} className="section-eyebrow block mb-4 tracking-[0.3em]">
+          <motion.span variants={itemVariants} className="block mb-4 text-[#8A7A62] text-[11px] font-black tracking-[0.2em] uppercase">
             {t('contact.titleLabel')}
           </motion.span>
-          <motion.h2 variants={itemVariants} className="section-title mb-10">
+          <motion.h2 variants={itemVariants} className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#1A1410] leading-tight tracking-tight mb-10">
             {t('contact.title')}
           </motion.h2>
           <motion.div 
             initial={{ scaleX: 0 }}
             animate={isInView ? { scaleX: 1 } : {}}
             transition={{ duration: 1, ease: "circOut" }}
-            className="section-rule origin-left" 
+            className="w-full h-px bg-[#EBEBE6] origin-left" 
           />
         </motion.div>
 
@@ -109,30 +107,30 @@ export default function Contact() {
               key={item.title}
               variants={itemVariants}
               whileHover={{ y: -5 }}
-              className="glass-card glass-highlight-ring p-10 lg:p-12 relative group"
+              className="bg-white border border-[#EBEBE6] rounded-3xl shadow-sm hover:shadow-md transition-all p-10 lg:p-12 relative group"
             >
-              <div className="text-ember-500 mb-8 opacity-60 group-hover:opacity-100 transition-opacity">
+              <div className="text-[#1A1410] mb-8 opacity-60 group-hover:opacity-100 transition-opacity">
                 {item.icon}
               </div>
-              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#9B8D74] block mb-4">
+              <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-[#8A7A62] block mb-4 font-bold">
                 {item.title}
               </span>
-              <p className="text-[#1A1410] font-serif-1947 italic text-2xl mb-3 leading-tight">
+              <p className="text-[#1A1410] font-sans font-bold text-2xl mb-3 leading-tight tracking-tight">
                 {item.info}
               </p>
               {item.href ? (
                  <a 
                    href={item.href} 
                    target={item.href.startsWith('http') ? "_blank" : undefined}
-                   className="text-ember-600 font-mono text-[10px] tracking-[0.1em] uppercase hover:underline inline-flex items-center gap-2"
+                   className="text-[#1A1410] font-sans font-bold text-[10px] tracking-[0.1em] uppercase hover:underline inline-flex items-center gap-2 mt-2"
                  >
-                   {item.subtext}
+                  {item.subtext}
                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                    </svg>
                  </a>
               ) : (
-                <p className="text-[#9B8D74] text-xs font-mono tracking-wider">{item.subtext}</p>
+                <p className="text-[#8A7A62] text-xs font-sans font-medium mt-2">{item.subtext}</p>
               )}
             </motion.div>
           ))}
@@ -142,17 +140,17 @@ export default function Contact() {
           variants={containerVariants}
           initial="hidden"
            animate={isInView ? "visible" : "hidden"}
-          className="mt-20 pt-16 border-t border-[#1A1410]/[0.06]"
+          className="mt-20 pt-16 border-t border-[#EBEBE6]"
         >
-          <motion.span variants={itemVariants} className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#9B8D74] block mb-8 text-center">
+          <motion.span variants={itemVariants} className="font-sans font-bold text-[10px] tracking-[0.2em] uppercase text-[#8A7A62] block mb-8 text-center">
             {t('contact.availableOn')}
           </motion.span>
           <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-4">
             {['Uber Eats', 'DoorDash', 'Grubhub', 'Postmates'].map((partner) => (
               <motion.span
                 key={partner}
-                whileHover={{ scale: 1.05, backgroundColor: 'rgba(26,20,16,0.04)' }}
-                className="font-mono text-[11px] tracking-[0.12em] uppercase text-[#1A1410] glass-pill px-6 py-3 border-[#1A1410]/10 cursor-default"
+                whileHover={{ scale: 1.05 }}
+                className="font-sans font-bold text-[11px] tracking-[0.12em] uppercase text-[#1A1410] bg-white border border-[#EBEBE6] shadow-sm rounded-full px-6 py-3 cursor-default transition-all hover:border-[#1A1410]"
               >
                 {partner}
               </motion.span>

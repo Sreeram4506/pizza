@@ -69,10 +69,8 @@ export default function PizzaGallery() {
   }
 
   return (
-    <section ref={ref} id="gallery" className="py-24 lg:py-40 relative overflow-hidden section-grain glass-shell">
-      <div className="absolute inset-0 gold-glow-bg opacity-40" />
-
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
+    <section ref={ref} id="gallery" className="py-24 lg:py-40 relative overflow-hidden bg-[#FAFAF8]">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
         {/* Section Header */}
         <motion.div
            variants={containerVariants}
@@ -81,10 +79,10 @@ export default function PizzaGallery() {
            className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-8"
         >
           <div className="max-w-3xl">
-            <motion.span variants={itemVariants} className="section-eyebrow block mb-4">
+            <motion.span variants={itemVariants} className="block mb-4 text-[#8A7A62] text-[11px] font-black tracking-[0.2em] uppercase">
               {t('gallery.titleLabel')}
             </motion.span>
-            <motion.h2 variants={itemVariants} className="section-title">
+            <motion.h2 variants={itemVariants} className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#1A1410] leading-tight tracking-tight">
               {t('gallery.title')}
             </motion.h2>
           </div>
@@ -93,7 +91,7 @@ export default function PizzaGallery() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/menu')}
-            className="self-start lg:self-auto glass-button-light px-8 py-4 rounded-full text-[#1A1410] text-[11px] font-black tracking-[0.15em] uppercase inline-flex items-center gap-2 group"
+            className="self-start lg:self-auto bg-white border border-[#EBEBE6] rounded-full px-8 py-4 text-[#1A1410] text-[11px] font-black tracking-[0.15em] uppercase inline-flex items-center gap-2 group shadow-sm hover:shadow-md hover:border-[#1A1410] transition-all"
           >
             {t('gallery.viewFullMenu')}
             <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -106,7 +104,7 @@ export default function PizzaGallery() {
           initial={{ scaleX: 0 }}
           animate={isInView ? { scaleX: 1 } : {}}
           transition={{ duration: 1, ease: "circOut" }}
-          className="section-rule mb-16 origin-left" 
+          className="w-full h-px bg-[#EBEBE6] mb-16 origin-left" 
         />
 
         {/* Menu Grid */}
@@ -118,7 +116,7 @@ export default function PizzaGallery() {
         >
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="glass-card overflow-hidden flex flex-col relative aspect-[4/5] animate-pulse bg-[#E8E3DB]/30" />
+              <div key={i} className="bg-white border border-[#EBEBE6] rounded-2xl overflow-hidden flex flex-col relative aspect-[4/5] animate-pulse" />
             ))
           ) : (
             menuItems.slice(0, 8).map((item, index) => (
@@ -164,12 +162,12 @@ function MenuCard({ image, name, price, description, category, available, dietar
           transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
         }
       }}
-      className={`group cursor-pointer relative overflow-hidden glass-card glass-highlight-ring hover:shadow-2xl transition-all ${!available ? 'opacity-40' : ''}`}
+      className={`group cursor-pointer relative overflow-hidden bg-white border border-[#EBEBE6] rounded-2xl hover:shadow-xl transition-all ${!available ? 'opacity-40' : ''}`}
       onClick={onOrder}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative overflow-hidden aspect-[4/5]">
+      <div className="relative overflow-hidden aspect-[4/5] bg-[#F5F5F0]">
         {/* Image */}
         <motion.img
           src={imgSrc}
@@ -180,35 +178,27 @@ function MenuCard({ image, name, price, description, category, available, dietar
           onError={() => setImgSrc(image)}
         />
 
-        {/* Subtle glass overlay on hover */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
-          initial={{ opacity: 0.4 }}
-          animate={{ opacity: isHovered ? 0.8 : 0.4 }}
+          className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500 pointer-events-none"
         />
 
-        {/* Content */}
-        <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-end">
-           <motion.div
-             animate={{ y: isHovered ? 0 : 5 }}
-             transition={{ duration: 0.3 }}
-           >
-             <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-ember-400 mb-1 block">
-               {category || 'Specials'}
-             </span>
-             <h3 className="font-serif-1947 text-lg sm:text-xl lg:text-2xl italic text-white leading-tight mb-2">
-               {name}
-             </h3>
-             <div className="flex items-center justify-between">
-               <span className="font-mono text-xs sm:text-sm text-white/90">
-                 ${price?.toFixed(2)}
-               </span>
-               {dietary?.spicy && (
-                 <span className="w-2 h-2 rounded-full bg-ember-500 shadow-[0_0_8px_rgba(193,68,14,0.8)]" />
-               )}
-             </div>
-           </motion.div>
-        </div>
+        {/* Content Box (moved below image instead of overlaying to match menu) */}
+      </div>
+      <div className="p-4 sm:p-5 flex flex-col">
+          <span className="font-sans text-[9px] font-black tracking-[0.2em] uppercase text-[#8A7A62] mb-1.5 block">
+            {category || 'Specials'}
+          </span>
+          <div className="flex justify-between items-start gap-2 mb-1">
+            <h3 className="font-bold text-[#1A1410] text-[16px] sm:text-[18px] uppercase tracking-tight leading-tight group-hover:text-ember-700 transition-colors">
+              {name}
+            </h3>
+            <span className="font-black text-[#1A1410] text-[15px] sm:text-[16px] shrink-0">
+              ${price?.toFixed(2)}
+            </span>
+          </div>
+          {dietary?.spicy && (
+            <span className="w-2 h-2 rounded-full bg-ember-600 mt-1" />
+          )}
       </div>
     </motion.div>
   )

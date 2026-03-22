@@ -120,21 +120,21 @@ export default function Hero() {
         {/* Restaurant Name - large cinematic display */}
         <div className="hero-stagger flex flex-col items-center">
           <h1
-            className="font-serif-1947 font-black leading-none tracking-tight text-white mb-2"
+            className="font-serif font-black leading-none tracking-tight text-white mb-0"
             style={{ textShadow: '0 4px 28px rgba(0,0,0,0.28)' }}
           >
-            <span className="block text-[clamp(2.5rem,15vw,10rem)] leading-none">
+            <span className="block text-[clamp(3.5rem,18vw,12rem)] leading-[0.85]">
               {brandFirst}
             </span>
           </h1>
-          <span className="text-[11px] sm:text-sm md:text-lg font-black uppercase tracking-[0.18em] sm:tracking-[0.28em] text-white/78 -mt-1 md:-mt-2">
+          <span className="text-[18px] sm:text-2xl md:text-[2.2rem] font-black uppercase tracking-[0.4em] sm:tracking-[0.55em] text-[#FAFAF8] mt-2 md:mt-4">
             {brandSecond}
           </span>
         </div>
 
         {/* Sub-headline */}
-        <div className="hero-stagger mt-3 sm:mt-4">
-          <p className="font-mono text-[11px] sm:text-[12px] tracking-[0.18em] sm:tracking-[0.22em] uppercase text-white/72">
+        <div className="hero-stagger mt-6 sm:mt-10">
+          <p className="font-sans text-[11px] sm:text-[13px] font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase text-white/80">
             {t('hero.type')}
           </p>
         </div>
@@ -156,7 +156,7 @@ export default function Hero() {
             whileHover={{ scale: 1.05, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
             whileTap={{ scale: 0.97 }}
             onClick={() => navigate('/menu')}
-            className="w-full sm:w-auto justify-center px-9 py-4 glass-button-dark text-white text-[11px] sm:text-xs font-black tracking-[0.16em] sm:tracking-[0.18em] uppercase rounded-full flex items-center gap-2 transition-all"
+            className="w-full sm:w-auto justify-center px-9 py-4 bg-[#1A1410] text-white text-[11px] sm:text-[13px] font-black tracking-[0.16em] uppercase rounded-full flex items-center gap-2 transition-all hover:bg-black border border-transparent hover:border-white/20"
             aria-label="Explore the menu"
           >
             {t('hero.exploreMenu')}
@@ -166,14 +166,14 @@ export default function Hero() {
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.15)' }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => document.querySelector('#atelier')?.scrollIntoView({ behavior: 'smooth' })}
-            className="w-full sm:w-auto justify-center px-8 py-3.5 glass-button-light text-white text-[11px] font-body font-bold tracking-[0.14em] sm:tracking-[0.16em] uppercase rounded-full flex items-center gap-2 transition-all border-white/25 bg-white/12"
-            aria-label="Build your own pizza"
+            onClick={() => document.querySelector('#gallery')?.scrollIntoView({ behavior: 'smooth' })}
+            className="w-full sm:w-auto justify-center px-8 py-4 bg-white text-[#1A1410] text-[11px] sm:text-[13px] font-sans font-black tracking-[0.16em] uppercase rounded-full flex items-center gap-2 transition-all hover:bg-[#EBEBE6] border border-transparent shadow-md"
+            aria-label="View our specials"
           >
-            {t('hero.buildYourOwn')}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            OUR SPECIALS
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
           </motion.button>

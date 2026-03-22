@@ -46,14 +46,11 @@ export default function About() {
   }
 
   return (
-    <section ref={ref} id="about" className="py-24 lg:py-40 relative overflow-hidden section-grain glass-shell">
+    <section ref={ref} id="about" className="py-24 lg:py-40 relative overflow-hidden bg-[#FAFAF8]">
       {/* Huge ghost background text */}
-      <div className="absolute top-1/2 -translate-y-1/2 -left-20 font-serif-1947 font-black text-[22vw] leading-none text-[#1A1410]/[0.015] select-none pointer-events-none hidden xl:block z-0">
+      <div className="absolute top-1/2 -translate-y-1/2 -left-20 font-serif font-black text-[22vw] leading-none text-[#1A1410]/[0.02] select-none pointer-events-none hidden xl:block z-0">
         HERITAGE
       </div>
-
-      {/* Ember glow */}
-      <div className="absolute inset-0 ember-glow-bg z-0" />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
         <motion.div
@@ -65,29 +62,29 @@ export default function About() {
           {/* Main content block */}
           <div className="space-y-12">
             <motion.div variants={itemVariants}>
-              <span className="section-eyebrow block mb-6 tracking-[0.3em]">
+              <span className="block mb-4 text-[#8A7A62] text-[11px] font-black tracking-[0.2em] uppercase">
                 {t('about.philosophy')}
               </span>
-              <h2 className="font-serif-1947 italic text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[#1A1410] leading-[1.1] tracking-tight mb-8">
+              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-[#1A1410] leading-tight tracking-tight mb-8">
                 <span dangerouslySetInnerHTML={{ __html: t('about.quote') }} />
               </h2>
-              <div className="w-20 h-px bg-gold-400/60" />
+              <div className="w-16 h-1 bg-[#1A1410] rounded-full" />
             </motion.div>
 
             <motion.div 
               variants={itemVariants}
               className="grid sm:grid-cols-2 gap-8 lg:gap-12"
             >
-              <p className="section-copy text-lg leading-relaxed text-[#5C554E] first-letter:text-5xl first-letter:font-serif-1947 first-letter:mr-3 first-letter:float-left first-letter:text-[#1A1410]">
+              <p className="text-[16px] leading-relaxed text-[#5C554E] font-medium first-letter:text-5xl first-letter:font-serif first-letter:mr-3 first-letter:float-left first-letter:text-[#1A1410]">
                 {t('about.description1', { restaurantName: settings?.restaurantName || 'Mustang Pizza' })}
               </p>
-              <p className="section-copy text-lg leading-relaxed text-[#5C554E] pt-4 sm:pt-10">
+              <p className="text-[16px] leading-relaxed text-[#5C554E] font-medium pt-4 sm:pt-10">
                 {t('about.description2')}
               </p>
             </motion.div>
 
             <motion.div variants={itemVariants} className="pt-4">
-              <span className="font-serif-1947 italic text-4xl text-[#1A1410]/30 select-none">
+              <span className="font-serif italic text-3xl text-[#1A1410]/30 select-none">
                 {t('about.signature')}
               </span>
             </motion.div>
@@ -100,12 +97,12 @@ export default function About() {
                 key={stat.label}
                 variants={itemVariants}
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                className="glass-card glass-highlight-ring p-8 sm:p-10 flex flex-col items-center justify-center text-center aspect-square sm:aspect-auto sm:h-48"
+                className="bg-white border border-[#EBEBE6] rounded-[24px] shadow-sm hover:shadow-md transition-all p-8 flex flex-col items-center justify-center text-center aspect-square sm:aspect-auto sm:h-44"
               >
-                <div className="font-mono text-3xl md:text-4xl text-ember-500 mb-2 font-bold tracking-tighter">
+                <div className="font-sans text-3xl md:text-4xl text-[#1A1410] mb-2 font-black tracking-tight">
                   {stat.num}
                 </div>
-                <div className="font-mono text-[10px] sm:text-[11px] tracking-[0.2em] uppercase text-[#9B8D74] leading-tight font-black">
+                <div className="font-sans text-[10px] sm:text-[11px] font-bold tracking-[0.15em] uppercase text-[#8A7A62] leading-tight">
                   {stat.label}
                 </div>
               </motion.div>

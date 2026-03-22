@@ -14,9 +14,11 @@ import Testimonials from './components/Testimonials'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
+import CartDrawer from './components/CartDrawer'
 import { useTranslation } from 'react-i18next'
 import CateringPage from './components/CateringPage'
 import DiningPage from './components/DiningPage'
+import CheckoutPage from './components/CheckoutPage'
 
 import OrderTracker from './components/OrderTracker'
 import CustomerProfile from './components/CustomerProfile'
@@ -145,20 +147,15 @@ function App() {
     <BrowserRouter>
       <SettingsProvider>
         <ChatbotProvider>
-          <div className="glass-shell bg-[#FAFAF8] relative overflow-x-hidden selection:bg-ember-500/15 selection:text-[#1A1410]">
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute left-[-10rem] top-[-9rem] h-[24rem] w-[24rem] rounded-full bg-ember-500/6 blur-[140px]" />
-              <div className="absolute right-[-8rem] top-[22rem] h-[20rem] w-[20rem] rounded-full bg-gold-400/7 blur-[150px]" />
-              <div className="absolute bottom-0 left-1/3 h-[20rem] w-[20rem] rounded-full bg-white/55 blur-[160px]" />
-            </div>
-            <div className="relative z-10 text-[#1A1410]">
+          <div className="bg-[#FAFAF8] relative min-h-screen text-[#1A1410] font-sans selection:bg-[#1A1410] selection:text-white pb-0">
+            <div className="relative z-10">
               <Toaster position="top-center" toastOptions={{
-                className: 'font-body',
+                className: 'font-semibold shadow-md border border-[#EBEBE6]',
                 style: {
-                  background: '#1A1410',
-                  color: '#fff',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(255,255,255,0.1)'
+                  background: '#FFFFFF',
+                  color: '#1A1410',
+                  borderRadius: '16px',
+                  padding: '12px 24px',
                 }
               }} />
               <QuickLoginWrapper />
@@ -166,6 +163,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/menu" element={<MenuPage />} />
+                <Route path="/checkout" element={<><Navbar /><CheckoutPage /></>} />
                 <Route path="/catering" element={<><Navbar /><CateringPage /></>} />
                 <Route path="/dining" element={<><Navbar /><DiningPage /></>} />
 
@@ -199,6 +197,7 @@ function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               <GlobalChatbot />
+              <CartDrawer />
             </div>
           </div>
         </ChatbotProvider>

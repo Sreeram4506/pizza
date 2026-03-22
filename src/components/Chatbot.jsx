@@ -23,7 +23,8 @@ export default function Chatbot() {
     clearCart,
     cartCount,
     isVoiceEnabled,
-    setIsVoiceEnabled
+    setIsVoiceEnabled,
+    setIsCartOpen
   } = useChatbot()
   const { settings } = useSettings()
   const { t, i18n } = useTranslation()
@@ -380,7 +381,8 @@ Keep adding or go to cart to checkout!`,
         setIsOpen(false)
         break
       case 'cart':
-        setView('cart')
+        setIsOpen(false)
+        setIsCartOpen(true)
         break
       case 'reorder':
         if (data.items && Array.isArray(data.items)) {
@@ -641,29 +643,36 @@ I've added all items from your past order. Would you like to add anything else o
           >
             {/* Header */}
             <div className="chatbot-header flex items-center justify-between p-4 sm:p-8 shrink-0 relative z-10">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-white shadow-xl shrink-0 font-serif-1947 text-xl sm:text-2xl" style={{ background: 'linear-gradient(135deg, #C1440E, #8B2F0A)' }}>
+              <button 
+                type="button"
+                className="flex items-center gap-3 sm:gap-4 cursor-pointer hover:opacity-80 transition-opacity text-left outline-none"
+                onClick={() => {
+                  navigate('/')
+                  setIsOpen(false)
+                }}
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-white shadow-xl shrink-0 font-serif text-xl sm:text-2xl" style={{ background: 'linear-gradient(135deg, #1A1410, #2A2420)' }}>
                   {settings?.restaurantName?.[0] || 'M'}
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-serif-1947 text-sm sm:text-xl text-[#1A1410] italic truncate">{restaurantName}</h3>
-                  <p className="text-[7px] sm:text-[9px] text-[#C1440E] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#C1440E] animate-pulse" /> <span className="hidden xs:inline">System Active</span>
+                  <h3 className="font-serif font-black text-sm sm:text-xl text-[#1A1410] truncate mt-1">{restaurantName}</h3>
+                  <p className="text-[7px] sm:text-[9px] text-[#8A7A62] font-black uppercase tracking-[0.3em] flex items-center gap-2 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> <span className="hidden xs:inline">System Active</span>
                   </p>
                 </div>
-              </div>
+              </button>
 
               <div className="flex items-center gap-3 sm:gap-6">
                 {/* Tab buttons - Visible on all screens for better nav */}
                 <div className="chatbot-tab-rail flex items-center p-1 rounded-full">
-                  {['chat', 'menu', 'cart'].map(tab => (
+                  {['chat', 'menu'].map(tab => (
                     <motion.button
                       key={tab}
                       onClick={() => tab === 'menu' ? (navigate('/menu'), setIsOpen(false)) : setView(tab)}
                       className={`px-3 sm:px-8 py-2 sm:py-2.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-all ${view === tab ? 'chatbot-tab-active' : 'chatbot-tab-inactive'}`}
                       whileTap={{ scale: 0.95 }}
                     >
-                      {tab === 'cart' ? `Cart ${cartCount > 0 ? `(${cartCount})` : ''}` : tab}
+                      {tab}
                     </motion.button>
                   ))}
                 </div>
@@ -739,7 +748,7 @@ I've added all items from your past order. Would you like to add anything else o
                   {messages.map((msg, i) => (
                     <ChatMessage key={i} message={msg}
                       onMenuOpen={() => { navigate('/menu'); setIsOpen(false); }}
-                      onCartOpen={() => setView('cart')}
+                      onCartOpen={() => { setIsOpen(false); setIsCartOpen(true); }}
                       onCheckoutOpen={() => setView('checkout')}
                     />
                   ))}

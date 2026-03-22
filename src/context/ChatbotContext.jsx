@@ -6,6 +6,7 @@ const createCartItemId = () => `custom-${Date.now()}-${Math.random().toString(36
 
 export function ChatbotProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isCartOpen, setIsCartOpen] = useState(false)
   const [initialMessage, setInitialMessage] = useState(null)
 
   // Cart State with LocalStorage Persistence
@@ -104,6 +105,8 @@ export function ChatbotProvider({ children }) {
     <ChatbotContext.Provider value={{
       isOpen,
       setIsOpen,
+      isCartOpen,
+      setIsCartOpen,
       openWithIntent,
       openChatbot,
       closeChatbot,
