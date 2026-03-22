@@ -233,9 +233,14 @@ export default function MenuPage() {
                     <button onClick={() => openWithIntent('cart')} className="w-9 h-9 bg-white border border-[#EBEBE6] rounded-full flex items-center justify-center relative hover:bg-[#F9F9F7] transition-colors shadow-sm">
                         <svg className="w-3.5 h-3.5 text-[#1A1410]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 10-8 0v4M5 9h14l1 12H4L5 9z" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         {cartCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-ember-600 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-white">
+                            <motion.span 
+                                key={cartCount}
+                                initial={{ scale: 0.5, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="absolute -top-1 -right-1 w-4 h-4 bg-ember-600 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-white"
+                            >
                                 {cartCount}
-                            </span>
+                            </motion.span>
                         )}
                     </button>
                 </div>
@@ -373,13 +378,15 @@ export default function MenuPage() {
                                                     
                                                     <div className="flex items-center gap-4 mt-auto">
                                                         <p className="font-black text-[#1A1410] text-[16px] sm:text-[18px] tracking-tight">${item.price?.toFixed(2)}</p>
-                                                        <button
+                                                        <motion.button 
+                                                            whileTap={{ scale: 0.8 }}
+                                                            whileHover={{ scale: 1.15 }}
                                                             onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
                                                             disabled={item.available === false}
-                                                            className="w-10 h-10 rounded-full bg-[#1A1410] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-md group-hover:bg-[#EBB250] group-hover:text-[#1A1410]"
+                                                            className="w-10 h-10 rounded-full bg-[#1A1410] text-white flex items-center justify-center transition-all shadow-md group-hover:bg-[#EBB250] group-hover:text-[#1A1410]"
                                                         >
                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
-                                                        </button>
+                                                        </motion.button>
                                                     </div>
                                                 </div>
                                             </div>

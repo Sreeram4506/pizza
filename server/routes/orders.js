@@ -351,7 +351,12 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       io.to(`tenant:${tenantId || 'default'}`).emit('order:new', order)
     }
 
-    res.status(201).json(order)
+    res.status(201).json({ 
+      success: true, 
+      id: order._id,
+      orderNumber: order.orderNumber,
+      order: order.toObject() 
+    })
   } catch (err) {
     console.error('CRITICAL Order creation error:', err)
     console.error('Error Stack:', err.stack)
