@@ -52,8 +52,9 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
     }
 
     const tenantId = req.tenantId
-    const { items, customerInfo, address, type, payment, pickupDateTime, dineInTime, appliedReward } = req.body
+    const { items, customerInfo, address, type, payment, pickupDateTime, dineInTime, appliedReward, tip, promoCode } = req.body
 
+    const incomingTip = Number(tip) || 0
     console.log('Order request - Authenticated user:', authenticatedUser)
     console.log('Order request - Body:', { items, customerInfo, address, type, payment })
 
@@ -138,7 +139,7 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       }
     }
 
-    const total = Math.max(0, subtotal - discount) + tax + deliveryFee
+    const total = Math.max(0, subtotal - discount) + tax + deliveryFee + incomingTip
 
     // Calculate Points Earned
     if (authenticatedUser && loyaltyCfg) {
@@ -151,11 +152,17 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       finalCustomerInfo = {
         name: authenticatedUser.name,
         email: authenticatedUser.email,
-        phone: authenticatedUser.phone
+        phone: authenticatedUser.phone,
+        promoEmail: customerInfo?.promoEmail || false,
+        promoText: customerInfo?.promoText || false
       }
       console.log('Using authenticated user info:', finalCustomerInfo)
     } else if (customerInfo) {
-      finalCustomerInfo = customerInfo
+      finalCustomerInfo = {
+        ...customerInfo,
+        promoEmail: customerInfo.promoEmail || false,
+        promoText: customerInfo.promoText || false
+      }
       console.log('Using provided customer info:', finalCustomerInfo)
     } else {
       return res.status(400).json({ error: 'Customer information required' })
@@ -222,12 +229,14 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       subtotal,
       tax,
       deliveryFee: normalizedType === 'delivery' ? 3.99 : 0,
+      tip: incomingTip,
       discount,
       total,
       pointsEarned,
       pointsRedeemed: usedRewardCost,
       status: 'confirmed',
       customerInfo: finalCustomerInfo,
+      promoCode: promoCode || '',
       address: address || { street: 'Pickup', city: '', zip: '' },
       type: normalizedType,
       payment: normalizedPayment,
@@ -302,7 +311,7 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       console.log('Guest customer updated/created:', customer._id, customer.name, 'Order count:', customer.orderCount)
     }
 
-    // Send order confirmation email (non-blocking)
+    // Send order confirmation email (fully awaited for reliability)
     if (order.customerInfo.email) {
       let totalPoints = 0
       let isGuest = true
@@ -312,15 +321,28 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
           const latestCustomer = await Customer.findById(authenticatedUser.id)
           totalPoints = latestCustomer?.loyalty?.points || 0
         } catch (err) {
-          console.error('Failed to fetch customer points for email:', err)
+          console.error('[LOYALTY] Failed to fetch customer points for email:', err)
         }
       }
-      console.log(`[EMAIL] Sending confirmation - Points earned: ${order.pointsEarned}, Total balance: ${totalPoints}, isGuest: ${isGuest}`)
-      sendOrderConfirmation(order, totalPoints, isGuest).catch(err => console.error('Customer email failed:', err))
+      
+      console.log(`[EMAIL] Processing confirmation for ${order.customerInfo.email}...`)
+      try {
+        const emailResult = await sendOrderConfirmation(order, totalPoints, isGuest)
+        if (emailResult) {
+          console.log(`✅ [EMAIL] Confirmation sent to ${order.customerInfo.email}`)
+        }
+      } catch (err) {
+        console.error(`❌ [EMAIL] Customer email failed for ${order.orderNumber}:`, err)
+      }
     }
 
-    // Notify admin (non-blocking)
-    sendAdminNotification(order).catch(err => console.error('Admin email failed:', err))
+    // Notify admin (awaited)
+    try {
+      await sendAdminNotification(order)
+      console.log(`🔔 [EMAIL] Admin notified for order ${order.orderNumber}`)
+    } catch (err) {
+      console.error(`❌ [EMAIL] Admin notification failed for ${order.orderNumber}:`, err)
+    }
 
     // Emit WebSocket event to admin room
     const io = req.app.get('io')

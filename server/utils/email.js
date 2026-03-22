@@ -12,6 +12,8 @@ const brevoRequest = async (to, subject, htmlContent, senderName = config.restau
     return { simulation: true }
   }
 
+  console.log(`[EMAIL] Attempting to send to: ${to} from: ${config.senderEmail} using API: ${apiKey.substring(0, 5)}...`)
+  
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
@@ -28,14 +30,21 @@ const brevoRequest = async (to, subject, htmlContent, senderName = config.restau
   })
 
   let result
+  const responseClone = response.clone()
   try {
     result = await response.json()
   } catch (parseErr) {
-    const text = await response.text()
+    const text = await responseClone.text()
+    console.error(`[EMAIL] Failed to parse Brevo JSON response. Status: ${response.status}. Body preview: ${text.substring(0, 200)}`)
     throw new Error(`Brevo API returned non-JSON: ${text.substring(0, 100)}`)
   }
 
-  if (!response.ok) throw new Error(result.message || result.code || 'Brevo API Failure')
+  if (!response.ok) {
+    console.error(`❌ [EMAIL] Brevo API Error (${response.status}):`, result)
+    throw new Error(result.message || result.code || 'Brevo API Failure')
+  }
+  
+  console.log(`✅ [EMAIL] Successfully sent! ID: ${result.messageId}`)
   return result
 }
 
@@ -301,12 +310,12 @@ const templates = {
  */
 export const sendOrderConfirmation = async (order, totalPoints = 0, isGuest = false) => {
   try {
-    const { subject, html } = templates.orderConfirmation(order, totalPoints, isGuest)
+    const rendered = templates.orderConfirmation(order, totalPoints, isGuest)
+    const { subject, html } = rendered
     const result = await brevoRequest(order.customerInfo.email, subject, html)
-    console.log(`✅ [EMAIL] Confirmation sent to ${order.customerInfo.email} (Points earned: ${order.pointsEarned || 0}, Balance: ${totalPoints}, Guest: ${isGuest})`)
     return result
   } catch (err) {
-    console.error(`❌ [EMAIL] Customer Error: ${err.message}`)
+    console.error(`❌ [EMAIL] Send Error for ${order?.customerInfo?.email}:`, err)
   }
 }
 

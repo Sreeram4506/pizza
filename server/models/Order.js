@@ -21,6 +21,7 @@ const orderSchema = new mongoose.Schema({
   subtotal: { type: Number, required: true },
   tax: { type: Number, default: 0 },
   deliveryFee: { type: Number, default: 0 },
+  tip: { type: Number, default: 0 },
   discount: { type: Number, default: 0 },
   total: { type: Number, required: true },
   status: {
@@ -36,8 +37,11 @@ const orderSchema = new mongoose.Schema({
   customerInfo: {
     name: { type: String, required: true },
     phone: { type: String, required: true },
-    email: { type: String, default: '' }
+    email: { type: String, default: '' },
+    promoEmail: { type: Boolean, default: false },
+    promoText: { type: Boolean, default: false }
   },
+  promoCode: { type: String, default: '' },
   address: {
     street: { type: String, default: '' },
     city: { type: String, default: '' },

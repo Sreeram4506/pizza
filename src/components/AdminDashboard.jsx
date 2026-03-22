@@ -213,9 +213,24 @@ export default function AdminDashboard() {
                                                         }`}>
                                                         {order.status}
                                                     </span>
-                                                    <span className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest ml-auto">
+                                                     <span className={`text-[10px] uppercase tracking-wider font-black px-3 py-1 rounded-full ${order.payment?.method === 'cash'
+                                                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                                        : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
+                                                        }`}>
+                                                        {order.payment?.method === 'cash' ? '💵 COD' : '💳 CARD'}
+                                                     </span>
+                                                     {order.promoCode && (
+                                                         <span className="text-[10px] bg-ember-600 text-white px-3 py-1 rounded-full font-black uppercase shadow-sm">
+                                                             🎁 {order.promoCode}
+                                                         </span>
+                                                     )}
+                                                     <div className="flex gap-1.5 ml-1">
+                                                        {order.customerInfo?.promoEmail && <span title="Marketing Email Opt-in" className="text-xs">📧</span>}
+                                                        {order.customerInfo?.promoText && <span title="SMS text Opt-in" className="text-xs">💬</span>}
+                                                     </div>
+                                                     <span className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest ml-auto">
                                                         {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
+                                                     </span>
                                                 </div>
 
                                                 {/* Order items */}
@@ -238,9 +253,17 @@ export default function AdminDashboard() {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="text-right">
-                                                        <p className="text-xl font-black text-ember-600">
-                                                            ${(order.total || order.items?.reduce((sum, i) => sum + i.price * (i.quantity || i.qty), 0)).toFixed(2)}
+                                                     <div className="text-right">
+                                                        {order.tip > 0 && (
+                                                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight mb-1">
+                                                                + ${order.tip.toFixed(2)} Tip Included
+                                                            </p>
+                                                        )}
+                                                        <p className="text-xl font-black text-ember-600 leading-none">
+                                                            ${(order.total || 0).toFixed(2)}
+                                                        </p>
+                                                        <p className="text-[9px] font-black uppercase text-[#9B8D74] mt-1 tracking-widest">
+                                                            {order.type || 'pickup'}
                                                         </p>
                                                     </div>
                                                 </div>
