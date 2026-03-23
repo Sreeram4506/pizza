@@ -13,7 +13,8 @@ export default function MenuPage() {
     const [menuItems, setMenuItems] = useState([])
     const [searchQuery, setSearchQuery] = useState('')
     const [activeCategory, setActiveCategory] = useState('')
-    const { openWithIntent, cartCount, addToCart, setIsOpen, orderType, setOrderType } = useChatbot()
+    const { openWithIntent, cart, cartCount, addToCart, setIsOpen, orderType, setOrderType, setIsCartOpen } = useChatbot()
+    const [flyingItems, setFlyingItems] = useState([]) // Array of { id, x, y } for floating +1s
     const { settings } = useSettings()
     const navigate = useNavigate()
 
@@ -120,8 +121,14 @@ export default function MenuPage() {
         }
     }
 
-    const handleOrder = (item) => {
+    const handleAddWithAnimation = (item, e) => {
         addToCart(item)
+        const rect = e.currentTarget.getBoundingClientRect()
+        const newAnim = { id: Date.now(), x: rect.left + rect.width / 2, y: rect.top }
+        setFlyingItems(prev => [...prev, newAnim])
+        setTimeout(() => {
+            setFlyingItems(prev => prev.filter(a => a.id !== newAnim.id))
+        }, 1000)
     }
 
     const groupedItems = categories.reduce((accumulator, category) => {
@@ -230,7 +237,7 @@ export default function MenuPage() {
                         </div>
                     </button>
 
-                    <button onClick={() => openWithIntent('cart')} className="w-9 h-9 bg-white border border-[#EBEBE6] rounded-full flex items-center justify-center relative hover:bg-[#F9F9F7] transition-colors shadow-sm">
+                    <button onClick={() => setIsCartOpen(true)} className="w-9 h-9 bg-white border border-[#EBEBE6] rounded-full flex items-center justify-center relative hover:bg-[#F9F9F7] transition-colors shadow-sm">
                         <svg className="w-3.5 h-3.5 text-[#1A1410]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 10-8 0v4M5 9h14l1 12H4L5 9z" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         {cartCount > 0 && (
                             <motion.span 
@@ -355,7 +362,7 @@ export default function MenuPage() {
                                         <article
                                             key={item._id}
                                             className={`w-full relative group flex gap-5 sm:gap-8 items-center transition-all cursor-pointer border-b border-[#EBEBE6]/60 pb-8 last:border-0 hover:bg-white/40 rounded-2xl -mx-4 px-4 ${item.available === false ? 'opacity-50 grayscale' : ''}`}
-                                            onClick={() => handleOrder(item)}
+                                            onClick={(e) => handleAddWithAnimation(item, e)}
                                         >
                                             <div className="flex-1 min-w-0 order-1">
                                                 <div className="flex flex-col h-full">
@@ -381,7 +388,7 @@ export default function MenuPage() {
                                                         <motion.button 
                                                             whileTap={{ scale: 0.8 }}
                                                             whileHover={{ scale: 1.15 }}
-                                                            onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
+                                                            onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }}
                                                             disabled={item.available === false}
                                                             className="w-10 h-10 rounded-full bg-[#1A1410] text-white flex items-center justify-center transition-all shadow-md group-hover:bg-[#EBB250] group-hover:text-[#1A1410]"
                                                         >
@@ -398,6 +405,20 @@ export default function MenuPage() {
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                                                 />
                                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500 pointer-events-none" />
+                                                
+                                                {/* Quantity Badge on Item */}
+                                                <AnimatePresence>
+                                                    {(cart?.find(i => (i._id || i.itemId) === item._id)?.qty > 0) && (
+                                                        <motion.div 
+                                                            initial={{ scale: 0, opacity: 0 }}
+                                                            animate={{ scale: 1, opacity: 1 }}
+                                                            exit={{ scale: 0, opacity: 0 }}
+                                                            className="absolute top-2 right-2 w-7 h-7 bg-ember-600 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white shadow-lg z-10"
+                                                        >
+                                                            {cart.find(i => (i._id || i.itemId) === item._id)?.qty}
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
                                             </div>
                                         </article>
                                     ))}
@@ -406,6 +427,25 @@ export default function MenuPage() {
                         )
                     })}
                 </main>
+            </div>
+
+            {/* Floating +1 Animations */}
+            <div className="fixed inset-0 pointer-events-none z-[9999]">
+                <AnimatePresence>
+                    {flyingItems.map(anim => (
+                        <motion.div
+                            key={anim.id}
+                            initial={{ opacity: 1, scale: 0.5, x: anim.x - 20, y: anim.y - 20 }}
+                            animate={{ opacity: 0, scale: 1.5, y: anim.y - 100 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className="absolute text-ember-600 font-black text-xl pointer-events-none"
+                            style={{ textShadow: '0 0 10px rgba(255,255,255,0.8)' }}
+                        >
+                            +1
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
             </div>
 
             <style dangerouslySetInnerHTML={{ __html: `

@@ -369,7 +369,8 @@ Keep adding or go to cart to checkout!`,
             available: true
           }
           addToCart(customItem)
-          setView('checkout')
+          setIsOpen(false)
+          navigate('/checkout')
         }
         break
       case 'menu':
@@ -408,7 +409,8 @@ I've added all items from your past order. Would you like to add anything else o
           }
           addToCart(customItem)
         }
-        setView('checkout')
+        setIsOpen(false)
+        navigate('/checkout')
         break
       default:
         break
@@ -427,7 +429,8 @@ I've added all items from your past order. Would you like to add anything else o
 
   const handleCheckoutIntent = () => {
     if (cart.length === 0) return
-    setView('checkout')
+    setIsOpen(false)
+    navigate('/checkout')
   }
 
   const handleCheckoutSuccess = async (paymentIntent) => {
@@ -749,7 +752,7 @@ I've added all items from your past order. Would you like to add anything else o
                     <ChatMessage key={i} message={msg}
                       onMenuOpen={() => { navigate('/menu'); setIsOpen(false); }}
                       onCartOpen={() => { setIsOpen(false); setIsCartOpen(true); }}
-                      onCheckoutOpen={() => setView('checkout')}
+                      onCheckoutOpen={() => { navigate('/checkout'); setIsOpen(false); }}
                     />
                   ))}
 
@@ -1173,7 +1176,7 @@ I've added all items from your past order. Would you like to add anything else o
                       className="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full chatbot-btn-secondary text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap"
                       whileTap={{ scale: 0.95 }}>{t('chatbot.browseMenu')}</motion.button>
                     {cart.length > 0 && (
-                      <motion.button type="button" onClick={() => setView('cart')}
+                      <motion.button type="button" onClick={() => { setIsOpen(false); setIsCartOpen(true); }}
                         className="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full chatbot-btn-primary text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap"
                         whileTap={{ scale: 0.95 }}>Cart ({cartCount})</motion.button>
                     )}
