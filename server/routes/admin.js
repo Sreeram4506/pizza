@@ -20,6 +20,7 @@ import { verifyAdmin } from '../middleware/auth.js'
 import { isConnected } from '../utils/database.js'
 import { Catering } from '../models/Catering.js'
 import { Reservation } from '../models/Reservation.js'
+import { ImageService } from '../utils/image.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -547,12 +548,12 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
             dietary: dietary ? JSON.parse(dietary) : {}
         }
 
-        // Add image path if uploaded
+        // Add image path if uploaded (Using ImageService for abstraction)
         if (req.file) {
-            itemData.image = `/uploads/menu/${req.file.filename}`
+            itemData.image = ImageService.getStoredPath(req.file, 'menu')
             console.log('Image saved:', itemData.image)
         } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
-            itemData.image = image
+            itemData.image = ImageService.getPublicUrl(image)
         }
 
         console.log('Creating item with data:', itemData)
@@ -598,9 +599,9 @@ router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('ima
 
         // Add image path if new image uploaded
         if (req.file) {
-            updateData.image = `/uploads/menu/${req.file.filename}`
+            updateData.image = ImageService.getStoredPath(req.file, 'menu')
         } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
-            updateData.image = image
+            updateData.image = ImageService.getPublicUrl(image)
         }
 
         const item = await MenuItem.findByIdAndUpdate(

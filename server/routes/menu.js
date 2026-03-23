@@ -7,6 +7,7 @@ import { dirname } from 'path'
 import { MenuCategory } from '../models/MenuCategory.js'
 import { MenuItem } from '../models/MenuItem.js'
 import { verifyAdmin } from '../middleware/auth.js'
+import { ImageService } from '../utils/image.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -240,11 +241,11 @@ router.post('/items', verifyAdmin, upload.single('image'), async (req, res) => {
       dietary: dietary ? JSON.parse(dietary) : {}
     }
 
-    // Add image path if uploaded
+    // Add image path if uploaded (Using ImageService for abstraction)
     if (req.file) {
-      itemData.image = `/uploads/menu/${req.file.filename}`
+      itemData.image = ImageService.getStoredPath(req.file, 'menu')
     } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
-      itemData.image = image
+      itemData.image = ImageService.getPublicUrl(image)
     }
 
     const item = new MenuItem(itemData)
@@ -287,9 +288,9 @@ router.put('/items/:id', verifyAdmin, upload.single('image'), async (req, res) =
 
     // Add image path if new image uploaded
     if (req.file) {
-      updateData.image = `/uploads/menu/${req.file.filename}`
+      updateData.image = ImageService.getStoredPath(req.file, 'menu')
     } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
-      updateData.image = image
+      updateData.image = ImageService.getPublicUrl(image)
     }
 
     const item = await MenuItem.findOneAndUpdate(

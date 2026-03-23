@@ -478,6 +478,7 @@ router.get('/me', authenticateCustomer, async (req, res) => {
         name: customer.name,
         email: customer.email,
         phone: customer.phone,
+        addressBook: customer.addressBook || [],
         loyalty: customer.loyalty || { points: 0, lifetimePoints: 0, tier: 'bronze' }
       },
       orders,
@@ -487,6 +488,67 @@ router.get('/me', authenticateCustomer, async (req, res) => {
   } catch (err) {
     console.error('Profile fetch error:', err)
     res.status(500).json({ error: 'Failed to fetch profile' })
+  }
+})
+
+// Add or update address in address book
+router.post('/address-book', async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1]
+  if (!token) return res.status(401).json({ error: 'Authentication required' })
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET)
+    req.customerId = decoded.customerId || decoded.id
+    next()
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' })
+  }
+}, async (req, res) => {
+  try {
+    const { label, street, city, zip, isDefault } = req.body
+    if (!label || !street || !city) {
+      return res.status(400).json({ error: 'Label, street, and city are required' })
+    }
+
+    const customer = await Customer.findById(req.customerId)
+    if (!customer) return res.status(404).json({ error: 'Customer not found' })
+
+    if (isDefault) {
+      customer.addressBook.forEach(a => { a.isDefault = false })
+    }
+
+    customer.addressBook.push({ label, street, city, zip, isDefault: !!isDefault })
+    await customer.save()
+
+    res.json({ message: 'Address added', addressBook: customer.addressBook })
+  } catch (err) {
+    console.error('Add address error:', err)
+    res.status(500).json({ error: 'Failed to add address' })
+  }
+})
+
+// Delete address from address book
+router.delete('/address-book/:addressId', async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1]
+  if (!token) return res.status(401).json({ error: 'Authentication required' })
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET)
+    req.customerId = decoded.customerId || decoded.id
+    next()
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' })
+  }
+}, async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.customerId)
+    if (!customer) return res.status(404).json({ error: 'Customer not found' })
+
+    customer.addressBook = customer.addressBook.filter(a => a._id.toString() !== req.params.addressId)
+    await customer.save()
+
+    res.json({ message: 'Address removed', addressBook: customer.addressBook })
+  } catch (err) {
+    console.error('Delete address error:', err)
+    res.status(500).json({ error: 'Failed to delete address' })
   }
 })
 

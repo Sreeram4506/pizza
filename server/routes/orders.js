@@ -2,10 +2,12 @@ import { Router } from 'express'
 import { Order } from '../models/Order.js'
 import { Customer } from '../models/Customer.js'
 import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
-import { optionalVerifyCustomer } from '../middleware/auth.js'
+import { verifyCustomer } from '../middleware/auth.js'
 import { v4 as uuidv4 } from 'uuid'
 import { config } from '../config.js'
 import { sendOrderConfirmation, sendAdminNotification } from '../utils/email.js'
+import { PricingService } from '../utils/pricing.js'
+import { TrackingService } from '../utils/tracking.js'
 
 // Orders route module
 
@@ -32,7 +34,7 @@ router.get('/', async (req, res) => {
 })
 
 // Create new order
-router.post('/', optionalVerifyCustomer, async (req, res) => {
+router.post('/', verifyCustomer, async (req, res) => {
   console.log('=== ORDER ROUTE CALLED ===')
 
   try {
@@ -139,7 +141,12 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       }
     }
 
-    const total = Math.max(0, subtotal - discount) + tax + deliveryFee + incomingTip
+    // SCALABLE CORE: Calculate all totals using PricingService
+    const { tax, deliveryFee, total } = PricingService.calculateTotals(normalizedItems, {
+      type: normalizedType,
+      discount,
+      tip: incomingTip
+    })
 
     // Calculate Points Earned
     if (authenticatedUser && loyaltyCfg) {
@@ -389,13 +396,35 @@ router.get('/:id', async (req, res) => {
 router.get('/track/:orderNumber', async (req, res) => {
   try {
     const tenantId = req.tenantId
-    const order = await Order.findOne({ orderNumber: req.params.orderNumber.toUpperCase(), ...(tenantId && { tenantId }) })
+    const orderInfo = await TrackingService.getPublicTrackingInfo(
+      { orderNumber: req.params.orderNumber.toUpperCase() }, 
+      tenantId
+    )
 
-    if (!order) {
+    if (!orderInfo) {
       return res.status(404).json({ error: 'Order not found' })
     }
 
-    res.json(order)
+    res.json(orderInfo)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to track order' })
+  }
+})
+
+// Track order by tracking token (SECURE SCALABLE APPROACH)
+router.get('/tracking/:token', async (req, res) => {
+  try {
+    const tenantId = req.tenantId
+    const orderInfo = await TrackingService.getPublicTrackingInfo(
+      { trackingToken: req.params.token },
+      tenantId
+    )
+
+    if (!orderInfo) {
+      return res.status(404).json({ error: 'Tracking info not found' })
+    }
+
+    res.json(orderInfo)
   } catch (err) {
     res.status(500).json({ error: 'Failed to track order' })
   }
@@ -405,23 +434,28 @@ router.get('/track/:orderNumber', async (req, res) => {
 // Use PUT /api/admin/orders/:id/status for status updates (requires admin authentication).
 
 // Track order by phone - changed path to avoid conflict with order number tracking
+// Track order by phone - SECURED: Only returns non-sensitive status info
 router.get('/track-by-phone/:phone', async (req, res) => {
   try {
     const tenantId = req.tenantId
     const phone = req.params.phone.replace(/\D/g, '')
 
-    const order = await Order.findOne({
-      ...(tenantId && { tenantId }),
-      'customerInfo.phone': { $regex: phone },
-      status: { $nin: ['delivered', 'completed', 'cancelled'] }
-    }).sort({ createdAt: -1 })
+    if (!phone || phone.length < 10) {
+      return res.status(400).json({ error: 'Valid phone number required' })
+    }
 
-    if (!order) {
+    const orderInfo = await TrackingService.getPublicTrackingInfo(
+      { 'customerInfo.phone': phone },
+      tenantId
+    )
+
+    if (!orderInfo) {
       return res.status(404).json({ error: 'No active order found' })
     }
 
-    res.json(order)
+    res.json(orderInfo)
   } catch (err) {
+    console.error('[AUTH] Track by phone error:', err)
     res.status(500).json({ error: 'Failed to track order' })
   }
 })

@@ -147,9 +147,23 @@ app.get('/', (req, res) => {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // Fallback for missing upload files — redirect to a placeholder instead of 404
-app.use('/uploads', (req, res) => {
+// 3) DYNAMIC STATIC FILE SERVING (Fine-tuned for Scalability)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')), (req, res) => {
+  // FALLBACK: If file doesn't exist (e.g. in ephemeral serverless environment),
+  // redirect to a high-quality placeholder to keep the UI 'working like now'.
   res.redirect('https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=600&q=80')
 })
+
+// 4) SECURITY: Scaling protection for tracking endpoints
+const trackingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit each IP to 30 tracking requests per window
+  message: { error: 'Too many tracking attempts from this IP, please try again after 15 minutes' }
+})
+
+app.use('/api/orders/track', trackingLimiter)
+app.use('/api/orders/tracking', trackingLimiter)
+app.use('/api/orders/track-by-phone', trackingLimiter)
 
 // Tenant extraction middleware
 app.use(extractTenant)

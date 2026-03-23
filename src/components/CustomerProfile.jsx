@@ -14,6 +14,8 @@ export default function CustomerProfile() {
     const navigate = useNavigate()
     const { openWithIntent } = useChatbot()
     const [expandedOrderId, setExpandedOrderId] = useState(null)
+    const [isAddingAddress, setIsAddingAddress] = useState(false)
+    const [newAddress, setNewAddress] = useState({ label: '', street: '', city: '', zip: '', isDefault: false })
 
     const [loyaltyConfig, setLoyaltyConfig] = useState(null)
 
@@ -52,6 +54,51 @@ export default function CustomerProfile() {
         // Send all items at once to the chatbot for reordering
         openWithIntent('reorder', { items: pastOrder.items })
         toast.success(`Items from Order #${pastOrder.orderNumber} added to cart!`)
+    }
+
+    const handleAddAddress = async (e) => {
+        e.preventDefault()
+        const token = localStorage.getItem('customerToken')
+        try {
+            const res = await fetch('/api/auth/address-book', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newAddress)
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setProfile(prev => ({ ...prev, addressBook: data.addressBook }))
+                setIsAddingAddress(false)
+                setNewAddress({ label: '', street: '', city: '', zip: '', isDefault: false })
+                toast.success('Address added to your book!')
+            } else {
+                const errData = await res.json()
+                toast.error(errData.error || 'Failed to add address')
+            }
+        } catch (err) {
+            console.error('Add address error:', err)
+            toast.error('Network error. Please try again.')
+        }
+    }
+
+    const handleDeleteAddress = async (addressId) => {
+        const token = localStorage.getItem('customerToken')
+        try {
+            const res = await fetch(`/api/auth/address-book/${addressId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setProfile(prev => ({ ...prev, addressBook: data.addressBook }))
+                toast.success('Address removed')
+            }
+        } catch (err) {
+            console.error('Delete address error:', err)
+        }
     }
 
     if (loading) {
@@ -300,6 +347,96 @@ export default function CustomerProfile() {
                                                         </motion.div>
                                                     )}
                                                 </AnimatePresence>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </motion.div>
+
+                            {/* Address Book Section */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.15 }}
+                                className="bg-white rounded-[2.5rem] p-10 shadow-crust border border-crust-100"
+                            >
+                                <div className="flex items-center justify-between mb-8">
+                                    <h3 className="font-display font-black text-2xl text-wood-800 tracking-tight uppercase">Address Book</h3>
+                                    <button 
+                                        onClick={() => setIsAddingAddress(!isAddingAddress)}
+                                        className="bg-wood-800 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all"
+                                    >
+                                        {isAddingAddress ? 'Cancel' : '+ Add Address'}
+                                    </button>
+                                </div>
+
+                                {isAddingAddress && (
+                                    <form onSubmit={handleAddAddress} className="mb-8 p-6 bg-crust-50 rounded-3xl border border-crust-200 space-y-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <input 
+                                                required
+                                                placeholder="Label (e.g. Home, Work)" 
+                                                className="bg-white border border-crust-200 rounded-xl px-4 py-3 outline-none focus:border-tomato-500 transition-all font-bold text-sm"
+                                                value={newAddress.label}
+                                                onChange={e => setNewAddress({...newAddress, label: e.target.value})}
+                                            />
+                                            <input 
+                                                required
+                                                placeholder="Street Address" 
+                                                className="bg-white border border-crust-200 rounded-xl px-4 py-3 outline-none focus:border-tomato-500 transition-all font-bold text-sm"
+                                                value={newAddress.street}
+                                                onChange={e => setNewAddress({...newAddress, street: e.target.value})}
+                                            />
+                                            <input 
+                                                required
+                                                placeholder="City" 
+                                                className="bg-white border border-crust-200 rounded-xl px-4 py-3 outline-none focus:border-tomato-500 transition-all font-bold text-sm"
+                                                value={newAddress.city}
+                                                onChange={e => setNewAddress({...newAddress, city: e.target.value})}
+                                            />
+                                            <input 
+                                                placeholder="Zip Code" 
+                                                className="bg-white border border-crust-200 rounded-xl px-4 py-3 outline-none focus:border-tomato-500 transition-all font-bold text-sm"
+                                                value={newAddress.zip}
+                                                onChange={e => setNewAddress({...newAddress, zip: e.target.value})}
+                                            />
+                                        </div>
+                                        <label className="flex items-center gap-2 cursor-pointer group">
+                                            <input 
+                                                type="checkbox" 
+                                                className="w-4 h-4 accent-tomato-500"
+                                                checked={newAddress.isDefault}
+                                                onChange={e => setNewAddress({...newAddress, isDefault: e.target.checked})}
+                                            />
+                                            <span className="text-xs font-bold text-wood-600 group-hover:text-wood-800">Set as default address</span>
+                                        </label>
+                                        <button type="submit" className="w-full py-3 bg-tomato-600 text-white rounded-xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-tomato-600/20 hover:bg-tomato-700 transition-all">
+                                            Save Address
+                                        </button>
+                                    </form>
+                                )}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {(profile?.addressBook || []).length === 0 ? (
+                                        <div className="col-span-2 text-center py-10 opacity-50">
+                                            <p className="font-bold text-sm">No saved addresses</p>
+                                        </div>
+                                    ) : (
+                                        profile.addressBook.map((addr) => (
+                                            <div key={addr._id} className="p-6 bg-crust-50 rounded-3xl border border-crust-100 hover:border-crust-200 transition-all relative group">
+                                                {addr.isDefault && <span className="absolute top-4 right-4 text-[8px] bg-[#EBB250] text-[#1A1410] px-2 py-0.5 rounded font-black uppercase tracking-widest">Default</span>}
+                                                <h4 className="font-black text-wood-800 uppercase tracking-tight text-sm mb-2">{addr.label}</h4>
+                                                <p className="text-xs text-wood-600 font-bold mb-1 leading-relaxed">{addr.street}</p>
+                                                <p className="text-[10px] text-wood-400 font-black uppercase tracking-widest">{addr.city}, {addr.zip}</p>
+                                                
+                                                <div className="mt-4 flex gap-2">
+                                                    <button 
+                                                        onClick={() => handleDeleteAddress(addr._id)}
+                                                        className="text-[9px] font-black text-tomato-600 uppercase tracking-tighter hover:underline"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))
                                     )}

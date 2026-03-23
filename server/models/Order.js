@@ -61,8 +61,17 @@ const orderSchema = new mongoose.Schema({
   deliveryNotes: { type: String, default: '' },
   pointsEarned: { type: Number, default: 0 },
   pointsRedeemed: { type: Number, default: 0 },
+  trackingToken: { type: String, unique: true },
   source: { type: String, enum: ['website', 'app', 'phone', 'in_person'], default: 'website' }
 }, { timestamps: true })
+
+// Pre-save hook to generate tracking token
+orderSchema.pre('save', function(next) {
+  if (!this.trackingToken) {
+    this.trackingToken = Math.random().toString(36).substring(2, 12).toUpperCase() + '-' + Date.now().toString(36).toUpperCase()
+  }
+  next()
+})
 
 orderSchema.index({ tenantId: 1, status: 1 })
 orderSchema.index({ tenantId: 1, createdAt: -1 })

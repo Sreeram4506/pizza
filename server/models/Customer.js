@@ -11,6 +11,15 @@ const customerSchema = new mongoose.Schema({
     city: { type: String, default: '' },
     zip: { type: String, default: '' }
   },
+  addressBook: [
+    {
+      label: { type: String, required: true },
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      zip: { type: String, required: false },
+      isDefault: { type: Boolean, default: false }
+    }
+  ],
   preferences: {
     dietary: [{ type: String }],
     allergies: [{ type: String }],

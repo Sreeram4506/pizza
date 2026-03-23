@@ -5,6 +5,8 @@ import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
 import { resolveMenuItemImage } from '../utils/menuArtwork'
 import { OrderService } from '../services/OrderService'
+import QuickLoginModal from './QuickLoginModal'
+import toast from 'react-hot-toast'
 
 export default function CheckoutPage() {
   const { cart, cartTotal, orderType, addToCart, removeFromCart, clearCart } = useChatbot()
@@ -36,8 +38,72 @@ export default function CheckoutPage() {
     zip: ''
   })
 
-  // Calculations
-  const taxRate = 0.07 // 7% dummy tax
+  const [userProfile, setUserProfile] = useState(null)
+  const [addressBook, setAddressBook] = useState([])
+  const [showAddressBook, setShowAddressBook] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+
+  useEffect(() => {
+    const token = localStorage.getItem('customerToken')
+    if (!token) {
+      setIsLoginModalOpen(true)
+      return
+    }
+    fetchProfile(token)
+  }, [])
+
+  const fetchProfile = async (token) => {
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setUserProfile(data.user)
+        setAddressBook(data.user.addressBook || [])
+        
+        // Auto-fill
+        const names = data.user.name.split(' ')
+        setForm(prev => ({
+          ...prev,
+          firstName: names[0] || '',
+          lastName: names.slice(1).join(' ') || '',
+          email: data.user.email || '',
+          mobile: data.user.phone || ''
+        }))
+
+        // Auto-select default address
+        const defaultAddr = data.user.addressBook?.find(a => a.isDefault)
+        if (defaultAddr) {
+          setForm(prev => ({
+            ...prev,
+            street: defaultAddr.street,
+            city: defaultAddr.city,
+            zip: defaultAddr.zip
+          }))
+        }
+      } else {
+        localStorage.removeItem('customerToken')
+        setIsLoginModalOpen(true)
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile:', err)
+    }
+  }
+
+  const handleSelectAddress = (addr) => {
+    setForm(prev => ({
+      ...prev,
+      street: addr.street,
+      city: addr.city,
+      zip: addr.zip
+    }))
+    setShowAddressBook(false)
+    toast.success(`Selected ${addr.label}`)
+  }
+
+  // Calculations (Matched to Backend PricingService for Scaling)
+  const taxRate = settings?.taxRate || 0.08 // Default to 8% to match backend
   const subtotal = cartTotal
   const taxes = subtotal * taxRate
   
@@ -50,7 +116,7 @@ export default function CheckoutPage() {
   }
 
   const finalTotal = subtotal + taxes + tipAmount
-  const pointsToEarn = Math.floor(finalTotal * 10) // 10 points per dollar
+  const pointsToEarn = Math.floor(finalTotal * (settings?.loyaltyPointsPerDollar || 10))
 
 
   const handlePlaceOrder = async () => {
@@ -138,6 +204,15 @@ export default function CheckoutPage() {
                 Back to Menu
               </button>
               <h1 className="text-4xl md:text-5xl font-serif tracking-tight font-bold text-[#1A1410]">Checkout</h1>
+              
+              {userProfile && (
+                <div className="mt-4 flex items-center gap-3 bg-[#1A1410]/5 inline-flex px-4 py-2 rounded-full border border-[#1A1410]/10">
+                  <div className="w-8 h-8 rounded-full bg-[#1A1410] text-[#FAFAF8] flex items-center justify-center text-xs font-bold">
+                    {userProfile.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-[14px] font-bold text-[#1A1410]">Logged in as <span className="text-[#EBB250]">{userProfile.name}</span></span>
+                </div>
+              )}
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
@@ -161,6 +236,43 @@ export default function CheckoutPage() {
                             onChange={e => setForm({...formData, street: e.target.value})}
                             className="w-full bg-white border border-[#EBEBE6] rounded-[12px] px-4 py-3 outline-none focus:border-[#1A1410] transition-colors text-[14px] font-semibold"
                           />
+
+                          {addressBook.length > 0 && (
+                            <div className="relative">
+                              <button 
+                                onClick={() => setShowAddressBook(!showAddressBook)}
+                                className="text-[13px] font-bold text-[#EBB250] flex items-center gap-1 hover:underline"
+                              >
+                                📖 Choose from address book ({addressBook.length})
+                              </button>
+                              
+                              <AnimatePresence>
+                                {showAddressBook && (
+                                  <motion.div 
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 5 }}
+                                    className="absolute left-0 top-7 w-full max-w-[300px] bg-white border border-[#EBEBE6] rounded-xl shadow-xl z-20 p-2 space-y-1"
+                                  >
+                                    {addressBook.map((addr) => (
+                                      <button
+                                        key={addr._id}
+                                        onClick={() => handleSelectAddress(addr)}
+                                        className="w-full text-left p-3 hover:bg-[#F5F5F0] rounded-lg transition-colors group"
+                                      >
+                                        <p className="text-[14px] font-black text-[#1A1410] flex items-center justify-between">
+                                          {addr.label}
+                                          {addr.isDefault && <span className="text-[9px] bg-[#EBB250] text-[#1A1410] px-1.5 py-0.5 rounded uppercase">Default</span>}
+                                        </p>
+                                        <p className="text-[12px] text-[#1A1410]/60 truncate">{addr.street}, {addr.city}</p>
+                                      </button>
+                                    ))}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          )}
+
                           <div className="grid grid-cols-2 gap-3">
                             <input 
                               type="text" 
@@ -578,6 +690,20 @@ export default function CheckoutPage() {
 
         </div>
       </div>
+
+      {/* Login Requirement Modal */}
+      <QuickLoginModal 
+        isOpen={isLoginModalOpen} 
+        onClose={() => {
+          if (!localStorage.getItem('customerToken')) {
+            navigate('/menu')
+            toast.error('Login required for checkout')
+          } else {
+            setIsLoginModalOpen(false)
+            fetchProfile(localStorage.getItem('customerToken'))
+          }
+        }} 
+      />
     </div>
   )
 }
