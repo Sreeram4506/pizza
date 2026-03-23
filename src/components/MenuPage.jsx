@@ -13,7 +13,7 @@ export default function MenuPage() {
     const [menuItems, setMenuItems] = useState([])
     const [searchQuery, setSearchQuery] = useState('')
     const [activeCategory, setActiveCategory] = useState('')
-    const { openWithIntent, cart, cartCount, addToCart, setIsOpen, orderType, setOrderType, setIsCartOpen } = useChatbot()
+    const { openWithIntent, cart, cartCount, addToCart, removeFromCart, setIsOpen, orderType, setOrderType, setIsCartOpen } = useChatbot()
     const [flyingItems, setFlyingItems] = useState([]) // Array of { id, x, y } for floating +1s
     const { settings } = useSettings()
     const navigate = useNavigate()
@@ -383,18 +383,56 @@ export default function MenuPage() {
                                                         {item.description || "Freshly prepared with authentic ingredients and our signature secret sauce."}
                                                     </p>
                                                     
-                                                    <div className="flex items-center gap-4 mt-auto">
-                                                        <p className="font-black text-[#1A1410] text-[16px] sm:text-[18px] tracking-tight">${item.price?.toFixed(2)}</p>
-                                                        <motion.button 
-                                                            whileTap={{ scale: 0.8 }}
-                                                            whileHover={{ scale: 1.15 }}
-                                                            onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }}
-                                                            disabled={item.available === false}
-                                                            className="w-10 h-10 rounded-full bg-[#1A1410] text-white flex items-center justify-center transition-all shadow-md group-hover:bg-[#EBB250] group-hover:text-[#1A1410]"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
-                                                        </motion.button>
-                                                    </div>
+                                                     <div className="flex items-center gap-4 mt-auto">
+                                                         <p className="font-black text-[#1A1410] text-[16px] sm:text-[18px] tracking-tight">${item.price?.toFixed(2)}</p>
+                                                         
+                                                         <div className="flex items-center gap-3">
+                                                             <AnimatePresence mode="wait">
+                                                                 {cart.find(i => (i._id || i.itemId) === item._id)?.qty > 0 ? (
+                                                                     <motion.div 
+                                                                         key="stepper"
+                                                                         initial={{ width: 0, opacity: 0, scale: 0.8 }}
+                                                                         animate={{ width: 'auto', opacity: 1, scale: 1 }}
+                                                                         exit={{ width: 0, opacity: 0, scale: 0.8 }}
+                                                                         className="flex items-center bg-[#F5F3EF] rounded-full p-1 border border-[#EBEBE6] shadow-sm overflow-hidden"
+                                                                         onClick={(e) => e.stopPropagation()}
+                                                                     >
+                                                                         <motion.button
+                                                                             whileTap={{ scale: 0.8 }}
+                                                                             onClick={(e) => { e.stopPropagation(); removeFromCart(item._id); }}
+                                                                             className="w-8 h-8 rounded-full flex items-center justify-center text-[#1A1410] hover:bg-white transition-colors"
+                                                                         >
+                                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M20 12H4" /></svg>
+                                                                         </motion.button>
+                                                                         <span className="font-black text-[13px] px-2 min-w-[24px] text-center text-[#1A1410]">
+                                                                             {cart.find(i => (i._id || i.itemId) === item._id).qty}
+                                                                         </span>
+                                                                         <motion.button
+                                                                             whileTap={{ scale: 0.8 }}
+                                                                             onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }}
+                                                                             className="w-8 h-8 rounded-full bg-[#1A1410] text-white flex items-center justify-center hover:bg-ember-600 transition-colors shadow-sm"
+                                                                         >
+                                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
+                                                                         </motion.button>
+                                                                     </motion.div>
+                                                                 ) : (
+                                                                     <motion.button 
+                                                                         key="add-btn"
+                                                                         initial={{ scale: 0.8, opacity: 0 }}
+                                                                         animate={{ scale: 1, opacity: 1 }}
+                                                                         whileTap={{ scale: 0.8 }}
+                                                                         whileHover={{ scale: 1.15 }}
+                                                                         onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }}
+                                                                         disabled={item.available === false}
+                                                                         className="w-10 h-10 rounded-full bg-[#1A1410] text-white flex items-center justify-center transition-all shadow-md group-hover:bg-[#EBB250] group-hover:text-[#1A1410]"
+                                                                     >
+                                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
+                                                                     </motion.button>
+                                                                 )}
+                                                             </AnimatePresence>
+                                                         </div>
+                                                     </div>
+</div>
                                                 </div>
                                             </div>
 
