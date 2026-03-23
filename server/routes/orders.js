@@ -110,8 +110,6 @@ router.post('/', verifyCustomer, async (req, res) => {
       const itemTotal = (price + modifiersTotal) * quantity
       return sum + (Number(itemTotal) || 0)
     }, 0)
-    const tax = subtotal * 0.08 // 8% tax
-    const deliveryFee = normalizedType === 'delivery' ? 3.99 : 0
     let discount = 0
     let usedRewardCost = 0
     let usedRewardName = ''
@@ -235,7 +233,7 @@ router.post('/', verifyCustomer, async (req, res) => {
       })),
       subtotal,
       tax,
-      deliveryFee: normalizedType === 'delivery' ? 3.99 : 0,
+      deliveryFee,
       tip: incomingTip,
       discount,
       total,
