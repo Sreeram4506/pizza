@@ -432,7 +432,6 @@ export default function MenuPage() {
                                                              </AnimatePresence>
                                                          </div>
                                                      </div>
-</div>
                                                 </div>
                                             </div>
 
