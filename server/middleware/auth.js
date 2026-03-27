@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken'
 const JWT_SECRET = process.env.JWT_SECRET || 'pizza-blast-secret-2024'
 
 export const verifyCustomer = (req, res, next) => {
+  if (typeof next !== 'function') {
+    console.error('❌ [AUTH] CRITICAL error: "next" is not a function in verifyCustomer. Type:', typeof next)
+    return res.status(500).json({ error: 'Internal middleware error' })
+  }
   const token = req.headers.authorization?.split(' ')[1]
   if (!token) return res.status(401).json({ error: 'Authentication required' })
 
@@ -18,6 +22,12 @@ export const verifyCustomer = (req, res, next) => {
 }
 
 export const optionalVerifyCustomer = (req, res, next) => {
+  if (typeof next !== 'function') {
+    console.error('❌ [AUTH] CRITICAL error: "next" is not a function in optionalVerifyCustomer. Type:', typeof next)
+    // If next is not a function, we are likely being called directly or Express is misconfigured. 
+    // We can't call next(), so we just have to allow the request to continue or fail.
+    return 
+  }
   const token = req.headers.authorization?.split(' ')[1]
   if (!token) return next()
 
@@ -28,8 +38,6 @@ export const optionalVerifyCustomer = (req, res, next) => {
     req.customerRole = decoded.role
     next()
   } catch (err) {
-    // If token is invalid, we don't throw error for optional auth, 
-    // but we can log it for debugging
     next()
   }
 }

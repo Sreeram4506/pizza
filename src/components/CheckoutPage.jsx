@@ -10,7 +10,11 @@ import toast from 'react-hot-toast'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '')
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+if (!stripeKey) {
+    console.warn('[STRIPE] VITE_STRIPE_PUBLISHABLE_KEY is missing from environment variables!');
+}
+const stripePromise = loadStripe(stripeKey);
 
 export default function CheckoutPage() {
   const { cart, cartTotal, orderType, addToCart, removeFromCart, clearCart } = useChatbot()

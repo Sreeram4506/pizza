@@ -31,6 +31,7 @@ export const TrackingService = {
         actualDeliveredAt: order.actualDeliveredAt,
         // Include ONLY the street for privacy
         addressStreet: order.type === 'delivery' ? order.address.street : null,
+        driverLocation: order.driverLocation,
         message: `Order ${order.orderNumber} is currently ${order.status}`
       };
     } catch (err) {

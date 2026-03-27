@@ -363,13 +363,14 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       order: order.toObject() 
     })
   } catch (err) {
-    console.error('CRITICAL Order creation error:', err)
-    console.error('Error Stack:', err.stack)
+    console.error('❌ [ORDER] CRITICAL creation failure:', err.message)
+    console.error('❌ [ORDER] Stack trace:', err.stack)
     res.status(500).json({
+      success: false,
       error: 'Order placement failed on server',
-      details: err.message,
-      code: err.name || err.code,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      message: err.message,
+      code: err.name || 'INTERNAL_ERROR',
+      stage: 'processing'
     })
   }
 })

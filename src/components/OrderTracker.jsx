@@ -1,13 +1,44 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { io } from 'socket.io-client'
 
 export default function OrderTracker() {
   const [orderNumber, setOrderNumber] = useState('')
   const [orderStatus, setOrderStatus] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [driverLocation, setDriverLocation] = useState(null)
   const navigate = useNavigate()
+
+  // Real-time updates via Socket.io
+  useEffect(() => {
+    if (!orderStatus?.id) return
+
+    const socket = io('/', {
+       transports: ['websocket', 'polling']
+    })
+
+    // Join the specific order room
+    socket.emit('join', `order:${orderStatus.id}`)
+
+    // Listen for live location
+    socket.on('order:driver_location', (location) => {
+      console.log('Live location update:', location)
+      setDriverLocation(location)
+    })
+
+    // Listen for status changes
+    socket.on('order:status_update', (data) => {
+      setOrderStatus(prev => prev ? { ...prev, status: data.status } : null)
+    })
+
+    return () => {
+      socket.off('order:driver_location')
+      socket.off('order:status_update')
+      socket.disconnect()
+    }
+  }, [orderStatus?.id])
 
   const trackOrder = async (e) => {
     e.preventDefault()
@@ -30,6 +61,7 @@ export default function OrderTracker() {
       const order = await response.json()
 
       setOrderStatus({
+        id: order._id || order.id,
         orderNumber: order.orderNumber,
         status: order.status,
         estimatedTime: (order.estimatedDeliveryAt || order.estimatedReadyAt || order.estimatedDineInTime) 
@@ -40,8 +72,13 @@ export default function OrderTracker() {
         total: order.total,
         type: order.type,
         customerName: order.customerInfo?.name || 'Guest',
-        orderTime: order.createdAt
+        orderTime: order.createdAt,
+        driverLocation: order.driverLocation
       })
+
+      if (order.driverLocation) {
+        setDriverLocation(order.driverLocation)
+      }
     } catch (err) {
       setError('Order not found. Please check your order number.')
     } finally {
@@ -205,6 +242,45 @@ export default function OrderTracker() {
                 />
               </div>
             </div>
+            
+            {/* LIVE GPS MAP */}
+            <AnimatePresence>
+              {orderStatus.status === 'out_for_delivery' && driverLocation && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-8 overflow-hidden"
+                >
+                  <div className="flex items-center justify-between mb-3 px-1">
+                    <h3 className="font-black text-[#1A1410] text-sm uppercase tracking-widest flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-tomato-500 animate-ping"></span>
+                      Live Delivery Map
+                    </h3>
+                    <span className="bg-tomato-50 text-tomato-600 text-[9px] font-black px-2 py-0.5 rounded border border-tomato-100 uppercase tracking-tighter">
+                      Live Tracking Active
+                    </span>
+                  </div>
+                  <div className="relative w-full h-64 rounded-2xl overflow-hidden border-2 border-mozzarella-100 shadow-inner group">
+                    <iframe
+                      key={`${driverLocation.lat}-${driverLocation.lng}`}
+                      className="absolute inset-0 w-full h-full grayscale-[0.2] contrast-[1.1]"
+                      frameBorder="0"
+                      scrolling="no"
+                      marginHeight="0"
+                      marginWidth="0"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${driverLocation.lng - 0.005}%2C${driverLocation.lat - 0.005}%2C${driverLocation.lng + 0.005}%2C${driverLocation.lat + 0.005}&layer=mapnik&marker=${driverLocation.lat}%2C${driverLocation.lng}`}
+                    ></iframe>
+                    <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-black/5 shadow-lg text-[10px] font-black text-black/60 pointer-events-none">
+                       📍 Driver's Current Position
+                    </div>
+                  </div>
+                  <p className="mt-2 text-[10px] text-wood-500 font-bold text-center italic">
+                    Driver is moving! Position updates automatically.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Order Details */}
             <div className="space-y-4">

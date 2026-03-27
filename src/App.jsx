@@ -177,6 +177,7 @@ function App() {
                 <Route path="/profile" element={<CustomerProfile />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/delivery" element={<DeliveryPortal />} />
+                <Route path="/delivery/:token" element={<DeliveryPortal />} />
 
                 {/* Secure Nested Admin Routes — no chatbot, no grain */}
                 <Route path="/admin" element={<AdminLayout />}>

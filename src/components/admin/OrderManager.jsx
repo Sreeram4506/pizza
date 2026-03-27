@@ -422,6 +422,33 @@ export default function OrderManager() {
                         )}
                       </div>
 
+                      {/* 3RD PARTY MAGIC LINK */}
+                      {selectedOrder.type === 'delivery' && (
+                        <div className="mt-8 p-5 bg-[#1A1410] rounded-3xl border border-black/5 shadow-xl relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 pointer-events-none" />
+                          <h4 className="font-sans text-[9px] font-black uppercase tracking-[0.25em] text-white/50 mb-3">3rd Party Delivery Access</h4>
+                          <div className="flex gap-2">
+                             <input 
+                               readOnly 
+                               value={`${window.location.origin}/delivery/${selectedOrder.deliveryToken}`}
+                               className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-white font-medium outline-none"
+                             />
+                             <button 
+                               onClick={() => {
+                                 navigator.clipboard.writeText(`${window.location.origin}/delivery/${selectedOrder.deliveryToken}`);
+                                 alert('Magic Link Copied!');
+                               }}
+                               className="px-4 py-2 bg-ember-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-ember-500 transition-all active:scale-95 whitespace-nowrap"
+                             >
+                               Copy Link
+                             </button>
+                          </div>
+                          <p className="mt-3 text-[9px] text-white/40 font-bold italic leading-tight">
+                            Share this link with DoorDash/Uber drivers. No login required.
+                          </p>
+                        </div>
+                      )}
+
                       {/* Driver Assignment Flow within details */}
                       {(selectedOrder.status === 'ready' || selectedOrder.status === 'out_for_delivery') && (
                         <div className="mt-6">

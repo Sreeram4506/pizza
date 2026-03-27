@@ -103,6 +103,109 @@ router.get('/stats', verifyDelivery, async (req, res) => {
             console.error('Failed to mark order delivered:', err)
             res.status(500).json({ error: 'Failed to mark order as delivered' })
         }
+    // Update driver's live location
+    router.post('/orders/:id/location', verifyDelivery, async (req, res) => {
+        try {
+            const { lat, lng } = req.body
+            const tenantId = req.tenantId
+
+            const order = await Order.findOneAndUpdate(
+                { 
+                    _id: req.params.id, 
+                    deliveryPersonId: req.user.id,
+                    status: 'out_for_delivery',
+                    ...(tenantId && { tenantId })
+                },
+                { 
+                    'driverLocation.lat': lat,
+                    'driverLocation.lng': lng,
+                    'driverLocation.updatedAt': new Date()
+                },
+                { returnDocument: 'after' }
+            )
+
+            if (!order) {
+                return res.status(404).json({ error: 'Active order not found' })
+            }
+
+            // Emit live position to tracking page room
+            const io = req.app.get('io')
+            if (io) {
+                io.to(`order:${order._id}`).emit('order:driver_location', {
+                    lat,
+                    lng,
+                    updatedAt: new Date()
+                })
+            }
+
+            res.json({ success: true })
+        } catch (err) {
+            console.error('Failed to update driver location:', err)
+            res.status(500).json({ error: 'Failed to update location' })
+        }
+    })
+
+    // ==========================================
+    // 🚚 3RD PARTY / MAGIC LINK DRIVER ROUTES
+    // (No Login Required - Authorized by Token)
+    // ==========================================
+
+    // Get order via delivery token
+    router.get('/token/:token', async (req, res) => {
+        try {
+            const order = await Order.findOne({ 
+                deliveryToken: req.params.token,
+                status: { $nin: ['delivered', 'cancelled'] }
+            })
+            if (!order) return res.status(404).json({ error: 'Order not found' })
+            res.json(order)
+        } catch (err) {
+            res.status(500).json({ error: 'Server error' })
+        }
+    })
+
+    // Mark as delivered via token
+    router.put('/token/:token/deliver', async (req, res) => {
+        try {
+            const { deliveryNotes } = req.body
+            const order = await Order.findOneAndUpdate(
+                { deliveryToken: req.params.token },
+                { 
+                    status: 'delivered', 
+                    actualDeliveredAt: new Date(),
+                    deliveryNotes: deliveryNotes || ''
+                },
+                { returnDocument: 'after' }
+            )
+            if (!order) return res.status(404).json({ error: 'Order not found' })
+
+            const io = req.app.get('io')
+            if (io) {
+                io.to(`order:${order._id}`).emit('order:status_update', { id: order._id, status: 'delivered' })
+                io.to('admin:orders').emit('order:update', order)
+            }
+            res.json({ success: true, order })
+        } catch (err) {
+            res.status(500).json({ error: 'Failed' })
+        }
+    })
+
+    // Update GPS via token
+    router.post('/token/:token/location', async (req, res) => {
+        try {
+            const { lat, lng } = req.body
+            const order = await Order.findOneAndUpdate(
+                { deliveryToken: req.params.token, status: 'out_for_delivery' },
+                { 'driverLocation.lat': lat, 'driverLocation.lng': lng, 'driverLocation.updatedAt': new Date() }
+            )
+            if (!order) return res.status(404).json({ error: 'Active delivery not found' })
+
+            const io = req.app.get('io')
+            if (io) io.to(`order:${order._id}`).emit('order:driver_location', { lat, lng, updatedAt: new Date() })
+            res.json({ success: true })
+        } catch (err) {
+            res.status(500).json({ error: 'Failed' })
+        }
     })
 
     export default router

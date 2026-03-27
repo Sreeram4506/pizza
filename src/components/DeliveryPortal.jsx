@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { io } from 'socket.io-client'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 export default function DeliveryPortal() {
+    const { token: magicToken } = useParams()
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
     const [token, setToken] = useState(localStorage.getItem('adminToken') || '')
@@ -26,20 +27,114 @@ export default function DeliveryPortal() {
         return () => clearInterval(interval)
     }, [orders])
 
+    // LIVE GPS TRACKING LOOP
     useEffect(() => {
-        if (!token) {
-// ... existing fetch logic ...
+        if (!magicToken && (!token || orders.length === 0)) return
+
+        let watchId = null
+        let lastReportTime = 0
+
+        const startTracking = () => {
+            if ("geolocation" in navigator) {
+                watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        const now = Date.now()
+                        if (now - lastReportTime > 15000) {
+                            lastReportTime = now
+                            const { latitude, longitude } = position.coords
+                            
+                            orders.forEach(order => {
+                                if (order.status === 'out_for_delivery') {
+                                    const url = magicToken 
+                                        ? `/api/delivery/token/${magicToken}/location`
+                                        : `/api/delivery/orders/${order._id}/location`
+                                    
+                                    const headers = magicToken 
+                                        ? { 'Content-Type': 'application/json' }
+                                        : { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+
+                                    fetch(url, {
+                                        method: 'POST',
+                                        headers,
+                                        body: JSON.stringify({ lat: latitude, lng: longitude })
+                                    }).catch(err => console.error("GPS report error", err))
+                                }
+                            })
+                        }
+                    },
+                    (err) => console.error("Geolocation error", err),
+                    { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 }
+                )
+            }
         }
-    }, [token])
+
+        startTracking()
+        return () => { if (watchId) navigator.geolocation.clearWatch(watchId) }
+    }, [token, magicToken, orders])
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                setLoading(true)
+                
+                // If we have a magic link token, use the public token endpoint
+                if (magicToken) {
+                    const res = await fetch(`/api/delivery/token/${magicToken}`)
+                    if (res.ok) {
+                        const order = await res.json()
+                        setOrders([order])
+                        setIsDriver(true)
+                    } else {
+                        setIsDriver(false)
+                    }
+                    setLoading(false)
+                    return
+                }
+
+                // Standard login flow
+                if (!token) {
+                    setIsDriver(false)
+                    setLoading(false)
+                    return
+                }
+
+                const [ordersRes, statsRes] = await Promise.all([
+                    fetch('/api/delivery/orders', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/delivery/stats', { headers: { 'Authorization': `Bearer ${token}` } })
+                ])
+
+                if (ordersRes.ok && statsRes.ok) {
+                    const ordersData = await ordersRes.json()
+                    const statsData = await statsRes.json()
+                    setOrders(ordersData)
+                    setStats(statsData)
+                    setIsDriver(true)
+                } else {
+                    setIsDriver(false)
+                }
+            } catch (err) {
+                console.error('Fetch failed', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchOrders()
+    }, [token, magicToken])
 
     const handleDeliver = async (orderId) => {
         try {
-            const res = await fetch(`/api/delivery/orders/${orderId}/deliver`, {
+            const url = magicToken 
+                ? `/api/delivery/token/${magicToken}/deliver`
+                : `/api/delivery/orders/${orderId}/deliver`
+            
+            const headers = magicToken 
+                ? { 'Content-Type': 'application/json' }
+                : { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+
+            const res = await fetch(url, {
                 method: 'PUT',
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers,
                 body: JSON.stringify({ deliveryNotes: orderNotes[orderId] || '' })
             })
             if (res.ok) {
@@ -71,38 +166,44 @@ export default function DeliveryPortal() {
             <div className="bg-white border-b border-[rgba(26,20,16,0.06)] p-4 sticky top-0 z-20 flex justify-between items-center shadow-sm">
                 <div>
                     <h1 className="text-xl font-sans font-bold text-[#1A1410]">Driver Portal</h1>
-                    <p className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest mt-1">Enterprise Mobile View</p>
+                    <p className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest mt-1">
+                        {magicToken ? 'External Partner View' : 'Enterprise Mobile View'}
+                    </p>
                 </div>
-                <button
-                    onClick={() => {
-                        localStorage.removeItem('adminToken')
-                        navigate('/')
-                    }}
-                    className="p-2 text-[#9B8D74] hover:text-[#1A1410] hover:bg-[#F5F3EF] rounded-xl transition-all"
-                >
-                    Logout
-                </button>
+                {!magicToken && (
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem('adminToken')
+                            navigate('/')
+                        }}
+                        className="p-2 text-[#9B8D74] hover:text-[#1A1410] hover:bg-[#F5F3EF] rounded-xl transition-all"
+                    >
+                        Logout
+                    </button>
+                )}
             </div>
 
-            {/* Metrics Dashboard */}
-            <div className="p-4 grid grid-cols-2 lg:grid-cols-4 gap-2 bg-[#F5F3EF] border-b border-[rgba(26,20,16,0.06)] sticky top-[73px] z-10 shadow-sm">
-                <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
-                    <p className="text-[8px] font-black text-ember-600 uppercase tracking-widest mb-1">Active</p>
-                    <p className="text-xl font-black text-[#1A1410]">{orders.length}</p>
+            {/* Metrics Dashboard - Hidden for Magic Links */}
+            {!magicToken && (
+                <div className="p-4 grid grid-cols-2 lg:grid-cols-4 gap-2 bg-[#F5F3EF] border-b border-[rgba(26,20,16,0.06)] sticky top-[73px] z-10 shadow-sm">
+                    <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
+                        <p className="text-[8px] font-black text-ember-600 uppercase tracking-widest mb-1">Active</p>
+                        <p className="text-xl font-black text-[#1A1410]">{orders.length}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
+                        <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-1">Delivered</p>
+                        <p className="text-xl font-black text-[#1A1410]">{stats.deliveredCount}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
+                        <p className="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-1">Earned</p>
+                        <p className="text-xl font-black text-[#1A1410]">${stats.totalEarnings?.toFixed(0)}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
+                        <p className="text-[8px] font-black text-blue-600 uppercase tracking-widest mb-1">Avg Time</p>
+                        <p className="text-xl font-black text-[#1A1410]">{stats.avgDeliveryTime}m</p>
+                    </div>
                 </div>
-                <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
-                    <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-1">Delivered</p>
-                    <p className="text-xl font-black text-[#1A1410]">{stats.deliveredCount}</p>
-                </div>
-                <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
-                    <p className="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-1">Earned</p>
-                    <p className="text-xl font-black text-[#1A1410]">${stats.totalEarnings?.toFixed(0)}</p>
-                </div>
-                <div className="bg-white p-3 rounded-2xl border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
-                    <p className="text-[8px] font-black text-blue-600 uppercase tracking-widest mb-1">Avg Time</p>
-                    <p className="text-xl font-black text-[#1A1410]">{stats.avgDeliveryTime}m</p>
-                </div>
-            </div>
+            )}
 
             {/* Orders List */}
             <div className="p-3 sm:p-4 space-y-4 max-w-md mx-auto pb-24">

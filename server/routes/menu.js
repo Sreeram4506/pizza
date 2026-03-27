@@ -78,7 +78,18 @@ router.get('/categories', async (req, res) => {
     const categories = await MenuCategory.find(query)
       .sort({ sortOrder: 1, createdAt: 1 })
 
-    console.log('Categories found:', categories.length, categories)
+    console.log(`[MENU] Categories found in DB: ${categories.length}`)
+
+    // If no categories in DB, serve the starter menu items as mock fallback
+    if (categories.length === 0) {
+      console.warn('⚠️ [MENU] DB EMPTY: Serving mock categories to allow UI preview.')
+      return res.json([
+        { _id: '1', name: 'Signature Pizzas', description: 'Classic handcrafted pizzas', sortOrder: 1, isActive: true },
+        { _id: '2', name: 'Pastas', description: 'Fresh Italian pasta', sortOrder: 2, isActive: true },
+        { _id: '3', name: 'Sides', description: 'Perfect accompaniments', sortOrder: 3, isActive: true }
+      ])
+    }
+
     res.json(categories)
   } catch (err) {
     console.error('Failed to fetch categories:', err)
@@ -198,7 +209,18 @@ router.get('/items', async (req, res) => {
     const items = await MenuItem.find(query)
       .sort({ sortOrder: 1, createdAt: -1 })
 
-    console.log('Menu items found:', items.length, items)
+    console.log(`[MENU] Items found in DB: ${items.length}`)
+
+    // If no items in DB, serve the starter menu items as mock fallback
+    if (items.length === 0) {
+      console.warn('⚠️ [MENU] DB EMPTY: Serving mock items to allow UI preview.')
+      return res.json([
+        { _id: '101', categoryId: '1', name: 'Margherita', price: 12.99, description: 'Fresh basil and mozzarella', isPopular: true, image: 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad50' },
+        { _id: '102', categoryId: '1', name: 'Pepperoni', price: 14.99, description: 'Spicy pepperoni slices', isPopular: true, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e' },
+        { _id: '103', categoryId: '2', name: 'Lasagna', price: 16.99, description: 'Beef bolognese and béchamel', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c' }
+      ])
+    }
+
     res.json(items)
   } catch (err) {
     console.error('Failed to fetch items:', err)

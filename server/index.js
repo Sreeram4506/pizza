@@ -148,9 +148,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // Fallback for missing upload files — redirect to a placeholder instead of 404
 // 3) DYNAMIC STATIC FILE SERVING (Fine-tuned for Scalability)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')), (req, res) => {
-  // FALLBACK: If file doesn't exist (e.g. in ephemeral serverless environment),
-  // redirect to a high-quality placeholder to keep the UI 'working like now'.
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')), (req, res, next) => {
+  // FALLBACK: If file doesn't exist, redirect to a high-quality placeholder
   res.redirect('https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=600&q=80')
 })
 

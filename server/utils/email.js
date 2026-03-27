@@ -12,7 +12,7 @@ const brevoRequest = async (to, subject, htmlContent, senderName = config.restau
     return { simulation: true }
   }
 
-  console.log(`[EMAIL] Attempting to send to: ${to} from: ${config.senderEmail} using API: ${apiKey.substring(0, 5)}...`)
+  console.log(`[EMAIL] Attempting to send using Brevo. To: ${to}, From: ${config.senderEmail}, API: ${apiKey.substring(0, 5)}...`)
   
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
