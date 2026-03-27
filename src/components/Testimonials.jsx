@@ -57,10 +57,7 @@ export default function Testimonials() {
     <section ref={ref} id="testimonials" className="py-24 lg:py-40 relative overflow-hidden bg-[#FAFAF8]">
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+        <div
           className="text-center mb-20 lg:mb-32"
         >
           <motion.span variants={itemVariants} className="block mb-6 text-[#8A7A62] text-[11px] font-black tracking-[0.2em] uppercase">
@@ -69,7 +66,7 @@ export default function Testimonials() {
           <motion.h2 variants={itemVariants} className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#1A1410] leading-tight tracking-tight">
             {t('testimonials.title')}
           </motion.h2>
-        </motion.div>
+        </div>
 
         <div className="grid lg:grid-cols-[1fr,450px] gap-16 lg:gap-24 items-center">
           {/* Active Testimonial Card */}
@@ -137,8 +134,10 @@ export default function Testimonials() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 lg:gap-8">
             {stats.map((stat, index) => (
               <motion.div
-                key={stat.label}
-                variants={itemVariants}
+                key={index}
+                initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
+                animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: index * 0.1 }}
                 className="bg-white border border-[#EBEBE6] rounded-3xl shadow-sm hover:shadow-md transition-shadow p-8 lg:p-12 relative overflow-hidden group"
               >
                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">

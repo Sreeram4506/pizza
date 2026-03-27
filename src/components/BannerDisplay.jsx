@@ -71,8 +71,6 @@ export default function BannerDisplay({ position = 'middle' }) {
           return (
             <motion.div
               key={banner._id}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
               className="w-full relative z-[60] py-2.5 px-4 shadow-sm"
               style={{ backgroundColor: banner.backgroundColor || '#C1440E' }}
             >
@@ -103,9 +101,6 @@ export default function BannerDisplay({ position = 'middle' }) {
           return (
             <motion.div
               key={banner._id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
               className="absolute left-1/2 -translate-x-1/2 bottom-8 z-30 w-[90%] max-w-lg"
             >
               <div
@@ -134,8 +129,6 @@ export default function BannerDisplay({ position = 'middle' }) {
         return (
           <motion.div
             key={banner._id}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
             className={`w-full ${index > 0 ? 'mt-4' : ''}`}
           >
             <div

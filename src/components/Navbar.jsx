@@ -95,8 +95,6 @@ export default function Navbar() {
 
   return (
     <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 flex flex-col ${isSolid
         ? 'glass-panel-strong border-b border-white/70 shadow-[0_14px_36px_rgba(26,20,16,0.08)]'

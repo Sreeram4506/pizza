@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { Order } from '../models/Order.js'
 import { Customer } from '../models/Customer.js'
 import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
-import { verifyCustomer } from '../middleware/auth.js'
+import { optionalVerifyCustomer } from '../middleware/auth.js'
 import { v4 as uuidv4 } from 'uuid'
 import { config } from '../config.js'
 import { sendOrderConfirmation, sendAdminNotification } from '../utils/email.js'
@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
 })
 
 // Create new order
-router.post('/', verifyCustomer, async (req, res) => {
+router.post('/', optionalVerifyCustomer, async (req, res) => {
   console.log('=== ORDER ROUTE CALLED ===')
 
   try {

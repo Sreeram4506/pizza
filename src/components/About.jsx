@@ -53,10 +53,7 @@ export default function About() {
       </div>
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+        <div
           className="grid lg:grid-cols-[1.2fr,0.8fr] gap-16 lg:gap-24 items-center"
         >
           {/* Main content block */}
@@ -108,7 +105,7 @@ export default function About() {
               </motion.div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

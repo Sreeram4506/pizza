@@ -76,10 +76,7 @@ export default function Contact() {
       </div>
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
-        <motion.div
-           variants={containerVariants}
-           initial="hidden"
-           animate={isInView ? "visible" : "hidden"}
+        <div
            className="mb-16 max-w-3xl"
         >
           <motion.span variants={itemVariants} className="block mb-4 text-[#8A7A62] text-[11px] font-black tracking-[0.2em] uppercase">
@@ -94,12 +91,9 @@ export default function Contact() {
             transition={{ duration: 1, ease: "circOut" }}
             className="w-full h-px bg-[#EBEBE6] origin-left" 
           />
-        </motion.div>
+        </div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+        <div 
           className="grid md:grid-cols-3 gap-6 lg:gap-8"
         >
           {contactInfo.map((item, i) => (
@@ -134,18 +128,15 @@ export default function Contact() {
               )}
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-           animate={isInView ? "visible" : "hidden"}
+        <div
           className="mt-20 pt-16 border-t border-[#EBEBE6]"
         >
-          <motion.span variants={itemVariants} className="font-sans font-bold text-[10px] tracking-[0.2em] uppercase text-[#8A7A62] block mb-8 text-center">
+          <span className="font-sans font-bold text-[10px] tracking-[0.2em] uppercase text-[#8A7A62] block mb-8 text-center">
             {t('contact.availableOn')}
-          </motion.span>
-          <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-4">
+          </span>
+          <div className="flex flex-wrap justify-center gap-4">
             {['Uber Eats', 'DoorDash', 'Grubhub', 'Postmates'].map((partner) => (
               <motion.span
                 key={partner}
@@ -155,8 +146,8 @@ export default function Contact() {
                 {partner}
               </motion.span>
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   )

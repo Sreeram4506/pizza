@@ -72,10 +72,7 @@ export default function PizzaGallery() {
     <section ref={ref} id="gallery" className="py-24 lg:py-40 relative overflow-hidden bg-[#FAFAF8]">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
         {/* Section Header */}
-        <motion.div
-           variants={containerVariants}
-           initial="hidden"
-           animate={isInView ? "visible" : "hidden"}
+        <div
            className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-8"
         >
           <div className="max-w-3xl">
@@ -98,25 +95,19 @@ export default function PizzaGallery() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
           </motion.button>
-        </motion.div>
+        </div>
 
-        <motion.div 
-          initial={{ scaleX: 0 }}
-          animate={isInView ? { scaleX: 1 } : {}}
-          transition={{ duration: 1, ease: "circOut" }}
+        <div 
           className="w-full h-px bg-[#EBEBE6] mb-16 origin-left" 
         />
 
         {/* Menu Grid */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+        <div 
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8"
         >
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white border border-[#EBEBE6] rounded-2xl overflow-hidden flex flex-col relative aspect-[4/5] animate-pulse" />
+              <div key={i} className="bg-white border border-[#EBEBE6] rounded-2xl overflow-hidden flex flex-col relative aspect-[4/5]" />
             ))
           ) : (
             menuItems.slice(0, 8).map((item, index) => (
@@ -135,7 +126,7 @@ export default function PizzaGallery() {
               />
             ))
           )}
-        </motion.div>
+        </div>
 
       </div>
     </section>

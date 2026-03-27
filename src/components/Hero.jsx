@@ -18,19 +18,10 @@ export default function Hero() {
   const [brandFirst, ...brandRest] = restaurantName.split(' ')
   const brandSecond = brandRest.join(' ') || 'Pizza'
 
+  // Removed starting animation to eliminate pre-loading feel
   useGSAP(() => {
     if (!containerRef.current) return
-    const ctx = gsap.context(() => {
-      gsap.from('.hero-stagger', {
-        y: 40,
-        opacity: 0,
-        stagger: 0.15,
-        duration: 1.2,
-        ease: 'power3.out',
-        delay: 0.6
-      })
-    }, containerRef)
-    return () => ctx.revert()
+    // Animations removed per user request for a faster start
   }, [])
 
   // Extended timeout for video load.
@@ -64,7 +55,7 @@ export default function Hero() {
         {/* Video layer served from /public to avoid external CORS issues. */}
         <video
           ref={videoRef}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className="absolute inset-0 w-full h-full object-cover"
           autoPlay
           muted
           loop
@@ -182,9 +173,6 @@ export default function Hero() {
         {/* Feature Pills */}
         <motion.div
           className="hero-stagger flex flex-wrap justify-center gap-2.5 sm:gap-3 mt-8 sm:mt-10 max-w-3xl"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.4 }}
         >
           {[
             t('hero.features.dough'),
@@ -202,18 +190,13 @@ export default function Hero() {
       </div>
 
       {/* Scroll indicator */}
-      <motion.div
+      <div
         className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 hidden sm:flex flex-col items-center gap-2 pointer-events-none"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 2, duration: 0.8 }}
       >
-        <motion.div
-          className="w-px h-12 bg-gradient-to-b from-white/50 to-transparent"
-          animate={{ scaleY: [0.5, 1, 0.5], opacity: [0.4, 0.8, 0.4] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        <div
+          className="w-px h-12 bg-gradient-to-b from-white/50 to-transparent opacity-40"
         />
-      </motion.div>
+      </div>
     </section>
   )
 }

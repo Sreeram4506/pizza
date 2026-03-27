@@ -618,9 +618,6 @@ I've added all items from your past order. Would you like to add anything else o
         <motion.button
           className="chatbot-float-btn fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-[9998] w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white shadow-2xl"
           style={{ position: 'fixed', right: '1.5rem', bottom: '1.5rem', background: 'linear-gradient(135deg, #C1440E 0%, #8B2F0A 100%)' }}
-        initial={{ scale: 0, rotate: -180 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 1 }}
         whileHover={{ scale: 1.1, shadow: '0 8px 30px rgba(244,162,97,0.4)' }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}

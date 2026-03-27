@@ -7,6 +7,10 @@ import { resolveMenuItemImage } from '../utils/menuArtwork'
 import { OrderService } from '../services/OrderService'
 import QuickLoginModal from './QuickLoginModal'
 import toast from 'react-hot-toast'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '')
 
 export default function CheckoutPage() {
   const { cart, cartTotal, orderType, addToCart, removeFromCart, clearCart } = useChatbot()
@@ -30,9 +34,6 @@ export default function CheckoutPage() {
     email: '',
     promoEmail: true,
     promoText: false,
-    cardNumber: '',
-    expiry: '',
-    cvc: '',
     street: '',
     city: '',
     zip: ''
@@ -119,7 +120,7 @@ export default function CheckoutPage() {
   const pointsToEarn = Math.floor(finalTotal * (settings?.loyaltyPointsPerDollar || 10))
 
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = async (stripePaymentIntent) => {
     if (!formData.firstName || !formData.mobile || !formData.email) {
       alert('Please fill out your name, mobile, and email address.')
       return
@@ -159,13 +160,13 @@ export default function CheckoutPage() {
         payment: {
           method: paymentMethod,
           status: paymentMethod === 'cash' ? 'pending' : 'paid',
-          transactionId: paymentMethod === 'cash' ? '' : `MOCK-${Date.now()}`
+          transactionId: paymentMethod === 'cash' ? '' : (stripePaymentIntent?.id || `CARD-${Date.now()}`)
         }
       })
       
       if (order && order.success) {
         clearCart()
-        // Successfully placed: Navigate to Tracking Page
+        toast.success('Order placed successfully!')
         navigate(`/track/${order.orderNumber}`, { state: { order: order, isNew: true } })
       } else {
         alert(order?.error || 'Failed to place order. Please check your information.')
@@ -185,6 +186,121 @@ export default function CheckoutPage() {
         <button onClick={() => navigate('/menu')} className="bg-[#EBB250] text-[#1A1410] px-6 py-3 rounded-full font-bold">Return to Menu</button>
       </div>
     )
+  }
+
+  return (
+    <Elements stripe={stripePromise}>
+    <CheckoutInner
+      cart={cart}
+      cartTotal={cartTotal}
+      orderType={orderType}
+      addToCart={addToCart}
+      removeFromCart={removeFromCart}
+      clearCart={clearCart}
+      settings={settings}
+      formData={formData}
+      setForm={setForm}
+      tipPercent={tipPercent}
+      setTipPercent={setTipPercent}
+      customTip={customTip}
+      setCustomTip={setCustomTip}
+      showCustomTip={showCustomTip}
+      setShowCustomTip={setShowCustomTip}
+      promoCode={promoCode}
+      setPromoCode={setPromoCode}
+      isPromoOpen={isPromoOpen}
+      setIsPromoOpen={setIsPromoOpen}
+      paymentMethod={paymentMethod}
+      setPaymentMethod={setPaymentMethod}
+      isSubmitting={isSubmitting}
+      setIsSubmitting={setIsSubmitting}
+      userProfile={userProfile}
+      addressBook={addressBook}
+      showAddressBook={showAddressBook}
+      setShowAddressBook={setShowAddressBook}
+      isLoginModalOpen={isLoginModalOpen}
+      setIsLoginModalOpen={setIsLoginModalOpen}
+      handleSelectAddress={handleSelectAddress}
+      fetchProfile={fetchProfile}
+      handlePlaceOrder={handlePlaceOrder}
+      subtotal={subtotal}
+      taxes={taxes}
+      tipAmount={tipAmount}
+      finalTotal={finalTotal}
+      pointsToEarn={pointsToEarn}
+    />
+    </Elements>
+  )
+}
+
+function CheckoutInner({
+  cart, cartTotal, orderType, addToCart, removeFromCart, clearCart, settings,
+  formData, setForm, tipPercent, setTipPercent, customTip, setCustomTip,
+  showCustomTip, setShowCustomTip, promoCode, setPromoCode, isPromoOpen, setIsPromoOpen,
+  paymentMethod, setPaymentMethod, isSubmitting, setIsSubmitting,
+  userProfile, addressBook, showAddressBook, setShowAddressBook,
+  isLoginModalOpen, setIsLoginModalOpen, handleSelectAddress, fetchProfile,
+  handlePlaceOrder, subtotal, taxes, tipAmount, finalTotal, pointsToEarn
+}) {
+  const navigate = useNavigate()
+  const stripe = useStripe()
+  const elements = useElements()
+  const [cardError, setCardError] = useState(null)
+  const [clientSecret, setClientSecret] = useState('')
+
+  // Create PaymentIntent when card payment is selected
+  useEffect(() => {
+    if (paymentMethod === 'card' && finalTotal > 0) {
+      const totalWithDelivery = finalTotal + (orderType === 'delivery' ? 3.99 : 0)
+      fetch('/api/payments/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: totalWithDelivery }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.clientSecret) {
+            setClientSecret(data.clientSecret)
+          }
+        })
+        .catch(err => console.error('Payment intent error:', err))
+    }
+  }, [paymentMethod, finalTotal, orderType])
+
+  const handleSubmitOrder = async () => {
+    if (paymentMethod === 'card') {
+      if (!stripe || !elements) {
+        toast.error('Payment system is loading. Please wait...')
+        return
+      }
+      setIsSubmitting(true)
+      setCardError(null)
+
+      if (!clientSecret) {
+        toast.error('Payment not ready. Please wait a moment and try again.')
+        setIsSubmitting(false)
+        return
+      }
+
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
+      })
+
+      if (error) {
+        setCardError(error.message)
+        setIsSubmitting(false)
+        toast.error(`Payment failed: ${error.message}`)
+        return
+      }
+
+      // Payment succeeded - place the order
+      await handlePlaceOrder(paymentIntent)
+    } else {
+      // Cash payment - place order directly
+      await handlePlaceOrder(null)
+    }
   }
 
   return (
@@ -465,41 +581,31 @@ export default function CheckoutPage() {
                   {paymentMethod === 'card' && (
                     <>
                       <div>
-                        <label className="block text-[13px] font-bold text-[#1A1410]/70 mb-1.5 ml-1">Card number</label>
-                        <div className="relative">
-                          <input 
-                            type="text" 
-                            placeholder="0000 0000 0000 0000"
-                            value={formData.cardNumber}
-                            onChange={e => setForm({...formData, cardNumber: e.target.value})}
-                            className="w-full bg-white border border-[#EBEBE6] rounded-[12px] px-4 py-3.5 pr-12 outline-none focus:border-[#1A1410] transition-colors text-[15px] font-semibold shadow-sm tracking-widest"
+                        <label className="block text-[13px] font-bold text-[#1A1410]/70 mb-1.5 ml-1">Card details</label>
+                        <div className="bg-white border border-[#EBEBE6] rounded-[12px] px-4 py-4 shadow-sm focus-within:border-[#1A1410] transition-colors">
+                          <CardElement
+                            options={{
+                              style: {
+                                base: {
+                                  fontSize: '16px',
+                                  color: '#1A1410',
+                                  '::placeholder': { color: '#a8a29e' },
+                                  fontFamily: 'Inter, system-ui, sans-serif',
+                                },
+                                invalid: { color: '#dc2626' },
+                              },
+                            }}
                           />
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1">
-                            <div className="w-8 h-5 rounded bg-[#F5F5F0] border border-[#EBEBE6]" />
-                          </div>
                         </div>
+                        {cardError && (
+                          <p className="text-red-500 text-[13px] font-semibold mt-2 ml-1">{cardError}</p>
+                        )}
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[13px] font-bold text-[#1A1410]/70 mb-1.5 ml-1">Expiry date</label>
-                          <input 
-                            type="text" 
-                            placeholder="MM / YY"
-                            value={formData.expiry}
-                            onChange={e => setForm({...formData, expiry: e.target.value})}
-                            className="w-full bg-white border border-[#EBEBE6] rounded-[12px] px-4 py-3.5 outline-none focus:border-[#1A1410] transition-colors text-[15px] font-semibold shadow-sm tracking-widest text-center"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[13px] font-bold text-[#1A1410]/70 mb-1.5 ml-1">Security code</label>
-                          <input 
-                            type="text" 
-                            placeholder="CVC"
-                            value={formData.cvc}
-                            onChange={e => setForm({...formData, cvc: e.target.value})}
-                            className="w-full bg-white border border-[#EBEBE6] rounded-[12px] px-4 py-3.5 outline-none focus:border-[#1A1410] transition-colors text-[15px] font-semibold shadow-sm tracking-widest text-center"
-                          />
-                        </div>
+                      <div className="flex items-center gap-2 text-[#1A1410]/40 mt-1">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-[11px] font-bold uppercase tracking-widest">Secured by Stripe · 256-bit SSL</span>
                       </div>
                     </>
                   )}
@@ -515,18 +621,18 @@ export default function CheckoutPage() {
                   )}
 
                   <button 
-                    onClick={handlePlaceOrder}
-                    disabled={isSubmitting}
+                    onClick={handleSubmitOrder}
+                    disabled={isSubmitting || (paymentMethod === 'card' && (!stripe || !clientSecret))}
                     className={`w-full mt-6 flex items-center justify-center gap-2 bg-[#EBB250] hover:bg-[#DCA440] text-[#1A1410] text-[18px] font-black py-5 rounded-[16px] transition-all active:scale-[0.98] shadow-md hover:shadow-xl ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
                     {isSubmitting ? (
                         <div className="flex items-center gap-3">
                             <svg className="animate-spin h-6 w-6 text-[#1A1410]" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
-                            Placing Order...
+                            {paymentMethod === 'card' ? 'Processing Payment...' : 'Placing Order...'}
                         </div>
                     ) : (
                         <>
-                            Place order
+                            {paymentMethod === 'card' ? `Pay $${(finalTotal + (orderType === 'delivery' ? 3.99 : 0)).toFixed(2)}` : 'Place order'}
                             <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
                             </svg>
@@ -707,3 +813,4 @@ export default function CheckoutPage() {
     </div>
   )
 }
+
