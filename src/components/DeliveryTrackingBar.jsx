@@ -8,14 +8,26 @@ export default function DeliveryTrackingBar() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Don't show on tracking page, admin page, or delivery portal
-  const shouldHide = location.pathname.startsWith('/track') ||
-    location.pathname.startsWith('/admin') ||
-    location.pathname.startsWith('/delivery')
+  // STRICTLY only show on the profile page to ensure privacy
+  const shouldHide = location.pathname !== '/profile'
 
   useEffect(() => {
     const checkActiveOrders = async () => {
-      const activeOrderIds = JSON.parse(localStorage.getItem('activeOrders') || '[]')
+      // 1. Get current user ID to check their specific storage key
+      let userId = 'guest'
+      const token = localStorage.getItem('customerToken')
+      if (token) {
+        try {
+          const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` }})
+          if (res.ok) {
+            const data = await res.json()
+            userId = data.user._id
+          }
+        } catch {}
+      }
+
+      const storageKey = userId !== 'guest' ? `activeOrders_${userId}` : 'activeOrders_guest'
+      const activeOrderIds = JSON.parse(localStorage.getItem(storageKey) || '[]')
       if (activeOrderIds.length === 0) { setIsVisible(false); return }
 
       try {

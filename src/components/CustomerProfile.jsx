@@ -295,6 +295,14 @@ export default function CustomerProfile() {
                                                                 <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white text-wood-600 border border-crust-100 inline-block">
                                                                     {order.status}
                                                                 </span>
+                                                                {['confirmed', 'preparing', 'ready', 'out_for_delivery'].includes(order.status) && (
+                                                                    <button 
+                                                                        onClick={(e) => { e.stopPropagation(); navigate(`/track/${order.orderNumber}`) }}
+                                                                        className="text-[9px] font-black text-tomato-600 hover:text-tomato-700 underline tracking-widest mt-1 uppercase"
+                                                                    >
+                                                                        Live Tracker →
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </div>
                                                         <div className={`w-8 h-8 rounded-full border border-crust-200 flex items-center justify-center transition-transform ${expandedOrderId === order._id ? 'rotate-180' : ''}`}>

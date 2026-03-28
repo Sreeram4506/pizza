@@ -192,12 +192,13 @@ export default function CheckoutPage() {
       })
       
       if (order && order.success) {
-        // 1. Save to active orders for the tracking bar to pick up
-        const activeIds = JSON.parse(localStorage.getItem('activeOrders') || '[]')
+        // 1. Save to active orders for the tracking bar to pick up (user-specific for privacy)
+        const storageKey = userProfile?._id ? `activeOrders_${userProfile._id}` : 'activeOrders_guest'
+        const activeIds = JSON.parse(localStorage.getItem(storageKey) || '[]')
         const savedId = order.id || order.order?._id
         if (savedId && !activeIds.includes(savedId)) {
           activeIds.push(savedId)
-          localStorage.setItem('activeOrders', JSON.stringify(activeIds))
+          localStorage.setItem(storageKey, JSON.stringify(activeIds))
         }
 
         // 2. Clear cart and show toast
