@@ -254,6 +254,12 @@ export default function CheckoutPage() {
       tipAmount={tipAmount}
       finalTotal={finalTotal}
       pointsToEarn={pointsToEarn}
+      geoLat={geoLat}
+      setGeoLat={setGeoLat}
+      geoLng={geoLng}
+      setGeoLng={setGeoLng}
+      geoLoading={geoLoading}
+      setGeoLoading={setGeoLoading}
     />
     </Elements>
   )
@@ -266,7 +272,8 @@ function CheckoutInner({
   paymentMethod, setPaymentMethod, isSubmitting, setIsSubmitting,
   userProfile, addressBook, showAddressBook, setShowAddressBook,
   isLoginModalOpen, setIsLoginModalOpen, handleSelectAddress, fetchProfile,
-  handlePlaceOrder, subtotal, taxes, tipAmount, finalTotal, pointsToEarn
+  handlePlaceOrder, subtotal, taxes, tipAmount, finalTotal, pointsToEarn,
+  geoLat, setGeoLat, geoLng, setGeoLng, geoLoading, setGeoLoading
 }) {
   const navigate = useNavigate()
   const stripe = useStripe()
