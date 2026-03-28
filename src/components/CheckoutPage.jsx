@@ -141,6 +141,22 @@ export default function CheckoutPage() {
     }
 
     setIsSubmitting(true)
+    
+    // Auto-resolve GPS if missing (magic pin fallback)
+    let finalLat = geoLat
+    let finalLng = geoLng
+    if (orderType === 'delivery' && !finalLat) {
+      try {
+        const query = encodeURIComponent(`${formData.street}, ${formData.city}, ${formData.zip}`)
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`)
+        const data = await res.json()
+        if (data && data[0]) {
+          finalLat = parseFloat(data[0].lat)
+          finalLng = parseFloat(data[0].lon)
+        }
+      } catch (err) { console.warn('Nominatim fallback failed', err) }
+    }
+
     try {
       const order = await OrderService.placeOrder({
         items: cart.map((i) => ({
@@ -156,8 +172,8 @@ export default function CheckoutPage() {
           city: formData.city,
           zip: formData.zip || '',
           instructions: formData.instructions || '',
-          lat: geoLat || null,
-          lng: geoLng || null
+          lat: finalLat || null,
+          lng: finalLng || null
         } : null,
         customerInfo: {
           name: `${formData.firstName} ${formData.lastName}`.trim(),

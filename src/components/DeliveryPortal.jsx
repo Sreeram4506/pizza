@@ -291,31 +291,62 @@ export default function DeliveryPortal() {
                                           </div>
                                         )}
 
-                                        <div className="flex gap-2">
-                                            <button 
-                                                onClick={() => {
-                                                  if (order.address?.lat && order.address?.lng) {
-                                                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${order.address.lat},${order.address.lng}`, '_blank')
-                                                  } else {
-                                                    openMaps(order.address, 'google')
-                                                  }
-                                                }}
-                                                className="flex-1 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all text-[10px] font-black uppercase tracking-tighter rounded-xl border border-blue-200 hover:shadow-sm"
-                                            >
-                                                🗺️ Navigate (Google)
-                                            </button>
-                                            <button 
-                                                onClick={() => {
-                                                  if (order.address?.lat && order.address?.lng) {
-                                                    window.open(`http://maps.apple.com/?daddr=${order.address.lat},${order.address.lng}`, '_blank')
-                                                  } else {
-                                                    openMaps(order.address, 'apple')
-                                                  }
-                                                }}
-                                                className="flex-1 py-2.5 bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all text-[10px] font-black uppercase tracking-tighter rounded-xl border border-[rgba(26,20,16,0.06)] hover:shadow-sm"
-                                            >
-                                                🍎 Navigate (Apple)
-                                            </button>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {/* Google Maps Group */}
+                                            <div className="flex flex-col gap-1">
+                                              <button 
+                                                  onClick={() => {
+                                                    if (order.address?.lat && order.address?.lng) {
+                                                      window.open(`https://www.google.com/maps/dir/?api=1&destination=${order.address.lat},${order.address.lng}`, '_blank')
+                                                    } else {
+                                                      openMaps(order.address, 'google')
+                                                    }
+                                                  }}
+                                                  className="w-full py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all text-[9px] font-black uppercase tracking-tighter rounded-xl border border-blue-200"
+                                              >
+                                                  🚗 Route (Google)
+                                              </button>
+                                              <button 
+                                                  onClick={() => {
+                                                    if (order.address?.lat && order.address?.lng) {
+                                                      window.open(`https://www.google.com/maps/search/?api=1&query=${order.address.lat},${order.address.lng}`, '_blank')
+                                                    } else {
+                                                      openMaps(order.address, 'google')
+                                                    }
+                                                  }}
+                                                  className="w-full py-1.5 bg-white text-blue-600 hover:bg-blue-50 transition-all text-[8px] font-bold uppercase tracking-widest rounded-lg border border-blue-100"
+                                              >
+                                                  📍 Pin (Google)
+                                              </button>
+                                            </div>
+
+                                            {/* Apple Maps Group */}
+                                            <div className="flex flex-col gap-1">
+                                              <button 
+                                                  onClick={() => {
+                                                    if (order.address?.lat && order.address?.lng) {
+                                                      window.open(`http://maps.apple.com/?daddr=${order.address.lat},${order.address.lng}`, '_blank')
+                                                    } else {
+                                                      openMaps(order.address, 'apple')
+                                                    }
+                                                  }}
+                                                  className="w-full py-2 bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all text-[9px] font-black uppercase tracking-tighter rounded-xl border border-[rgba(26,20,16,0.1)]"
+                                              >
+                                                  🍎 Route (Apple)
+                                              </button>
+                                              <button 
+                                                  onClick={() => {
+                                                    if (order.address?.lat && order.address?.lng) {
+                                                      window.open(`http://maps.apple.com/?q=${order.address.lat},${order.address.lng}`, '_blank')
+                                                    } else {
+                                                      openMaps(order.address, 'apple')
+                                                    }
+                                                  }}
+                                                  className="w-full py-1.5 bg-white text-[#1A1410] hover:bg-[#F5F3EF] transition-all text-[8px] font-bold uppercase tracking-widest rounded-lg border border-[rgba(26,20,16,0.06)]"
+                                              >
+                                                  📍 Pin (Apple)
+                                              </button>
+                                            </div>
                                         </div>
                                         {order.address?.instructions && (
                                             <div className="mt-3 text-xs bg-ember-50 p-3 rounded-xl text-ember-700 border border-ember-200 italic">
