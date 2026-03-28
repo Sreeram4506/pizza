@@ -17,7 +17,7 @@ if (!stripeKey) {
 const stripePromise = loadStripe(stripeKey);
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, orderType, addToCart, removeFromCart, clearCart } = useChatbot()
+  const { cart, cartTotal, orderType, addToCart, removeFromCart, clearCart, openWithIntent } = useChatbot()
   const { settings } = useSettings()
   const navigate = useNavigate()
 
@@ -40,8 +40,13 @@ export default function CheckoutPage() {
     promoText: false,
     street: '',
     city: '',
-    zip: ''
+    zip: '',
+    instructions: ''
   })
+
+  const [geoLat, setGeoLat] = useState(null)
+  const [geoLng, setGeoLng] = useState(null)
+  const [geoLoading, setGeoLoading] = useState(false)
 
   const [userProfile, setUserProfile] = useState(null)
   const [addressBook, setAddressBook] = useState([])
@@ -150,7 +155,9 @@ export default function CheckoutPage() {
           street: formData.street,
           city: formData.city,
           zip: formData.zip || '',
-          instructions: formData.instructions || ''
+          instructions: formData.instructions || '',
+          lat: geoLat || null,
+          lng: geoLng || null
         } : null,
         customerInfo: {
           name: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -169,9 +176,24 @@ export default function CheckoutPage() {
       })
       
       if (order && order.success) {
+        // 1. Save to active orders for the tracking bar to pick up
+        const activeIds = JSON.parse(localStorage.getItem('activeOrders') || '[]')
+        const savedId = order.id || order.order?._id
+        if (savedId && !activeIds.includes(savedId)) {
+          activeIds.push(savedId)
+          localStorage.setItem('activeOrders', JSON.stringify(activeIds))
+        }
+
+        // 2. Clear cart and show toast
         clearCart()
-        toast.success('Order placed successfully!')
-        navigate(`/track/${order.orderNumber}`, { state: { order: order, isNew: true } })
+        toast.success('🎉 Order placed! Directing you to tracker...')
+
+        // 3. Open chatbot with order confirmed intent (use full order data)
+        const fullOrder = order.order || order
+        openWithIntent('order_confirmed', { order: { ...fullOrder, orderNumber: order.orderNumber, total: fullOrder.total } })
+
+        // 4. Navigate to tracking page directly for immediate visibility
+        navigate(`/track/${order.orderNumber}`)
       } else {
         alert(order?.error || 'Failed to place order. Please check your information.')
       }
@@ -356,6 +378,53 @@ function CheckoutInner({
                             onChange={e => setForm({...formData, street: e.target.value})}
                             className="w-full bg-white border border-[#EBEBE6] rounded-[12px] px-4 py-3 outline-none focus:border-[#1A1410] transition-colors text-[14px] font-semibold"
                           />
+
+                          {/* GPS Location Button */}
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!navigator.geolocation) { alert('Geolocation not supported'); return }
+                              setGeoLoading(true)
+                              navigator.geolocation.getCurrentPosition(
+                                async (pos) => {
+                                  const { latitude, longitude } = pos.coords
+                                  setGeoLat(latitude)
+                                  setGeoLng(longitude)
+                                  try {
+                                    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`)
+                                    const d = await r.json()
+                                    if (d?.address) {
+                                      const a = d.address
+                                      const street = [a.house_number, a.road].filter(Boolean).join(' ') || d.display_name?.split(',')[0] || ''
+                                      setForm(prev => ({
+                                        ...prev,
+                                        street: street || prev.street,
+                                        city: a.city || a.town || a.village || prev.city,
+                                        zip: a.postcode || prev.zip
+                                      }))
+                                      toast.success('📍 Location captured!')
+                                    }
+                                  } catch { /* reverse geocode failed, coordinates still saved */ }
+                                  setGeoLoading(false)
+                                },
+                                () => { setGeoLoading(false); alert('Location access denied. Please enter address manually.') },
+                                { enableHighAccuracy: true, timeout: 10000 }
+                              )
+                            }}
+                            disabled={geoLoading}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl text-blue-700 text-[12px] font-bold uppercase tracking-wider hover:from-blue-100 hover:to-indigo-100 transition-all disabled:opacity-50"
+                          >
+                            {geoLoading ? (
+                              <><svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Detecting...</>
+                            ) : (
+                              <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> Use Current Location</>
+                            )}
+                          </button>
+                          {geoLat && geoLng && (
+                            <p className="text-[10px] text-green-600 font-bold flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> GPS pinned · Driver will see exact location
+                            </p>
+                          )}
 
                           {addressBook.length > 0 && (
                             <div className="relative">

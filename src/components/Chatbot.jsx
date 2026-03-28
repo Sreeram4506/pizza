@@ -314,12 +314,25 @@ Browse our menu below, add your favourites to the cart, then hit checkout!`,
     setMessages(prev => [...prev, { type: 'user', text: transcript }])
     setIsTyping(true)
     try {
+      // 1. Get active orders from localStorage for context
+      const activeOrderIds = JSON.parse(localStorage.getItem('activeOrders') || '[]')
+      let orderHistory = []
+      
+      if (activeOrderIds.length > 0) {
+        try {
+          const ordersPromises = activeOrderIds.map(id => OrderService.getOrderStatus(id).catch(() => null))
+          const fetchedOrders = await Promise.all(ordersPromises)
+          orderHistory = fetchedOrders.filter(Boolean)
+        } catch (err) { console.error('Voice context fetch failed:', err) }
+      }
+
       const res = await OrderService.chat(transcript, {
         items: cart,
         customer: getCustomerInfo(),
         orderType,
         deliveryAddress,
-        settings
+        settings,
+        activeOrders: orderHistory
       })
       setIsTyping(false)
       if (res.action === 'PLACE_ORDER') {
@@ -327,7 +340,8 @@ Browse our menu below, add your favourites to the cart, then hit checkout!`,
       } else {
         setMessages(prev => [...prev, { type: 'bot', text: res.text || "I'm here to help with your order." }])
       }
-    } catch {
+    } catch (error) {
+      console.error('[CHATBOT-VOICE] Error:', error)
       setIsTyping(false)
       setMessages(prev => [...prev, { type: 'bot', text: "I'm having trouble right now. Try again!" }])
     }
@@ -374,25 +388,20 @@ Keep adding or go to cart to checkout!`,
         }
         break
       case 'menu':
-        navigate('/menu')
-        setIsOpen(false)
+        navigate('/menu'); setIsOpen(false);
         break
       case 'order':
-        navigate('/menu')
-        setIsOpen(false)
+        navigate('/menu'); setIsOpen(false);
         break
       case 'cart':
-        setIsOpen(false)
-        setIsCartOpen(true)
+        setIsOpen(false); setIsCartOpen(true);
         break
       case 'reorder':
         if (data.items && Array.isArray(data.items)) {
           addMultipleToCart(data.items)
           setMessages(prev => [...prev, {
             type: 'bot',
-            text: `**Order Added to Cart!**
-
-I've added all items from your past order. Would you like to add anything else or proceed to checkout?`,
+            text: `**Order Added to Cart!**\n\nI've added all items from your past order. Would you like to add anything else or proceed to checkout?`,
             cartAction: true,
           }])
           setView('chat')
@@ -400,17 +409,28 @@ I've added all items from your past order. Would you like to add anything else o
         break
       case 'checkout':
         if (data.item && typeof data.item === 'object') {
-          const customItem = {
-            ...data.item,
-            _id: `custom-${Date.now()}`,
-            name: data.item.name || `Custom Pizza (${data.item.base || 'Classic'})`,
-            qty: 1,
-            available: true
-          }
+          const customItem = { ...data.item, _id: `custom-${Date.now()}`, name: data.item.name || `Custom Pizza (${data.item.base || 'Classic'})`, qty: 1, available: true }
           addToCart(customItem)
         }
-        setIsOpen(false)
-        navigate('/checkout')
+        setIsOpen(false); navigate('/checkout');
+        break
+      case 'order_confirmed':
+        if (data.order) {
+          const ordId = data.order.orderNumber || data.order._id || data.order.id
+          const eta = data.order.estimatedDeliveryAt || data.order.estimatedReadyAt || new Date(Date.now() + 30 * 60000)
+          const etaStr = new Date(eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          
+          setMessages([
+            {
+              type: 'bot',
+              text: `🎉 **Order Confirmed!**\n\nYour order **${ordId}** has been received!\n\n**ETA:** ${etaStr}\n**Total:** $${Number(data.order.total).toFixed(2)}\n\nCheck the live tracking bar at the bottom of your screen to follow your pizza! 🍕`,
+              showTrackBtn: true,
+              orderNumber: ordId
+            }
+          ])
+          setView('chat')
+          setIsOpen(true)
+        }
         break
       default:
         break
@@ -591,21 +611,39 @@ I've added all items from your past order. Would you like to add anything else o
     setMessages(prev => [...prev, { type: 'user', text: msg }])
     setIsTyping(true)
     try {
+      // 1. Get active orders from localStorage for context
+      const activeOrderIds = JSON.parse(localStorage.getItem('activeOrders') || '[]')
+      let orderHistory = []
+      
+      if (activeOrderIds.length > 0) {
+        try {
+          // Fetch status for all active orders
+          const ordersPromises = activeOrderIds.map(id => 
+            OrderService.getOrderStatus(id).catch(() => null)
+          )
+          const fetchedOrders = await Promise.all(ordersPromises)
+          orderHistory = fetchedOrders.filter(Boolean)
+        } catch (err) {
+          console.error('Failed to fetch order history for chatbot context:', err)
+        }
+      }
+
       const res = await OrderService.chat(msg, {
         items: cart,
         customer: getCustomerInfo(),
         orderType,
         deliveryAddress,
-        settings
+        settings,
+        activeOrders: orderHistory // Provide order history to AI
       })
       setIsTyping(false)
       if (res.action === 'PLACE_ORDER') {
-        // Instead of immediate placement, move to checkout view so user can review/fill details
         handleCheckoutIntent()
       } else {
         setMessages(prev => [...prev, { type: 'bot', text: res.text || "I'm here to help with your order." }])
       }
-    } catch {
+    } catch (error) {
+      console.error('[CHATBOT] Error in handleSend:', error)
       setIsTyping(false)
       setMessages(prev => [...prev, { type: 'bot', text: "I'm having trouble right now. Try again!" }])
     }

@@ -268,26 +268,53 @@ export default function DeliveryPortal() {
                                         </div>
                                     </div>
 
-                                    {/* Address & Maps */}
+                                    {/* Address & Map */}
                                     <div>
-                                        <p className="text-[10px] text-[#9B8D74] font-black uppercase tracking-widest mb-1">Address</p>
-                                        <p className="font-bold text-[#1A1410] text-sm leading-snug">
+                                        <p className="text-[10px] text-[#9B8D74] font-black uppercase tracking-widest mb-1">Delivery Location</p>
+                                        <p className="font-bold text-[#1A1410] text-sm leading-snug mb-2">
                                             {typeof order.address === 'string'
                                                 ? order.address
-                                                : `${order.address?.street}, ${order.address?.city} ${order.address?.zip || ''}`}
+                                                : `${order.address?.street || ''}, ${order.address?.city || ''} ${order.address?.zip || ''}`}
                                         </p>
-                                        <div className="flex gap-2 mt-2">
+
+                                        {/* Embedded GPS Map */}
+                                        {order.address?.lat && order.address?.lng && (
+                                          <div className="relative w-full h-40 rounded-2xl overflow-hidden border border-[rgba(26,20,16,0.1)] mb-3 shadow-inner">
+                                            <iframe
+                                              className="absolute inset-0 w-full h-full"
+                                              frameBorder="0" scrolling="no"
+                                              src={`https://www.openstreetmap.org/export/embed.html?bbox=${order.address.lng - 0.003}%2C${order.address.lat - 0.003}%2C${order.address.lng + 0.003}%2C${order.address.lat + 0.003}&layer=mapnik&marker=${order.address.lat}%2C${order.address.lng}`}
+                                            />
+                                            <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-[8px] font-black text-green-700 border border-green-200 uppercase tracking-wider">
+                                              📍 GPS Pin
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <div className="flex gap-2">
                                             <button 
-                                                onClick={() => openMaps(order.address, 'google')}
-                                                className="flex-1 py-2 bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all text-[10px] font-black uppercase tracking-tighter rounded-xl border border-[rgba(26,20,16,0.06)] hover:shadow-sm"
+                                                onClick={() => {
+                                                  if (order.address?.lat && order.address?.lng) {
+                                                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${order.address.lat},${order.address.lng}`, '_blank')
+                                                  } else {
+                                                    openMaps(order.address, 'google')
+                                                  }
+                                                }}
+                                                className="flex-1 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all text-[10px] font-black uppercase tracking-tighter rounded-xl border border-blue-200 hover:shadow-sm"
                                             >
-                                                🗺️ Google Maps
+                                                🗺️ Navigate (Google)
                                             </button>
                                             <button 
-                                                onClick={() => openMaps(order.address, 'apple')}
-                                                className="flex-1 py-2 bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all text-[10px] font-black uppercase tracking-tighter rounded-xl border border-[rgba(26,20,16,0.06)] hover:shadow-sm"
+                                                onClick={() => {
+                                                  if (order.address?.lat && order.address?.lng) {
+                                                    window.open(`http://maps.apple.com/?daddr=${order.address.lat},${order.address.lng}`, '_blank')
+                                                  } else {
+                                                    openMaps(order.address, 'apple')
+                                                  }
+                                                }}
+                                                className="flex-1 py-2.5 bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all text-[10px] font-black uppercase tracking-tighter rounded-xl border border-[rgba(26,20,16,0.06)] hover:shadow-sm"
                                             >
-                                                🍎 Apple Maps
+                                                🍎 Navigate (Apple)
                                             </button>
                                         </div>
                                         {order.address?.instructions && (

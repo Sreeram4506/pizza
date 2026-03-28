@@ -46,7 +46,9 @@ const orderSchema = new mongoose.Schema({
     street: { type: String, default: '' },
     city: { type: String, default: '' },
     zip: { type: String, default: '' },
-    instructions: { type: String, default: '' }
+    instructions: { type: String, default: '' },
+    lat: { type: Number },
+    lng: { type: Number }
   },
   payment: {
     method: { type: String, enum: ['cash', 'card', 'online'], required: true },
@@ -69,18 +71,9 @@ const orderSchema = new mongoose.Schema({
   deliveryToken: { type: String, unique: true },
   trackingToken: { type: String, unique: true },
   source: { type: String, enum: ['website', 'app', 'phone', 'in_person'], default: 'website' }
-}, { timestamps: true })
-
-// Pre-save hook to generate tracking tokens
-orderSchema.pre('save', function(next) {
-  if (!this.trackingToken) {
-    this.trackingToken = 'TRK-' + Math.random().toString(36).substring(2, 8).toUpperCase() + '-' + Date.now().toString(36).toUpperCase()
-  }
-  if (!this.deliveryToken) {
-    this.deliveryToken = 'DLV-' + Math.random().toString(36).substring(2, 10).toUpperCase() + '-' + Date.now().toString(36).toUpperCase()
-  }
-  next()
 })
+
+orderSchema.index({ tenantId: 1, status: 1 })
 
 orderSchema.index({ tenantId: 1, status: 1 })
 orderSchema.index({ tenantId: 1, createdAt: -1 })

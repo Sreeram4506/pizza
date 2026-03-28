@@ -15,6 +15,7 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
 import CartDrawer from './components/CartDrawer'
+import DeliveryTrackingBar from './components/DeliveryTrackingBar'
 import { useTranslation } from 'react-i18next'
 import CateringPage from './components/CateringPage'
 import DiningPage from './components/DiningPage'
@@ -172,6 +173,7 @@ function App() {
                 <Route path="/forgot-password" element={<><Navbar /><ForgotPassword /></>} />
                 <Route path="/reset-password" element={<><Navbar /><ResetPassword /></>} />
                 <Route path="/track" element={<><Navbar /><OrderTracker /></>} />
+                <Route path="/track/:orderNumber" element={<><Navbar /><OrderTracker /></>} />
                 <Route path="/privacy" element={<><Navbar /><LegalPage variant="privacy" /><Footer /></>} />
                 <Route path="/terms" element={<><Navbar /><LegalPage variant="terms" /><Footer /></>} />
                 <Route path="/profile" element={<CustomerProfile />} />
@@ -199,6 +201,7 @@ function App() {
               </Routes>
               <GlobalChatbot />
               <CartDrawer />
+              <DeliveryTrackingBar />
             </div>
           </div>
         </ChatbotProvider>

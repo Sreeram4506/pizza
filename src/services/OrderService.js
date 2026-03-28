@@ -29,6 +29,28 @@ export const OrderService = {
         }
     },
 
+    async getOrderStatus(orderId) {
+        try {
+            const response = await fetch(`${API_BASE}/orders/${orderId}`);
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (error) {
+            console.error('Fetch order status error:', error);
+            return null;
+        }
+    },
+
+    async trackByNumber(orderNumber) {
+        try {
+            const response = await fetch(`${API_BASE}/orders/track/${orderNumber}`);
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (error) {
+            console.error('Tracking by number error:', error);
+            return null;
+        }
+    },
+
     async trackOrder(phone) {
         try {
             const response = await fetch(`${API_BASE}/orders/track/${phone}`);

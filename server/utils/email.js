@@ -40,11 +40,11 @@ const brevoRequest = async (to, subject, htmlContent, senderName = config.restau
   }
 
   if (!response.ok) {
-    console.error(`❌ [EMAIL] Brevo API Error (${response.status}):`, result)
-    throw new Error(result.message || result.code || 'Brevo API Failure')
+    console.error(`❌ [EMAIL] Brevo API Error (${response.status}):`, JSON.stringify(result, null, 2))
+    throw new Error(result.message || result.code || `Brevo API Failure (${response.status})`)
   }
   
-  console.log(`✅ [EMAIL] Successfully sent! ID: ${result.messageId}`)
+  console.log(`✅ [EMAIL] Successfully sent! ID: ${result.messageId || 'Success'}`)
   return result
 }
 

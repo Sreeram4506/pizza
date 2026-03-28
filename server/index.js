@@ -40,9 +40,16 @@ validateEnv()
 
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.SOCKET_IO_CORS_ORIGIN || 'http://localhost:5173',
-    methods: ['GET', 'POST']
-  }
+    origin: (origin, callback) => {
+      // Allow no-origin requests (same-origin, mobile apps)
+      if (!origin) return callback(null, true)
+      const allowed = !origin || origin.includes('localhost') || origin.includes('vercel.app') || origin.includes('onrender.com') || origin === process.env.FRONTEND_URL
+      callback(null, allowed)
+    },
+    methods: ['GET', 'POST'],
+    credentials: true
+  },
+  transports: ['websocket', 'polling']
 })
 
 // Make io accessible to routes
