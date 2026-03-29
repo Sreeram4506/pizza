@@ -182,4 +182,23 @@ router.post('/token/:token/location', async (req, res) => {
     }
 })
 
+// Update driver's availability status (Online/Offline)
+router.put('/status', verifyDelivery, async (req, res) => {
+    try {
+        const { isActive } = req.body
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { isActive: !!isActive },
+            { new: true }
+        ).select('isActive name')
+
+        if (!user) return res.status(404).json({ error: 'User not found' })
+
+        res.json({ success: true, isActive: user.isActive })
+    } catch (err) {
+        console.error('Failed to update driver status:', err)
+        res.status(500).json({ error: 'Failed to update status' })
+    }
+})
+
 export default router

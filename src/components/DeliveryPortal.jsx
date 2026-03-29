@@ -9,10 +9,27 @@ export default function DeliveryPortal() {
     const [loading, setLoading] = useState(true)
     const [token, setToken] = useState(localStorage.getItem('adminToken') || '')
     const [isDriver, setIsDriver] = useState(false)
+    const [isActive, setIsActive] = useState(true)
     const [stats, setStats] = useState({ deliveredCount: 0, totalEarnings: 0, avgDeliveryTime: 0 })
     const [orderNotes, setOrderNotes] = useState({})
     const [times, setTimes] = useState({})
     const navigate = useNavigate()
+
+    const toggleStatus = async () => {
+        try {
+            const res = await fetch('/api/delivery/status', {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isActive: !isActive })
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setIsActive(data.isActive)
+            }
+        } catch (err) {
+            console.error('Failed to toggle status', err)
+        }
+    }
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -29,7 +46,7 @@ export default function DeliveryPortal() {
 
     // LIVE GPS TRACKING LOOP
     useEffect(() => {
-        if (!magicToken && (!token || orders.length === 0)) return
+        if (!magicToken && (!token || orders.length === 0 || !isActive)) return
 
         let watchId = null
         let lastReportTime = 0
@@ -70,7 +87,7 @@ export default function DeliveryPortal() {
 
         startTracking()
         return () => { if (watchId) navigator.geolocation.clearWatch(watchId) }
-    }, [token, magicToken, orders])
+    }, [token, magicToken, orders, isActive])
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -98,9 +115,10 @@ export default function DeliveryPortal() {
                     return
                 }
 
-                const [ordersRes, statsRes] = await Promise.all([
+                const [ordersRes, statsRes, meRes] = await Promise.all([
                     fetch('/api/delivery/orders', { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch('/api/delivery/stats', { headers: { 'Authorization': `Bearer ${token}` } })
+                    fetch('/api/delivery/stats', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
                 ])
 
                 if (ordersRes.ok && statsRes.ok) {
@@ -109,6 +127,11 @@ export default function DeliveryPortal() {
                     setOrders(ordersData)
                     setStats(statsData)
                     setIsDriver(true)
+
+                    if (meRes.ok) {
+                        const meData = await meRes.json()
+                        setIsActive(meData.isActive)
+                    }
                 } else {
                     setIsDriver(false)
                 }
@@ -158,29 +181,58 @@ export default function DeliveryPortal() {
         window.location.href = `sms:${phone}?body=${text}`
     }
 
-// ... loading and access denied logic ...
+    if (loading) return <div className="h-screen flex items-center justify-center bg-[#FAFAF8] text-[#9B8D74] font-bold uppercase tracking-widest animate-pulse">Syncing Portal...</div>
+
+    if (!isDriver) return (
+        <div className="h-screen flex flex-col items-center justify-center p-8 text-center bg-[#FAFAF8]">
+            <div className="text-6xl mb-6">🔒</div>
+            <h2 className="text-2xl font-black text-[#1A1410] mb-2 uppercase italic tracking-tight">Access Restricted</h2>
+            <p className="text-[#9B8D74] text-sm mb-8">This portal is reserved for authorized delivery personnel.</p>
+            <button onClick={() => navigate('/login')} className="px-10 py-4 bg-[#1A1410] text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition-all">
+                Staff Login
+            </button>
+        </div>
+    )
 
     return (
         <div className="min-h-screen bg-[#FAFAF8] text-[#1A1410] overflow-x-hidden">
-            {/* Header omitted for brevity in targetContent match, but I will include it in replacement */}
-            <div className="bg-white border-b border-[rgba(26,20,16,0.06)] p-4 sticky top-0 z-20 flex justify-between items-center shadow-sm">
+            <div className="bg-white border-b border-[rgba(26,20,16,0.06)] p-4 sticky top-0 z-30 flex justify-between items-center shadow-md">
                 <div>
                     <h1 className="text-xl font-sans font-bold text-[#1A1410]">Driver Portal</h1>
-                    <p className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest mt-1">
-                        {magicToken ? 'External Partner View' : 'Enterprise Mobile View'}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                        <p className="text-[9px] text-[#9B8D74] font-bold uppercase tracking-widest">
+                            {magicToken ? 'External Partner' : 'Enterprise Fleet'}
+                        </p>
+                        {!magicToken && (
+                           <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${isActive ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'}`}>
+                             <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                             <span className="text-[8px] font-black uppercase tracking-widest">{isActive ? 'Online' : 'Offline'}</span>
+                           </div>
+                        )}
+                    </div>
                 </div>
-                {!magicToken && (
-                    <button
-                        onClick={() => {
-                            localStorage.removeItem('adminToken')
-                            navigate('/')
-                        }}
-                        className="p-2 text-[#9B8D74] hover:text-[#1A1410] hover:bg-[#F5F3EF] rounded-xl transition-all"
-                    >
-                        Logout
-                    </button>
-                )}
+                
+                <div className="flex items-center gap-3">
+                   {!magicToken && (
+                      <button 
+                         onClick={toggleStatus}
+                         className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isActive ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}
+                      >
+                        {isActive ? 'Go Offline' : 'Go Online'}
+                      </button>
+                   )}
+                   {!magicToken && (
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem('adminToken')
+                                navigate('/')
+                            }}
+                            className="p-2.5 text-[#9B8D74] hover:text-[#1A1410] hover:bg-[#F5F3EF] rounded-xl transition-all border border-transparent hover:border-[rgba(26,20,16,0.06)]"
+                        >
+                            Logout
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Metrics Dashboard - Hidden for Magic Links */}
@@ -242,9 +294,18 @@ export default function DeliveryPortal() {
                                     </div>
                                     <div className="text-right shrink-0">
                                         <span className="text-[#1A1410] font-black text-sm md:text-base">${order.total?.toFixed(2)}</span>
-                                        <span className="block mt-1 px-2 py-0.5 bg-ember-50 text-ember-600 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-md border border-ember-200">
-                                            PAID
-                                        </span>
+                                        <div className="mt-1 flex flex-col items-end gap-1">
+                                            <span className={`px-2 py-0.5 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-md border ${
+                                                order.payment?.status === 'paid' 
+                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200' 
+                                                : 'bg-amber-50 text-amber-600 border-amber-200'
+                                            }`}>
+                                                {order.payment?.status === 'paid' ? 'PAID' : 'PAYMENT PENDING'}
+                                            </span>
+                                            <span className="text-[7px] md:text-[9px] font-bold text-[#9B8D74] uppercase tracking-[0.1em]">
+                                                {order.payment?.method || 'Method Unknown'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 

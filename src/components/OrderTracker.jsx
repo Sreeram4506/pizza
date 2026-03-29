@@ -229,7 +229,9 @@ export default function OrderTracker() {
                 <div className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-[#F0EDE7]">
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="text-xs font-black uppercase tracking-widest text-[#1A1410]/40">Order Summary</h3>
-                    <span className="text-[10px] font-bold text-[#8A7A62]">{new Date(order.createdAt).toLocaleDateString()}</span>
+                    <span className="text-[10px] font-bold text-[#8A7A62]">
+                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Just Now'}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] font-bold text-[#8A7A62] mt-2">
                     <span className="capitalize">{order.type === 'dine_in' ? 'Dine-In' : order.type}</span>

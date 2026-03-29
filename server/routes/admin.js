@@ -124,8 +124,9 @@ router.get('/orders', verifyAdmin, async (req, res) => {
         }
 
         const orders = await Order.find(query)
+            .populate('deliveryPersonId', 'name phone email')
             .sort({ createdAt: -1 })
-            .limit(50)
+            .limit(100)
         res.json(orders)
     } catch (err) {
         console.error('Failed to fetch orders:', err)

@@ -461,8 +461,9 @@ router.get('/me', authenticateCustomer, async (req, res) => {
     const customer = await Customer.findById(req.user.id)
     if (!customer) return res.status(404).json({ error: 'Profile not found' })
 
-    // Fetch recent orders
-    const orders = await Order.find({ 'customerInfo.email': customer.email })
+    // Fetch recent orders explicitly linked to THIS customer ID
+    // This prevents "global" visibility of orders placed by others with same info
+    const orders = await Order.find({ customerId: customer._id })
       .sort({ createdAt: -1 })
       .limit(5)
 

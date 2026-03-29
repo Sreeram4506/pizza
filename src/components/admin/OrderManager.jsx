@@ -424,28 +424,80 @@ export default function OrderManager() {
 
                       {/* 3RD PARTY MAGIC LINK */}
                       {selectedOrder.type === 'delivery' && (
-                        <div className="mt-8 p-5 bg-[#1A1410] rounded-3xl border border-black/5 shadow-xl relative overflow-hidden">
-                          <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 pointer-events-none" />
-                          <h4 className="font-sans text-[9px] font-black uppercase tracking-[0.25em] text-white/50 mb-3">3rd Party Delivery Access</h4>
-                          <div className="flex gap-2">
-                             <input 
-                               readOnly 
-                               value={`${window.location.origin}/delivery/${selectedOrder.deliveryToken}`}
-                               className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-white font-medium outline-none"
-                             />
-                             <button 
-                               onClick={() => {
-                                 navigator.clipboard.writeText(`${window.location.origin}/delivery/${selectedOrder.deliveryToken}`);
-                                 alert('Magic Link Copied!');
-                               }}
-                               className="px-4 py-2 bg-ember-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-ember-500 transition-all active:scale-95 whitespace-nowrap"
-                             >
-                               Copy Link
-                             </button>
+                        <div className="mt-8 p-6 bg-[#1A1410] rounded-[32px] border border-black/5 shadow-2xl relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+                          <h4 className="font-sans text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-4">3rd Party Delivery Suite</h4>
+                          
+                          <div className="space-y-5">
+                            {/* Brief Summary for Admin */}
+                            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
+                              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1 italic">Shared Brief</p>
+                              <p className="text-[11px] text-white font-bold truncate">📍 {typeof selectedOrder.address === 'string' ? selectedOrder.address : `${selectedOrder.address?.street}, ${selectedOrder.address?.city}`}</p>
+                              <p className="text-[10px] text-white/60 font-medium mt-1 truncate">📦 {selectedOrder.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')}</p>
+                            </div>
+
+                            <div className="flex gap-2">
+                               <input 
+                                 readOnly 
+                                 value={`${window.location.origin}/delivery/${selectedOrder.deliveryToken}`}
+                                 className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white font-medium outline-none focus:border-ember-600/50 transition-all"
+                               />
+                               <button 
+                                 onClick={async () => {
+                                   const shareText = `🛵 NEW DELIVERY ASSIGNMENT\n` +
+                                                `--------------------------\n` +
+                                                `Order: #${selectedOrder.orderNumber}\n` +
+                                                `📍 Address: ${typeof selectedOrder.address === 'string' ? selectedOrder.address : `${selectedOrder.address?.street}, ${selectedOrder.address?.city || ''}`}\n` +
+                                                `📦 Items: ${selectedOrder.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')}\n` +
+                                                `💰 Total: $${selectedOrder.total?.toFixed(2)} (${selectedOrder.payment?.method?.toUpperCase() || 'CASH'})\n` +
+                                                `📞 Customer: ${selectedOrder.customerInfo?.name || 'Customer'} (${selectedOrder.customerInfo?.phone || 'No Phone'})\n` +
+                                                `--------------------------\n` +
+                                                `🔗 TRACK & MANAGE: ${window.location.origin}/delivery/${selectedOrder.deliveryToken}`;
+                                   
+                                   try {
+                                     if (navigator.clipboard && window.isSecureContext) {
+                                       await navigator.clipboard.writeText(shareText);
+                                     } else {
+                                       const textArea = document.createElement("textarea");
+                                       textArea.value = shareText;
+                                       document.body.appendChild(textArea);
+                                       textArea.select();
+                                       document.execCommand('copy');
+                                       document.body.removeChild(textArea);
+                                     }
+                                     alert('Full Brief Copied! (Link + Details)');
+                                   } catch (err) {
+                                     console.error('Copy failed', err);
+                                     alert('Failed to copy. Please manually select the URL above.');
+                                   }
+                                 }}
+                                 className="px-6 py-3 bg-ember-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ember-500 transition-all active:scale-95 shadow-lg shadow-ember-600/20 whitespace-nowrap"
+                               >
+                                 Copy Full Details
+                               </button>
+                            </div>
+                            
+                            <div className="flex justify-between items-center px-1">
+                              <p className="text-[9px] text-white/40 font-bold italic leading-tight max-w-[70%]">
+                                Clipboard content includes full order details + the live tracking link.
+                              </p>
+                              <div className="flex gap-2">
+                                <span className="text-white font-black text-sm">${selectedOrder.total?.toFixed(2)}</span>
+                                <div className="mt-1 flex flex-col items-end gap-1">
+                                    <span className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md border ${
+                                        selectedOrder.payment?.status === 'paid' 
+                                        ? 'bg-emerald-900 text-emerald-300 border-emerald-700' 
+                                        : 'bg-amber-900 text-amber-300 border-amber-700'
+                                    }`}>
+                                        {selectedOrder.payment?.status === 'paid' ? 'PAID' : 'PAYMENT PENDING'}
+                                    </span>
+                                    <span className="text-[7px] font-bold text-white/40 uppercase tracking-[0.1em]">
+                                        {selectedOrder.payment?.method || 'Method Unknown'}
+                                    </span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <p className="mt-3 text-[9px] text-white/40 font-bold italic leading-tight">
-                            Share this link with DoorDash/Uber drivers. No login required.
-                          </p>
                         </div>
                       )}
 

@@ -71,7 +71,10 @@ const orderSchema = new mongoose.Schema({
   deliveryToken: { type: String, unique: true },
   trackingToken: { type: String, unique: true },
   source: { type: String, enum: ['website', 'app', 'phone', 'in_person'], default: 'website' }
+}, { 
+  timestamps: true 
 })
+
 
 orderSchema.index({ tenantId: 1, status: 1 })
 

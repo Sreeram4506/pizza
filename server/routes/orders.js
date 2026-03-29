@@ -34,14 +34,14 @@ router.get('/', async (req, res) => {
 })
 
 // Create new order
-router.post('/', async (req, res) => {
+router.post('/', optionalVerifyCustomer, async (req, res) => {
   console.log('=== ORDER ROUTE CALLED ===')
   try {
     const tenantId = req.tenantId
     const { items, customerInfo, address, type, payment, tip } = req.body
     
-    // Auth info if available from body (since I removed middleware for now)
-    const authenticatedUser = req.body.authenticatedUser || null 
+    // Auth info if available from middleware
+    const authenticatedId = req.customerId || null 
 
     console.log('1. Data validation...')
     if (!items || !Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'Items required' })
@@ -77,25 +77,39 @@ router.post('/', async (req, res) => {
     try {
       const configQuery = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] };
       const loyaltyCfg = await LoyaltyConfig.findOne(configQuery);
-      if (authenticatedUser && loyaltyCfg) {
+      if (authenticatedId && loyaltyCfg) {
         pointsEarned = Math.floor(total * (loyaltyCfg.pointsPerDollar || 1))
       }
     } catch (e) { console.error('Loyalty lookup failed:', e.message) }
+
+    // 4.5 Automatic Driver Assignment (New Logic requested by user)
+    let autoAssignedDriver = null
+    if (normalizedType === 'delivery') {
+      try {
+        const driverQuery = { role: 'delivery', isActive: true, ...(tenantId && { tenantId }) }
+        autoAssignedDriver = await User.findOne(driverQuery)
+        console.log(autoAssignedDriver ? `[AUTO-DISPATCH] Assigned driver: ${autoAssignedDriver.name}` : '[AUTO-DISPATCH] No active drivers found.')
+      } catch (e) {
+        console.error('[AUTO-DISPATCH] Error during lookup:', e.message)
+      }
+    }
 
     // Create Order document
     console.log('5. Saving to database...')
     const order = await Order.create({
       tenantId: tenantId || null,
-      customerId: authenticatedUser ? authenticatedUser.id : undefined,
+      customerId: authenticatedId,
+      deliveryPersonId: autoAssignedDriver ? autoAssignedDriver._id : undefined,
       orderNumber,
       trackingToken,
       deliveryToken,
       items: normalizedItems,
       subtotal, tax, deliveryFee, total, discount: calcDiscount,
       pointsEarned,
-      status: 'confirmed',
-      customerInfo: authenticatedUser ? {
-          name: authenticatedUser.name, email: authenticatedUser.email, phone: authenticatedUser.phone
+      status: autoAssignedDriver ? 'preparing' : 'confirmed', // Speed up flow
+      customerInfo: authenticatedId ? {
+          ...customerInfo, // Keep what was sent (name/phone)
+          email: req.customerEmail || customerInfo.email
       } : customerInfo,
       address: address || { street: 'Main Street', city: '', zip: '' },
       type: normalizedType, payment: normalizedPayment,
@@ -104,10 +118,17 @@ router.post('/', async (req, res) => {
 
     console.log('6. Order created successfully! ID:', order._id)
 
+    // Notify Driver if auto-assigned (Future enhancement: WhatsApp/SMS)
+    const io = req.app.get('io')
+    if (io && autoAssignedDriver) {
+      io.to('admin:orders').emit('order:new', order) // Still notify kitchen
+      // Special event for drivers could go here
+    }
+
     // Non-critical updates
     try {
-      if (authenticatedUser) {
-        await Customer.findByIdAndUpdate(authenticatedUser.id, {
+      if (authenticatedId) {
+        await Customer.findByIdAndUpdate(authenticatedId, {
           $inc: { orderCount: 1, totalSpent: total, 'loyalty.points': pointsEarned, 'loyalty.lifetimePoints': pointsEarned },
           $set: { lastOrderAt: new Date(), isGuest: false }
         })
@@ -117,7 +138,7 @@ router.post('/', async (req, res) => {
     // Send Confirmation Email
     try {
       if (order.customerInfo.email) {
-        await sendOrderConfirmation(order, 0, !authenticatedUser)
+        await sendOrderConfirmation(order, 0, !authenticatedId)
       }
     } catch (e) { console.error('Email failed:', e.message) }
 
