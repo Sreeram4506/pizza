@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { io } from 'socket.io-client'
 import { useNavigate } from 'react-router-dom'
 import { requestNotificationPermission, showPushNotification, playNotificationSound } from '../utils/notifications'
+import toast from 'react-hot-toast'
 
 export default function OrderNotifications() {
   const [notifications, setNotifications] = useState([])
@@ -16,28 +17,47 @@ export default function OrderNotifications() {
       transports: ['websocket', 'polling']
     })
 
+    // Join rooms for active orders
     const activeOrders = JSON.parse(localStorage.getItem('activeOrders') || '[]')
     activeOrders.forEach(orderId => socket.emit('join-order', orderId))
 
+    // Join room for customer if logged in
+    const token = localStorage.getItem('customerToken')
+    if (token) {
+        fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(res => res.json())
+            .then(data => {
+                if (data.user?._id) {
+                    socket.emit('join-customer', data.user._id)
+                }
+            })
+            .catch(err => console.error('Failed to join customer room', err))
+    }
+
+    const handleUpdate = (data) => {
+        const isReady = data.status === 'ready'
+        const newNotification = {
+          id: Date.now(),
+          type: 'status_update',
+          title: isReady ? 'Your Pizza is Ready! 🍕' : 'Order Update!',
+          message: data.message,
+          time: new Date(),
+          read: false,
+          status: data.status,
+          isHighPriority: isReady
+        }
+
+        setNotifications(prev => [newNotification, ...prev].slice(0, 10))
+        setIsVisible(true)
+
+        // Browser Alert
+        showPushNotification(newNotification.title, { body: newNotification.message })
+        playNotificationSound(isReady || data.status === 'delivered' ? 'success' : 'default')
+        if (isReady) toast.success(`🎉 ${data.message}`, { duration: 8000, position: 'bottom-right' })
+    }
+
     // Handle order status updates
-    socket.on('order:status_update', (data) => {
-      const newNotification = {
-        id: Date.now(),
-        type: 'status_update',
-        title: 'Order Status Update!',
-        message: data.message,
-        time: new Date(),
-        read: false,
-        status: data.status
-      }
-
-      setNotifications(prev => [newNotification, ...prev].slice(0, 10))
-      setIsVisible(true)
-
-      // Browser Alert
-      showPushNotification(newNotification.title, { body: newNotification.message })
-      playNotificationSound(data.status === 'ready' || data.status === 'delivered' ? 'success' : 'default')
-    })
+    socket.on('order:status_update', handleUpdate)
 
     // On mount, ask for permission
     requestNotificationPermission()
@@ -93,27 +113,27 @@ export default function OrderNotifications() {
                   key={notification.id}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-tomato-50' : ''
+                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${notification.isHighPriority ? 'bg-amber-50 border-l-4 border-l-amber-500' : (!notification.read ? 'bg-tomato-50' : '')
                     }`}
                   onClick={() => markAsRead(notification.id)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-tomato-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm">🍕</span>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${notification.isHighPriority ? 'bg-amber-100 text-amber-600' : 'bg-tomato-100 text-tomato-600'}`}>
+                      <span className="text-sm">{notification.isHighPriority ? '🔥' : '🍕'}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-wood-800 text-sm">
+                      <p className={`font-black text-sm ${notification.isHighPriority ? 'text-amber-900' : 'text-wood-800'}`}>
                         {notification.title}
                       </p>
-                      <p className="text-wood-600 text-xs mt-1">
+                      <p className={`text-xs mt-1 ${notification.isHighPriority ? 'text-amber-700' : 'text-wood-600'}`}>
                         {notification.message}
                       </p>
-                      <p className="text-wood-400 text-xs mt-2">
-                        {notification.time.toLocaleTimeString()}
+                      <p className="text-wood-400 text-[10px] mt-2 font-bold uppercase tracking-widest">
+                        {notification.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                     {!notification.read && (
-                      <div className="w-2 h-2 bg-tomato-600 rounded-full flex-shrink-0 mt-2"></div>
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 mt-2 ${notification.isHighPriority ? 'bg-amber-500' : 'bg-tomato-600'}`}></div>
                     )}
                   </div>
                 </motion.div>

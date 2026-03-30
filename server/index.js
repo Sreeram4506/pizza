@@ -18,6 +18,7 @@ import paymentRoutes from './routes/payments.js'
 import deliveryRoutes from './routes/delivery.js'
 import cateringRoutes from './routes/catering.js'
 import reservationRoutes from './routes/reservations.js'
+import webhookRoutes from './routes/webhooks.js'
 import { config } from './config.js'
 import { connectDatabase } from './utils/database.js'
 import { runCleanup } from './utils/cleanup.js'
@@ -88,6 +89,10 @@ app.use('/api', limiter)
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '1MB' })) // Increased from 10kb to 1MB for campaign data
+app.use((req, res, next) => {
+  console.log(`📡 [REQUEST] ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize())
@@ -189,6 +194,7 @@ app.use('/api/cart', requireTenant, verifyCustomer, cartRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/payments', paymentRoutes)
 app.use('/api/delivery', requireTenant, deliveryRoutes)
+app.use('/api/webhooks', webhookRoutes)
 
 // Handle 404 for API routes
 app.all('/api/*', (req, res, next) => {

@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
 import { resolveMenuItemImage } from '../utils/menuArtwork'
+import toast from 'react-hot-toast'
 
 export default function CartDrawer() {
   const { 
@@ -18,13 +20,31 @@ export default function CartDrawer() {
   } = useChatbot()
   const { settings } = useSettings()
   const navigate = useNavigate()
+  const [profile, setProfile] = useState(null)
+
+  useEffect(() => {
+    if (isCartOpen) {
+      const token = localStorage.getItem('customerToken')
+      if (token) {
+        fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
+          .then(res => res.json())
+          .then(data => { if (data.user) setProfile(data.user) })
+          .catch(err => console.error('Failed to fetch profile:', err))
+      }
+    }
+  }, [isCartOpen])
 
   if (!isCartOpen) return null
 
-  // Points System Logic: 10 points per dollar spent.
-  const pointsEarned = Math.floor(cartTotal * 10)
+  const pointsEarned = Math.floor(cartTotal * 0.05)
+  const cartPointsTotal = cart.reduce((sum, i) => sum + (i.isPointsRedemption ? (i.pointsCost * (i.qty || 0)) : 0), 0)
+  const availablePoints = profile?.loyalty?.points || 0
 
   const handleCheckout = () => {
+    if (cartPointsTotal > availablePoints) {
+      toast.error('Insufficient points for rewards in cart!')
+      return
+    }
     setIsCartOpen(false)
     navigate('/checkout')
   }
@@ -132,7 +152,11 @@ export default function CartDrawer() {
                       </div>
 
                       <span className="text-[#1A1410] font-black text-[16px]">
-                        ${(item.price * item.qty).toFixed(2)}
+                        {item.isPointsRedemption ? (
+                          <span className="text-amber-600 text-[13px]">FREE ({item.pointsCost * item.qty} pts)</span>
+                        ) : (
+                          `$${(item.price * item.qty).toFixed(2)}`
+                        )}
                       </span>
                     </div>
                   </div>
@@ -146,10 +170,17 @@ export default function CartDrawer() {
             <div className="px-6 pb-6 pt-5 bg-white border-t border-[#EBEBE6] shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] z-20">
               
               {/* Points Logic Section */}
-              <div className="py-3 px-4 rounded-[12px] bg-[#FFFDF7] border border-[#EBB250]/40 text-center mb-6 shadow-sm">
-                <span className="text-[#1A1410] text-[13px] font-medium">
-                  You'll earn <span className="font-extrabold text-[#D2902A]">{pointsEarned} points</span> with this order
-                </span>
+              {/* Points Logic Section */}
+              <div className="py-3 px-4 rounded-[12px] bg-[#FFFDF7] border border-[#EBB250]/40 mb-6 shadow-sm">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[#1A1410] text-[11px] font-medium uppercase tracking-wider opacity-60">Status</span>
+                  <span className="text-[#1A1410] text-[12px] font-bold">{availablePoints} Available PTS</span>
+                </div>
+                <div className="h-[1px] bg-[#EBB250]/20 my-2" />
+                <div className="flex justify-between items-center text-[13px]">
+                   <span className="text-[#1A1410] font-medium">Earn <span className="font-extrabold text-[#D2902A]">{pointsEarned} pts</span></span>
+                   {cartPointsTotal > 0 && <span className="text-amber-700 font-bold">Use {cartPointsTotal} pts</span>}
+                </div>
               </div>
 
               {/* Subtotal */}

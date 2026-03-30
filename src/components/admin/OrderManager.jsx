@@ -385,9 +385,17 @@ export default function OrderManager() {
               </button>
 
               <div className="mb-10 pt-4">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex flex-wrap items-center gap-3 mb-2">
                   <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-ember-600 font-bold px-3 py-1 bg-ember-50 rounded-lg">Invoice Master</span>
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${getStatusStyle(selectedOrder.status)}`}>{selectedOrder.status}</span>
+                  {selectedOrder.source && selectedOrder.source !== 'website' && (
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm ${
+                      selectedOrder.source === 'ubereats' ? 'bg-black text-white' : 
+                      selectedOrder.source === 'grubhub' ? 'bg-[#FF8000] text-white' : 'bg-[#F5F3EF] text-[#1A1410]'
+                    }`}>
+                      🚀 {selectedOrder.source}
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-5xl font-sans font-bold text-[#1A1410] tracking-tight">#{selectedOrder.orderNumber}</h3>
                 <p className="text-[#9B8D74] text-sm mt-1 font-medium">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
@@ -432,15 +440,15 @@ export default function OrderManager() {
                             {/* Brief Summary for Admin */}
                             <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
                               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1 italic">Shared Brief</p>
-                              <p className="text-[11px] text-white font-bold truncate">📍 {typeof selectedOrder.address === 'string' ? selectedOrder.address : `${selectedOrder.address?.street}, ${selectedOrder.address?.city}`}</p>
-                              <p className="text-[10px] text-white/60 font-medium mt-1 truncate">📦 {selectedOrder.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')}</p>
+                              <p className="text-[11px] text-white font-bold">📍 {typeof selectedOrder.address === 'string' ? selectedOrder.address : `${selectedOrder.address?.street}, ${selectedOrder.address?.city}`}</p>
+                              <p className="text-[10px] text-white/60 font-medium mt-1">📦 {selectedOrder.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')}</p>
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                <input 
                                  readOnly 
                                  value={`${window.location.origin}/delivery/${selectedOrder.deliveryToken}`}
-                                 className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white font-medium outline-none focus:border-ember-600/50 transition-all"
+                                 className="w-full sm:flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white font-medium outline-none focus:border-ember-600/50 transition-all"
                                />
                                <button 
                                  onClick={async () => {
@@ -471,7 +479,7 @@ export default function OrderManager() {
                                      alert('Failed to copy. Please manually select the URL above.');
                                    }
                                  }}
-                                 className="px-6 py-3 bg-ember-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ember-500 transition-all active:scale-95 shadow-lg shadow-ember-600/20 whitespace-nowrap"
+                                 className="w-full sm:w-auto px-6 py-3 bg-ember-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ember-500 transition-all active:scale-95 shadow-lg shadow-ember-600/20 whitespace-nowrap"
                                >
                                  Copy Full Details
                                </button>

@@ -16,6 +16,7 @@ import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
 import CartDrawer from './components/CartDrawer'
 import DeliveryTrackingBar from './components/DeliveryTrackingBar'
+import OrderNotifications from './components/OrderNotifications'
 import { useTranslation } from 'react-i18next'
 import CateringPage from './components/CateringPage'
 import DiningPage from './components/DiningPage'
@@ -202,6 +203,7 @@ function App() {
               <GlobalChatbot />
               <CartDrawer />
               <DeliveryTrackingBar />
+              <OrderNotifications />
             </div>
           </div>
         </ChatbotProvider>

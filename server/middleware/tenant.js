@@ -50,8 +50,7 @@ export async function extractTenant(req, res, next) {
 
     next()
   } catch (error) {
-    console.error('Tenant extraction error:', error)
-    res.status(500).json({ error: 'Failed to identify restaurant' })
+    next(error)
   }
 }
 

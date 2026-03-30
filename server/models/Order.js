@@ -9,6 +9,8 @@ const orderItemSchema = new mongoose.Schema({
     name: String,
     price: Number
   }],
+  isPointsRedemption: { type: Boolean, default: false },
+  pointsCost: { type: Number, default: 0 },
   notes: { type: String, default: '' }
 })
 
@@ -70,7 +72,9 @@ const orderSchema = new mongoose.Schema({
   },
   deliveryToken: { type: String, unique: true },
   trackingToken: { type: String, unique: true },
-  source: { type: String, enum: ['website', 'app', 'phone', 'in_person'], default: 'website' }
+  source: { type: String, enum: ['website', 'app', 'phone', 'in_person', 'grubhub', 'ubereats'], default: 'website' },
+  externalOrderId: { type: String },
+  externalPlatform: { type: String }
 }, { 
   timestamps: true 
 })

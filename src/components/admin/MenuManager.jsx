@@ -26,7 +26,9 @@ export default function MenuManager() {
     modifiers: [],
     tags: [],
     dietary: { vegetarian: false, vegan: false, glutenFree: false, spicy: false },
-    image: ''
+    image: '',
+    isLoyaltyItem: false,
+    loyaltyCost: 0
   })
 
   useEffect(() => { fetchMenuData() }, [])
@@ -87,11 +89,14 @@ export default function MenuManager() {
       formData.append('name', itemForm.name)
       formData.append('description', itemForm.description)
       formData.append('price', itemForm.price)
-      formData.append('categoryId', activeCategory || itemForm.categoryId)
+      formData.append('categoryId', itemForm.categoryId || activeCategory)
       formData.append('available', itemForm.available)
       formData.append('modifiers', JSON.stringify(itemForm.modifiers))
       formData.append('tags', JSON.stringify(itemForm.tags))
       formData.append('dietary', JSON.stringify(itemForm.dietary))
+      formData.append('isLoyaltyItem', itemForm.isLoyaltyItem)
+      formData.append('loyaltyCost', itemForm.loyaltyCost || 0)
+      formData.append('isPopular', itemForm.isPopular || false)
 
       if (itemForm.imageFile) formData.append('image', itemForm.imageFile)
 
@@ -108,7 +113,7 @@ export default function MenuManager() {
       setItemForm({
         name: '', description: '', price: '', categoryId: '', available: true,
         modifiers: [], tags: [], dietary: { vegetarian: false, vegan: false, glutenFree: false, spicy: false },
-        image: ''
+        image: '', isLoyaltyItem: false, loyaltyCost: 0, isPopular: false
       })
       setImagePreview(null)
       fetchMenuData()
@@ -178,7 +183,7 @@ export default function MenuManager() {
               setItemForm({
                 name: '', description: '', price: '', categoryId: activeCategory || '', available: true,
                 modifiers: [], tags: [], dietary: { vegetarian: false, vegan: false, glutenFree: false, spicy: false },
-                image: ''
+                image: '', isLoyaltyItem: false, loyaltyCost: 0, isPopular: false
               })
               setImagePreview(null)
               setShowItemModal(true)
@@ -235,6 +240,11 @@ export default function MenuManager() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="bg-white rounded-[2rem] p-6 border border-[rgba(26,20,16,0.06)] shadow-sm hover:shadow-xl hover:shadow-[#1A1410]/5 transition-all group overflow-hidden relative"
               >
+                {item.isLoyaltyItem && (
+                  <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-amber-500 text-white rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg">
+                    Loyalty Reward ({item.loyaltyCost} pts)
+                  </div>
+                )}
                 <div className="flex gap-6">
                   <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shadow-md flex-shrink-0 border border-[rgba(26,20,16,0.03)] group-hover:scale-105 transition-transform duration-500">
                     <img
@@ -250,7 +260,7 @@ export default function MenuManager() {
                           {item.name}
                         </h3>
                         <div className="flex gap-2">
-                          <button onClick={() => { setEditingItem(item); setItemForm({ ...item, dietary: item.dietary || { vegetarian: false, vegan: false, glutenFree: false, spicy: false } }); setImagePreview(resolveMenuItemImage(item)); setShowItemModal(true); }} className="w-8 h-8 rounded-lg bg-[#FAFAF8] flex items-center justify-center text-xs hover:bg-[#1A1410] hover:text-white transition-all shadow-sm">✏️</button>
+                          <button onClick={() => { setEditingItem(item); setItemForm({ ...item, isLoyaltyItem: item.isLoyaltyItem || false, loyaltyCost: item.loyaltyCost || 0, dietary: item.dietary || { vegetarian: false, vegan: false, glutenFree: false, spicy: false } }); setImagePreview(resolveMenuItemImage(item)); setShowItemModal(true); }} className="w-8 h-8 rounded-lg bg-[#FAFAF8] flex items-center justify-center text-xs hover:bg-[#1A1410] hover:text-white transition-all shadow-sm">✏️</button>
                           <button onClick={() => handleDeleteItem(item._id)} className="w-8 h-8 rounded-lg bg-[#FAFAF8] flex items-center justify-center text-xs hover:bg-rose-500 hover:text-white transition-all shadow-sm">🗑️</button>
                         </div>
                       </div>
@@ -431,7 +441,23 @@ export default function MenuManager() {
                         <div className="w-10 h-5 bg-[#EAE7E1] rounded-full peer peer-checked:bg-ember-500 transition-all after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-5" />
                       </div>
                     </label>
+                    <label className="flex items-center justify-between cursor-pointer group">
+                      <span className="font-black text-[10px] text-amber-600 uppercase tracking-widest">🎁 Loyalty Item</span>
+                      <div className="relative">
+                        <input type="checkbox" checked={itemForm.isLoyaltyItem} onChange={(e) => setItemForm({ ...itemForm, isLoyaltyItem: e.target.checked })} className="sr-only peer" />
+                        <div className="w-10 h-5 bg-[#EAE7E1] rounded-full peer peer-checked:bg-amber-500 transition-all after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-5" />
+                      </div>
+                    </label>
                   </div>
+
+                  {itemForm.isLoyaltyItem && (
+                    <div className="pt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-[#9B8D74] pl-1">Loyalty Cost (points)</label>
+                        <input type="number" value={itemForm.loyaltyCost} onChange={(e) => setItemForm({ ...itemForm, loyaltyCost: e.target.value })} className="w-full h-14 px-6 bg-[#FAFAF8] border border-amber-200 rounded-2xl text-[#1A1410] font-bold outline-none focus:bg-white focus:border-amber-500 transition-all shadow-sm" required />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-4 pt-4">

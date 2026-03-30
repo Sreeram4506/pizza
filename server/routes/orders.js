@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { Order } from '../models/Order.js'
 import { Customer } from '../models/Customer.js'
+import { User } from '../models/User.js'
 import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
 import { optionalVerifyCustomer } from '../middleware/auth.js'
 import { v4 as uuidv4 } from 'uuid'
@@ -52,9 +53,11 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
     const normalizedItems = items.map((item, index) => ({
       itemId: item.itemId || item._id || `custom-${index + 1}`,
       name: item.name,
-      price: Number(item.price) || 0,
+      price: item.isPointsRedemption ? 0 : (Number(item.price) || 0),
       quantity: Number(item.quantity) || 1,
       modifiers: Array.isArray(item.modifiers) ? item.modifiers : [],
+      isPointsRedemption: item.isPointsRedemption || false,
+      pointsCost: item.pointsCost || 0,
       notes: item.notes || ''
     }))
 
@@ -74,13 +77,18 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
     // Loyalty Calculation
     console.log('4. Checking loyalty...')
     let pointsEarned = 0
-    try {
-      const configQuery = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] };
-      const loyaltyCfg = await LoyaltyConfig.findOne(configQuery);
-      if (authenticatedId && loyaltyCfg) {
-        pointsEarned = Math.floor(total * (loyaltyCfg.pointsPerDollar || 1))
+    let pointsRedeemed = 0
+    
+    // Calculate totals for loyalty
+    pointsRedeemed = normalizedItems.reduce((sum, item) => sum + (item.isPointsRedemption ? (item.pointsCost * item.quantity) : 0), 0)
+    pointsEarned = Math.floor(total * 0.05)
+
+    if (authenticatedId && pointsRedeemed > 0) {
+      const customer = await Customer.findById(authenticatedId)
+      if (!customer || (customer.loyalty?.points || 0) < pointsRedeemed) {
+        return res.status(400).json({ error: 'Insufficient loyalty points' })
       }
-    } catch (e) { console.error('Loyalty lookup failed:', e.message) }
+    }
 
     // 4.5 Automatic Driver Assignment (New Logic requested by user)
     let autoAssignedDriver = null
@@ -105,7 +113,8 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
       deliveryToken,
       items: normalizedItems,
       subtotal, tax, deliveryFee, total, discount: calcDiscount,
-      pointsEarned,
+      pointsEarned: authenticatedId ? pointsEarned : 0,
+      pointsRedeemed: authenticatedId ? pointsRedeemed : 0,
       status: autoAssignedDriver ? 'preparing' : 'confirmed', // Speed up flow
       customerInfo: authenticatedId ? {
           ...customerInfo, // Keep what was sent (name/phone)
@@ -128,8 +137,14 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
     // Non-critical updates
     try {
       if (authenticatedId) {
+        const pointsDiff = pointsEarned - pointsRedeemed
         await Customer.findByIdAndUpdate(authenticatedId, {
-          $inc: { orderCount: 1, totalSpent: total, 'loyalty.points': pointsEarned, 'loyalty.lifetimePoints': pointsEarned },
+          $inc: { 
+            orderCount: 1, 
+            totalSpent: total, 
+            'loyalty.points': pointsDiff, 
+            'loyalty.lifetimePoints': pointsEarned 
+          },
           $set: { lastOrderAt: new Date(), isGuest: false }
         })
       }

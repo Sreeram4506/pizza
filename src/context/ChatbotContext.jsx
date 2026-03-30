@@ -56,12 +56,16 @@ export function ChatbotProvider({ children }) {
   // Cart Methods
   const addToCart = (item) => {
     setCart(prev => {
+      const isPoints = item.isPointsRedemption || false
       const itemId = item._id || item.itemId || createCartItemId()
-      const existing = prev.find(i => (i._id || i.itemId) === itemId)
+      
+      // Points items are unique entries usually, but if we want to stack them:
+      const existing = prev.find(i => (i._id || i.itemId) === itemId && i.isPointsRedemption === isPoints)
+      
       if (existing) {
-        return prev.map(i => (i._id || i.itemId) === itemId ? { ...i, qty: (i.qty || 1) + (item.qty || 1) } : i)
+        return prev.map(i => ((i._id || i.itemId) === itemId && i.isPointsRedemption === isPoints) ? { ...i, qty: (i.qty || 1) + (item.qty || 1) } : i)
       }
-      return [...prev, { ...item, _id: itemId, itemId, qty: item.qty || 1 }]
+      return [...prev, { ...item, _id: itemId, itemId, qty: item.qty || 1, isPointsRedemption: isPoints, pointsCost: item.pointsCost || 0 }]
     })
   }
 
@@ -99,7 +103,8 @@ export function ChatbotProvider({ children }) {
   }
 
   const cartCount = cart.reduce((sum, i) => sum + (i.qty || 0), 0)
-  const cartTotal = cart.reduce((sum, i) => sum + (i.price * (i.qty || 0)), 0)
+  const cartTotal = cart.reduce((sum, i) => sum + (i.isPointsRedemption ? 0 : (i.price * (i.qty || 0))), 0)
+  const cartPointsTotal = cart.reduce((sum, i) => sum + (i.isPointsRedemption ? (i.pointsCost * (i.qty || 0)) : 0), 0)
 
   return (
     <ChatbotContext.Provider value={{
@@ -119,6 +124,7 @@ export function ChatbotProvider({ children }) {
       addMultipleToCart,
       cartCount,
       cartTotal,
+      cartPointsTotal,
       isVoiceEnabled,
       setIsVoiceEnabled,
       orderType,

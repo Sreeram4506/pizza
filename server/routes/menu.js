@@ -52,7 +52,7 @@ const emitMenuUpdate = (req, event, data) => {
 // Menu routes
 
 // Get all categories for a tenant
-router.get('/categories', async (req, res) => {
+router.get('/categories', async (req, res, next) => {
   try {
     console.log('GET /api/menu/categories - Request received')
     const tenantId = req.tenantId
@@ -92,8 +92,7 @@ router.get('/categories', async (req, res) => {
 
     res.json(categories)
   } catch (err) {
-    console.error('Failed to fetch categories:', err)
-    res.status(500).json({ error: 'Failed' })
+    next(err)
   }
 })
 
@@ -183,7 +182,7 @@ router.delete('/categories/:id', verifyAdmin, async (req, res) => {
 })
 
 // Get all menu items
-router.get('/items', async (req, res) => {
+router.get('/items', async (req, res, next) => {
   try {
     console.log('GET /api/menu/items - Request received')
     const tenantId = req.tenantId
@@ -223,8 +222,7 @@ router.get('/items', async (req, res) => {
 
     res.json(items)
   } catch (err) {
-    console.error('Failed to fetch items:', err)
-    res.status(500).json({ error: 'Failed' })
+    next(err)
   }
 })
 

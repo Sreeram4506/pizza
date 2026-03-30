@@ -116,7 +116,20 @@ export default function DeliveryTrackingBar() {
 
     checkActiveOrders()
     const interval = setInterval(checkActiveOrders, 30000)
-    return () => clearInterval(interval)
+
+    // Listen for storage changes (logout in another tab or handled via manual clear)
+    const handleStorageChange = (e) => {
+      if ((e.key === 'customerToken' || e.key === 'activeOrders') && !e.newValue) {
+        setActiveOrder(null)
+        setIsVisible(false)
+      }
+    }
+    window.addEventListener('storage', handleStorageChange)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('storage', handleStorageChange)
+    }
   }, [location.pathname])
 
   if (!isVisible || shouldHide || !activeOrder || isDismissed) return null

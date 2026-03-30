@@ -2,6 +2,8 @@ import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import { config } from '../config.js'
 import { Order } from '../models/Order.js'
+import { User } from '../models/User.js'
+import { ExternalPlatformService } from '../utils/externalPlatforms.js'
 
 const router = Router()
 
@@ -82,6 +84,11 @@ router.put('/orders/:id/deliver', verifyDelivery, async (req, res) => {
             io.to(`tenant:${tenantId || 'default'}`).emit('order:update', order)
             io.to(`order:${order._id}`).emit('order:status_update', { id: order._id, status: 'delivered' })
         }
+        
+        // Sync with external platforms
+        if (order.externalOrderId) {
+            await ExternalPlatformService.updateStatus(order)
+        }
         res.json(order)
     } catch (err) {
         console.error('Failed to mark order delivered:', err)
@@ -157,6 +164,11 @@ router.put('/token/:token/deliver', async (req, res) => {
         if (io) {
             io.to(`order:${order._id}`).emit('order:status_update', { id: order._id, status: 'delivered' })
             io.to('admin:orders').emit('order:update', order)
+        }
+        
+        // Sync with external platforms
+        if (order.externalOrderId) {
+            await ExternalPlatformService.updateStatus(order)
         }
         res.json({ success: true, order })
     } catch (err) {

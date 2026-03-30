@@ -21,6 +21,7 @@ import { isConnected } from '../utils/database.js'
 import { Catering } from '../models/Catering.js'
 import { Reservation } from '../models/Reservation.js'
 import { ImageService } from '../utils/image.js'
+import { ExternalPlatformService } from '../utils/externalPlatforms.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -217,6 +218,11 @@ router.put('/orders/:id/status', verifyAdmin, async (req, res) => {
                 message: `Your order is now ${order.status}!`
             })
         }
+        
+        // Sync with external platforms
+        if (order.externalOrderId) {
+            await ExternalPlatformService.updateStatus(order)
+        }
 
         res.json(order)
     } catch (err) {
@@ -246,6 +252,11 @@ router.put('/orders/:id/assign', verifyAdmin, async (req, res) => {
         if (io) {
             io.to('admin:orders').emit('order:update', order)
             io.to(`tenant:${tenantId || 'default'}`).emit('order:update', order)
+        }
+        
+        // Sync with external platforms
+        if (order.externalOrderId) {
+            await ExternalPlatformService.updateStatus(order)
         }
 
         res.json(order)
@@ -534,7 +545,7 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
         console.log('File:', req.file)
 
         const tenantId = req.tenantId
-        const { name, description, price, categoryId, available, modifiers, tags, dietary, image } = req.body
+        const { name, description, price, categoryId, available, modifiers, tags, dietary, image, isLoyaltyItem, loyaltyCost } = req.body
 
         // Build item data
         const itemData = {
@@ -543,10 +554,12 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
             description: description || '',
             price: parseFloat(price),
             categoryId,
-            available: available !== false,
+            available: available !== 'false' && available !== false,
             modifiers: modifiers ? JSON.parse(modifiers) : [],
             tags: tags ? JSON.parse(tags) : [],
-            dietary: dietary ? JSON.parse(dietary) : {}
+            dietary: dietary ? JSON.parse(dietary) : {},
+            isLoyaltyItem: isLoyaltyItem === 'true' || isLoyaltyItem === true,
+            loyaltyCost: loyaltyCost ? parseInt(loyaltyCost) : 0
         }
 
         // Add image path if uploaded (Using ImageService for abstraction)
@@ -584,7 +597,7 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
 router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('image'), async (req, res) => {
     try {
         const { id } = req.params
-        const { name, description, price, categoryId, available, modifiers, tags, dietary, image } = req.body
+        const { name, description, price, categoryId, available, modifiers, tags, dietary, image, isLoyaltyItem, loyaltyCost } = req.body
 
         // Build update data
         const updateData = {
@@ -592,10 +605,12 @@ router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('ima
             description: description || '',
             price: parseFloat(price),
             categoryId,
-            available: available !== false,
+            available: available !== 'false' && available !== false,
             modifiers: modifiers ? JSON.parse(modifiers) : [],
             tags: tags ? JSON.parse(tags) : [],
-            dietary: dietary ? JSON.parse(dietary) : {}
+            dietary: dietary ? JSON.parse(dietary) : {},
+            isLoyaltyItem: isLoyaltyItem === 'true' || isLoyaltyItem === true,
+            loyaltyCost: loyaltyCost ? parseInt(loyaltyCost) : 0
         }
 
         // Add image path if new image uploaded
@@ -660,7 +675,7 @@ router.delete('/menu/items/:id', verifyAdmin, async (req, res) => {
 })
 
 // Public Settings (no auth required)
-router.get('/public/settings', async (req, res) => {
+router.get('/public/settings', async (req, res, next) => {
     try {
         const tenantId = req.tenantId
         console.log('GET /admin/public/settings - Request received')
@@ -699,13 +714,12 @@ router.get('/public/settings', async (req, res) => {
         console.log('Public settings found:', settings)
         res.json(settings)
     } catch (err) {
-        console.error('Failed to fetch public settings:', err)
-        res.status(500).json({ error: 'Failed to fetch settings' })
+        next(err)
     }
 })
 
 // Public API for restaurant stats (no auth)
-router.get('/public/stats', async (req, res) => {
+router.get('/public/stats', async (req, res, next) => {
     try {
         const tenantId = req.tenantId
         const query = tenantId ? { tenantId } : {}
@@ -729,7 +743,7 @@ router.get('/public/stats', async (req, res) => {
             experienceYears: 12 // Hardcoded but could be from settings
         })
     } catch (err) {
-        res.status(500).json({ error: 'Failed' })
+        next(err)
     }
 })
 

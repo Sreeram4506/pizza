@@ -224,6 +224,14 @@ export default function AdminDashboard() {
                                                              🎁 {order.promoCode}
                                                          </span>
                                                      )}
+                                                     {order.source && order.source !== 'website' && (
+                                                         <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-sm ${
+                                                             order.source === 'ubereats' ? 'bg-black text-white' : 
+                                                             order.source === 'grubhub' ? 'bg-[#FF8000] text-white' : 'bg-[#F5F3EF] text-[#1A1410]'
+                                                         }`}>
+                                                             🚀 {order.source}
+                                                         </span>
+                                                     )}
                                                      <div className="flex gap-1.5 ml-1">
                                                         {order.customerInfo?.promoEmail && <span title="Marketing Email Opt-in" className="text-xs">📧</span>}
                                                         {order.customerInfo?.promoText && <span title="SMS text Opt-in" className="text-xs">💬</span>}
@@ -279,44 +287,77 @@ export default function AdminDashboard() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.98 }}
                             >
-                                <div className="max-w-xl mx-auto bg-white rounded-2xl border border-[rgba(26,20,16,0.06)] p-5 sm:p-8 space-y-5 shadow-xl">
-                                    <div>
-                                        <h2 className="text-2xl font-display font-black text-[#1A1410] tracking-tight">Broadcaster</h2>
-                                        <p className="text-[#5C554E] text-sm mt-1">Send announcements to all {users.length} registered customers.</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                                    <div className="bg-white rounded-3xl border border-[rgba(26,20,16,0.06)] p-6 sm:p-10 space-y-7 shadow-xl">
+                                        <div>
+                                            <h2 className="text-3xl font-display font-black text-[#1A1410] tracking-tight">Campaign Broadcaster</h2>
+                                            <p className="text-[#5C554E] text-sm mt-1">Send beautiful updates to your loyal customers.</p>
+                                        </div>
+
+                                        {/* Subject */}
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-[#9B8D74] uppercase tracking-widest ml-1">Subject Line</label>
+                                            <input
+                                                type="text"
+                                                value={offerSubject}
+                                                onChange={e => setOfferSubject(e.target.value)}
+                                                className="w-full h-14 px-5 rounded-2xl bg-[#F5F3EF] border-2 border-transparent focus:bg-white focus:border-ember-500/30 outline-none text-[#1A1410] text-[15px] font-bold transition-all shadow-inner"
+                                                placeholder="e.g. 🎉 Free Pepperoni Friday!"
+                                            />
+                                        </div>
+
+                                        {/* Message */}
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-[#9B8D74] uppercase tracking-widest ml-1">Message Content</label>
+                                            <textarea
+                                                rows={5}
+                                                value={offerText}
+                                                onChange={e => setOfferText(e.target.value)}
+                                                className="w-full px-5 py-4 rounded-2xl bg-[#F5F3EF] border-2 border-transparent focus:bg-white focus:border-ember-500/30 font-bold outline-none text-[#1A1410] text-[15px] resize-none transition-all placeholder:text-[#9B8D74] shadow-inner"
+                                                placeholder="What's the hype today?"
+                                            />
+                                        </div>
+
+                                        <motion.button
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={handleSendOffers}
+                                            disabled={sendingEmail || !offerText}
+                                            className="w-full py-5 bg-[#1A1410] hover:bg-black text-white font-black rounded-2xl shadow-2xl disabled:opacity-50 transition-all uppercase tracking-widest text-[11px] shadow-black/20"
+                                        >
+                                            {sendingEmail ? '🚀 Launching Campaign...' : '📣 Broadcast to Audience'}
+                                        </motion.button>
                                     </div>
 
-                                    {/* Subject */}
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-[#9B8D74] uppercase tracking-widest">Subject Line</label>
-                                        <input
-                                            type="text"
-                                            value={offerSubject}
-                                            onChange={e => setOfferSubject(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl bg-[#F5F3EF] border border-[rgba(26,20,16,0.06)] outline-none focus:border-ember-500/30 text-[#1A1410] text-sm transition-all shadow-sm"
-                                            placeholder="Email subject..."
-                                        />
+                                    {/* Audience Overview */}
+                                    <div className="bg-white rounded-3xl border border-[rgba(26,20,16,0.06)] p-6 sm:p-10 shadow-lg">
+                                        <div className="flex items-center justify-between mb-8">
+                                            <h3 className="text-xl font-bold font-display text-[#1A1410]">Target Audience</h3>
+                                            <span className="px-3 py-1 bg-ember-50 text-ember-600 rounded-full font-bold text-[10px] uppercase tracking-widest">{users.length} Leads</span>
+                                        </div>
+                                        
+                                        <div className="space-y-4 max-h-[460px] overflow-y-auto pr-2 scrollbar-hide">
+                                            {users.map((u, idx) => (
+                                                <div key={idx} className="flex items-center gap-3 p-3 bg-[#F5F3EF] rounded-xl group/audience transition-all hover:bg-[#EAE8E4]">
+                                                    <div className="w-8 h-8 bg-white border border-[#EBEBE6] rounded-lg flex items-center justify-center font-bold text-[10px] text-[#1A1410] shadow-sm">
+                                                        {u.name?.[0] || 'U'}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-[13px] font-bold text-[#1A1410] truncate">{u.name}</p>
+                                                        <p className="text-[10px] text-[#9B8D74] font-medium truncate">{u.email}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {users.length === 0 && (
+                                                <div className="text-center py-10 opacity-40">
+                                                    <p className="italic text-sm">No registered customers found.</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="mt-8 pt-8 border-t border-[rgba(26,20,16,0.06)] text-center">
+                                            <p className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest">Audience includes all registered accounts</p>
+                                        </div>
                                     </div>
-
-                                    {/* Message */}
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-[#9B8D74] uppercase tracking-widest">Message</label>
-                                        <textarea
-                                            rows={6}
-                                            value={offerText}
-                                            onChange={e => setOfferText(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl bg-[#F5F3EF] border border-[rgba(26,20,16,0.06)] outline-none focus:border-ember-500/30 text-[#1A1410] text-sm resize-none transition-all placeholder:text-[#9B8D74] shadow-sm"
-                                            placeholder="Compose your message to customers..."
-                                        />
-                                    </div>
-
-                                    <motion.button
-                                        whileTap={{ scale: 0.98 }}
-                                        onClick={handleSendOffers}
-                                        disabled={sendingEmail || !offerText}
-                                        className="w-full py-4 bg-[#1A1410] hover:bg-black text-white font-black rounded-xl shadow-xl disabled:opacity-50 transition-all uppercase tracking-widest text-sm"
-                                    >
-                                        {sendingEmail ? '🚀 Sending...' : '📣 Broadcast to All Customers'}
-                                    </motion.button>
                                 </div>
                             </motion.div>
                         )}

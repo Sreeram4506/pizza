@@ -60,7 +60,19 @@ export default function CheckoutPage() {
       return
     }
     fetchProfile(token)
+    fetchLoyaltyItems()
   }, [])
+
+  const [loyaltyItems, setLoyaltyItems] = useState([])
+  const fetchLoyaltyItems = async () => {
+    try {
+      const res = await fetch('/api/menu/items')
+      if (res.ok) {
+        const items = await res.json()
+        setLoyaltyItems(items.filter(i => i.isLoyaltyItem))
+      }
+    } catch (err) { console.error('Failed loyalty fetch', err) }
+  }
 
   const fetchProfile = async (token) => {
     try {
@@ -126,7 +138,24 @@ export default function CheckoutPage() {
   }
 
   const finalTotal = subtotal + taxes + tipAmount
-  const pointsToEarn = Math.floor(finalTotal * (settings?.loyaltyPointsPerDollar || 10))
+  const pointsToEarn = Math.floor(finalTotal * 0.05)
+  const { cartPointsTotal } = useChatbot()
+
+  const handleRedeemPointItem = (item) => {
+    const pointsBalance = userProfile?.loyalty?.points || 0
+    if (pointsBalance < item.loyaltyCost) {
+      toast.error(`Need ${item.loyaltyCost - pointsBalance} more points!`)
+      return
+    }
+    
+    addToCart({
+      ...item,
+      isPointsRedemption: true,
+      pointsCost: item.loyaltyCost,
+      price: 0 // Free in terms of currency
+    })
+    toast.success(`🎁 Added ${item.name} to rewards!`)
+  }
 
 
   const handlePlaceOrder = async (stripePaymentIntent) => {
@@ -164,8 +193,11 @@ export default function CheckoutPage() {
           name: i.name,
           quantity: i.qty || 1,
           price: i.price,
-          modifiers: i.modifiers || []
+          modifiers: i.modifiers || [],
+          isPointsRedemption: i.isPointsRedemption || false,
+          pointsCost: i.pointsCost || 0
         })),
+        pointsRedeemed: cartPointsTotal,
         type: orderType || 'pickup',
         address: orderType === 'delivery' ? {
           street: formData.street,
@@ -193,12 +225,12 @@ export default function CheckoutPage() {
       
       if (order && order.success) {
         // 1. Save to active orders for the tracking bar to pick up (user-specific for privacy)
-        const storageKey = userProfile?._id ? `activeOrders_${userProfile._id}` : 'activeOrders_guest'
-        const activeIds = JSON.parse(localStorage.getItem(storageKey) || '[]')
+        // 1. Save to active orders for the tracking bar to pick up
+        const activeIds = JSON.parse(localStorage.getItem('activeOrders') || '[]')
         const savedId = order.id || order.order?._id
         if (savedId && !activeIds.includes(savedId)) {
           activeIds.push(savedId)
-          localStorage.setItem(storageKey, JSON.stringify(activeIds))
+          localStorage.setItem('activeOrders', JSON.stringify(activeIds))
         }
 
         // 2. Clear cart and show toast
@@ -277,6 +309,8 @@ export default function CheckoutPage() {
       setGeoLng={setGeoLng}
       geoLoading={geoLoading}
       setGeoLoading={setGeoLoading}
+      loyaltyItems={loyaltyItems}
+      handleRedeemPointItem={handleRedeemPointItem}
     />
     </Elements>
   )
@@ -290,7 +324,8 @@ function CheckoutInner({
   userProfile, addressBook, showAddressBook, setShowAddressBook,
   isLoginModalOpen, setIsLoginModalOpen, handleSelectAddress, fetchProfile,
   handlePlaceOrder, subtotal, taxes, tipAmount, finalTotal, pointsToEarn,
-  geoLat, setGeoLat, geoLng, setGeoLng, geoLoading, setGeoLoading
+  geoLat, setGeoLat, geoLng, setGeoLng, geoLoading, setGeoLoading,
+  loyaltyItems, handleRedeemPointItem
 }) {
   const navigate = useNavigate()
   const stripe = useStripe()
@@ -583,6 +618,62 @@ function CheckoutInner({
                 )}
               </section>
 
+              {/* ── LOYALTY REWARDS MENU ── */}
+              {loyaltyItems.length > 0 && (
+                <section className="bg-white border-2 border-ember-100 rounded-[32px] p-6 sm:p-8 shadow-xl shadow-ember-600/5 relative overflow-hidden group/loyalty">
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-ember-600/5 rounded-full -mr-24 -mt-24 pointer-events-none group-hover/loyalty:scale-110 transition-transform duration-700" />
+                  
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                    <div>
+                      <h3 className="text-2xl font-bold font-serif text-[#1A1410] flex items-center gap-2">
+                        <span className="text-3xl">🎁</span> Loyalty Vault
+                      </h3>
+                      <p className="text-[13px] text-[#9B8D74] font-medium">Redeem your hard-earned points for free treats!</p>
+                    </div>
+                    {userProfile && (
+                      <div className="bg-[#1A1410] border-l-4 border-ember-500 p-4 rounded-2xl shadow-xl min-w-[140px]">
+                        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 italic">Point Balance</p>
+                        <p className="text-2xl font-black text-ember-500 leading-none">{userProfile.loyalty?.points || 0}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-2 px-2 scrollbar-hide snap-x h-[280px]">
+                    {loyaltyItems.map((item) => (
+                      <div key={item._id} className="min-w-[200px] bg-[#F5F3EF] rounded-3xl p-5 border border-[rgba(26,20,16,0.06)] flex flex-col group transition-all hover:border-ember-500/30 hover:bg-white hover:shadow-2xl hover:-translate-y-1 snap-start">
+                        <div className="w-full aspect-square bg-white rounded-2xl mb-4 overflow-hidden shadow-inner relative">
+                          <img 
+                            src={resolveMenuItemImage(item.name)} 
+                            alt={item.name} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                          />
+                          <div className="absolute top-2 right-2 bg-ember-600 text-white text-[9px] font-black px-2 py-1 rounded-lg shadow-lg">
+                            {item.loyaltyCost} PTS
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[15px] font-black text-[#1A1410] truncate mb-1">{item.name}</p>
+                          <p className="text-[11px] text-[#9B8D74] font-bold uppercase tracking-widest">{item.categoryId?.name || 'Treat'}</p>
+                        </div>
+                        <button 
+                          onClick={() => handleRedeemPointItem(item)}
+                          disabled={!userProfile || (userProfile.loyalty?.points || 0) < item.loyaltyCost}
+                          className="w-full mt-4 py-3 bg-[#1A1410] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ember-600 disabled:opacity-20 disabled:grayscale transition-all active:scale-95 shadow-lg shadow-black/10"
+                        >
+                          Redeem Now
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-ember-600" />
+                    <span className="text-[10px] font-black text-ember-600 uppercase tracking-widest">Scroll to explore rewards menu</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-ember-600" />
+                  </div>
+                </section>
+              )}
+
               {/* Information Form */}
               <section>
                 <h3 className="text-[17px] font-bold text-[#1A1410] mb-4 font-serif">Your information</h3>
@@ -780,6 +871,14 @@ function CheckoutInner({
                     <span>Tip</span>
                     <span className="text-[#1A1410]">${tipAmount.toFixed(2)}</span>
                   </div>
+                  {cart.some(i => i.isPointsRedemption) && (
+                    <div className="flex justify-between text-[15px] font-bold text-ember-600 pt-2 border-t border-ember-100 italic">
+                      <span className="flex items-center gap-1">
+                        <span className="text-xs">🎁</span> Points Redemption
+                      </span>
+                      <span>-{cart.reduce((sum, i) => sum + (i.isPointsRedemption ? (i.pointsCost * i.qty) : 0), 0)} pts</span>
+                    </div>
+                  )}
                   <div className="pt-2">
                     {!isPromoOpen ? (
                         <button 

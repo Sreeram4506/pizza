@@ -6,6 +6,7 @@ import { useSettings } from '../context/SettingsContext'
 import wsService from '../services/websocket.js'
 import { useTranslation } from 'react-i18next'
 import { resolveMenuItemImage } from '../utils/menuArtwork'
+import toast from 'react-hot-toast'
 
 export default function MenuPage() {
     const { t } = useTranslation()
@@ -42,7 +43,11 @@ export default function MenuPage() {
                 const items = Array.isArray(rawItems) ? rawItems : []
 
                 const hasPopular = items.some((item) => item.isPopular)
-                const finalCats = hasPopular ? [{ _id: 'popular', name: 'Popular' }, ...cats] : cats
+                const hasLoyalty = items.some((item) => item.isLoyaltyItem)
+                
+                let finalCats = cats
+                if (hasPopular) finalCats = [{ _id: 'popular', name: 'Popular' }, ...finalCats]
+                if (hasLoyalty) finalCats = [{ _id: 'loyalty', name: 'Loyalty Rewards' }, ...finalCats]
 
                 setCategories(finalCats)
                 setMenuItems(items)
@@ -122,7 +127,16 @@ export default function MenuPage() {
     }
 
     const handleAddWithAnimation = (item, e) => {
-        addToCart(item)
+        if (item.isLoyaltyItem) {
+            const currentPoints = profile?.loyalty?.points || 0
+            if (currentPoints < item.loyaltyCost) {
+                toast.error(t('loyalty.insufficientPoints') || `You need ${item.loyaltyCost} points for this item!`)
+                return
+            }
+            addToCart({ ...item, isPointsRedemption: true, pointsCost: item.loyaltyCost, price: 0 })
+        } else {
+            addToCart(item)
+        }
         const rect = e.currentTarget.getBoundingClientRect()
         const newAnim = { id: Date.now(), x: rect.left + rect.width / 2, y: rect.top }
         setFlyingItems(prev => [...prev, newAnim])
@@ -134,8 +148,10 @@ export default function MenuPage() {
     const groupedItems = categories.reduce((accumulator, category) => {
         if (category.name === 'Popular') {
             accumulator[category.name] = menuItems.filter((item) => item.isPopular)
+        } else if (category.name === 'Loyalty Rewards') {
+            accumulator[category.name] = menuItems.filter((item) => item.isLoyaltyItem)
         } else {
-            accumulator[category.name] = menuItems.filter((item) => (item.categoryId?._id || item.categoryId) === category._id)
+            accumulator[category.name] = menuItems.filter((item) => (item.categoryId?._id || item.categoryId) === category._id && !item.isLoyaltyItem)
         }
         return accumulator
     }, {})
@@ -163,6 +179,7 @@ export default function MenuPage() {
 
     const getLocalizedCatName = (name) => {
         if (name === 'Popular') return t('menu.categories.popular')
+        if (name === 'Loyalty Rewards') return t('menu.categories.loyalty') || 'Loyalty Rewards'
         return name
     }
 
@@ -182,6 +199,7 @@ export default function MenuPage() {
     const getDietaryBadges = (item) => {
         const badges = []
         if (item.isPopular) badges.push({ label: t('menu.categories.popular'), tone: 'bg-ember-500 text-white' })
+        if (item.isLoyaltyItem) badges.push({ label: 'Reward', tone: 'bg-amber-500 text-white' })
         if (item.dietary?.vegetarian) badges.push({ label: t('menu.items.veg'), tone: 'bg-[#D4922A] text-white' })
         if (item.dietary?.vegan) badges.push({ label: 'Vegan', tone: 'bg-emerald-700 text-white' })
         if (item.dietary?.glutenFree) badges.push({ label: 'GF', tone: 'bg-slate-700 text-white' })
@@ -384,7 +402,11 @@ export default function MenuPage() {
                                                     </p>
                                                     
                                                      <div className="flex items-center gap-4 mt-auto">
-                                                         <p className="font-black text-[#1A1410] text-[16px] sm:text-[18px] tracking-tight">${item.price?.toFixed(2)}</p>
+                                                         {item.isLoyaltyItem ? (
+                                                             <p className="font-black text-amber-600 text-[16px] sm:text-[18px] tracking-tight">{item.loyaltyCost} PTS</p>
+                                                         ) : (
+                                                             <p className="font-black text-[#1A1410] text-[16px] sm:text-[18px] tracking-tight">${item.price?.toFixed(2)}</p>
+                                                         )}
                                                          
                                                          <div className="flex items-center gap-3">
                                                              <AnimatePresence mode="wait">
@@ -465,6 +487,37 @@ export default function MenuPage() {
                     })}
                 </main>
             </div>
+
+            {/* ── MOBILE FLOATING CART BAR ── */}
+            <AnimatePresence>
+                {cartCount > 0 && (
+                    <motion.div
+                        initial={{ y: 100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 100, opacity: 0 }}
+                        className="lg:hidden fixed bottom-6 left-4 right-4 z-[90]"
+                    >
+                        <button
+                            onClick={() => setIsCartOpen(true)}
+                            className="w-full bg-[#1A1410] text-white h-16 rounded-2xl shadow-2xl flex items-center justify-between px-6 border border-white/10 active:scale-[0.98] transition-transform"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-ember-600 rounded-full flex items-center justify-center text-[10px] font-black italic shadow-lg shadow-ember-600/20">PB</div>
+                                <div className="text-left">
+                                    <p className="text-[10px] uppercase tracking-widest font-bold text-white/50 leading-none mb-1">Your Order</p>
+                                    <p className="text-sm font-black tracking-tight">{cartCount} {cartCount === 1 ? 'Item' : 'Items'}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <p className="text-lg font-serif italic tracking-tight font-black">${cart.reduce((acc, item) => acc + (item.price * item.qty), 0).toFixed(2)}</p>
+                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                </div>
+                            </div>
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Floating +1 Animations */}
             <div className="fixed inset-0 pointer-events-none z-[9999]">

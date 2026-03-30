@@ -1,4 +1,14 @@
 const errorHandler = (err, req, res, next) => {
+  // Always log errors in development
+  console.error('❌ [SERVER ERROR]', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.body,
+    query: req.query
+  });
+
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 

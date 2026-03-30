@@ -88,6 +88,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem('customerToken')
+    localStorage.removeItem('activeOrders')
     setIsLoggedIn(false)
     toast.success('Logged out successfully.')
     navigate('/')
