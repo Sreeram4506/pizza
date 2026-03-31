@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import jwt from 'jsonwebtoken'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
@@ -208,10 +209,18 @@ app.use(errorHandler)
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id)
 
-  // Handle admin joining for order notifications
-  socket.on('join-admin', () => {
-    socket.join('admin:orders')
-    console.log(`Socket ${socket.id} joined admin:orders room`)
+  // Handle admin joining for order notifications securely
+  socket.on('join-admin', (token) => {
+    try {
+      if (!token) throw new Error('No token provided')
+      const decoded = jwt.verify(token, config.JWT_SECRET)
+      if (decoded && (decoded.role === 'admin' || decoded.id)) {
+        socket.join('admin:orders')
+        console.log(`Socket ${socket.id} joined admin:orders room`)
+      }
+    } catch (err) {
+      console.warn(`Unauthorized socket join-admin attempt from ${socket.id}: ${err.message}`)
+    }
   })
 
   socket.on('join-tenant', (tenantId) => {

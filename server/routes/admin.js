@@ -2,6 +2,7 @@ import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import multer from 'multer'
+import { uploadToCloudinary } from '../utils/cloudinary.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
@@ -39,16 +40,19 @@ const emitPromotionalBannerUpdate = (req, eventName, payload) => {
     })
 }
 
-// Configure multer for image uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../uploads/menu'))
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        cb(null, 'menu-' + uniqueSuffix + path.extname(file.originalname))
-    }
-})
+// Configure multer for image uploads dynamically (Cloudinary vs Local)
+const isCloudStorage = !!(process.env.CLOUDINARY_URL || process.env.CLOUDINARY_CLOUD_NAME)
+const storage = isCloudStorage 
+    ? multer.memoryStorage() 
+    : multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, path.join(__dirname, '../uploads/menu'))
+        },
+        filename: (req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+            cb(null, 'menu-' + uniqueSuffix + path.extname(file.originalname))
+        }
+    })
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
@@ -343,42 +347,48 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
         const yesterday = new Date(today)
         yesterday.setDate(yesterday.getDate() - 1)
 
-        // Total orders and revenue
-        const totalOrders = await Order.countDocuments(query)
-        const allOrders = await Order.find({ ...query, status: { $nin: ['cancelled'] } })
-        const totalRevenue = allOrders.reduce((sum, order) => sum + (order.total || 0), 0)
+        // Aggregated stats (replaces looping)
+        const orderStats = await Order.aggregate([
+            { $match: { ...query, status: { $nin: ['cancelled'] } } },
+            { 
+               $group: { 
+                 _id: null, 
+                 totalRevenue: { $sum: '$total' },
+                 totalTips: { $sum: '$tip' },
+                 totalCashRevenue: { $sum: { $cond: [{ $eq: ['$payment.method', 'cash'] }, '$total', 0] } },
+                 totalCardRevenue: { $sum: { $cond: [{ $in: ['$payment.method', ['card', 'online']] }, '$total', 0] } }
+               } 
+            }
+        ])
+        const stats = orderStats[0] || { totalRevenue: 0, totalTips: 0, totalCashRevenue: 0, totalCardRevenue: 0 }
         
-        // Revenue Breakdown
-        const totalCashRevenue = allOrders.filter(o => o.payment?.method === 'cash').reduce((sum, order) => sum + (order.total || 0), 0)
-        const totalCardRevenue = allOrders.filter(o => ['card', 'online'].includes(o.payment?.method)).reduce((sum, order) => sum + (order.total || 0), 0)
-        const totalTips = allOrders.reduce((sum, order) => sum + (order.tip || 0), 0)
-
         // Today's orders
         const todayOrdersQuery = { ...query, createdAt: { $gte: today }, status: { $nin: ['cancelled'] } }
-        const todayOrders = await Order.find(todayOrdersQuery)
-        const todayRevenue = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0)
+        const todayStats = await Order.aggregate([
+            { $match: todayOrdersQuery },
+            { $group: { _id: null, count: { $sum: 1 }, totalRevenue: { $sum: '$total' } } }
+        ])
+        const todayData = todayStats[0] || { count: 0, totalRevenue: 0 }
 
         // Pending orders
         const pendingOrders = await Order.countDocuments({ ...query, status: 'pending' })
+        const totalOrders = await Order.countDocuments(query)
 
         // Active customers (customers with orders)
         const activeCustomers = await Customer.countDocuments({ ...query, orderCount: { $gt: 0 } })
 
         // Average order value
-        const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
+        const avgOrderValue = totalOrders > 0 ? stats.totalRevenue / totalOrders : 0
 
-        // Popular items
-        const itemCounts = {}
-        allOrders.forEach(order => {
-            order.items.forEach(item => {
-                itemCounts[item.name] = (itemCounts[item.name] || 0) + item.quantity
-            })
-        })
-
-        const popularItems = Object.entries(itemCounts)
-            .map(([name, count]) => ({ name, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 10)
+        // Popular items Aggregation
+        const popularItems = await Order.aggregate([
+            { $match: { ...query, status: { $nin: ['cancelled'] } } },
+            { $unwind: '$items' },
+            { $group: { _id: '$items.name', count: { $sum: { $ifNull: ['$items.quantity', 1] } } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 },
+            { $project: { name: '$_id', count: 1, _id: 0 } }
+        ])
 
         // Recent orders
         const recentOrders = await Order.find(query)
@@ -386,13 +396,13 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
             .limit(10)
 
         res.json({
-            totalRevenue,
-            totalCashRevenue,
-            totalCardRevenue,
-            totalTips,
+            totalRevenue: stats.totalRevenue,
+            totalCashRevenue: stats.totalCashRevenue,
+            totalCardRevenue: stats.totalCardRevenue,
+            totalTips: stats.totalTips,
             totalOrders,
-            todayOrders: todayOrders.length,
-            todayRevenue,
+            todayOrders: todayData.count,
+            todayRevenue: todayData.totalRevenue,
             activeCustomers,
             pendingOrders,
             avgOrderValue,
@@ -570,9 +580,15 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
             loyaltyCost: loyaltyCost ? parseInt(loyaltyCost) : 0
         }
 
-        // Add image path if uploaded (Using ImageService for abstraction)
+        // Add image path if uploaded (Cloud vs Local)
         if (req.file) {
-            itemData.image = ImageService.getStoredPath(req.file, 'menu')
+            if (req.file.buffer) {
+                // Cloudinary upload
+                itemData.image = await uploadToCloudinary(req.file.buffer, 'pizzablast/menu')
+            } else {
+                // Local upload fallback
+                itemData.image = ImageService.getStoredPath(req.file, 'menu')
+            }
             console.log('Image saved:', itemData.image)
         } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
             itemData.image = ImageService.getPublicUrl(image)
@@ -621,11 +637,16 @@ router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('ima
             loyaltyCost: loyaltyCost ? parseInt(loyaltyCost) : 0
         }
 
-        // Add image path if new image uploaded
+        // Handle image update securely 
         if (req.file) {
-            updateData.image = ImageService.getStoredPath(req.file, 'menu')
-        } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
-            updateData.image = ImageService.getPublicUrl(image)
+            if (req.file.buffer) {
+                updateData.image = await uploadToCloudinary(req.file.buffer, 'pizzablast/menu')
+            } else {
+                updateData.image = ImageService.getStoredPath(req.file, 'menu')
+            }
+            console.log('Image updated:', updateData.image)
+        } else if (typeof image === 'string') {
+            updateData.image = image
         }
 
         const item = await MenuItem.findByIdAndUpdate(

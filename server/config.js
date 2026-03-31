@@ -13,9 +13,18 @@ export const config = {
   get port() { return process.env.PORT || 5000 },
   get mongoUri() { return process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/pizzablast' },
   get nvidiaApiKey() { return process.env.NVIDIA_API_KEY },
-  get JWT_SECRET() { return process.env.JWT_SECRET || 'pizza-blast-secret-2024' },
-  get adminUsername() { return process.env.ADMIN_USERNAME || 'admin' },
-  get adminPassword() { return process.env.ADMIN_PASSWORD || 'password123' },
+  get JWT_SECRET() { 
+    if (!process.env.JWT_SECRET) throw new Error('FATAL: JWT_SECRET environment variable is missing!');
+    return process.env.JWT_SECRET;
+  },
+  get adminUsername() { 
+    if (!process.env.ADMIN_USERNAME) throw new Error('FATAL: ADMIN_USERNAME environment variable is missing!');
+    return process.env.ADMIN_USERNAME;
+  },
+  get adminPassword() { 
+    if (!process.env.ADMIN_PASSWORD) throw new Error('FATAL: ADMIN_PASSWORD environment variable is missing!');
+    return process.env.ADMIN_PASSWORD;
+  },
   get stripeSecretKey() { return process.env.STRIPE_SECRET_KEY },
   get stripePublishableKey() { return process.env.STRIPE_PUBLISHABLE_KEY },
   get smtpHost() { return process.env.SMTP_HOST },

@@ -19,5 +19,18 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor_react: ['react', 'react-dom', 'react-router-dom'],
+          vendor_ui: ['framer-motion', 'lucide-react', 'react-hot-toast'],
+          vendor_charts: ['recharts'],
+          vendor_utils: ['socket.io-client', 'i18next', 'react-i18next']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 800
   }
 })

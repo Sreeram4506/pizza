@@ -37,7 +37,7 @@ export default function OrderManager() {
 
     newSocket.on('connect', () => {
       console.log('Connected to live order system')
-      newSocket.emit('join-admin')
+      newSocket.emit('join-admin', localStorage.getItem('adminToken'))
     })
 
     newSocket.on('order:new', (order) => {
