@@ -11,7 +11,10 @@ export default function Dashboard() {
     todayOrders: 0,
     activeCustomers: 0,
     pendingOrders: 0,
-    avgOrderValue: 0
+    avgOrderValue: 0,
+    totalCashRevenue: 0,
+    totalCardRevenue: 0,
+    totalTips: 0
   })
   const [recentOrders, setRecentOrders] = useState([])
   const [popularItems, setPopularItems] = useState([])
@@ -39,6 +42,9 @@ export default function Dashboard() {
           activeCustomers: analytics.activeCustomers || 0,
           pendingOrders: analytics.pendingOrders || 0,
           avgOrderValue: analytics.avgOrderValue || 0,
+          totalCashRevenue: analytics.totalCashRevenue || 0,
+          totalCardRevenue: analytics.totalCardRevenue || 0,
+          totalTips: analytics.totalTips || 0,
         })
         setPopularItems(analytics.popularItems?.slice(0, 5) || [])
       }
@@ -69,10 +75,12 @@ export default function Dashboard() {
 
   const statCards = [
     { label: 'Today Sales', value: `$${stats.todayRevenue.toFixed(2)}`, icon: '💎', color: 'text-[#1A1410]', suffix: 'USD' },
+    { label: 'Card & Online', value: `$${stats.totalCardRevenue.toFixed(2)}`, icon: '💳', color: 'text-indigo-600', suffix: 'Rev' },
+    { label: 'Cash Income', value: `$${stats.totalCashRevenue.toFixed(2)}`, icon: '💵', color: 'text-emerald-600', suffix: 'Rev' },
+    { label: 'Total Tips', value: `$${stats.totalTips.toFixed(2)}`, icon: '🪙', color: 'text-amber-600', suffix: 'Tip' },
     { label: 'Live Orders', value: stats.todayOrders.toString(), icon: '📋', color: 'text-ember-600', suffix: 'Items' },
-    { label: 'Basket Avg', value: `$${stats.avgOrderValue.toFixed(2)}`, icon: '🛒', color: 'text-[#1A1410]', suffix: 'Val' },
-    { label: 'Retention', value: stats.activeCustomers.toString(), icon: '👥', color: 'text-[#1A1410]', suffix: 'Users' },
     { label: 'Preparation', value: stats.pendingOrders.toString(), icon: '⏳', color: 'text-ember-600', suffix: 'Wait' },
+    { label: 'Basket Avg', value: `$${stats.avgOrderValue.toFixed(2)}`, icon: '🛒', color: 'text-[#1A1410]', suffix: 'Val' },
     { label: 'Performance', value: performanceStatus, icon: '📈', color: performanceColor, suffix: 'Ops' },
   ]
 
@@ -127,7 +135,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Key Performance Indicators (KPIs) ────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         {statCards.map((stat, i) => (
           <motion.div
             key={stat.label}
