@@ -1,0 +1,20 @@
+﻿Testing ./server/routes/menu.js... [dotenv@17.3.1] injecting env (13) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+Γ£à OK
+Testing ./server/routes/orders.js... Γ£à OK
+Testing ./server/routes/ai.js... Γ£à OK
+Testing ./server/routes/admin.js... Γ£à OK
+Testing ./server/routes/auth.js... Γ£à OK
+Testing ./server/routes/customers.js... Γ£à OK
+Testing ./server/routes/analytics.js... Γ£à OK
+Testing ./server/routes/cart.js... Γ£à OK
+Testing ./server/routes/payments.js... Γ£à OK
+Testing ./server/routes/delivery.js... Γ£à OK
+Testing ./server/routes/catering.js... Γ£à OK
+Testing ./server/routes/reservations.js... Γ£à OK
+Testing ./server/routes/webhooks.js... Γ£à OK
+Testing ./server/config.js... Γ£à OK
+Testing ./server/utils/database.js... Γ£à OK
+Testing ./server/utils/cleanup.js... Γ£à OK
+Testing ./server/middleware/tenant.js... Γ£à OK
+Testing ./server/middleware/auth.js... Γ£à OK
+Testing ./server/utils/envValidator.js... Γ£à OK

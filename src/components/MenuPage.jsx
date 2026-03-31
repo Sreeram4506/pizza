@@ -368,6 +368,109 @@ export default function MenuPage() {
                         const items = filteredMenuItems(groupedItems[category.name] || [])
                         if (items.length === 0) return null
 
+                        if (category.name === 'Loyalty Rewards') {
+                            return (
+                                <section
+                                    key={category._id}
+                                    data-category={category.name}
+                                    ref={(element) => { categoryRefs.current[category.name] = element }}
+                                    className="mb-24 max-w-7xl mx-auto -mx-4 px-4 sm:mx-auto sm:px-0"
+                                >
+                                    <div className="flex items-end justify-between mb-8 px-4 sm:px-0">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="w-10 h-[1.5px] bg-amber-500 rounded-full" />
+                                                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-600">Exclusive Rewards</span>
+                                            </div>
+                                            <h3 className="text-3xl sm:text-4xl font-serif tracking-tight text-[#1A1410] italic">Loyalty Vault</h3>
+                                        </div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <div className="flex gap-1">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500/30" />
+                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500/30" />
+                                            </div>
+                                            <span className="text-[9px] font-bold text-[#8A7A62] uppercase tracking-widest pl-2">Scroll To Explore</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="relative group/vault">
+                                        <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory hide-scrollbar hover:cursor-grab active:cursor-grabbing px-4 sm:px-0">
+                                            {items.map((item) => (
+                                                <article
+                                                    key={item._id}
+                                                    className="w-[280px] sm:w-[320px] lg:w-[calc(25%-18px)] shrink-0 snap-start bg-white border border-[#EBEBE6] rounded-[2rem] p-6 flex flex-col items-center text-center shadow-sm hover:shadow-2xl hover:shadow-amber-900/10 transition-all duration-500 group relative overflow-hidden active:scale-[0.98]"
+                                                    onClick={(e) => handleAddWithAnimation(item, e)}
+                                                >
+                                                    <div className="absolute top-4 right-4 z-10">
+                                                        <div className="bg-amber-100 text-amber-700 text-[9px] font-black px-3 py-1 rounded-full uppercase border border-amber-200/50 shadow-sm">
+                                                            Earn Points
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="w-full aspect-[4/3] rounded-[1.5rem] overflow-hidden mb-6 bg-[#F5F5F0] border border-[#EBEBE6] relative">
+                                                        <img
+                                                            src={resolveMenuItemImage(item)}
+                                                            alt={item.name}
+                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                        />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    </div>
+
+                                                    <div className="flex-1 w-full">
+                                                        <h4 className="font-serif text-[18px] sm:text-[20px] leading-tight text-[#1A1410] mb-2 uppercase tracking-tight line-clamp-1">{item.name}</h4>
+                                                        <p className="text-[#8A7A62] text-[12px] leading-relaxed font-medium line-clamp-2 mb-6">
+                                                            {item.description || "A signature reward crafted with the finest local ingredients for our elite members."}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="w-full pt-5 border-t border-[#F5F3EF] flex items-center justify-between">
+                                                        <div className="text-left">
+                                                            <p className="text-[9px] font-black uppercase tracking-widest text-amber-600/60 leading-none mb-1">Exchange Rate</p>
+                                                            <p className="font-black text-[#1A1410] text-[18px] tracking-tight">{item.loyaltyCost} <span className="text-[10px] font-sans uppercase">Pts</span></p>
+                                                        </div>
+
+                                                        <div className="relative">
+                                                            <AnimatePresence mode="wait">
+                                                                {(cart?.find(i => (i._id || i.itemId) === item._id)?.qty > 0) ? (
+                                                                    <motion.div 
+                                                                        key="reward-stepper"
+                                                                        initial={{ scale: 0.8, opacity: 0 }}
+                                                                        animate={{ scale: 1, opacity: 1 }}
+                                                                        exit={{ scale: 0.8, opacity: 0 }}
+                                                                        className="flex items-center bg-[#1A1410] text-white rounded-full p-1"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                    >
+                                                                        <button onClick={(e) => { e.stopPropagation(); removeFromCart(item._id); }} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M20 12H4" /></svg></button>
+                                                                        <span className="w-6 text-center font-black text-xs">{cart.find(i => (i._id || i.itemId) === item._id).qty}</span>
+                                                                        <button onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M12 4v16m8-8H4" /></svg></button>
+                                                                    </motion.div>
+                                                                ) : (
+                                                                    <motion.button
+                                                                        key="reward-add"
+                                                                        whileHover={{ scale: 1.1, rotate: 5 }}
+                                                                        whileTap={{ scale: 0.9 }}
+                                                                        onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }}
+                                                                        className="w-12 h-12 bg-[#1A1410] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-amber-600 transition-all group/btn"
+                                                                    >
+                                                                        <span className="text-xl group-hover/btn:rotate-12 transition-transform">🎁</span>
+                                                                    </motion.button>
+                                                                )}
+                                                            </AnimatePresence>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <style dangerouslySetInnerHTML={{ __html: `
+                                        .hide-scrollbar::-webkit-scrollbar { display: none; }
+                                        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                                    `}} />
+                                </section>
+                            )
+                        }
+
                         return (
                             <section
                                 key={category._id}

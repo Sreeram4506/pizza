@@ -389,14 +389,14 @@ function CheckoutInner({
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-[#1A1410] font-sans selection:bg-[#EBB250] pb-24 md:pb-0 pt-[80px]">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+    <div className="min-h-screen bg-[#FAFAF8] text-[#1A1410] font-sans selection:bg-[#EBB250] pb-24 md:pb-0 pt-[100px]">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-8 md:py-12">
         
         {/* Main Grid Layout */}
-        <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
+        <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 items-start justify-center">
           
           {/* LEFT COLUMN - Forms */}
-          <div className="flex-1 w-full max-w-[600px] lg:max-w-none lg:pr-8">
+          <div className="flex-1 min-w-0 w-full max-w-[600px] lg:max-w-none lg:pr-8">
             
             {/* Header */}
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
@@ -620,45 +620,51 @@ function CheckoutInner({
 
               {/* ── LOYALTY REWARDS MENU ── */}
               {loyaltyItems.length > 0 && (
-                <section className="bg-white border-2 border-ember-100 rounded-[32px] p-6 sm:p-8 shadow-xl shadow-ember-600/5 relative overflow-hidden group/loyalty">
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-ember-600/5 rounded-full -mr-24 -mt-24 pointer-events-none group-hover/loyalty:scale-110 transition-transform duration-700" />
+                <section className="bg-white border border-[#EBEBE6] rounded-[32px] p-6 sm:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative overflow-hidden group/loyalty">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-ember-600/[0.03] rounded-full -mr-32 -mt-32 pointer-events-none group-hover/loyalty:scale-110 transition-transform duration-700" />
                   
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-                    <div>
-                      <h3 className="text-2xl font-bold font-serif text-[#1A1410] flex items-center gap-2">
-                        <span className="text-3xl">🎁</span> Loyalty Vault
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10 relative z-10">
+                    <div className="max-w-md">
+                      <h3 className="text-2xl font-bold font-serif text-[#1A1410] flex items-center gap-3 mb-2">
+                        <span className="text-4xl">🎁</span> Loyalty Vault
                       </h3>
-                      <p className="text-[13px] text-[#9B8D74] font-medium">Redeem your hard-earned points for free treats!</p>
+                      <p className="text-[14px] text-[#9B8D74] font-medium leading-relaxed">Boost your order! Redeem your hard-earned points for exclusive treats right here.</p>
                     </div>
                     {userProfile && (
-                      <div className="bg-[#1A1410] border-l-4 border-ember-500 p-4 rounded-2xl shadow-xl min-w-[140px]">
-                        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 italic">Point Balance</p>
-                        <p className="text-2xl font-black text-ember-500 leading-none">{userProfile.loyalty?.points || 0}</p>
-                      </div>
+                       <motion.div 
+                        whileHover={{ scale: 1.02 }}
+                        className="bg-[#1A1410] border-l-[6px] border-ember-500 py-4 px-6 rounded-2xl shadow-xl min-w-[160px] flex flex-col justify-center"
+                       >
+                        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-1 italic">Point Balance</p>
+                        <div className="flex items-baseline gap-1">
+                          <p className="text-3xl font-black text-ember-500 leading-none">{userProfile.loyalty?.points || 0}</p>
+                          <span className="text-[10px] font-black text-white/60">PTS</span>
+                        </div>
+                      </motion.div>
                     )}
                   </div>
 
-                  <div className="flex gap-4 overflow-x-auto pb-4 pt-2 -mx-2 px-2 scrollbar-hide snap-x h-[280px]">
+                  <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-8 pt-4 -mx-6 px-6 sm:-mx-10 sm:px-10 scrollbar-hide snap-x">
                     {loyaltyItems.map((item) => (
-                      <div key={item._id} className="min-w-[200px] bg-[#F5F3EF] rounded-3xl p-5 border border-[rgba(26,20,16,0.06)] flex flex-col group transition-all hover:border-ember-500/30 hover:bg-white hover:shadow-2xl hover:-translate-y-1 snap-start">
-                        <div className="w-full aspect-square bg-white rounded-2xl mb-4 overflow-hidden shadow-inner relative">
+                      <div key={item._id} className="w-[240px] sm:w-[260px] shrink-0 bg-[#FAFAF8] rounded-[2rem] p-5 border border-[#EBEBE6] flex flex-col group transition-all hover:border-ember-500/30 hover:bg-white hover:shadow-2xl hover:-translate-y-1 snap-start relative">
+                        <div className="w-full aspect-[4/3] bg-white rounded-2xl mb-4 overflow-hidden shadow-sm relative border border-[#EBEBE6]/50">
                           <img 
-                            src={resolveMenuItemImage(item.name)} 
+                            src={item.image || resolveMenuItemImage(item.name || 'pizza')} 
                             alt={item.name} 
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                           />
-                          <div className="absolute top-2 right-2 bg-ember-600 text-white text-[9px] font-black px-2 py-1 rounded-lg shadow-lg">
-                            {item.loyaltyCost} PTS
+                          <div className="absolute top-3 right-3 bg-[#1A1410] text-[#EBB250] text-[10px] font-black px-2.5 py-1.5 rounded-xl shadow-lg border border-white/10">
+                            {item.loyaltyCost} <span className="text-[8px]">PTS</span>
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[15px] font-black text-[#1A1410] truncate mb-1">{item.name}</p>
-                          <p className="text-[11px] text-[#9B8D74] font-bold uppercase tracking-widest">{item.categoryId?.name || 'Treat'}</p>
+                        <div className="flex-1 min-w-0 mb-4">
+                          <p className="text-[15px] leading-tight font-black text-[#1A1410] line-clamp-2 mb-1 uppercase tracking-tight">{item.name}</p>
+                          <p className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest leading-none mt-1">{item.categoryId?.name || 'Signature Reward'}</p>
                         </div>
                         <button 
                           onClick={() => handleRedeemPointItem(item)}
                           disabled={!userProfile || (userProfile.loyalty?.points || 0) < item.loyaltyCost}
-                          className="w-full mt-4 py-3 bg-[#1A1410] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ember-600 disabled:opacity-20 disabled:grayscale transition-all active:scale-95 shadow-lg shadow-black/10"
+                          className="w-full py-3.5 bg-[#1A1410] text-white rounded-xl text-[10px] font-black uppercase tracking-[0.15em] hover:bg-ember-600 disabled:opacity-20 disabled:grayscale transition-all active:scale-95 shadow-md shadow-black/5"
                         >
                           Redeem Now
                         </button>
@@ -666,10 +672,10 @@ function CheckoutInner({
                     ))}
                   </div>
 
-                  <div className="mt-4 flex items-center justify-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-ember-600" />
-                    <span className="text-[10px] font-black text-ember-600 uppercase tracking-widest">Scroll to explore rewards menu</span>
-                    <div className="w-1.5 h-1.5 rounded-full bg-ember-600" />
+                  <div className="mt-2 flex items-center justify-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-ember-600/20" />
+                    <span className="text-[10px] font-black text-[#9B8D74] uppercase tracking-[0.2em]">Swipe To Explore Rewards Menu</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-ember-600/20" />
                   </div>
                 </section>
               )}
@@ -906,15 +912,17 @@ function CheckoutInner({
                     )}
                   </div>
                   
-                  <div className="mt-4 p-3 bg-black/[0.03] rounded-xl border border-black/[0.05] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                       <span className="text-xl">🏆</span>
-                       <div className="flex flex-col">
-                          <span className="text-[11px] font-black uppercase tracking-wider text-black/40 leading-none">Loyalty Reward</span>
-                          <span className="text-[13px] font-bold text-[#1A1410]">Earn {pointsToEarn} points</span>
+                  <div className="mt-5 p-4 bg-[#F5F5F0] rounded-2xl border border-[#EBEBE6] flex items-center justify-between gap-4 overflow-hidden shadow-inner">
+                    <div className="flex items-center gap-3 min-w-0 overflow-hidden">
+                       <span className="text-2xl shrink-0">🏆</span>
+                       <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#9B8D74] leading-none mb-1">Loyalty Reward</span>
+                          <span className="text-[14px] font-black text-[#1A1410] truncate tracking-tight">Earn {pointsToEarn} points</span>
                        </div>
                     </div>
-                    <span className="text-[10px] font-black bg-[#EBB250] text-[#1A1410] px-1.5 py-0.5 rounded-md leading-none">PENDING</span>
+                    <div className="shrink-0 bg-[#EBB250] text-[#1A1410] px-2.5 py-1 rounded-lg border border-[#1A1410]/10 flex items-center justify-center">
+                       <span className="text-[9px] font-black uppercase leading-none">PENDING</span>
+                    </div>
                   </div>
                 </div>
 
@@ -992,6 +1000,11 @@ function CheckoutInner({
 
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
 
       {/* Login Requirement Modal */}
       <QuickLoginModal 

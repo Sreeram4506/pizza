@@ -1,0 +1,112 @@
+﻿Testing ./server/routes/menu.js... [dotenv@17.3.1] injecting env (13) from .env -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+Γ£à OK
+Testing ./server/routes/orders.js... Γ£à OK
+Testing ./server/routes/ai.js... Γ£à OK
+Testing ./server/routes/admin.js... Γ¥î FAILED: ERR_MODULE_NOT_FOUND - Cannot find package 'axios' imported from C:\Users\SREER\Documents\indra\pizza-main\pizza-main\server\utils\externalPlatforms.js
+node : Error 
+[ERR_MODULE_NOT_FOUND]: 
+Cannot find package 
+'axios' imported from C:\U
+sers\SREER\Documents\indra
+\pizza-main\pizza-main\ser
+ver\utils\externalPlatform
+s.js
+At line:1 char:1
++ node test-imports.js > 
+test-output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (E  
+  rror [ERR_MODU...nalP   
+ latforms.js:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+    at 
+Object.getPackageJSONURL (
+node:internal/modules/pack
+age_json_reader:256:9)
+    at packageResolve (nod
+e:internal/modules/esm/res
+olve:768:81)
+    at moduleResolve (node
+:internal/modules/esm/reso
+lve:854:18)
+    at defaultResolve (nod
+e:internal/modules/esm/res
+olve:984:11)
+    at ModuleLoader.defaul
+tResolve (node:internal/mo
+dules/esm/loader:780:12)
+    at 
+#cachedDefaultResolve (nod
+e:internal/modules/esm/loa
+der:704:25)
+    at 
+ModuleLoader.resolve (node
+:internal/modules/esm/load
+er:687:38)
+    at ModuleLoader.getMod
+uleJobForImport (node:inte
+rnal/modules/esm/loader:30
+5:38)
+    at ModuleJob._link (no
+de:internal/modules/esm/mo
+dule_job:137:49)
+Testing ./server/routes/auth.js... Γ£à OK
+Testing ./server/routes/customers.js... Γ£à OK
+Testing ./server/routes/analytics.js... Γ£à OK
+Testing ./server/routes/cart.js... Γ£à OK
+Testing ./server/routes/payments.js... Γ£à OK
+Testing ./server/routes/delivery.js... Γ¥î FAILED: ERR_MODULE_NOT_FOUND - Cannot find package 'axios' imported from C:\Users\SREER\Documents\indra\pizza-main\pizza-main\server\utils\externalPlatforms.js
+Error 
+[ERR_MODULE_NOT_FOUND]: 
+Cannot find package 
+'axios' imported from C:\U
+sers\SREER\Documents\indra
+\pizza-main\pizza-main\ser
+ver\utils\externalPlatform
+s.js
+    at 
+Object.getPackageJSONURL (
+node:internal/modules/pack
+age_json_reader:256:9)
+    at packageResolve (nod
+e:internal/modules/esm/res
+olve:768:81)
+    at moduleResolve (node
+:internal/modules/esm/reso
+lve:854:18)
+    at defaultResolve (nod
+e:internal/modules/esm/res
+olve:984:11)
+    at ModuleLoader.defaul
+tResolve (node:internal/mo
+dules/esm/loader:780:12)
+    at 
+#cachedDefaultResolve (nod
+e:internal/modules/esm/loa
+der:704:25)
+    at 
+ModuleLoader.resolve (node
+:internal/modules/esm/load
+er:687:38)
+    at ModuleLoader.getMod
+uleJobForImport (node:inte
+rnal/modules/esm/loader:30
+5:38)
+    at ModuleJob._link (no
+de:internal/modules/esm/mo
+dule_job:137:49)
+Testing ./server/routes/catering.js... Γ£à OK
+Testing ./server/routes/reservations.js... Γ£à OK
+Testing ./server/routes/webhooks.js... Γ£à OK
+Testing ./server/config.js... Γ£à OK
+Testing ./server/utils/database.js... Γ£à OK
+Testing ./server/utils/cleanup.js... Γ£à OK
+Testing ./server/middleware/tenant.js... Γ£à OK
+Testing ./server/middleware/auth.js... Γ£à OK
+Testing ./server/utils/envValidator.js... Γ£à OK

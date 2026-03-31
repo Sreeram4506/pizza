@@ -27,19 +27,32 @@ export class ExternalPlatformService {
     const uberStatus = statusMap[order.status]
     if (!uberStatus) return
 
-    // Note: In a real app, you'd handle OAuth token management here
     const accessToken = process.env.UBER_EATS_ACCESS_TOKEN 
-    
+    if (!accessToken) {
+       console.warn(`[UBER EATS] Warning: UBER_EATS_ACCESS_TOKEN not set. Skipping update for order ${order.externalOrderId}.`)
+       return;
+    }
+
     console.log(`[UBER EATS] Updating order ${order.externalOrderId} to ${uberStatus}`)
     
-    // Placeholder for actual API call
-    /*
-    await axios.post(`https://api.uber.com/v1/eats/order/${order.externalOrderId}/status`, {
-      status: uberStatus
-    }, {
-      headers: { 'Authorization': `Bearer ${accessToken}` }
-    })
-    */
+    try {
+        const response = await fetch(`https://api.uber.com/v1/eats/order/${order.externalOrderId}/status`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: uberStatus })
+        })
+
+        if (!response.ok) {
+            const errBody = await response.text()
+            throw new Error(`Uber Eats API returned ${response.status}: ${errBody}`)
+        }
+        console.log(`[UBER EATS] Successfully updated status for order ${order.externalOrderId}`)
+    } catch (err) {
+        console.error(`[UBER EATS API ERROR]`, err.message)
+    }
   }
 
   static async updateGrubhubStatus(order) {
@@ -54,8 +67,32 @@ export class ExternalPlatformService {
     const grubhubStatus = statusMap[order.status]
     if (!grubhubStatus) return
 
+    const accessToken = process.env.GRUBHUB_ACCESS_TOKEN
+    
+    if (!accessToken) {
+       console.warn(`[GRUBHUB] Warning: GRUBHUB_ACCESS_TOKEN not set. Skipping update for order ${order.externalOrderId}.`)
+       return;
+    }
+
     console.log(`[GRUBHUB] Updating order ${order.externalOrderId} to ${grubhubStatus}`)
     
-    // Placeholder for actual API call
+    try {
+        const response = await fetch(`https://api-partner.grubhub.com/v1/orders/${order.externalOrderId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: grubhubStatus })
+        })
+
+        if (!response.ok) {
+            const errBody = await response.text()
+            throw new Error(`Grubhub API returned ${response.status}: ${errBody}`)
+        }
+        console.log(`[GRUBHUB] Successfully updated status for order ${order.externalOrderId}`)
+    } catch (err) {
+        console.error(`[GRUBHUB API ERROR]`, err.message)
+    }
   }
 }

@@ -452,15 +452,7 @@ export default function OrderManager() {
                                />
                                <button 
                                  onClick={async () => {
-                                   const shareText = `🛵 NEW DELIVERY ASSIGNMENT\n` +
-                                                `--------------------------\n` +
-                                                `Order: #${selectedOrder.orderNumber}\n` +
-                                                `📍 Address: ${typeof selectedOrder.address === 'string' ? selectedOrder.address : `${selectedOrder.address?.street}, ${selectedOrder.address?.city || ''}`}\n` +
-                                                `📦 Items: ${selectedOrder.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')}\n` +
-                                                `💰 Total: $${selectedOrder.total?.toFixed(2)} (${selectedOrder.payment?.method?.toUpperCase() || 'CASH'})\n` +
-                                                `📞 Customer: ${selectedOrder.customerInfo?.name || 'Customer'} (${selectedOrder.customerInfo?.phone || 'No Phone'})\n` +
-                                                `--------------------------\n` +
-                                                `🔗 TRACK & MANAGE: ${window.location.origin}/delivery/${selectedOrder.deliveryToken}`;
+                                   const shareText = `${window.location.origin}/delivery/${selectedOrder.deliveryToken}`;
                                    
                                    try {
                                      if (navigator.clipboard && window.isSecureContext) {
@@ -473,7 +465,7 @@ export default function OrderManager() {
                                        document.execCommand('copy');
                                        document.body.removeChild(textArea);
                                      }
-                                     alert('Full Brief Copied! (Link + Details)');
+                                     alert('Delivery Tracking Link Copied!');
                                    } catch (err) {
                                      console.error('Copy failed', err);
                                      alert('Failed to copy. Please manually select the URL above.');
@@ -481,13 +473,13 @@ export default function OrderManager() {
                                  }}
                                  className="w-full sm:w-auto px-6 py-3 bg-ember-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ember-500 transition-all active:scale-95 shadow-lg shadow-ember-600/20 whitespace-nowrap"
                                >
-                                 Copy Full Details
+                                 Copy Magic Link
                                </button>
                             </div>
                             
                             <div className="flex justify-between items-center px-1">
                               <p className="text-[9px] text-white/40 font-bold italic leading-tight max-w-[70%]">
-                                Clipboard content includes full order details + the live tracking link.
+                                Share this direct assignment link with your 3rd party couriers.
                               </p>
                               <div className="flex gap-2">
                                 <span className="text-white font-black text-sm">${selectedOrder.total?.toFixed(2)}</span>
