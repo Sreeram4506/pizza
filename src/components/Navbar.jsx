@@ -27,7 +27,8 @@ export default function Navbar() {
     { label: t('nav.contact'), href: '/#contact' },
   ]
 
-  const isLightPage = ['/menu', '/catering', '/dining', '/track', '/profile', '/login', '/register', '/checkout'].includes(location.pathname)
+  const lightPages = ['/menu', '/catering', '/dining', '/track', '/profile', '/login', '/register', '/checkout']
+  const isLightPage = lightPages.some(page => location.pathname === page || location.pathname.startsWith(`${page}/`))
   const isSolid = scrolled || isLightPage || mobileOpen
   const restaurantName = settings?.restaurantName || 'Mustang Pizza'
 
