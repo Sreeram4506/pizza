@@ -174,14 +174,24 @@ export default function AdminDashboard() {
                                     </div>
                                     {/* Stats Pills */}
                                     <div className="flex flex-wrap gap-2">
+                                        <span className="bg-white border border-[rgba(26,20,16,0.06)] text-[#1A1410] px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
+                                            {analytics ? `$${analytics.totalRevenue?.toFixed(2) || '0.00'}` : '--'} REVENUE
+                                        </span>
+                                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
+                                            {analytics ? `$${analytics.totalCashRevenue?.toFixed(2) || '0.00'}` : '--'} CASH
+                                        </span>
+                                        <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
+                                            {analytics ? `$${analytics.totalCardRevenue?.toFixed(2) || '0.00'}` : '--'} CARD
+                                        </span>
+                                        <span className="bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
+                                            {analytics ? `$${analytics.totalTips?.toFixed(2) || '0.00'}` : '--'} TIPS
+                                        </span>
+                                        <div className="w-full flex sm:hidden" />
                                         <span className="bg-white border border-[rgba(26,20,16,0.06)] text-ember-600 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
-                                            {orders.length} Orders
+                                            {orders.length} QUEUED
                                         </span>
                                         <span className="bg-white border border-[rgba(26,20,16,0.06)] text-[#1A1410] px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
-                                            {analytics ? `$${analytics.revenue?.toFixed(2) || '0.00'}` : '--'} Revenue
-                                        </span>
-                                        <span className="bg-white border border-[rgba(26,20,16,0.06)] text-[#1A1410] px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
-                                            {users.length} Users
+                                            {users.length} LEADS
                                         </span>
                                     </div>
                                 </div>

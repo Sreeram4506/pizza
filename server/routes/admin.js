@@ -347,6 +347,11 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
         const totalOrders = await Order.countDocuments(query)
         const allOrders = await Order.find({ ...query, status: { $nin: ['cancelled'] } })
         const totalRevenue = allOrders.reduce((sum, order) => sum + (order.total || 0), 0)
+        
+        // Revenue Breakdown
+        const totalCashRevenue = allOrders.filter(o => o.payment?.method === 'cash').reduce((sum, order) => sum + (order.total || 0), 0)
+        const totalCardRevenue = allOrders.filter(o => ['card', 'online'].includes(o.payment?.method)).reduce((sum, order) => sum + (order.total || 0), 0)
+        const totalTips = allOrders.reduce((sum, order) => sum + (order.tip || 0), 0)
 
         // Today's orders
         const todayOrdersQuery = { ...query, createdAt: { $gte: today }, status: { $nin: ['cancelled'] } }
@@ -382,6 +387,9 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
 
         res.json({
             totalRevenue,
+            totalCashRevenue,
+            totalCardRevenue,
+            totalTips,
             totalOrders,
             todayOrders: todayOrders.length,
             todayRevenue,
