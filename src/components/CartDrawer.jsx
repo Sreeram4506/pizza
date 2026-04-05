@@ -16,7 +16,8 @@ export default function CartDrawer() {
     cartTotal,
     orderType,
     setOrderType,
-    openWithIntent
+    openWithIntent,
+    setShowOrderDetails
   } = useChatbot()
   const { settings } = useSettings()
   const navigate = useNavigate()
@@ -88,7 +89,7 @@ export default function CartDrawer() {
               {['pickup', 'delivery'].map((type) => (
                 <button
                   key={type}
-                  onClick={() => setOrderType(type)}
+                  onClick={() => { setOrderType(type); setShowOrderDetails(true); }}
                   className={`flex-1 py-2.5 rounded-[10px] text-[13px] font-bold capitalize transition-all ${
                     orderType === type 
                       ? 'bg-white text-[#1A1410] shadow-sm ring-1 ring-[#EBEBE6]' 

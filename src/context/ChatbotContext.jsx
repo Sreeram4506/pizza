@@ -25,6 +25,18 @@ export function ChatbotProvider({ children }) {
     return localStorage.getItem('pizza_order_type') || 'delivery'
   })
 
+  // Global Modal States
+  const [showOrderDetails, setShowOrderDetails] = useState(false)
+  const [showTimePicker, setShowTimePicker] = useState(false)
+  
+  // Delivery & Timing Persistence
+  const [deliveryAddress, setDeliveryAddress] = useState(() => {
+    return localStorage.getItem('pizza_delivery_address') || ''
+  })
+  const [orderTime, setOrderTime] = useState(() => {
+    return localStorage.getItem('pizza_order_time') || 'ASAP'
+  })
+
   // Persistence effect for cart
   useEffect(() => {
     localStorage.setItem('pizza_cart', JSON.stringify(cart))
@@ -39,6 +51,36 @@ export function ChatbotProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('pizza_order_type', orderType)
   }, [orderType])
+
+  // Persistence for Delivery Address
+  useEffect(() => {
+    localStorage.setItem('pizza_delivery_address', deliveryAddress)
+  }, [deliveryAddress])
+
+  // Saved Addresses Persistence
+  const [savedAddresses, setSavedAddresses] = useState(() => {
+    const saved = localStorage.getItem('pizza_saved_addresses')
+    return saved ? JSON.parse(saved) : [{ address: '702 Neponset Street, Norwood', type: 'Gas station' }]
+  })
+
+  // Persistence for Saved Addresses
+  useEffect(() => {
+    localStorage.setItem('pizza_saved_addresses', JSON.stringify(savedAddresses))
+  }, [savedAddresses])
+
+  const addSavedAddress = (address, type = 'Recent') => {
+    if (!address) return
+    setSavedAddresses(prev => {
+        // Only keep top 5 addresses
+        const filtered = prev.filter(a => a.address !== address)
+        return [{ address, type }, ...filtered].slice(0, 5)
+    })
+  }
+
+  // Persistence for Order Time
+  useEffect(() => {
+    localStorage.setItem('pizza_order_time', orderTime)
+  }, [orderTime])
 
   const openWithIntent = (intent, data = {}) => {
     setInitialMessage({ intent, data })
@@ -129,7 +171,17 @@ export function ChatbotProvider({ children }) {
       setIsVoiceEnabled,
       orderType,
       setOrderType,
-      clearOrderType
+      clearOrderType,
+      showOrderDetails,
+      setShowOrderDetails,
+      showTimePicker,
+      setShowTimePicker,
+      deliveryAddress,
+      setDeliveryAddress,
+      orderTime,
+      setOrderTime,
+      savedAddresses,
+      addSavedAddress
     }}>
       {children}
     </ChatbotContext.Provider>

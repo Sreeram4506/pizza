@@ -14,7 +14,10 @@ export default function MenuPage() {
     const [menuItems, setMenuItems] = useState([])
     const [searchQuery, setSearchQuery] = useState('')
     const [activeCategory, setActiveCategory] = useState('')
-    const { openWithIntent, cart, cartCount, addToCart, removeFromCart, setIsOpen, orderType, setOrderType, setIsCartOpen } = useChatbot()
+    const { 
+        openWithIntent, cart, cartCount, addToCart, removeFromCart, setIsOpen, 
+        orderType, setOrderType, setIsCartOpen, setShowOrderDetails 
+    } = useChatbot()
     const [flyingItems, setFlyingItems] = useState([]) // Array of { id, x, y } for floating +1s
     const { settings } = useSettings()
     const navigate = useNavigate()
@@ -311,13 +314,13 @@ export default function MenuPage() {
                             <div className="flex gap-3">
                                 <div className="bg-[#F0F0EE] p-1 rounded-full flex border border-[#EBEBE6]">
                                     <button
-                                        onClick={() => setOrderType('pickup')}
+                                        onClick={() => { setOrderType('pickup'); setShowOrderDetails(true); }}
                                         className={`px-5 py-2 rounded-full text-[12px] uppercase tracking-wider font-extrabold transition-all ${orderType === 'pickup' ? 'bg-white text-[#1A1410] shadow-sm' : 'text-[#7A6F64] hover:text-[#1A1410]'}`}
                                     >
                                         Pickup
                                     </button>
                                     <button
-                                        onClick={() => setOrderType('delivery')}
+                                        onClick={() => { setOrderType('delivery'); setShowOrderDetails(true); }}
                                         className={`px-5 py-2 rounded-full text-[12px] uppercase tracking-wider font-extrabold transition-all ${orderType === 'delivery' ? 'bg-white text-[#1A1410] shadow-sm' : 'text-[#7A6F64] hover:text-[#1A1410]'}`}
                                     >
                                         Delivery

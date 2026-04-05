@@ -19,6 +19,7 @@ import DeliveryTrackingBar from './components/DeliveryTrackingBar'
 import OrderNotifications from './components/OrderNotifications'
 import { useTranslation } from 'react-i18next'
 import CateringPage from './components/CateringPage'
+import GlobalModals from './components/GlobalModals'
 import DiningPage from './components/DiningPage'
 import CheckoutPage from './components/CheckoutPage'
 
@@ -202,6 +203,7 @@ function App() {
               </Routes>
               <GlobalChatbot />
               <CartDrawer />
+              <GlobalModals />
               <DeliveryTrackingBar />
               <OrderNotifications />
             </div>
