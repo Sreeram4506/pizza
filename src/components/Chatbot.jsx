@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
 import { OrderService } from '../services/OrderService'
 import wsService from '../services/websocket.js'
 import StripePayment from './StripePayment'
 import { useVoice } from '../hooks/useVoice'
+import { openMenuRoute } from '../utils/menuNavigation'
 
 export default function Chatbot() {
+  const navigate = useNavigate()
   const {
     isOpen,
     setIsOpen,
@@ -104,6 +107,8 @@ export default function Chatbot() {
   const inputRef = useRef(null)
 
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0)
+
+  const goToMenu = () => openMenuRoute(navigate, setIsOpen)
 
   let discountAmount = 0
   if (selectedReward) {
@@ -289,10 +294,10 @@ export default function Chatbot() {
         }
         break
       case 'menu':
-        setView('menu')
+        goToMenu()
         break
       case 'order':
-        setView('menu')
+        goToMenu()
         break
       case 'cart':
         setView('cart')
@@ -560,7 +565,7 @@ export default function Chatbot() {
                   {['chat', 'menu', 'cart'].map(tab => (
                     <motion.button
                       key={tab}
-                      onClick={() => setView(tab)}
+                      onClick={() => (tab === 'menu' ? goToMenu() : setView(tab))}
                       className={`px-8 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${view === tab ? 'bg-tomato-600 text-white shadow-lg shadow-tomato-600/20' : 'text-wood-600 hover:text-tomato-600'}`}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -621,7 +626,7 @@ export default function Chatbot() {
                 <div className="p-6 max-w-4xl mx-auto w-full space-y-6">
                   {messages.map((msg, i) => (
                     <ChatMessage key={i} message={msg}
-                      onMenuOpen={() => setView('menu')}
+                      onMenuOpen={goToMenu}
                       onCartOpen={() => setView('cart')}
                       onCheckoutOpen={() => setView('checkout')}
                     />
@@ -706,7 +711,7 @@ export default function Chatbot() {
                       <p className="text-xl font-medium">Your cart is empty!</p>
 
                       <motion.button
-                        onClick={() => setView('menu')}
+                        onClick={goToMenu}
                         className="px-10 py-4 rounded-2xl bg-tomato-600 text-white font-bold shadow-pizza"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -765,7 +770,7 @@ export default function Chatbot() {
 
 
                         <button
-                          onClick={() => setView('menu')}
+                          onClick={goToMenu}
                           className="w-full mt-4 text-sm text-wood-400 font-bold uppercase tracking-widest hover:text-tomato-600 transition-colors"
                         >
                           + Add more items
@@ -1053,7 +1058,7 @@ export default function Chatbot() {
               <div className="p-8 bg-white border-t border-crust-100">
                 <div className="max-w-4xl mx-auto w-full">
                   <div className="flex gap-4 mb-6">
-                    <motion.button type="button" onClick={() => setView('menu')}
+                    <motion.button type="button" onClick={goToMenu}
                       className="px-8 py-2.5 rounded-full border border-crust-100 text-wood-500 text-[10px] font-black uppercase tracking-[0.2em] hover:text-tomato-600 hover:border-tomato-200 transition-all shadow-sm"
                       whileTap={{ scale: 0.95 }}>Browse Menu</motion.button>
                     {cart.length > 0 && (

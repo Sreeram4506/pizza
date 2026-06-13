@@ -6,6 +6,7 @@ import { useSettings } from '../context/SettingsContext'
 import wsService from '../services/websocket.js'
 import toast from 'react-hot-toast'
 import { resolveAssetUrl } from '../utils/env'
+import { closeMenuRoute } from '../utils/menuNavigation'
 
 export default function MenuPage() {
     const [categories, setCategories] = useState([])
@@ -139,7 +140,7 @@ export default function MenuPage() {
             <header className="h-16 sm:h-20 flex-shrink-0 bg-white/80 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] px-4 sm:px-12 flex items-center justify-between z-50">
                 <div
                     className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
-                    onClick={() => navigate('/')}
+                    onClick={() => closeMenuRoute(navigate, setIsOpen)}
                 >
                     <div className="w-8 h-8 sm:w-10 sm:h-10 bg-ember-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-mono font-bold text-lg sm:text-xl shadow-lg shadow-ember-600/20 group-hover:scale-105 transition-transform">
                         {settings?.restaurantName?.[0] || 'M'}
@@ -210,7 +211,7 @@ export default function MenuPage() {
                     </button>
 
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={() => closeMenuRoute(navigate, setIsOpen)}
                         className="flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all shadow-sm border border-[rgba(26,20,16,0.04)]"
                     >
                         <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

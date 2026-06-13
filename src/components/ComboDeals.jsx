@@ -108,14 +108,14 @@ export default function ComboDeals() {
                 </span>
 
                 {/* Name */}
-                <h3 className="font-display text-3xl italic text-[#1A1410] mt-4 mb-6 relative z-10">
+                <h3 className="font-display text-xl md:text-2xl text-[#1A1410] mt-4 mb-6 relative z-10 leading-tight">
                   {combo.name}
                 </h3>
 
                 {/* Price */}
                 <div className="flex items-baseline gap-3 mb-8 relative z-10">
-                  <span className="font-mono text-3xl text-ember-500 tracking-tight">${combo.price}</span>
-                  <span className="font-mono text-xs text-gold-400/60">Save ${combo.savings}</span>
+                  <span className="font-mono text-xl md:text-2xl text-ember-500 tracking-tight">${combo.price}</span>
+                  <span className="font-mono text-[11px] text-gold-400/60">Save ${combo.savings}</span>
                 </div>
 
                 {/* Divider */}
@@ -124,7 +124,7 @@ export default function ComboDeals() {
                 {/* Includes */}
                 <ul className="space-y-3 mb-10 relative z-10">
                   {combo.includes.map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-[#5C554E] text-sm font-body">
+                    <li key={item} className="flex items-center gap-3 text-[#5C554E] text-xs md:text-sm font-body leading-snug">
                       <span className="w-1 h-1 rounded-full bg-ember-500 flex-shrink-0" />
                       {item}
                     </li>
@@ -134,7 +134,7 @@ export default function ComboDeals() {
                 {/* CTA */}
                 <button
                   onClick={() => openWithIntent('order', { item: combo.name })}
-                  className={`relative z-10 w-full py-4 text-center font-body text-sm font-medium tracking-[0.15em] uppercase transition-all duration-300 rounded-xl ${combo.featured
+                  className={`relative z-10 w-full py-3.5 text-center font-body text-xs md:text-sm font-medium tracking-[0.15em] uppercase transition-all duration-300 rounded-xl ${combo.featured
                     ? 'bg-ember-500 text-white hover:shadow-ember'
                     : 'border border-[rgba(26,20,16,0.1)] text-[#1A1410] hover:bg-ember-500 hover:border-ember-500 hover:text-white'
                     }`}

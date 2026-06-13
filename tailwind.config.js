@@ -118,11 +118,11 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Cormorant Garamond"', 'serif'],
-        sub: ['"Libre Baskerville"', 'serif'],
-        body: ['"DM Sans"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
-        marquee: ['"Bebas Neue"', 'sans-serif'],
+        display: ['"Segoe UI"', '"Inter"', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        sub: ['"Segoe UI"', '"Inter"', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        body: ['"Segoe UI"', '"Inter"', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        mono: ['"SFMono-Regular"', 'Consolas', '"Liberation Mono"', 'Menlo', 'monospace'],
+        marquee: ['"Segoe UI"', '"Inter"', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',

@@ -7,6 +7,9 @@
    ═══════════════════════════════════════════ */
 
 :root {
+  --font-ui: "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono-ui: "SFMono-Regular", "Consolas", "Liberation Mono", Menlo, monospace;
+
   /* Core Palette — Warm Terracotta / Olive Theme */
   --bg-primary: #F7F1EA;
   --bg-surface: #FFFDF8;
@@ -52,7 +55,7 @@ html {
 }
 
 body {
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: var(--font-ui);
   background:
     radial-gradient(circle at top, rgba(255, 255, 255, 0.8) 0%, rgba(247, 241, 234, 0.96) 45%, #F5EFE6 100%);
   color: var(--text-primary);
@@ -63,20 +66,14 @@ body {
 
 /* ═══ Typography Classes ═══ */
 
-.font-display {
-  font-family: 'Cormorant Garamond', serif;
-}
-
-.font-sub {
-  font-family: 'Libre Baskerville', serif;
+.font-display,
+.font-sub,
+.font-marquee {
+  font-family: var(--font-ui);
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.font-marquee {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-mono-ui);
 }
 
 /* ═══ Subtle Grain Texture (Light) ═══ */

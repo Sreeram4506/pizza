@@ -1,27 +1,18 @@
 import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { useChatbot } from '../context/ChatbotContext'
 import { useNavigate } from 'react-router-dom'
-import wsService from '../services/websocket.js'
 import { resolveAssetUrl } from '../utils/env'
 
 export default function PizzaGallery() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
   const navigate = useNavigate()
-  const { openWithIntent } = useChatbot()
   const [menuItems, setMenuItems] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchMenuData()
-    wsService.connect()
-    wsService.on('menu_updated', () => fetchMenuData(true))
-    wsService.on('item_added', () => fetchMenuData(true))
-    wsService.on('item_updated', () => fetchMenuData(true))
-    wsService.on('item_removed', () => fetchMenuData(true))
-    return () => wsService.disconnect()
   }, [])
 
   const fetchMenuData = async () => {
@@ -70,7 +61,7 @@ export default function PizzaGallery() {
         <div className="divider-gold mb-12" />
 
         {/* Menu Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className={`bg-[#F5F3EF] rounded-xl overflow-hidden border border-white flex flex-col relative ${i === 0 ? 'aspect-[3/4] md:row-span-2' : 'aspect-square'}`}>
@@ -85,7 +76,7 @@ export default function PizzaGallery() {
               </div>
             ))
           ) : (
-            menuItems.slice(0, 3).map((item, index) => (
+            menuItems.slice(0, 4).map((item, index) => (
               <MenuCard
                 key={item._id}
                 image={item.image ? resolveAssetUrl(item.image) : '/pizza-hero-poster.svg'}
@@ -130,26 +121,25 @@ export default function PizzaGallery() {
 function MenuCard({ image, name, price, description, category, available, dietary, index, isInView, onOrder }) {
   const [isHovered, setIsHovered] = useState(false)
   const [imgSrc, setImgSrc] = useState(image)
-  const isLarge = index % 3 === 0
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 18 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ delay: 0.08 * index, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`group cursor-pointer relative overflow-hidden rounded-xl shadow-card hover:shadow-card-hover transition-shadow ${isLarge ? 'md:row-span-2' : ''} ${!available ? 'opacity-40' : ''}`}
+      transition={{ delay: 0.04 * index, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className={`group cursor-pointer relative overflow-hidden rounded-3xl shadow-sm hover:shadow-md transition-all ${!available ? 'opacity-40' : ''}`}
       onClick={onOrder}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className={`relative overflow-hidden rounded-xl ${isLarge ? 'aspect-[3/4]' : 'aspect-square'}`}>
+      <div className="relative overflow-hidden rounded-3xl aspect-[4/4.2] md:aspect-[4/4.1]">
         {/* Image */}
         <motion.img
           src={imgSrc}
           alt={name}
-          className="w-full h-full object-cover img-noir"
-          animate={{ scale: isHovered ? 1.05 : 1 }}
-          transition={{ duration: 0.6 }}
+          className="w-full h-full object-cover img-noir will-change-transform"
+          animate={{ scale: isHovered ? 1.03 : 1 }}
+          transition={{ duration: 0.35 }}
           onError={() => setImgSrc('/pizza-hero-poster.svg')}
         />
 
@@ -162,23 +152,23 @@ function MenuCard({ image, name, price, description, category, available, dietar
         />
 
         {/* Price — top-right */}
-        <div className="absolute top-4 right-4 z-10">
-          <span className="font-mono text-sm tracking-wider text-white bg-black/40 px-3 py-1.5 backdrop-blur-sm rounded-lg">
+        <div className="absolute top-3 right-3 z-10">
+          <span className="font-mono text-[10px] sm:text-[11px] tracking-wider text-white bg-black/40 px-2 py-1 backdrop-blur-sm rounded-md">
             ${price?.toFixed(2)}
           </span>
         </div>
 
         {/* Tags */}
         {dietary?.spicy && (
-          <div className="absolute top-4 left-4 z-10">
-            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-white bg-ember-500/80 px-3 py-1.5 backdrop-blur-sm rounded-lg">
+          <div className="absolute top-3 left-3 z-10">
+            <span className="font-mono text-[8px] tracking-[0.2em] uppercase text-white bg-ember-500/80 px-2 py-1 backdrop-blur-sm rounded-md">
               Spicy
             </span>
           </div>
         )}
         {dietary?.vegetarian && (
-          <div className="absolute top-4 left-4 z-10">
-            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-white bg-[#D4922A]/80 px-3 py-1.5 backdrop-blur-sm rounded-lg">
+          <div className="absolute top-3 left-3 z-10">
+            <span className="font-mono text-[8px] tracking-[0.2em] uppercase text-white bg-[#D4922A]/80 px-2 py-1 backdrop-blur-sm rounded-md">
               Vegetarian
             </span>
           </div>
@@ -186,23 +176,23 @@ function MenuCard({ image, name, price, description, category, available, dietar
 
         {/* Dish name — slides up on hover */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 p-6 z-10"
+          className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: isHovered ? 0 : 20, opacity: isHovered ? 1 : 0 }}
           transition={{ duration: 0.3 }}
         >
           {category && (
-            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-ember-300 block mb-2">
+            <span className="font-mono text-[8px] tracking-[0.2em] uppercase text-ember-200 block mb-2">
               {category}
             </span>
           )}
-          <h3 className="font-display text-2xl lg:text-3xl italic text-white mb-2">{name}</h3>
+          <h3 className="font-display text-base lg:text-lg text-white mb-1 leading-tight not-italic">{name}</h3>
           {description && (
-            <p className="text-white/70 text-sm line-clamp-2 max-w-sm">{description}</p>
+            <p className="text-white/70 text-[10px] lg:text-[11px] line-clamp-2 max-w-sm">{description}</p>
           )}
 
           <motion.button
-            className="mt-4 w-10 h-10 border border-white/30 flex items-center justify-center text-white bg-black/20 backdrop-blur-sm hover:bg-ember-500 hover:border-ember-500 hover:shadow-lg hover:shadow-ember-500/30 transition-all rounded-lg"
+            className="mt-3 w-9 h-9 border border-white/30 flex items-center justify-center text-white bg-black/20 backdrop-blur-sm hover:bg-ember-500 hover:border-ember-500 hover:shadow-lg hover:shadow-ember-500/30 transition-all rounded-lg"
             onClick={(e) => { e.stopPropagation(); onOrder(); }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -215,11 +205,11 @@ function MenuCard({ image, name, price, description, category, available, dietar
 
         {/* Resting state name */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 p-6 z-10 bg-gradient-to-t from-black/50 to-transparent"
+          className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10 bg-gradient-to-t from-black/50 to-transparent"
           animate={{ opacity: isHovered ? 0 : 1 }}
           transition={{ duration: 0.3 }}
         >
-          <h3 className="font-display text-xl italic text-white">{name}</h3>
+          <h3 className="font-display text-sm lg:text-base text-white leading-tight not-italic">{name}</h3>
         </motion.div>
       </div>
     </motion.div>
