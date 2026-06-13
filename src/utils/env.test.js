@@ -1,4 +1,5 @@
 import { normalizeEnvironmentBaseUrl, patchFetchForEnvironment } from './urlHelpers'
+import { getApiBaseUrl } from './env'
 
 describe('normalizeEnvironmentBaseUrl', () => {
   test('ignores localhost backend URLs in production builds', () => {
@@ -7,6 +8,16 @@ describe('normalizeEnvironmentBaseUrl', () => {
 
   test('keeps a real remote backend URL in production', () => {
     expect(normalizeEnvironmentBaseUrl('https://pizza-backend.onrender.com', { isProd: true })).toBe('https://pizza-backend.onrender.com')
+  })
+})
+
+describe('getApiBaseUrl', () => {
+  test('uses the production backend fallback when no Vite API URL is configured', () => {
+    expect(getApiBaseUrl({ PROD: true, VITE_API_URL: '' })).toBe('https://pizza-backend.onrender.com')
+  })
+
+  test('keeps a configured remote backend URL in production', () => {
+    expect(getApiBaseUrl({ PROD: true, VITE_API_URL: 'https://example.com' })).toBe('https://example.com')
   })
 })
 

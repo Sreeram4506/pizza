@@ -4,27 +4,40 @@ import {
   patchFetchForEnvironment as patchFetchWithBase
 } from './urlHelpers'
 
-export function getApiBaseUrl() {
-  if (typeof import.meta !== 'undefined') {
-    return normalizeEnvironmentBaseUrl(import.meta.env?.VITE_API_URL || '', {
-      isProd: import.meta.env?.PROD === true
-    })
+function getViteEnv() {
+  if (typeof globalThis !== 'undefined' && globalThis.__VITE_ENV__) {
+    return globalThis.__VITE_ENV__
+  }
+
+  return {}
+}
+
+export function getApiBaseUrl(env = getViteEnv()) {
+  const isProd = env?.PROD === true
+  const configuredApiUrl = normalizeEnvironmentBaseUrl(env?.VITE_API_URL || '', {
+    isProd
+  })
+
+  if (configuredApiUrl) {
+    return configuredApiUrl
+  }
+
+  if (isProd) {
+    return normalizeEnvironmentBaseUrl('https://pizza-backend.onrender.com', { isProd: true })
   }
 
   return ''
 }
 
-export function getWebSocketUrl() {
+export function getWebSocketUrl(env = getViteEnv()) {
   let wsUrl = ''
 
-  if (typeof import.meta !== 'undefined') {
-    wsUrl = normalizeEnvironmentBaseUrl(import.meta.env?.VITE_WS_URL || '', {
-      isProd: import.meta.env?.PROD === true
-    })
-  }
+  wsUrl = normalizeEnvironmentBaseUrl(env?.VITE_WS_URL || '', {
+    isProd: env?.PROD === true
+  })
 
   if (!wsUrl) {
-    const apiUrl = getApiBaseUrl()
+    const apiUrl = getApiBaseUrl(env)
     if (apiUrl) {
       wsUrl = apiUrl.replace(/^http/, 'ws')
     }
