@@ -8,28 +8,20 @@ import QuickLoginModal from './components/QuickLoginModal'
 import Navbar from './components/Navbar'
 import BannerDisplay from './components/BannerDisplay'
 import Hero from './components/Hero'
+import MarqueeStrip from './components/MarqueeStrip'
 import About from './components/About'
 import PizzaGallery from './components/PizzaGallery'
+import ComboDeals from './components/ComboDeals'
 import Testimonials from './components/Testimonials'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
-import CartDrawer from './components/CartDrawer'
-import DeliveryTrackingBar from './components/DeliveryTrackingBar'
-import OrderNotifications from './components/OrderNotifications'
-import { useTranslation } from 'react-i18next'
-import CateringPage from './components/CateringPage'
-import GlobalModals from './components/GlobalModals'
-import DiningPage from './components/DiningPage'
-import CheckoutPage from './components/CheckoutPage'
 
 import OrderTracker from './components/OrderTracker'
 import CustomerProfile from './components/CustomerProfile'
 import CustomerLogin from './components/CustomerLogin'
 import DeliveryPortal from './components/DeliveryPortal'
 import CustomerRegister from './components/CustomerRegister'
-import ForgotPassword from './components/ForgotPassword'
-import ResetPassword from './components/ResetPassword'
 import AdminLogin from './components/AdminLogin'
 import AdminLayout from './components/admin/Layout'
 import Dashboard from './components/admin/Dashboard'
@@ -38,13 +30,11 @@ import OrderManager from './components/admin/OrderManager'
 import CustomerManager from './components/admin/CustomerManager'
 import AnalyticsDashboard from './components/admin/Analytics'
 import Marketing from './components/admin/Marketing'
-import CateringManager from './components/admin/CateringManager'
-import ReservationManager from './components/admin/ReservationManager'
 import LoyaltyManager from './components/admin/LoyaltyManager'
 import Settings from './components/admin/Settings'
 import CustomPizzaBuilder from './components/CustomPizzaBuilder'
 import MenuPage from './components/MenuPage'
-import LegalPage from './components/LegalPage'
+import { resolveApiUrl } from './utils/env'
 
 // Routes where quick login should NOT appear
 const EXCLUDED_ROUTES = [
@@ -76,35 +66,7 @@ function QuickLoginWrapper() {
   )
 }
 
-function GlobalChatbot() {
-  const location = useLocation()
-  const hiddenPrefixes = ['/admin', '/delivery']
-  const shouldHide = hiddenPrefixes.some(prefix =>
-    location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
-  )
-
-  if (shouldHide) return null
-
-  return <Chatbot />
-}
-
 function Home() {
-  const { hash } = useLocation();
-
-  useEffect(() => {
-    if (hash) {
-      const id = hash.replace('#', '');
-      const element = document.getElementById(id);
-      if (element) {
-        // Wait a bit for the page to render fully
-        const timer = setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 300);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [hash]);
-
   return (
     <>
       <Navbar />
@@ -113,75 +75,62 @@ function Home() {
 
       <main>
         <Hero />
+        <MarqueeStrip />
         <BannerDisplay position="middle" />
         <PizzaGallery />
         <CustomPizzaBuilder />
         <About />
+        <ComboDeals />
         <Testimonials />
         <Contact />
-        <BannerDisplay position="bottom" />
-        <Footer />
       </main>
+      <BannerDisplay position="bottom" />
+      <Footer />
+      <Chatbot />
     </>
   )
 }
 
 function App() {
-  const { i18n } = useTranslation()
-
-  // Sync direction attribute with current language
+  // Auto-wake Render backend
   useEffect(() => {
-    const rtlLanguages = ['ar', 'ur']
-    const dir = rtlLanguages.includes(i18n.language) ? 'rtl' : 'ltr'
-    document.documentElement.dir = dir
-    document.documentElement.lang = i18n.language
-  }, [i18n.language])
-
-  // Ensure backend is reachable (optional local check)
-  useEffect(() => {
-    const checkServer = () => {
-      fetch('/health').catch(() => { })
+    const wakeServer = () => {
+      fetch(resolveApiUrl('/api/health'), { cache: 'no-store' }).catch(() => { })
     }
 
-    checkServer()
+    wakeServer()
+    const timer = setTimeout(wakeServer, 2000)
+
+    return () => clearTimeout(timer)
   }, [])
 
   return (
     <BrowserRouter>
       <SettingsProvider>
         <ChatbotProvider>
-          <div className="bg-[#FAFAF8] relative min-h-screen text-[#1A1410] font-sans selection:bg-[#1A1410] selection:text-white pb-0">
-            <div className="relative z-10">
+          <div className="min-h-screen bg-[#FAFAF8] relative overflow-x-hidden selection:bg-ember-500/15 selection:text-[#1A1410]">
+            <div className="relative z-10 text-[#1A1410]">
               <Toaster position="top-center" toastOptions={{
-                className: 'font-semibold shadow-md border border-[#EBEBE6]',
+                className: 'font-body',
                 style: {
-                  background: '#FFFFFF',
-                  color: '#1A1410',
-                  borderRadius: '16px',
-                  padding: '12px 24px',
+                  background: '#1A1410',
+                  color: '#fff',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.1)'
                 }
               }} />
               <QuickLoginWrapper />
 
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/menu" element={<MenuPage />} />
-                <Route path="/checkout" element={<><Navbar /><CheckoutPage /></>} />
-                <Route path="/catering" element={<><Navbar /><CateringPage /></>} />
-                <Route path="/dining" element={<><Navbar /><DiningPage /></>} />
+                <Route path="/menu" element={<><MenuPage /><Chatbot /></>} />
 
-                <Route path="/login" element={<><Navbar /><CustomerLogin /></>} />
-                <Route path="/register" element={<><Navbar /><CustomerRegister /></>} />
-                <Route path="/forgot-password" element={<><Navbar /><ForgotPassword /></>} />
-                <Route path="/reset-password" element={<><Navbar /><ResetPassword /></>} />
-                <Route path="/track" element={<><Navbar /><OrderTracker /></>} />
-                <Route path="/track/:orderNumber" element={<><Navbar /><OrderTracker /></>} />
-                <Route path="/privacy" element={<><Navbar /><LegalPage variant="privacy" /><Footer /></>} />
-                <Route path="/terms" element={<><Navbar /><LegalPage variant="terms" /><Footer /></>} />
-                <Route path="/profile" element={<CustomerProfile />} />
+                <Route path="/login" element={<><Navbar /><CustomerLogin /><Chatbot /></>} />
+                <Route path="/register" element={<><Navbar /><CustomerRegister /><Chatbot /></>} />
+                <Route path="/track" element={<><Navbar /><OrderTracker /><Chatbot /></>} />
+                <Route path="/profile" element={<><Navbar /><CustomerProfile /><Chatbot /></>} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/delivery" element={<DeliveryPortal />} />
-                <Route path="/delivery/:token" element={<DeliveryPortal />} />
 
                 {/* Secure Nested Admin Routes — no chatbot, no grain */}
                 <Route path="/admin" element={<AdminLayout />}>
@@ -191,21 +140,14 @@ function App() {
                   <Route path="orders" element={<OrderManager />} />
                   <Route path="customers" element={<CustomerManager />} />
                   <Route path="loyalty" element={<LoyaltyManager />} />
-                   <Route path="analytics" element={<AnalyticsDashboard />} />
+                  <Route path="analytics" element={<AnalyticsDashboard />} />
                   <Route path="marketing" element={<Marketing />} />
-                  <Route path="catering" element={<CateringManager />} />
-                  <Route path="reservations" element={<ReservationManager />} />
                   <Route path="settings" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-              <GlobalChatbot />
-              <CartDrawer />
-              <GlobalModals />
-              <DeliveryTrackingBar />
-              <OrderNotifications />
             </div>
           </div>
         </ChatbotProvider>

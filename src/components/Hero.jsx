@@ -1,201 +1,162 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef } from 'react'
 import { motion } from 'framer-motion'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 import BannerDisplay from './BannerDisplay'
-import { useTranslation } from 'react-i18next'
 
 export default function Hero() {
-  const { t } = useTranslation()
   const containerRef = useRef(null)
-  const videoRef = useRef(null)
   const { settings } = useSettings()
   const navigate = useNavigate()
-  const [videoLoaded, setVideoLoaded] = useState(false)
-  const restaurantName = settings?.restaurantName || 'Mustang Pizza'
-  const [brandFirst, ...brandRest] = restaurantName.split(' ')
-  const brandSecond = brandRest.join(' ') || 'Pizza'
 
-  // Removed starting animation to eliminate pre-loading feel
   useGSAP(() => {
     if (!containerRef.current) return
-    // Animations removed per user request for a faster start
+    const ctx = gsap.context(() => {
+      gsap.from('.hero-stagger', {
+        y: 60,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 1,
+        ease: 'power3.out',
+        delay: 0.2
+      })
+    }, containerRef)
+    return () => ctx.revert()
   }, [])
-
-  // Extended timeout for video load.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!videoLoaded && videoRef.current) {
-        videoRef.current.pause()
-      }
-    }, 10000)
-    return () => clearTimeout(timer)
-  }, [videoLoaded])
 
   return (
     <section
       id="home"
       ref={containerRef}
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex items-center overflow-hidden bg-[linear-gradient(135deg,#F7F2EA_0%,#FFFDF8_45%,#EFE4D7_100%)] section-grain"
     >
-      {/* Background Video */}
-      <div className="absolute inset-0 z-0">
-        {/* Always-visible pizza background image shown until the video loads. */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url('/pizza-hero-poster.svg')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
+      <div className="absolute inset-0 ember-glow-bg" />
+      <div className="absolute inset-0 gold-glow-bg" />
 
-        {/* Video layer served from /public to avoid external CORS issues. */}
-        <video
-          ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster="/pizza-hero-poster.svg"
-          onCanPlay={() => setVideoLoaded(true)}
-          onError={() => videoRef.current?.pause()}
-        >
-          {/* Local pizza video downloaded from Mixkit under its free license. */}
-          <source src="/pizza-hero.mp4" type="video/mp4" />
-        </video>
+      <div className="absolute right-[45%] top-0 bottom-0 w-px bg-[rgba(29,24,19,0.06)] hidden lg:block" />
+
+      <div className="absolute top-32 right-24 hidden lg:grid grid-cols-5 gap-3 opacity-[0.08]">
+        {Array.from({ length: 25 }).map((_, i) => (
+          <div key={i} className="w-1 h-1 rounded-full bg-[#1D1813]" />
+        ))}
       </div>
 
-      {/* Cinematic Gradient Overlay */}
-      <div
-        className="absolute inset-0 z-10"
-        style={{
-          background: `
-            linear-gradient(to bottom,
-              rgba(15,10,8,0.48) 0%,
-              rgba(15,10,8,0.22) 38%,
-              rgba(15,10,8,0.32) 68%,
-              rgba(15,10,8,0.72) 100%
-            )
-          `
-        }}
-      />
+      <BannerDisplay position="hero" />
 
-      {/* Subtle vignette edges */}
-      <div
-        className="absolute inset-0 z-10 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse at center, transparent 54%, rgba(0,0,0,0.36) 100%)'
-        }}
-      />
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 pt-32 pb-20 lg:py-0 relative z-10 w-full">
+        <div className="flex flex-col lg:flex-row items-center lg:items-center min-h-screen">
+          <div className="w-full lg:w-[45%] lg:pr-16 flex flex-col justify-center">
+            <div className="hero-stagger">
+              <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#6F7F52]">
+                Est. 2024 &nbsp;·&nbsp; Artisan Kitchen
+              </span>
+            </div>
 
-      <div className="absolute top-0 left-0 right-0 z-30">
-        <BannerDisplay position="hero" />
-      </div>
+            <div className="mt-8 hero-stagger">
+              <h1 className="font-display font-bold leading-[0.9] tracking-tight">
+                <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[96px] text-[#1D1813]">
+                  {settings.restaurantName || 'Pizza Blast'}
+                </span>
+                <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl italic text-[#1D1813]/20 mt-4">
+                  The Art of
+                </span>
+                <span
+                  className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl mt-2"
+                  style={{ WebkitTextStroke: '2px #1D1813', color: 'transparent' }}
+                >
+                  Neapolitan
+                </span>
+              </h1>
+            </div>
 
-      {/* Main Centered Content */}
-      <div className="relative z-20 flex flex-col items-center justify-center text-center px-5 sm:px-6 pt-28 pb-20 sm:pt-32 sm:pb-24 min-h-screen w-full max-w-5xl mx-auto">
-        {/* Top label */}
-        <motion.div className="hero-stagger mb-4 sm:mb-5">
-          <span className="inline-flex items-center gap-2.5 sm:gap-3 font-mono text-[10px] sm:text-[11px] tracking-[0.18em] sm:tracking-[0.24em] uppercase text-white/65">
-            <span className="w-6 sm:w-8 h-px bg-white/40" />
-            <span dangerouslySetInnerHTML={{ __html: t('hero.est') }} />
-            <span className="w-6 sm:w-8 h-px bg-white/40" />
-          </span>
-        </motion.div>
+            <div className="hero-stagger w-16 h-px bg-[#A24A28] mt-10" />
 
-        {/* Restaurant Name - large cinematic display */}
-        <div className="hero-stagger flex flex-col items-center">
-          <h1
-            className="font-serif font-black leading-none tracking-tight text-white mb-0"
-            style={{ textShadow: '0 4px 28px rgba(0,0,0,0.28)' }}
-          >
-            <span className="block text-[clamp(3.5rem,18vw,12rem)] leading-[0.85]">
-              {brandFirst}
-            </span>
-          </h1>
-          <span className="text-[18px] sm:text-2xl md:text-[2.2rem] font-black uppercase tracking-[0.4em] sm:tracking-[0.55em] text-[#FAFAF8] mt-2 md:mt-4">
-            {brandSecond}
-          </span>
-        </div>
+            <p className="hero-stagger mt-8 text-[#5E574F] text-base md:text-lg italic font-body max-w-md">
+              "Where fire meets flour, and tradition meets tomorrow."
+            </p>
 
-        {/* Sub-headline */}
-        <div className="hero-stagger mt-6 sm:mt-10">
-          <p className="font-sans text-[11px] sm:text-[13px] font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase text-white/80">
-            {t('hero.type')}
-          </p>
-        </div>
+            <div className="hero-stagger flex flex-wrap items-center gap-4 mt-12 relative z-20">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/menu')}
+                className="group px-8 py-3.5 bg-ember-600 text-white text-sm font-body font-semibold tracking-[0.1em] uppercase rounded-full flex items-center gap-2 transition-shadow shadow-lg shadow-ember-600/25 hover:shadow-xl hover:shadow-ember-600/40"
+              >
+                Explore Menu
+                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => document.querySelector('#atelier')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group px-8 py-3.5 border-2 border-[#1D1813] text-[#1D1813] text-sm font-body font-semibold tracking-[0.1em] uppercase rounded-full flex items-center gap-2 transition-colors hover:bg-[#1D1813] hover:text-white"
+              >
+                Build Your Own
+                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </motion.button>
+            </div>
+          </div>
 
-        {/* Thin accent line */}
-        <div className="hero-stagger w-12 h-px bg-[#C1440E] mt-7 sm:mt-8 mx-auto" />
-
-        {/* Tagline */}
-        <p
-          className="hero-stagger mt-6 font-serif-1947 italic text-white/85 text-lg md:text-[1.65rem] max-w-2xl leading-relaxed"
-          style={{ textShadow: '0 2px 10px rgba(0,0,0,0.35)' }}
-        >
-          {t('hero.tagline')}
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="hero-stagger flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3.5 sm:gap-4 mt-9 sm:mt-10 w-full sm:w-auto">
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/menu')}
-            className="w-full sm:w-auto justify-center px-9 py-4 bg-[#1A1410] text-white text-[11px] sm:text-[13px] font-black tracking-[0.16em] uppercase rounded-full flex items-center gap-2 transition-all hover:bg-black border border-transparent hover:border-white/20"
-            aria-label="Explore the menu"
-          >
-            {t('hero.exploreMenu')}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => document.querySelector('#gallery')?.scrollIntoView({ behavior: 'smooth' })}
-            className="w-full sm:w-auto justify-center px-8 py-4 bg-white text-[#1A1410] text-[11px] sm:text-[13px] font-sans font-black tracking-[0.16em] uppercase rounded-full flex items-center gap-2 transition-all hover:bg-[#EBEBE6] border border-transparent shadow-md"
-            aria-label="View our specials"
-          >
-            OUR SPECIALS
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>
-          </motion.button>
-        </div>
-
-        {/* Feature Pills */}
-        <motion.div
-          className="hero-stagger flex flex-wrap justify-center gap-2.5 sm:gap-3 mt-8 sm:mt-10 max-w-3xl"
-        >
-          {[
-            t('hero.features.dough'),
-            t('hero.features.fired'),
-            t('hero.features.rating')
-          ].map((feat) => (
-            <span
-              key={feat}
-              className="px-3.5 sm:px-4 py-2 rounded-full glass-pill text-white/82 font-mono text-[10px] sm:text-[11px] tracking-[0.1em] sm:tracking-[0.14em] uppercase bg-white/10 border-white/20"
+          <div className="w-full lg:w-[55%] mt-16 lg:mt-0 relative flex items-center justify-center">
+            <motion.div
+              className="relative w-full max-w-lg lg:max-w-xl xl:max-w-2xl"
+              initial={{ opacity: 0, x: 60, rotate: 0 }}
+              animate={{ opacity: 1, x: 0, rotate: 2 }}
+              transition={{ delay: 0.5, duration: 1, ease: [0.16, 1, 0.3, 1] }}
             >
-              {feat}
-            </span>
-          ))}
-        </motion.div>
-      </div>
+              <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-ember-500/10 via-transparent to-gold-400/10 blur-2xl" />
+              <div className="relative overflow-hidden rounded-[2rem] shadow-[0_30px_60px_rgba(35,27,22,0.18)] border border-white/70 bg-[#211A15] aspect-[4/5]">
+                <img
+                  src="/pizza-hero-poster.svg"
+                  alt="Artisan pizza poster"
+                  className="w-full h-full object-cover img-noir"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-white/12 px-4 py-2 backdrop-blur-md border border-white/12">
+                    <span className="w-2 h-2 rounded-full bg-[#D7DFBF] animate-pulse" />
+                    <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/90">
+                      Wood-fired. 48h dough. Seasonal produce.
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-      {/* Scroll indicator */}
-      <div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 hidden sm:flex flex-col items-center gap-2 pointer-events-none"
-      >
-        <div
-          className="w-px h-12 bg-gradient-to-b from-white/50 to-transparent opacity-40"
-        />
+              <motion.div
+                className="absolute -left-6 top-1/4 bg-[#FFFDF8]/95 backdrop-blur-sm border border-[rgba(35,27,22,0.10)] px-4 py-3 rounded-lg shadow-md"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.2 }}
+              >
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#6F7F52]">48h Fermented</span>
+              </motion.div>
+
+              <motion.div
+                className="absolute -right-4 top-1/3 bg-[#FFFDF8]/95 backdrop-blur-sm border border-[rgba(35,27,22,0.10)] px-4 py-3 rounded-lg shadow-md"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.4 }}
+              >
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#231B16]">4.9 Rating</span>
+              </motion.div>
+
+              <motion.div
+                className="absolute left-8 -bottom-4 bg-[#FFFDF8]/95 backdrop-blur-sm border border-[rgba(35,27,22,0.10)] px-4 py-3 rounded-lg shadow-md"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.6 }}
+              >
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C46A3B]">900C Wood-Fired</span>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   )

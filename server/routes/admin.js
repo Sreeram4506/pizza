@@ -2,7 +2,6 @@ import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import multer from 'multer'
-import { uploadToCloudinary } from '../utils/cloudinary.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
@@ -16,43 +15,24 @@ import { EmailCampaign } from '../models/EmailCampaign.js'
 import { PromotionalBanner } from '../models/PromotionalBanner.js'
 import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
 import { config } from '../config.js'
-import { sendMarketingEmail, sendReservationConfirmation, sendCateringConfirmation } from '../utils/email.js'
+import { sendMarketingEmail } from '../utils/email.js'
 import { verifyAdmin } from '../middleware/auth.js'
-import { isConnected } from '../utils/database.js'
-import { Catering } from '../models/Catering.js'
-import { Reservation } from '../models/Reservation.js'
-import { ImageService } from '../utils/image.js'
-import { ExternalPlatformService } from '../utils/externalPlatforms.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 const router = Router()
 
-const emitPromotionalBannerUpdate = (req, eventName, payload) => {
-    const io = req.app.get('io')
-    if (!io) return
-
-    io.emit(eventName, payload)
-    io.emit('promotional_banners_updated', {
-        type: eventName,
-        banner: payload
-    })
-}
-
-// Configure multer for image uploads dynamically (Cloudinary vs Local)
-const isCloudStorage = !!(process.env.CLOUDINARY_URL || process.env.CLOUDINARY_CLOUD_NAME)
-const storage = isCloudStorage 
-    ? multer.memoryStorage() 
-    : multer.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, path.join(__dirname, '../uploads/menu'))
-        },
-        filename: (req, file, cb) => {
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-            cb(null, 'menu-' + uniqueSuffix + path.extname(file.originalname))
-        }
-    })
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '../uploads/menu'))
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, 'menu-' + uniqueSuffix + path.extname(file.originalname))
+    }
+})
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
@@ -95,26 +75,14 @@ const handleMulterError = (err, req, res, next) => {
 
 // Login Route
 router.post('/login', async (req, res) => {
-    try {
-        const { username, password } = req.body
-        
-        if (!username || !password) {
-            return res.status(400).json({ error: 'Username and password are required' })
-        }
+    const { username, password } = req.body
 
-        const adminUser = ADMIN_USER()
-        const adminHash = ADMIN_PASS_HASH
-
-        if (username === adminUser && bcrypt.compareSync(password, adminHash)) {
-            const token = jwt.sign({ role: 'admin' }, config.JWT_SECRET, { expiresIn: '1d' })
-            return res.json({ token })
-        }
-
-        res.status(401).json({ error: 'Invalid credentials' })
-    } catch (err) {
-        console.error('[ADMIN LOGIN] CRITICAL ERROR:', err)
-        res.status(500).json({ error: 'Internal server error during login', details: err.message })
+    if (username === ADMIN_USER() && bcrypt.compareSync(password, ADMIN_PASS_HASH)) {
+        const token = jwt.sign({ role: 'admin' }, config.JWT_SECRET, { expiresIn: '1d' })
+        return res.json({ token })
     }
+
+    res.status(401).json({ error: 'Invalid credentials' })
 })
 
 // Get all orders
@@ -129,9 +97,8 @@ router.get('/orders', verifyAdmin, async (req, res) => {
         }
 
         const orders = await Order.find(query)
-            .populate('deliveryPersonId', 'name phone email')
             .sort({ createdAt: -1 })
-            .limit(100)
+            .limit(50)
         res.json(orders)
     } catch (err) {
         console.error('Failed to fetch orders:', err)
@@ -153,7 +120,7 @@ router.put('/orders/:id/status', verifyAdmin, async (req, res) => {
         const order = await Order.findOneAndUpdate(
             { _id: req.params.id, ...(tenantId && { tenantId }) },
             updateData,
-            { returnDocument: 'after' }
+            { new: true }
         )
 
         if (!order) {
@@ -222,11 +189,6 @@ router.put('/orders/:id/status', verifyAdmin, async (req, res) => {
                 message: `Your order is now ${order.status}!`
             })
         }
-        
-        // Sync with external platforms
-        if (order.externalOrderId) {
-            await ExternalPlatformService.updateStatus(order)
-        }
 
         res.json(order)
     } catch (err) {
@@ -245,7 +207,7 @@ router.put('/orders/:id/assign', verifyAdmin, async (req, res) => {
         const order = await Order.findOneAndUpdate(
             { _id: id, ...(tenantId && { tenantId }) },
             { deliveryPersonId, status: 'out_for_delivery' },
-            { returnDocument: 'after' }
+            { new: true }
         ).populate('deliveryPersonId', 'name phone')
 
         if (!order) {
@@ -256,11 +218,6 @@ router.put('/orders/:id/assign', verifyAdmin, async (req, res) => {
         if (io) {
             io.to('admin:orders').emit('order:update', order)
             io.to(`tenant:${tenantId || 'default'}`).emit('order:update', order)
-        }
-        
-        // Sync with external platforms
-        if (order.externalOrderId) {
-            await ExternalPlatformService.updateStatus(order)
         }
 
         res.json(order)
@@ -347,48 +304,37 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
         const yesterday = new Date(today)
         yesterday.setDate(yesterday.getDate() - 1)
 
-        // Aggregated stats (replaces looping)
-        const orderStats = await Order.aggregate([
-            { $match: { ...query, status: { $nin: ['cancelled'] } } },
-            { 
-               $group: { 
-                 _id: null, 
-                 totalRevenue: { $sum: '$total' },
-                 totalTips: { $sum: '$tip' },
-                 totalCashRevenue: { $sum: { $cond: [{ $eq: ['$payment.method', 'cash'] }, '$total', 0] } },
-                 totalCardRevenue: { $sum: { $cond: [{ $in: ['$payment.method', ['card', 'online']] }, '$total', 0] } }
-               } 
-            }
-        ])
-        const stats = orderStats[0] || { totalRevenue: 0, totalTips: 0, totalCashRevenue: 0, totalCardRevenue: 0 }
-        
+        // Total orders and revenue
+        const totalOrders = await Order.countDocuments(query)
+        const allOrders = await Order.find({ ...query, status: { $nin: ['cancelled'] } })
+        const totalRevenue = allOrders.reduce((sum, order) => sum + (order.total || 0), 0)
+
         // Today's orders
         const todayOrdersQuery = { ...query, createdAt: { $gte: today }, status: { $nin: ['cancelled'] } }
-        const todayStats = await Order.aggregate([
-            { $match: todayOrdersQuery },
-            { $group: { _id: null, count: { $sum: 1 }, totalRevenue: { $sum: '$total' } } }
-        ])
-        const todayData = todayStats[0] || { count: 0, totalRevenue: 0 }
+        const todayOrders = await Order.find(todayOrdersQuery)
+        const todayRevenue = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0)
 
         // Pending orders
         const pendingOrders = await Order.countDocuments({ ...query, status: 'pending' })
-        const totalOrders = await Order.countDocuments(query)
 
         // Active customers (customers with orders)
         const activeCustomers = await Customer.countDocuments({ ...query, orderCount: { $gt: 0 } })
 
         // Average order value
-        const avgOrderValue = totalOrders > 0 ? stats.totalRevenue / totalOrders : 0
+        const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
-        // Popular items Aggregation
-        const popularItems = await Order.aggregate([
-            { $match: { ...query, status: { $nin: ['cancelled'] } } },
-            { $unwind: '$items' },
-            { $group: { _id: '$items.name', count: { $sum: { $ifNull: ['$items.quantity', 1] } } } },
-            { $sort: { count: -1 } },
-            { $limit: 10 },
-            { $project: { name: '$_id', count: 1, _id: 0 } }
-        ])
+        // Popular items
+        const itemCounts = {}
+        allOrders.forEach(order => {
+            order.items.forEach(item => {
+                itemCounts[item.name] = (itemCounts[item.name] || 0) + item.quantity
+            })
+        })
+
+        const popularItems = Object.entries(itemCounts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10)
 
         // Recent orders
         const recentOrders = await Order.find(query)
@@ -396,13 +342,10 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
             .limit(10)
 
         res.json({
-            totalRevenue: stats.totalRevenue,
-            totalCashRevenue: stats.totalCashRevenue,
-            totalCardRevenue: stats.totalCardRevenue,
-            totalTips: stats.totalTips,
+            totalRevenue,
             totalOrders,
-            todayOrders: todayData.count,
-            todayRevenue: todayData.totalRevenue,
+            todayOrders: todayOrders.length,
+            todayRevenue,
             activeCustomers,
             pendingOrders,
             avgOrderValue,
@@ -505,7 +448,7 @@ router.put('/menu/categories/:id', verifyAdmin, async (req, res) => {
         const category = await MenuCategory.findByIdAndUpdate(
             id,
             { name, description: description || '', sortOrder: sortOrder || 0 },
-            { returnDocument: 'after' }
+            { new: true }
         )
 
         if (!category) {
@@ -563,7 +506,7 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
         console.log('File:', req.file)
 
         const tenantId = req.tenantId
-        const { name, description, price, categoryId, available, modifiers, tags, dietary, image, isLoyaltyItem, loyaltyCost } = req.body
+        const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
 
         // Build item data
         const itemData = {
@@ -572,26 +515,16 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
             description: description || '',
             price: parseFloat(price),
             categoryId,
-            available: available !== 'false' && available !== false,
+            available: available !== false,
             modifiers: modifiers ? JSON.parse(modifiers) : [],
             tags: tags ? JSON.parse(tags) : [],
-            dietary: dietary ? JSON.parse(dietary) : {},
-            isLoyaltyItem: isLoyaltyItem === 'true' || isLoyaltyItem === true,
-            loyaltyCost: loyaltyCost ? parseInt(loyaltyCost) : 0
+            dietary: dietary ? JSON.parse(dietary) : {}
         }
 
-        // Add image path if uploaded (Cloud vs Local)
+        // Add image path if uploaded
         if (req.file) {
-            if (req.file.buffer) {
-                // Cloudinary upload
-                itemData.image = await uploadToCloudinary(req.file.buffer, 'pizzablast/menu')
-            } else {
-                // Local upload fallback
-                itemData.image = ImageService.getStoredPath(req.file, 'menu')
-            }
+            itemData.image = `/uploads/menu/${req.file.filename}`
             console.log('Image saved:', itemData.image)
-        } else if (typeof image === 'string' && image.startsWith('/uploads/menu/')) {
-            itemData.image = ImageService.getPublicUrl(image)
         }
 
         console.log('Creating item with data:', itemData)
@@ -621,7 +554,7 @@ router.post('/menu/items', verifyAdmin, handleMulterError, upload.single('image'
 router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('image'), async (req, res) => {
     try {
         const { id } = req.params
-        const { name, description, price, categoryId, available, modifiers, tags, dietary, image, isLoyaltyItem, loyaltyCost } = req.body
+        const { name, description, price, categoryId, available, modifiers, tags, dietary } = req.body
 
         // Build update data
         const updateData = {
@@ -629,30 +562,21 @@ router.put('/menu/items/:id', verifyAdmin, handleMulterError, upload.single('ima
             description: description || '',
             price: parseFloat(price),
             categoryId,
-            available: available !== 'false' && available !== false,
+            available: available !== false,
             modifiers: modifiers ? JSON.parse(modifiers) : [],
             tags: tags ? JSON.parse(tags) : [],
-            dietary: dietary ? JSON.parse(dietary) : {},
-            isLoyaltyItem: isLoyaltyItem === 'true' || isLoyaltyItem === true,
-            loyaltyCost: loyaltyCost ? parseInt(loyaltyCost) : 0
+            dietary: dietary ? JSON.parse(dietary) : {}
         }
 
-        // Handle image update securely 
+        // Add image path if new image uploaded
         if (req.file) {
-            if (req.file.buffer) {
-                updateData.image = await uploadToCloudinary(req.file.buffer, 'pizzablast/menu')
-            } else {
-                updateData.image = ImageService.getStoredPath(req.file, 'menu')
-            }
-            console.log('Image updated:', updateData.image)
-        } else if (typeof image === 'string') {
-            updateData.image = image
+            updateData.image = `/uploads/menu/${req.file.filename}`
         }
 
         const item = await MenuItem.findByIdAndUpdate(
             id,
             updateData,
-            { returnDocument: 'after' }
+            { new: true }
         )
 
         if (!item) {
@@ -704,7 +628,7 @@ router.delete('/menu/items/:id', verifyAdmin, async (req, res) => {
 })
 
 // Public Settings (no auth required)
-router.get('/public/settings', async (req, res, next) => {
+router.get('/public/settings', async (req, res) => {
     try {
         const tenantId = req.tenantId
         console.log('GET /admin/public/settings - Request received')
@@ -714,18 +638,6 @@ router.get('/public/settings', async (req, res, next) => {
         if (tenantId) {
             settings = await Settings.findOne({ tenantId })
         } else {
-            // Mock settings if DB is down
-            if (!isConnected) {
-                console.warn('⚠️ [SETTINGS] FALLBACK: Serving mock settings because Database is disconnected.')
-                return res.json({
-                    restaurantName: 'Restaurant Name',
-                    email: 'contact@example.com',
-                    phone: '+1 (555) 000-0000',
-                    address: 'Main Street, City, State',
-                    currency: 'USD',
-                    timezone: 'UTC'
-                })
-            }
             settings = await Settings.findOne({ tenantId: null }) || await Settings.findOne({ tenantId: { $exists: false } })
         }
 
@@ -743,36 +655,8 @@ router.get('/public/settings', async (req, res, next) => {
         console.log('Public settings found:', settings)
         res.json(settings)
     } catch (err) {
-        next(err)
-    }
-})
-
-// Public API for restaurant stats (no auth)
-router.get('/public/stats', async (req, res, next) => {
-    try {
-        const tenantId = req.tenantId
-        const query = tenantId ? { tenantId } : {}
-        
-        if (!isConnected) {
-            return res.json({
-                orders: 450,
-                customers: 120,
-                experienceYears: 12
-            })
-        }
-
-        const [orderCount, customerCount] = await Promise.all([
-            Order.countDocuments(query),
-            Customer.countDocuments(query)
-        ])
-        
-        res.json({
-            orders: orderCount,
-            customers: customerCount,
-            experienceYears: 12 // Hardcoded but could be from settings
-        })
-    } catch (err) {
-        next(err)
+        console.error('Failed to fetch public settings:', err)
+        res.status(500).json({ error: 'Failed to fetch settings' })
     }
 })
 
@@ -816,8 +700,8 @@ router.post('/settings', verifyAdmin, async (req, res) => {
         console.log('Tenant ID:', tenantId)
         console.log('Settings data:', req.body)
 
-        const { restaurantName, email, phone, address, currency, timezone, atelierConfig } = req.body
-        
+        const { restaurantName, email, phone, address, currency, timezone } = req.body
+
         const settingsData = {
             ...(tenantId && { tenantId }),
             restaurantName,
@@ -826,7 +710,6 @@ router.post('/settings', verifyAdmin, async (req, res) => {
             address,
             currency,
             timezone,
-            atelierConfig,
             updatedAt: new Date()
         }
 
@@ -837,14 +720,14 @@ router.post('/settings', verifyAdmin, async (req, res) => {
             settings = await Settings.findOneAndUpdate(
                 { tenantId },
                 { $set: settingsData },
-                { upsert: true, returnDocument: 'after' }
+                { upsert: true, new: true }
             )
             console.log('Settings saved to database:', settings)
         } else {
             settings = await Settings.findOneAndUpdate(
                 { tenantId: null },
                 { $set: settingsData },
-                { upsert: true, returnDocument: 'after' }
+                { upsert: true, new: true }
             )
             console.log('Settings saved (global mode):', settings)
         }
@@ -890,12 +773,6 @@ router.post('/email-campaigns', verifyAdmin, async (req, res) => {
     try {
         const tenantId = req.tenantId
         const { name, subject, message, template, recipients, sendNow } = req.body
-        console.log(`[CAMPAIGN] Attempting to create campaign: "${name}" for tenant: ${tenantId || 'global'}. Recipients: ${recipients?.length || 0}`)
-
-        if (!name || !subject || !message) {
-            console.warn('[CAMPAIGN] Validation failed: Missing name, subject, or message')
-            return res.status(400).json({ error: 'Missing required campaign fields (name, subject, message)' })
-        }
 
         const campaignData = {
             ...(tenantId && { tenantId }),
@@ -932,12 +809,8 @@ router.post('/email-campaigns', verifyAdmin, async (req, res) => {
 
         res.json(campaign)
     } catch (err) {
-        console.error('CRITICAL [CAMPAIGN ERROR]:', err)
-        res.status(500).json({ 
-            error: 'Failed to process campaign', 
-            details: err.message,
-            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
-        })
+        console.error('Failed to create/send campaign:', err)
+        res.status(500).json({ error: 'Failed to process campaign' })
     }
 })
 
@@ -1024,7 +897,6 @@ router.post('/promotional-banners', verifyAdmin, async (req, res) => {
         const banner = await PromotionalBanner.create(bannerData)
 
         console.log('Promotional banner created:', banner)
-        emitPromotionalBannerUpdate(req, 'promotional_banner_created', banner)
         res.json(banner)
     } catch (err) {
         console.error('Failed to create promotional banner:', err)
@@ -1055,7 +927,6 @@ router.put('/promotional-banners/:id', verifyAdmin, async (req, res) => {
         }
 
         console.log('Promotional banner updated:', banner)
-        emitPromotionalBannerUpdate(req, 'promotional_banner_updated', banner)
         res.json(banner)
     } catch (err) {
         console.error('Failed to update promotional banner:', err)
@@ -1077,7 +948,6 @@ router.delete('/promotional-banners/:id', verifyAdmin, async (req, res) => {
         }
 
         console.log('Promotional banner deleted:', id)
-        emitPromotionalBannerUpdate(req, 'promotional_banner_deleted', { _id: id })
         res.json({ message: 'Banner deleted successfully' })
     } catch (err) {
         console.error('Failed to delete promotional banner:', err)
@@ -1090,23 +960,6 @@ router.get('/public/promotional-banners', async (req, res) => {
     try {
         const tenantId = req.tenantId
         console.log('GET /admin/public/promotional-banners - Request received')
-
-        if (!isConnected) {
-            return res.json([
-                {
-                    _id: 'b1',
-                    title: 'Grand Opening (Mock)',
-                    subtitle: '50% Off Your First Pizza',
-                    description: 'Use code MOCK50 at checkout',
-                    backgroundColor: '#C1440E',
-                    textColor: '#FFFFFF',
-                    buttonText: 'Order Now',
-                    buttonLink: '/menu',
-                    position: 'top',
-                    isActive: true
-                }
-            ])
-        }
 
         const baseQuery = tenantId ? { tenantId } : {}
         const banners = await PromotionalBanner.find({
@@ -1121,7 +974,7 @@ router.get('/public/promotional-banners', async (req, res) => {
         res.json(banners)
     } catch (err) {
         console.error('Failed to fetch active promotional banners:', err)
-        res.status(500).json({ error: 'Failed' })
+        res.status(500).json({ error: 'Failed to fetch active promotional banners' })
     }
 })
 
@@ -1140,196 +993,6 @@ router.post('/promotional-banners/:id/click', async (req, res) => {
         res.json({ success: true, clicks: banner.clicks })
     } catch (err) {
         res.status(500).json({ error: 'Failed to track click' })
-    }
-})
-
-// Catering Request Management
-router.get('/catering', verifyAdmin, async (req, res) => {
-    try {
-        const tenantId = req.tenantId
-        let query = {}
-        if (tenantId) query.tenantId = tenantId
-
-        const requests = await Catering.find(query)
-            .sort({ eventDate: 1, createdAt: -1 })
-        res.json(requests)
-    } catch (err) {
-        console.error('Failed to fetch catering requests:', err)
-        res.status(500).json({ error: 'Failed to fetch catering requests' })
-    }
-})
-
-router.patch('/catering/:id', verifyAdmin, async (req, res) => {
-    try {
-        const { id } = req.params
-        const tenantId = req.tenantId
-        const updateData = req.body
-
-        const request = await Catering.findOneAndUpdate(
-            { _id: id, ...(tenantId && { tenantId }) },
-            updateData,
-            { returnDocument: 'after' }
-        )
-
-        if (!request) return res.status(404).json({ error: 'Catering request not found' })
-
-        // Send confirmation email if status changed to confirmed
-        if (updateData.status === 'confirmed') {
-            await sendCateringConfirmation(request)
-        }
-
-        res.json(request)
-    } catch (err) {
-        console.error('Failed to update catering request:', err)
-        res.status(500).json({ error: 'Failed to update catering request' })
-    }
-})
-
-router.delete('/catering/:id', verifyAdmin, async (req, res) => {
-    try {
-        const { id } = req.params
-        const tenantId = req.tenantId
-
-        const request = await Catering.findOneAndDelete({ _id: id, ...(tenantId && { tenantId }) })
-        if (!request) return res.status(404).json({ error: 'Catering request not found' })
-
-        res.json({ message: 'Catering request deleted successfully' })
-    } catch (err) {
-        console.error('Failed to delete catering request:', err)
-        res.status(500).json({ error: 'Failed to delete catering request' })
-    }
-})
-
-// Reservation Management
-router.get('/reservations', verifyAdmin, async (req, res) => {
-    try {
-        const tenantId = req.tenantId
-        let query = {}
-        if (tenantId) query.tenantId = tenantId
-
-        const reservations = await Reservation.find(query)
-            .sort({ date: 1, createdAt: -1 })
-        res.json(reservations)
-    } catch (err) {
-        console.error('Failed to fetch reservations:', err)
-        res.status(500).json({ error: 'Failed to fetch reservations' })
-    }
-})
-
-router.patch('/reservations/:id', verifyAdmin, async (req, res) => {
-    try {
-        const { id } = req.params
-        const tenantId = req.tenantId
-        const updateData = req.body
-
-        const reservation = await Reservation.findOneAndUpdate(
-            { _id: id, ...(tenantId && { tenantId }) },
-            updateData,
-            { returnDocument: 'after' }
-        )
-
-        if (!reservation) return res.status(404).json({ error: 'Reservation not found' })
-
-        // Send confirmation email if status changed to confirmed
-        if (updateData.status === 'confirmed') {
-            await sendReservationConfirmation(reservation)
-        }
-
-        res.json(reservation)
-    } catch (err) {
-        console.error('Failed to update reservation:', err)
-        res.status(500).json({ error: 'Failed to update reservation' })
-    }
-})
-
-router.delete('/reservations/:id', verifyAdmin, async (req, res) => {
-    try {
-        const { id } = req.params
-        const tenantId = req.tenantId
-
-        const reservation = await Reservation.findOneAndDelete({ _id: id, ...(tenantId && { tenantId }) })
-        if (!reservation) return res.status(404).json({ error: 'Reservation not found' })
-
-        res.json({ message: 'Reservation deleted successfully' })
-    } catch (err) {
-        console.error('Failed to delete reservation:', err)
-        res.status(500).json({ error: 'Failed to delete reservation' })
-    }
-})
-
-// Loyalty Configuration CRUD
-router.get('/loyalty-config', verifyAdmin, async (req, res) => {
-    try {
-        const tenantId = req.tenantId
-        const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
-        let config = await LoyaltyConfig.findOne(query)
-        
-        if (!config) {
-            config = new LoyaltyConfig({ tenantId: tenantId || undefined })
-            await config.save()
-        }
-        
-        res.json(config)
-    } catch (err) {
-        console.error('Failed to fetch loyalty config:', err)
-        res.status(500).json({ error: 'Failed to fetch loyalty config' })
-    }
-})
-
-router.post('/loyalty-config', verifyAdmin, async (req, res) => {
-    try {
-        const tenantId = req.tenantId
-        const updateData = req.body
-        
-        const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
-        const config = await LoyaltyConfig.findOneAndUpdate(
-            query,
-            { ...updateData, updatedAt: new Date() },
-            { upsert: true, new: true, runValidators: true }
-        )
-        
-        res.json(config)
-    } catch (err) {
-        console.error('Failed to update loyalty config:', err)
-        res.status(500).json({ error: 'Failed to update loyalty config' })
-    }
-})
-
-router.post('/loyalty-config/rewards', verifyAdmin, async (req, res) => {
-    try {
-        const tenantId = req.tenantId
-        const rewardData = req.body
-        
-        const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
-        const config = await LoyaltyConfig.findOne(query)
-        
-        if (!config) return res.status(404).json({ error: 'Loyalty config not found' })
-        
-        config.rewards.push(rewardData)
-        await config.save()
-        
-        res.json(config)
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to add reward' })
-    }
-})
-
-router.delete('/loyalty-config/rewards/:rewardId', verifyAdmin, async (req, res) => {
-    try {
-        const tenantId = req.tenantId
-        const { rewardId } = req.params
-        
-        const query = tenantId ? { tenantId } : { $or: [{ tenantId: null }, { tenantId: { $exists: false } }] }
-        const config = await LoyaltyConfig.findOne(query)
-        
-        if (!config) return res.status(404).json({ error: 'Loyalty config not found' })
-        
-        config.rewards = config.rewards.filter(r => r._id.toString() !== rewardId)
-        await config.save()
-        
-        res.json(config)
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to delete reward' })
     }
 })
 

@@ -25,8 +25,6 @@ const menuItemSchema = new mongoose.Schema({
   preparationTime: { type: Number, default: 15 },
   sortOrder: { type: Number, default: 0 },
   isPopular: { type: Boolean, default: false },
-  isLoyaltyItem: { type: Boolean, default: false },
-  loyaltyCost: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true })
 

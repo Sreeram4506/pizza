@@ -1,157 +1,146 @@
 import { useRef, useState, useEffect } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
+
+const testimonials = [
+  {
+    id: 1,
+    name: 'Sarah M.',
+    text: "Best pizza in town! The Margherita Royale is literally life-changing. The crust is so airy and perfect, and you can taste the quality in every single bite.",
+    rating: 5,
+    order: 'Margherita Royale',
+  },
+  {
+    id: 2,
+    name: 'James K.',
+    text: "Authentic wood-fired taste that transports me straight to Naples. Pizza Blast is now my weekly Friday night tradition — nothing else compares.",
+    rating: 5,
+    order: 'Custom Pepperoni',
+  },
+  {
+    id: 3,
+    name: 'Emily R.',
+    text: "Finally a place that does vegetarian options right! The Garden Harvest pizza is absolutely divine. My whole family loves it.",
+    rating: 5,
+    order: 'Garden Harvest',
+  },
+  {
+    id: 4,
+    name: 'Mike T.',
+    text: "As a chef myself, I'm picky about pizza. The 48-hour fermented dough here is legit — perfect chew and char. Highly recommend.",
+    rating: 5,
+    order: 'Spicy Diavola',
+  },
+]
 
 export default function Testimonials() {
-  const { t } = useTranslation()
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-10% 0px -20% 0px' })
+  const isInView = useInView(ref, { once: true, margin: '-50px' })
+  const [active, setActive] = useState(0)
 
-  const testimonials = t('testimonials.data', { returnObjects: true }) || []
-  const stats = [
-    { value: "4.9/5", label: t('testimonials.stats.rating') },
-    { value: "10k+", label: t('testimonials.stats.customers') },
-    { value: "98%", label: t('testimonials.stats.recommend') }
-  ]
-
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [direction, setDirection] = useState(0)
-
-  // Auto-scroll
+  // Auto-rotate
   useEffect(() => {
-    if (testimonials.length === 0) return
-    const timer = setInterval(() => {
-      setDirection(1)
-      setActiveIndex((prev) => (prev + 1) % testimonials.length)
-    }, 8000)
-    return () => clearInterval(timer)
-  }, [testimonials.length])
-
-  const paginate = (newDirection) => {
-    if (testimonials.length === 0) return
-    setDirection(newDirection)
-    setActiveIndex((prev) => (prev + newDirection + testimonials.length) % testimonials.length)
-  }
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15, delayChildren: 0.2 }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30, filter: 'blur(8px)' },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      filter: 'blur(0px)',
-      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
-    }
-  }
-
-  if (testimonials.length === 0) return null
+    const interval = setInterval(() => {
+      setActive(prev => (prev + 1) % testimonials.length)
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
-    <section ref={ref} id="testimonials" className="py-24 lg:py-40 relative overflow-hidden bg-[#FAFAF8]">
+    <section ref={ref} className="py-24 lg:py-32 relative bg-white overflow-hidden section-grain">
+      <div className="absolute inset-0 gold-glow-bg" />
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
-        <div
-          className="text-center mb-20 lg:mb-32"
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          className="text-center mb-20"
         >
-          <motion.span variants={itemVariants} className="block mb-6 text-[#8A7A62] text-[11px] font-black tracking-[0.2em] uppercase">
-            {t('testimonials.titleLabel')}
-          </motion.span>
-          <motion.h2 variants={itemVariants} className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#1A1410] leading-tight tracking-tight">
-            {t('testimonials.title')}
-          </motion.h2>
-        </div>
+          <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold-400 block mb-4">
+            Testimonials
+          </span>
+          <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
+            What They Say
+          </h2>
+        </motion.div>
 
-        <div className="grid lg:grid-cols-[1fr,450px] gap-16 lg:gap-24 items-center">
-          {/* Active Testimonial Card */}
-          <div className="relative">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={activeIndex}
-                custom={direction}
-                initial={{ opacity: 0, x: direction > 0 ? 50 : -50, filter: 'blur(10px)' }}
-                animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, x: direction > 0 ? -50 : 50, filter: 'blur(10px)' }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-white border border-[#EBEBE6] rounded-3xl shadow-sm p-10 sm:p-16 lg:p-20 relative overflow-hidden min-h-[400px] flex flex-col justify-center"
-              >
-                {/* Large quote icon */}
-                <div className="absolute top-10 left-10 text-[180px] font-serif italic text-[#1A1410]/5 leading-none select-none pointer-events-none">
-                  “
-                </div>
+        {/* Testimonial — One at a time, centered, auto-rotate */}
+        <div className="max-w-3xl mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
+            >
+              {/* Stars — thin accent lines, not emoji */}
+              <div className="flex justify-center gap-2 mb-10">
+                {[...Array(testimonials[active].rating)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.08 * i, type: 'spring' }}
+                  >
+                    <svg className="w-4 h-4 text-ember-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </motion.div>
+                ))}
+              </div>
 
-                <div className="relative z-10">
-                  <p className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] leading-[1.3] text-[#1A1410] font-medium mb-12">
-                    {testimonials[activeIndex].text}
-                  </p>
-                  
-                  <div className="flex items-center justify-between border-t border-[#1A1410]/5 pt-10">
-                    <div>
-                      <h4 className="font-display text-xl text-[#1A1410] mb-1">{testimonials[activeIndex].name}</h4>
-                      <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#9B8D74]">
-                        {t('testimonials.orderedLabel')}{testimonials[activeIndex].order}
-                      </p>
-                    </div>
+              {/* Quote — Cormorant italic, large */}
+              <p className="font-display italic text-2xl md:text-3xl lg:text-4xl text-[#1A1410] leading-relaxed mb-10 px-4">
+                "{testimonials[active].text}"
+              </p>
 
-                    <div className="flex gap-4">
-                      <button 
-                        onClick={() => paginate(-1)}
-                        className="w-12 h-12 rounded-full bg-white border border-[#EBEBE6] flex items-center justify-center text-[#1A1410] hover:border-[#1A1410] shadow-sm transition-all"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeWidth={2} stroke="currentColor" /></svg>
-                      </button>
-                      <button 
-                        onClick={() => paginate(1)}
-                        className="w-12 h-12 rounded-full bg-white border border-[#EBEBE6] flex items-center justify-center text-[#1A1410] hover:border-[#1A1410] shadow-sm transition-all"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeWidth={2} stroke="currentColor" /></svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+              {/* Thin divider */}
+              <div className="w-12 h-px bg-gold-400/30 mx-auto mb-8" />
 
-            {/* Pagination dots */}
-            <div className="flex gap-3 justify-center mt-12">
-              {testimonials.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => { setDirection(i > activeIndex ? 1 : -1); setActiveIndex(i); }}
-                  className={`h-1.5 transition-all duration-500 rounded-full ${i === activeIndex ? 'w-12 bg-[#1A1410]' : 'w-4 bg-[#EBEBE6] hover:bg-[#1A1410]/20'}`}
-                />
-              ))}
-            </div>
-          </div>
+              {/* Customer — mono small caps */}
+              <div>
+                <p className="font-mono text-xs tracking-[0.2em] uppercase text-[#1A1410] mb-1">{testimonials[active].name}</p>
+                <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-[#9B8D74]">Ordered: {testimonials[active].order}</p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
 
-          {/* Side Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 lg:gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
-                animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: index * 0.1 }}
-                className="bg-white border border-[#EBEBE6] rounded-3xl shadow-sm hover:shadow-md transition-shadow p-8 lg:p-12 relative overflow-hidden group"
-              >
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
-                  <span className="text-6xl font-serif italic font-black text-[#1A1410]">0{index + 1}</span>
-                </div>
-                <div className="relative z-10">
-                  <div className="font-sans text-3xl lg:text-5xl text-[#1A1410] mb-2 font-black tracking-tight">{stat.value}</div>
-                  <div className="font-sans text-[10px] lg:text-[11px] tracking-[0.2em] uppercase text-[#8A7A62] font-black">{stat.label}</div>
-                  <div className="w-8 h-1 rounded-full bg-[#1A1410] mt-6 group-hover:w-16 transition-all duration-500" />
-                </div>
-              </motion.div>
+          {/* Navigation dots — minimal */}
+          <div className="flex justify-center gap-3 mt-12">
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActive(i)}
+                className={`transition-all duration-500 ${i === active
+                  ? 'w-8 h-1 bg-ember-500 rounded'
+                  : 'w-4 h-1 bg-[#1A1410]/10 hover:bg-[#1A1410]/20 rounded'
+                  }`}
+                style={{ borderRadius: '1px' }}
+              />
             ))}
           </div>
         </div>
+
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ delay: 0.5 }}
+          className="mt-20 flex flex-wrap justify-center gap-16"
+        >
+          {[
+            { value: '4.9', label: 'Average Rating' },
+            { value: '2,500+', label: 'Happy Customers' },
+            { value: '98%', label: 'Would Recommend' },
+          ].map((stat) => (
+            <div key={stat.label} className="text-center">
+              <div className="font-mono text-2xl text-ember-500 mb-2 tracking-wider">{stat.value}</div>
+              <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#9B8D74]">{stat.label}</div>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   )

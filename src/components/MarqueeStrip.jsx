@@ -1,13 +1,11 @@
 import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 
 export default function MarqueeStrip() {
-    const { t } = useTranslation()
     const items = [
-        t('marquee.woodFired'), '·', t('marquee.tomatoes'), '·', t('marquee.dough'), '·',
-        t('marquee.mozzarella'), '·', t('marquee.artisan'), '·', t('marquee.oven'), '·',
-        t('marquee.woodFired'), '·', t('marquee.tomatoes'), '·', t('marquee.dough'), '·',
-        t('marquee.mozzarella'), '·', t('marquee.artisan'), '·', t('marquee.oven'), '·',
+        'Wood-Fired', '·', 'San Marzano Tomatoes', '·', '48h Fermented Dough', '·',
+        'Imported Mozzarella', '·', 'Artisan Crafted', '·', 'Stone Oven', '·',
+        'Wood-Fired', '·', 'San Marzano Tomatoes', '·', '48h Fermented Dough', '·',
+        'Imported Mozzarella', '·', 'Artisan Crafted', '·', 'Stone Oven', '·',
     ]
 
     return (

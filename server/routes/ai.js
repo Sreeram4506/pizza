@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import fetch from 'node-fetch';
 import { config } from '../config.js';
-import { buildRestaurantChatSystemPrompt } from '../prompts/restaurantChatPrompt.js';
 
 const router = Router();
 
 router.post('/chat', async (req, res) => {
+    console.log('[AI-CHAT] Request received:', JSON.stringify(req.body));
     const { message, context } = req.body;
 
     if (!config.nvidiaApiKey) {
@@ -14,7 +14,7 @@ router.post('/chat', async (req, res) => {
     }
 
     try {
-        console.log('[AI-CHAT] Request received');
+        console.log('[AI-CHAT] Calling NVIDIA API...');
         const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -26,7 +26,20 @@ router.post('/chat', async (req, res) => {
                 messages: [
                     {
                         role: 'system',
-                        content: buildRestaurantChatSystemPrompt(context)
+                        content: `You are "${context?.settings?.restaurantName || 'Pizza Blast'} AI", a helpful assistant for ${context?.settings?.restaurantName?.toUpperCase() || 'PIZZA BLAST'} restaurant. 
+
+Behavior: 
+- Use emojis related to pizza (🍕, 🔥, 🥗, 🧀, 🍅).
+- Be friendly, premium, and Italian-inspired.
+- Help users browse menu, place orders, and track them.
+- Keep responses concise but helpful.
+
+Order Detection:
+- If user says "place order", "checkout", "confirm", "I want to order", "ready to order", or similar phrases, you MUST include: [ACTION:PLACE_ORDER]
+- If user has items in cart context and wants to complete the purchase, include: [ACTION:PLACE_ORDER]
+- Look for clear intent to purchase/checkout.
+
+Context: ${JSON.stringify(context)}`
                     },
                     { role: 'user', content: message }
                 ],
@@ -50,6 +63,8 @@ router.post('/chat', async (req, res) => {
         }
 
         const aiMessage = data.choices[0].message.content;
+        console.log('[AI-CHAT] AI Response:', aiMessage);
+
         let action = null;
         if (aiMessage.includes('[ACTION:PLACE_ORDER]')) {
             action = 'PLACE_ORDER';

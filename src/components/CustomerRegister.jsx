@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSettings } from '../context/SettingsContext'
 
 export default function CustomerRegister() {
   const [name, setName] = useState('')
@@ -11,10 +10,6 @@ export default function CustomerRegister() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { settings } = useSettings()
-  const restaurantName = settings?.restaurantName || 'Mustang Pizza'
-  const [brandFirst, ...brandRest] = restaurantName.split(' ')
-  const brandSecond = brandRest.join(' ') || 'Pizza'
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -48,10 +43,10 @@ export default function CustomerRegister() {
     }
   }
 
-  const inputClass = "w-full px-5 py-4 glass-input border border-white/60 text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/20 transition-all font-body text-sm"
+  const inputClass = "w-full px-5 py-4 bg-white border border-[rgba(26,20,16,0.1)] text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/40 transition-all font-body text-sm rounded-xl"
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] section-grain glass-shell pt-20 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] section-grain">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-ember-500/5 rounded-full blur-[100px] -ml-64 -mt-64" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gold-400/5 rounded-full blur-[100px] -mr-64 -mb-64" />
@@ -60,19 +55,15 @@ export default function CustomerRegister() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg glass-panel-strong glass-highlight-ring p-12 relative z-10 my-20 rounded-[3rem]"
+        className="w-full max-w-lg bg-noir-850 border border-[rgba(242,235,217,0.06)] p-12 relative z-10 my-20"
+        style={{ borderRadius: '2px' }}
       >
         <div className="text-center mb-10">
-          <div className="flex flex-col items-center mb-6">
-            <span className="font-serif-1947 text-[32px] tracking-tight leading-none text-[#1A1410]">
-              {brandFirst}
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.3em] font-black text-ember-600 -mt-1">
-              {brandSecond}
-            </span>
-          </div>
-          <h2 className="font-serif-1947 italic text-4xl text-[#1A1410] tracking-tight mt-4">Join the Family</h2>
-          <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#9B8D74] mt-3">Slices, rewards, and more</p>
+          <span className="font-display italic text-3xl text-[#1A1410] block mb-2">
+            Pizza<span className="text-ember-500">Blast</span>
+          </span>
+          <h2 className="font-display italic text-4xl text-[#1A1410] tracking-tight mt-4">Join the Family</h2>
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 mt-3">Slices, rewards, and more</p>
         </div>
 
         <AnimatePresence>
@@ -144,17 +135,18 @@ export default function CustomerRegister() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               disabled={loading}
-              className="w-full py-5 glass-button-dark text-white font-body font-semibold text-sm tracking-[0.15em] uppercase transition-all disabled:opacity-50 rounded-2xl"
+              className="w-full py-5 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all disabled:opacity-50 rounded-xl"
+              style={{ borderRadius: '2px' }}
             >
               {loading ? 'Creating Account...' : 'Get Started'}
             </motion.button>
           </div>
         </form>
 
-        <div className="mt-10 text-center border-t border-[rgba(26,20,16,0.06)] pt-8">
-          <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-[#9B8D74]">
+        <div className="mt-10 text-center border-t border-[rgba(242,235,217,0.06)] pt-8">
+          <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-parchment-700">
             Already have an account?{' '}
-            <Link to="/login" className="text-ember-500 font-bold hover:text-ember-600 ml-1">Sign in</Link>
+            <Link to="/login" className="text-ember-500 hover:text-ember-400 ml-1">Sign in</Link>
           </p>
         </div>
       </motion.div>

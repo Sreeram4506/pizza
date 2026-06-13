@@ -18,35 +18,10 @@ export const OrderService = {
                 headers,
                 body: JSON.stringify(orderData),
             });
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.details || errData.error || 'Order placement failed on server');
-            }
+            if (!response.ok) throw new Error('Order failed');
             return await response.json();
         } catch (error) {
             console.error('Order error:', error);
-            return null;
-        }
-    },
-
-    async getOrderStatus(orderId) {
-        try {
-            const response = await fetch(`${API_BASE}/orders/${orderId}`);
-            if (!response.ok) return null;
-            return await response.json();
-        } catch (error) {
-            console.error('Fetch order status error:', error);
-            return null;
-        }
-    },
-
-    async trackByNumber(orderNumber) {
-        try {
-            const response = await fetch(`${API_BASE}/orders/track/${orderNumber}`);
-            if (!response.ok) return null;
-            return await response.json();
-        } catch (error) {
-            console.error('Tracking by number error:', error);
             return null;
         }
     },

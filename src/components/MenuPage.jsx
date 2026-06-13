@@ -4,29 +4,21 @@ import { useNavigate } from 'react-router-dom'
 import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
 import wsService from '../services/websocket.js'
-import { useTranslation } from 'react-i18next'
-import { resolveMenuItemImage } from '../utils/menuArtwork'
 import toast from 'react-hot-toast'
+import { resolveAssetUrl } from '../utils/env'
 
 export default function MenuPage() {
-    const { t } = useTranslation()
     const [categories, setCategories] = useState([])
     const [menuItems, setMenuItems] = useState([])
     const [searchQuery, setSearchQuery] = useState('')
     const [activeCategory, setActiveCategory] = useState('')
-    const { 
-        openWithIntent, cart, cartCount, addToCart, removeFromCart, setIsOpen, 
-        orderType, setOrderType, setIsCartOpen, setShowOrderDetails 
-    } = useChatbot()
-    const [flyingItems, setFlyingItems] = useState([]) // Array of { id, x, y } for floating +1s
+    const { openWithIntent, cartCount, addToCart, setIsOpen } = useChatbot()
     const { settings } = useSettings()
     const navigate = useNavigate()
 
     const mainScrollRef = useRef(null)
     const categoryRefs = useRef({})
     const sidebarScrollRef = useRef(null)
-    const [profile, setProfile] = useState(null)
-    const [showPointsInstructions, setShowPointsInstructions] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -35,28 +27,18 @@ export default function MenuPage() {
                     fetch('/api/menu/categories'),
                     fetch('/api/menu/items')
                 ])
+                const cats = await catRes.json()
+                const items = await itemRes.json()
 
-                if (!catRes.ok || !itemRes.ok) {
-                    throw new Error(`Failed to fetch: ${catRes.status} / ${itemRes.status}`)
-                }
-
-                const rawCats = await catRes.json()
-                const rawItems = await itemRes.json()
-                const cats = Array.isArray(rawCats) ? rawCats : []
-                const items = Array.isArray(rawItems) ? rawItems : []
-
-                const hasPopular = items.some((item) => item.isPopular)
-                const hasLoyalty = items.some((item) => item.isLoyaltyItem)
-                
-                let finalCats = cats
-                if (hasPopular) finalCats = [{ _id: 'popular', name: 'Popular' }, ...finalCats]
-                if (hasLoyalty) finalCats = [{ _id: 'loyalty', name: 'Loyalty Rewards' }, ...finalCats]
+                // Inject "Popular" if items exist
+                const hasPopular = items.some(i => i.isPopular)
+                const finalCats = hasPopular ? [{ _id: 'popular', name: 'Popular' }, ...cats] : cats
 
                 setCategories(finalCats)
                 setMenuItems(items)
 
                 if (finalCats.length > 0) {
-                    setActiveCategory((current) => current || finalCats[0].name)
+                    setActiveCategory(finalCats[0].name)
                 }
             } catch (err) {
                 console.error('Failed to fetch menu data:', err)
@@ -64,14 +46,6 @@ export default function MenuPage() {
         }
 
         fetchData()
-
-        const token = localStorage.getItem('customerToken')
-        if (token) {
-            fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(res => res.json())
-                .then(data => { if (data.user) setProfile(data.user) })
-                .catch(err => console.error('Failed to fetch profile:', err))
-        }
 
         const handleUpdate = () => fetchData()
         wsService.on('item_added', handleUpdate)
@@ -85,12 +59,10 @@ export default function MenuPage() {
             wsService.off('item_added', handleUpdate)
             wsService.off('item_updated', handleUpdate)
             wsService.off('item_removed', handleUpdate)
-            wsService.off('category_added', handleUpdate)
-            wsService.off('category_updated', handleUpdate)
-            wsService.off('category_removed', handleUpdate)
         }
     }, [])
 
+    // Optimized Scroll Spy for custom container
     useEffect(() => {
         const observerOptions = {
             root: mainScrollRef.current,
@@ -99,627 +71,336 @@ export default function MenuPage() {
         }
 
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
+            entries.forEach(entry => {
                 if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
                     const catName = entry.target.getAttribute('data-category')
                     if (catName) {
                         setActiveCategory(catName)
 
-                        const activeButton = document.querySelector(`[data-cat-btn="${catName}"]`)
-                        if (activeButton && sidebarScrollRef.current) {
-                            activeButton.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                        // Sync sidebar scroll
+                        const activeBtn = document.querySelector(`[data-cat-btn="${catName}"]`)
+                        if (activeBtn && sidebarScrollRef.current) {
+                            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
                         }
                     }
                 }
             })
         }, observerOptions)
 
-        Object.values(categoryRefs.current).forEach((ref) => {
+        const currentRefs = categoryRefs.current
+        Object.values(currentRefs).forEach(ref => {
             if (ref) observer.observe(ref)
         })
 
         return () => observer.disconnect()
     }, [categories, menuItems, searchQuery])
 
-    const handleCategoryClick = (categoryName) => {
-        setActiveCategory(categoryName)
-        const target = categoryRefs.current[categoryName]
+    const handleCategoryClick = (catName) => {
+        setActiveCategory(catName)
+        const target = categoryRefs.current[catName]
         if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }
     }
 
-    const handleAddWithAnimation = (item, e) => {
-        if (item.isLoyaltyItem) {
-            const currentPoints = profile?.loyalty?.points || 0
-            if (currentPoints < item.loyaltyCost) {
-                toast.error(t('loyalty.insufficientPoints') || `You need ${item.loyaltyCost} points for this item!`)
-                return
-            }
-            addToCart({ ...item, isPointsRedemption: true, pointsCost: item.loyaltyCost, price: 0 })
-        } else {
-            addToCart(item)
-        }
-        const rect = e.currentTarget.getBoundingClientRect()
-        const newAnim = { id: Date.now(), x: rect.left + rect.width / 2, y: rect.top }
-        setFlyingItems(prev => [...prev, newAnim])
-        setTimeout(() => {
-            setFlyingItems(prev => prev.filter(a => a.id !== newAnim.id))
-        }, 1000)
+    const handleOrder = (item) => {
+        addToCart(item)
+        setIsOpen(true)
     }
 
-    const groupedItems = categories.reduce((accumulator, category) => {
-        if (category.name === 'Popular') {
-            accumulator[category.name] = menuItems.filter((item) => item.isPopular)
-        } else if (category.name === 'Loyalty Rewards') {
-            accumulator[category.name] = menuItems.filter((item) => item.isLoyaltyItem)
+    const groupedItems = categories.reduce((acc, cat) => {
+        if (cat.name === 'Popular') {
+            acc[cat.name] = menuItems.filter(item => item.isPopular)
         } else {
-            accumulator[category.name] = menuItems.filter((item) => (item.categoryId?._id || item.categoryId) === category._id && !item.isLoyaltyItem)
+            acc[cat.name] = menuItems.filter(item => (item.categoryId?._id || item.categoryId) === cat._id)
         }
-        return accumulator
+        return acc
     }, {})
 
     const filteredMenuItems = (items) => {
-        return items.filter((item) =>
+        return items.filter(item =>
             item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()))
         )
     }
 
-    const allFilteredItems = menuItems.filter((item) =>
+    const allFilteredItems = menuItems.filter(item =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()))
     )
 
     const hasSearchResults = allFilteredItems.length > 0 || !searchQuery
-    const restaurantName = settings?.restaurantName || 'Mustang Pizza'
-    const [brandFirst, ...brandRest] = restaurantName.split(' ')
-    const brandSecond = brandRest.join(' ') || 'Pizza'
-    const mapsHref = settings?.address
-        ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address)}`
-        : null
-    const phoneHref = settings?.phone ? `tel:${settings.phone.replace(/\D/g, '')}` : null
 
-    const getLocalizedCatName = (name) => {
-        if (name === 'Popular') return t('menu.categories.popular')
-        if (name === 'Loyalty Rewards') return t('menu.categories.loyalty') || 'Loyalty Rewards'
-        return name
-    }
-
-    const getTimezoneLabel = (timezone) => {
-        if (!timezone) return ''
-        try {
-            const parts = new Intl.DateTimeFormat('en-US', {
-                timeZone: timezone,
-                timeZoneName: 'short'
-            }).formatToParts(new Date())
-            return parts.find((part) => part.type === 'timeZoneName')?.value || timezone
-        } catch (error) {
-            return timezone
-        }
-    }
-
-    const getDietaryBadges = (item) => {
-        const badges = []
-        if (item.isPopular) badges.push({ label: t('menu.categories.popular'), tone: 'bg-ember-500 text-white' })
-        if (item.isLoyaltyItem) badges.push({ label: 'Reward', tone: 'bg-amber-500 text-white' })
-        if (item.dietary?.vegetarian) badges.push({ label: t('menu.items.veg'), tone: 'bg-[#D4922A] text-white' })
-        if (item.dietary?.vegan) badges.push({ label: 'Vegan', tone: 'bg-emerald-700 text-white' })
-        if (item.dietary?.glutenFree) badges.push({ label: 'GF', tone: 'bg-slate-700 text-white' })
-        if (item.dietary?.spicy) badges.push({ label: t('menu.items.spicy'), tone: 'bg-rose-600 text-white' })
-        if (item.available === false) badges.push({ label: 'Unavailable', tone: 'bg-white/90 text-[#1A1410]' })
-        return badges
-    }
-
-    const menuNavigation = [
-        { label: t('nav.home'), action: () => navigate('/') },
-        { label: t('nav.trackOrder'), action: () => navigate('/track') },
-        { label: t('nav.catering'), action: () => navigate('/catering') },
-        { label: t('nav.contact'), action: () => navigate('/#contact') }
-    ]
-
-    const timezoneLabel = getTimezoneLabel(settings?.timezone)
+    const [showMobileSearch, setShowMobileSearch] = useState(false)
 
     return (
-        <div className="min-h-screen bg-[#FAFAF8] text-[#1A1410] selection:bg-ember-500/15 font-sans overflow-x-hidden">
-            <header className="fixed top-0 left-0 right-0 h-16 bg-white/90 backdrop-blur-xl border-b border-[#EBEBE6] z-[100] flex items-center justify-between px-6 lg:px-10 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-                <div onClick={() => navigate('/')} className="flex items-center gap-3 cursor-pointer group">
-                    <div className="w-9 h-9 bg-[#1A1410] text-white rounded-[10px] flex items-center justify-center font-serif-1947 font-black text-lg group-hover:scale-105 transition-transform duration-300">
-                        {settings?.restaurantName?.[0] || '1'}
+        <div className="h-screen flex flex-col bg-[#FAFAF8] overflow-hidden selection:bg-ember-500/15 selection:text-[#1A1410] font-sans">
+            {/* Split Screen Header */}
+            <header className="h-16 sm:h-20 flex-shrink-0 bg-white/80 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] px-4 sm:px-12 flex items-center justify-between z-50">
+                <div
+                    className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
+                    onClick={() => navigate('/')}
+                >
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-ember-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-mono font-bold text-lg sm:text-xl shadow-lg shadow-ember-600/20 group-hover:scale-105 transition-transform">
+                        {settings?.restaurantName?.[0] || 'M'}
                     </div>
-                    <div>
-                        <h1 className="font-serif-1947 text-lg tracking-tight text-[#1A1410] leading-none">{brandFirst}</h1>
-                        <p className="text-[8px] uppercase tracking-[0.25em] text-[#8A7A62] mt-0.5 font-bold">{brandSecond}</p>
-                    </div>
-                </div>
-
-                <div className="hidden lg:flex items-center gap-10">
-                    {menuNavigation.map((link) => (
-                        <button
-                            key={link.label}
-                            onClick={link.action}
-                            className="text-[12px] uppercase tracking-widest font-bold text-[#7A6F64] hover:text-[#1A1410] transition-colors relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1.5px] after:bg-[#1A1410] hover:after:w-full after:transition-all"
+                    {!showMobileSearch && (
+                        <motion.span
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="font-display font-bold text-lg sm:text-2xl tracking-tighter text-[#1A1410] italic truncate max-w-[120px] sm:max-w-none"
                         >
-                            {link.label}
-                        </button>
-                    ))}
+                            {settings?.restaurantName || 'Mustang Pizza'}
+                        </motion.span>
+                    )}
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <button 
-                        onClick={() => setShowPointsInstructions(true)}
-                        className="h-9 px-3.5 flex items-center gap-2 rounded-full border border-[#EBEBE6] transition-all hover:bg-[#F0F0EE] bg-white"
+                {showMobileSearch && (
+                    <motion.div
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        className="flex-1 max-w-md mx-4"
                     >
-                        <div className="w-4.5 h-4.5 bg-[#1A1410] rounded-full flex items-center justify-center text-[8px] font-black text-white italic">PB</div>
-                        <div className="hidden sm:block">
-                            <p className="text-[11px] font-bold text-[#1A1410] tracking-tight">
-                                {profile ? `${profile.loyalty?.points || 0} pts` : 'Join Rewards'}
-                            </p>
+                        <div className="relative">
+                            <input
+                                autoFocus
+                                type="text"
+                                placeholder="Search menu..."
+                                className="w-full pl-4 pr-10 py-2 bg-[#F5F3EF] border-none rounded-full text-sm font-medium focus:ring-2 focus:ring-ember-500/20"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            <button
+                                onClick={() => { setShowMobileSearch(false); setSearchQuery(''); }}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9B8D74]"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            </button>
                         </div>
+                    </motion.div>
+                )}
+
+                <div className="flex items-center gap-2 sm:gap-6">
+                    <button
+                        onClick={() => setShowMobileSearch(!showMobileSearch)}
+                        className="sm:hidden p-2 rounded-full hover:bg-[#F5F3EF] text-[#1A1410]"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </button>
 
-                    <button onClick={() => setIsCartOpen(true)} className="w-9 h-9 bg-white border border-[#EBEBE6] rounded-full flex items-center justify-center relative hover:bg-[#F9F9F7] transition-colors shadow-sm">
-                        <svg className="w-3.5 h-3.5 text-[#1A1410]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 10-8 0v4M5 9h14l1 12H4L5 9z" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <div className="hidden sm:flex items-center gap-3">
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-[#9B8D74]">Kitchen Live</span>
+                    </div>
+
+                    <button
+                        onClick={() => openWithIntent('cart')}
+                        className="relative p-2 sm:p-2.5 rounded-full bg-[#1A1410] text-white shadow-xl shadow-black/10 hover:bg-ember-600 transition-colors group"
+                    >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 10-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
                         {cartCount > 0 && (
-                            <motion.span 
-                                key={cartCount}
-                                initial={{ scale: 0.5, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="absolute -top-1 -right-1 w-4 h-4 bg-ember-600 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-white"
-                            >
+                            <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-ember-500 text-white text-[8px] sm:text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white">
                                 {cartCount}
-                            </motion.span>
+                            </span>
                         )}
+                    </button>
+
+                    <button
+                        onClick={() => navigate('/')}
+                        className="flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all shadow-sm border border-[rgba(26,20,16,0.04)]"
+                    >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
             </header>
 
-            <div className="flex pt-16 h-screen overflow-hidden">
-                <aside className="w-[260px] border-r border-[#EBEBE6] overflow-y-auto scrollbar-hide hidden lg:flex flex-col py-8 px-5 space-y-8 bg-white/50">
-                    <div className="relative">
-                        <svg className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A7A62]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        <input
-                            type="text"
-                            placeholder={t('menu.search.sidebar') || "Search..."}
-                            className="w-full h-10 bg-[#F5F5F0] border-none rounded-xl pl-10 pr-4 text-[13px] font-semibold focus:ring-1 focus:ring-[#1A1410] outline-none transition-all placeholder:text-[#9B8D74] text-[#1A1410]"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+            <div className="flex flex-1 overflow-hidden relative">
+                {/* Slim Side Texture Overlays */}
+                <div className="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[#FAFAF8] to-transparent z-20 pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-[#FAFAF8] to-transparent z-20 pointer-events-none" />
+
+                {/* LEFT SIDEBAR: Categories (Responsive Width) */}
+                <aside
+                    ref={sidebarScrollRef}
+                    className="w-[75px] sm:w-72 lg:w-96 p-2 sm:p-8 overflow-y-auto border-r border-[rgba(26,20,16,0.06)] bg-[#FAFAF8] scrollbar-hide z-10 flex flex-col transition-all duration-500"
+                >
+                    <div className="hidden sm:block mb-10 pt-2">
+                        <div className="relative group">
+                            <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#9B8D74] opacity-50 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                className="w-full pl-12 pr-4 py-4 bg-white border border-[rgba(26,20,16,0.08)] rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-ember-500/5 transition-all shadow-sm"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                     </div>
 
-                    <nav ref={sidebarScrollRef} className="space-y-1.5">
-                        {categories.map((category) => (
-                            <button
-                                key={category._id}
-                                data-cat-btn={category.name}
-                                onClick={() => handleCategoryClick(category.name)}
-                                className={`w-full text-left px-4 py-3 rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all ${activeCategory === category.name ? 'bg-[#1A1410] text-white shadow-lg' : 'text-[#7A6F64] hover:text-[#1A1410] hover:bg-[#F0F0EE]'}`}
-                            >
-                                {getLocalizedCatName(category.name)}
-                            </button>
-                        ))}
-                    </nav>
+                    <div className="flex-1 space-y-4 sm:space-y-12">
+                        <span className="hidden sm:block font-mono text-[10px] tracking-[0.3em] uppercase text-ember-600 font-black px-2">Navigation</span>
+                        <nav className="flex flex-col gap-1.5 sm:gap-2">
+                            {categories.map((cat) => {
+                                const catItems = filteredMenuItems(groupedItems[cat.name] || [])
+                                const isVisible = catItems.length > 0
+                                if (!isVisible && searchQuery) return null
+
+                                return (
+                                    <button
+                                        key={cat._id}
+                                        data-cat-btn={cat.name}
+                                        onClick={() => handleCategoryClick(cat.name)}
+                                        className={`group flex flex-col sm:flex-row items-center sm:justify-between p-3 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] sm:text-[12px] font-bold tracking-[0.02em] sm:tracking-[0.05em] uppercase transition-all duration-300 relative overflow-hidden ${activeCategory === cat.name
+                                            ? 'bg-[#1A1410] text-[#FAFAFA] shadow-lg sm:shadow-2xl shadow-black/10'
+                                            : 'text-[#5C554E] hover:bg-white hover:text-[#1A1410]'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-2 sm:gap-4 relative z-10">
+                                            <div className={`w-1 h-1 rounded-full transition-all duration-500 ${activeCategory === cat.name ? 'bg-ember-500 scale-125' : 'bg-transparent'}`} />
+                                            <span className={`text-center sm:text-left leading-tight break-words sm:break-normal transition-colors ${activeCategory === cat.name ? 'text-white' : ''}`}>{cat.name}</span>
+                                        </div>
+                                        <span className={`hidden sm:block font-mono text-[10px] opacity-40 transition-opacity ${activeCategory === cat.name ? 'text-ember-400' : 'text-[#9B8D74]'}`}>
+                                            {catItems.length}
+                                        </span>
+                                    </button>
+                                )
+                            })}
+                        </nav>
+                    </div>
                 </aside>
 
-                <main ref={mainScrollRef} className="flex-1 overflow-y-auto px-6 sm:px-10 lg:px-12 pb-32 scroll-smooth scrollbar-hide bg-[#FAFAF8]">
-                    <div className="pt-10 pb-6 border-b border-[#EBEBE6] mb-0 max-w-5xl mx-auto">
-                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-                            <div>
-                                <h2 className="text-[32px] sm:text-[44px] font-serif tracking-tight text-[#1A1410] leading-none mb-3">{restaurantName} Menu</h2>
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[#8A7A62] text-[13px] font-bold">
-                                    <span className="flex items-center gap-1.5 uppercase tracking-wide"><svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg> {settings?.address?.split(',')[0]}</span>
-                                    <span className="flex items-center gap-1.5 uppercase tracking-wide">&bull; <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 11H5a1 1 0 010-2h3V5a1 1 0 112 0v5a1 1 0 01-1 1z" /></svg> Opens 11:00 AM</span>
+                {/* RIGHT CONTENT Area */}
+                <main
+                    ref={mainScrollRef}
+                    className="flex-1 overflow-y-auto p-3 sm:p-12 bg-white/40 backdrop-blur-3xl scroll-smooth"
+                >
+                    <div className="max-w-6xl mx-auto space-y-10 sm:space-y-24 pb-32">
+                        {!hasSearchResults && (
+                            <div className="flex flex-col items-center justify-center pt-20 text-center">
+                                <div className="w-16 h-16 bg-[#F5F3EF] rounded-full flex items-center justify-center mb-6">
+                                    <svg className="w-8 h-8 text-[#9B8D74]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                 </div>
+                                <h3 className="text-xl font-display font-black italic text-[#1A1410]">No items found</h3>
+                                <p className="text-sm text-[#5C554E] opacity-60 mt-2">Try searching for something else like "Cheese" or "Pepperoni"</p>
+                                <button
+                                    onClick={() => setSearchQuery('')}
+                                    className="mt-8 text-ember-600 font-mono text-[10px] uppercase font-bold tracking-widest border-b border-ember-600/30 pb-1"
+                                >
+                                    Clear Search
+                                </button>
                             </div>
-                            <div className="flex gap-3">
-                                <div className="bg-[#F0F0EE] p-1 rounded-full flex border border-[#EBEBE6]">
-                                    <button
-                                        onClick={() => { setOrderType('pickup'); setShowOrderDetails(true); }}
-                                        className={`px-5 py-2 rounded-full text-[12px] uppercase tracking-wider font-extrabold transition-all ${orderType === 'pickup' ? 'bg-white text-[#1A1410] shadow-sm' : 'text-[#7A6F64] hover:text-[#1A1410]'}`}
-                                    >
-                                        Pickup
-                                    </button>
-                                    <button
-                                        onClick={() => { setOrderType('delivery'); setShowOrderDetails(true); }}
-                                        className={`px-5 py-2 rounded-full text-[12px] uppercase tracking-wider font-extrabold transition-all ${orderType === 'delivery' ? 'bg-white text-[#1A1410] shadow-sm' : 'text-[#7A6F64] hover:text-[#1A1410]'}`}
-                                    >
-                                        Delivery
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        )}
 
-                    <div className="sticky top-0 z-40 bg-[#FAFAF8]/95 backdrop-blur-md pt-8 pb-4 border-b border-[#EBEBE6] mb-12 -mx-6 px-6 sm:-mx-10 sm:px-10 lg:-mx-12 lg:px-12">
-                        <div className="max-w-5xl mx-auto flex flex-col gap-6">
-                            <div className="relative group">
-                                <input
-                                    type="text"
-                                    placeholder={t('menu.search.placeholder') || "Find your favorite pizza..."}
-                                    className="w-full h-12 sm:h-14 bg-white border border-[#EBEBE6] rounded-2xl pl-12 pr-6 text-[15px] font-semibold focus:ring-1 focus:ring-[#1A1410] focus:border-[#1A1410] outline-none transition-all placeholder:text-[#9B8D74] text-[#1A1410] shadow-sm group-hover:shadow-md"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                                <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[#8A7A62]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                            </div>
+                        {categories.map((category) => {
+                            const items = filteredMenuItems(groupedItems[category.name] || [])
+                            if (items.length === 0) return null
 
-                            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 no-scrollbar">
-                                {categories.map((category) => (
-                                    <button
-                                        key={`main-cat-${category._id}`}
-                                        onClick={() => handleCategoryClick(category.name)}
-                                        className={`shrink-0 px-6 py-2.5 rounded-full text-[12px] font-extrabold uppercase tracking-widest transition-all whitespace-nowrap shadow-sm ${activeCategory === category.name ? 'bg-[#1A1410] text-white shadow-md' : 'bg-white border border-[#EBEBE6] text-[#7A6F64] hover:border-[#1A1410]'}`}
-                                    >
-                                        {getLocalizedCatName(category.name)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {!hasSearchResults && (
-                        <div className="bg-white border border-[#EBEBE6] rounded-3xl p-16 text-center mb-16 shadow-[0_10px_30px_rgba(0,0,0,0.03)] max-w-lg mx-auto">
-                            <h3 className="font-serif text-3xl text-[#1A1410] mb-4">No results found</h3>
-                            <p className="text-[#8A7A62] mb-8 font-medium">Try searching for something else like "Pepperoni" or "Salad"</p>
-                            <button onClick={() => setSearchQuery('')} className="bg-[#1A1410] text-white px-8 py-3 rounded-2xl text-[14px] font-bold hover:scale-105 transition-transform shadow-lg">
-                                Clear Search
-                            </button>
-                        </div>
-                    )}
-
-                    {categories.map((category) => {
-                        const items = filteredMenuItems(groupedItems[category.name] || [])
-                        if (items.length === 0) return null
-
-                        if (category.name === 'Loyalty Rewards') {
                             return (
                                 <section
                                     key={category._id}
                                     data-category={category.name}
-                                    ref={(element) => { categoryRefs.current[category.name] = element }}
-                                    className="mb-24 max-w-7xl mx-auto -mx-4 px-4 sm:mx-auto sm:px-0"
+                                    ref={el => categoryRefs.current[category.name] = el}
+                                    className="relative flex flex-col pt-2 sm:pt-4"
                                 >
-                                    <div className="flex items-end justify-between mb-8 px-4 sm:px-0">
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <div className="w-10 h-[1.5px] bg-amber-500 rounded-full" />
-                                                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-600">Exclusive Rewards</span>
+                                    {/* SECTION HEADER: STICKY */}
+                                    <div className="sticky top-0 z-30 -mx-4 px-4 py-3 sm:py-6 bg-white/60 backdrop-blur-xl mb-6 sm:mb-12 flex items-baseline justify-between border-b border-[rgba(26,20,16,0.04)]">
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-2 sm:gap-3 mb-1">
+                                                <div className="w-1 h-1 rounded-full bg-ember-500" />
+                                                <span className="font-mono text-[8px] sm:text-[10px] tracking-[0.3em] uppercase text-ember-600 font-bold opacity-70">
+                                                    {category.name === 'Popular' ? 'Curated' : 'Selection'}
+                                                </span>
                                             </div>
-                                            <h3 className="text-3xl sm:text-4xl font-serif tracking-tight text-[#1A1410] italic">Loyalty Vault</h3>
+                                            <h2 className="text-xl sm:text-[56px] font-display font-black italic text-[#1A1410] tracking-tighter leading-none">
+                                                {category.name}
+                                            </h2>
                                         </div>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <div className="flex gap-1">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500/30" />
-                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500/30" />
-                                            </div>
-                                            <span className="text-[9px] font-bold text-[#8A7A62] uppercase tracking-widest pl-2">Scroll To Explore</span>
+                                        <div className="font-mono text-[9px] sm:text-[11px] text-[#9B8D74] tracking-widest uppercase font-bold">
+                                            {items.length} {items.length === 1 ? 'Item' : 'Items'}
                                         </div>
                                     </div>
 
-                                    <div className="relative group/vault">
-                                        <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory hide-scrollbar hover:cursor-grab active:cursor-grabbing px-4 sm:px-0">
-                                            {items.map((item) => (
-                                                <article
-                                                    key={item._id}
-                                                    className="w-[280px] sm:w-[320px] lg:w-[calc(25%-18px)] shrink-0 snap-start bg-white border border-[#EBEBE6] rounded-[2rem] p-6 flex flex-col items-center text-center shadow-sm hover:shadow-2xl hover:shadow-amber-900/10 transition-all duration-500 group relative overflow-hidden active:scale-[0.98]"
-                                                    onClick={(e) => handleAddWithAnimation(item, e)}
+                                    {/* ITEM GRID */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
+                                        {items.map((item) => (
+                                            <motion.div
+                                                key={item._id}
+                                                layout
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="group relative flex flex-col"
+                                            >
+                                                <div
+                                                    className="relative aspect-[4/5] sm:aspect-square rounded-xl sm:rounded-3xl overflow-hidden bg-[#F5F3EF] border border-white shadow-sm transition-all duration-700 hover:shadow-2xl cursor-pointer"
+                                                    onClick={() => handleOrder(item)}
                                                 >
-                                                    <div className="absolute top-4 right-4 z-10">
-                                                        <div className="bg-amber-100 text-amber-700 text-[9px] font-black px-3 py-1 rounded-full uppercase border border-amber-200/50 shadow-sm">
-                                                            Earn Points
+                                                    <img
+                                                        src={item.image ? resolveAssetUrl(item.image) : '/pizza-hero-poster.svg'}
+                                                        alt={item.name}
+                                                        className="w-full h-full object-cover img-noir group-hover:scale-110 transition-transform duration-1000"
+                                                    />
+
+                                                    <div className="absolute top-1.5 right-1.5 sm:top-4 sm:right-4 z-10">
+                                                        <div className="px-1.5 py-0.5 sm:px-4 sm:py-2 bg-white/90 backdrop-blur-md rounded-lg sm:rounded-2xl shadow-xl border border-white/50">
+                                                            <span className="font-mono text-[9px] sm:text-sm font-black text-[#1A1410] tracking-tighter">
+                                                                ${item.price?.toFixed(2)}
+                                                            </span>
                                                         </div>
                                                     </div>
 
-                                                    <div className="w-full aspect-[4/3] rounded-[1.5rem] overflow-hidden mb-6 bg-[#F5F5F0] border border-[#EBEBE6] relative">
-                                                        <img
-                                                            src={resolveMenuItemImage(item)}
-                                                            alt={item.name}
-                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                                        />
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                    </div>
-
-                                                    <div className="flex-1 w-full">
-                                                        <h4 className="font-serif text-[18px] sm:text-[20px] leading-tight text-[#1A1410] mb-2 uppercase tracking-tight line-clamp-1">{item.name}</h4>
-                                                        <p className="text-[#8A7A62] text-[12px] leading-relaxed font-medium line-clamp-2 mb-6">
-                                                            {item.description || "A signature reward crafted with the finest local ingredients for our elite members."}
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="w-full pt-5 border-t border-[#F5F3EF] flex items-center justify-between">
-                                                        <div className="text-left">
-                                                            <p className="text-[9px] font-black uppercase tracking-widest text-amber-600/60 leading-none mb-1">Exchange Rate</p>
-                                                            <p className="font-black text-[#1A1410] text-[18px] tracking-tight">{item.loyaltyCost} <span className="text-[10px] font-sans uppercase">Pts</span></p>
-                                                        </div>
-
-                                                        <div className="relative">
-                                                            <AnimatePresence mode="wait">
-                                                                {(cart?.find(i => (i._id || i.itemId) === item._id)?.qty > 0) ? (
-                                                                    <motion.div 
-                                                                        key="reward-stepper"
-                                                                        initial={{ scale: 0.8, opacity: 0 }}
-                                                                        animate={{ scale: 1, opacity: 1 }}
-                                                                        exit={{ scale: 0.8, opacity: 0 }}
-                                                                        className="flex items-center bg-[#1A1410] text-white rounded-full p-1"
-                                                                        onClick={(e) => e.stopPropagation()}
-                                                                    >
-                                                                        <button onClick={(e) => { e.stopPropagation(); removeFromCart(item._id); }} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M20 12H4" /></svg></button>
-                                                                        <span className="w-6 text-center font-black text-xs">{cart.find(i => (i._id || i.itemId) === item._id).qty}</span>
-                                                                        <button onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M12 4v16m8-8H4" /></svg></button>
-                                                                    </motion.div>
-                                                                ) : (
-                                                                    <motion.button
-                                                                        key="reward-add"
-                                                                        whileHover={{ scale: 1.1, rotate: 5 }}
-                                                                        whileTap={{ scale: 0.9 }}
-                                                                        onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }}
-                                                                        className="w-12 h-12 bg-[#1A1410] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-amber-600 transition-all group/btn"
-                                                                    >
-                                                                        <span className="text-xl group-hover/btn:rotate-12 transition-transform">🎁</span>
-                                                                    </motion.button>
-                                                                )}
-                                                            </AnimatePresence>
-                                                        </div>
-                                                    </div>
-                                                </article>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <style dangerouslySetInnerHTML={{ __html: `
-                                        .hide-scrollbar::-webkit-scrollbar { display: none; }
-                                        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-                                    `}} />
-                                </section>
-                            )
-                        }
-
-                        return (
-                            <section
-                                key={category._id}
-                                data-category={category.name}
-                                ref={(element) => { categoryRefs.current[category.name] = element }}
-                                className="mb-20 max-w-7xl mx-auto"
-                            >
-                                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10 sm:gap-x-10 xl:gap-x-12">
-                                    {items.map((item) => (
-                                        <article
-                                            key={item._id}
-                                            className={`w-full relative group flex gap-5 sm:gap-8 items-center transition-all cursor-pointer border-b border-[#EBEBE6]/60 pb-8 last:border-0 hover:bg-white/40 rounded-2xl -mx-4 px-4 ${item.available === false ? 'opacity-50 grayscale' : ''}`}
-                                            onClick={(e) => handleAddWithAnimation(item, e)}
-                                        >
-                                            <div className="flex-1 min-w-0 order-1">
-                                                <div className="flex flex-col h-full">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <h4 className="font-serif text-[18px] sm:text-[22px] leading-tight text-[#1A1410] group-hover:text-ember-700 transition-colors uppercase tracking-tight line-clamp-2">{item.name}</h4>
-                                                        {getDietaryBadges(item).length > 0 && (
-                                                            <div className="flex flex-wrap gap-1">
-                                                                {getDietaryBadges(item).slice(0, 1).map((badge, i) => (
-                                                                    <span key={i} className="px-1.5 py-0.5 rounded shadow-sm bg-white/95 backdrop-blur-sm text-[8px] font-black uppercase tracking-tighter text-[#1A1410] border border-[#EBEBE6]">
-                                                                        {badge.label}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
+                                                    <div className="absolute top-1.5 left-1.5 sm:top-4 sm:left-4 flex flex-col gap-1 z-10">
+                                                        {item.dietary?.spicy && (
+                                                            <div className="px-1.5 py-0.5 bg-ember-600 text-white text-[6px] sm:text-[9px] font-black uppercase tracking-[0.1em] rounded-md shadow-lg">Spicy</div>
+                                                        )}
+                                                        {item.dietary?.vegetarian && (
+                                                            <div className="px-1.5 py-0.5 bg-green-600 text-white text-[6px] sm:text-[9px] font-black uppercase tracking-[0.1em] rounded-md shadow-lg">Veg</div>
                                                         )}
                                                     </div>
-                                                    
-                                                    <p className="text-[#8A7A62] text-[13px] sm:text-[14px] leading-relaxed font-medium line-clamp-3 mb-4">
-                                                        {item.description || "Freshly prepared with authentic ingredients and our signature secret sauce."}
-                                                    </p>
-                                                    
-                                                     <div className="flex items-center gap-4 mt-auto">
-                                                         {item.isLoyaltyItem ? (
-                                                             <p className="font-black text-amber-600 text-[16px] sm:text-[18px] tracking-tight">{item.loyaltyCost} PTS</p>
-                                                         ) : (
-                                                             <p className="font-black text-[#1A1410] text-[16px] sm:text-[18px] tracking-tight">${item.price?.toFixed(2)}</p>
-                                                         )}
-                                                         
-                                                         <div className="flex items-center gap-3">
-                                                             <AnimatePresence mode="wait">
-                                                                 {cart.find(i => (i._id || i.itemId) === item._id)?.qty > 0 ? (
-                                                                     <motion.div 
-                                                                         key="stepper"
-                                                                         initial={{ width: 0, opacity: 0, scale: 0.8 }}
-                                                                         animate={{ width: 'auto', opacity: 1, scale: 1 }}
-                                                                         exit={{ width: 0, opacity: 0, scale: 0.8 }}
-                                                                         className="flex items-center bg-[#F5F3EF] rounded-full p-1 border border-[#EBEBE6] shadow-sm overflow-hidden"
-                                                                         onClick={(e) => e.stopPropagation()}
-                                                                     >
-                                                                         <motion.button
-                                                                             whileTap={{ scale: 0.8 }}
-                                                                             onClick={(e) => { e.stopPropagation(); removeFromCart(item._id); }}
-                                                                             className="w-8 h-8 rounded-full flex items-center justify-center text-[#1A1410] hover:bg-white transition-colors"
-                                                                         >
-                                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M20 12H4" /></svg>
-                                                                         </motion.button>
-                                                                         <span className="font-black text-[13px] px-2 min-w-[24px] text-center text-[#1A1410]">
-                                                                             {cart.find(i => (i._id || i.itemId) === item._id).qty}
-                                                                         </span>
-                                                                         <motion.button
-                                                                             whileTap={{ scale: 0.8 }}
-                                                                             onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }}
-                                                                             className="w-8 h-8 rounded-full bg-[#1A1410] text-white flex items-center justify-center hover:bg-ember-600 transition-colors shadow-sm"
-                                                                         >
-                                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
-                                                                         </motion.button>
-                                                                     </motion.div>
-                                                                 ) : (
-                                                                     <motion.button 
-                                                                         key="add-btn"
-                                                                         initial={{ scale: 0.8, opacity: 0 }}
-                                                                         animate={{ scale: 1, opacity: 1 }}
-                                                                         whileTap={{ scale: 0.8 }}
-                                                                         whileHover={{ scale: 1.15 }}
-                                                                         onClick={(e) => { e.stopPropagation(); handleAddWithAnimation(item, e); }}
-                                                                         disabled={item.available === false}
-                                                                         className="w-10 h-10 rounded-full bg-[#1A1410] text-white flex items-center justify-center transition-all shadow-md group-hover:bg-[#EBB250] group-hover:text-[#1A1410]"
-                                                                     >
-                                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
-                                                                     </motion.button>
-                                                                 )}
-                                                             </AnimatePresence>
-                                                         </div>
-                                                     </div>
-                                                </div>
-                                            </div>
 
-                                            <div className="relative w-[100px] sm:w-[140px] lg:w-[160px] aspect-square rounded-2xl overflow-hidden shrink-0 border border-[#EBEBE6] bg-[#F5F5F0] shadow-sm group-hover:shadow-xl transition-all order-2">
-                                                <img
-                                                    src={resolveMenuItemImage(item)}
-                                                    alt={item.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                                                />
-                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500 pointer-events-none" />
-                                                
-                                                {/* Quantity Badge on Item */}
-                                                <AnimatePresence>
-                                                    {(cart?.find(i => (i._id || i.itemId) === item._id)?.qty > 0) && (
-                                                        <motion.div 
-                                                            initial={{ scale: 0, opacity: 0 }}
-                                                            animate={{ scale: 1, opacity: 1 }}
-                                                            exit={{ scale: 0, opacity: 0 }}
-                                                            className="absolute top-2 right-2 w-7 h-7 bg-ember-600 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white shadow-lg z-10"
+                                                    {/* Quick Add Overlay Mobile Hint */}
+                                                    <div className="sm:hidden absolute bottom-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-[#1A1410] shadow-md">
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
+                                                    </div>
+
+                                                    <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 via-black/20 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col justify-end">
+                                                        <button
+                                                            className="w-full bg-white text-[#1A1410] font-black text-[10px] uppercase tracking-[0.2em] py-4 rounded-2xl hover:bg-ember-500 hover:text-white transition-all shadow-xl"
+                                                            onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
                                                         >
-                                                            {cart.find(i => (i._id || i.itemId) === item._id)?.qty}
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                            </div>
-                                        </article>
-                                    ))}
-                                </div>
-                            </section>
-                        )
-                    })}
+                                                            Add to Order
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="py-2 sm:p-5 flex flex-col flex-1">
+                                                    <h3 className="font-display text-[13px] sm:text-2xl font-black italic text-[#1A1410] tracking-tight group-hover:text-ember-600 transition-colors mb-0.5 line-clamp-1">{item.name}</h3>
+                                                    <p className="text-[9px] sm:text-[13px] leading-tight sm:leading-relaxed text-[#5C554E] font-medium opacity-70 line-clamp-1 sm:line-clamp-2">
+                                                        {item.description || "Handcrafted fresh daily."}
+                                                    </p>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )
+                        })}
+                    </div>
                 </main>
             </div>
 
-            {/* ── MOBILE FLOATING CART BAR ── */}
-            <AnimatePresence>
-                {cartCount > 0 && (
-                    <motion.div
-                        initial={{ y: 100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 100, opacity: 0 }}
-                        className="lg:hidden fixed bottom-6 left-4 right-4 z-[90]"
-                    >
-                        <button
-                            onClick={() => setIsCartOpen(true)}
-                            className="w-full bg-[#1A1410] text-white h-16 rounded-2xl shadow-2xl flex items-center justify-between px-6 border border-white/10 active:scale-[0.98] transition-transform"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-ember-600 rounded-full flex items-center justify-center text-[10px] font-black italic shadow-lg shadow-ember-600/20">PB</div>
-                                <div className="text-left">
-                                    <p className="text-[10px] uppercase tracking-widest font-bold text-white/50 leading-none mb-1">Your Order</p>
-                                    <p className="text-sm font-black tracking-tight">{cartCount} {cartCount === 1 ? 'Item' : 'Items'}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <p className="text-lg font-serif italic tracking-tight font-black">${cart.reduce((acc, item) => acc + (item.price * item.qty), 0).toFixed(2)}</p>
-                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                                </div>
-                            </div>
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Floating +1 Animations */}
-            <div className="fixed inset-0 pointer-events-none z-[9999]">
-                <AnimatePresence>
-                    {flyingItems.map(anim => (
-                        <motion.div
-                            key={anim.id}
-                            initial={{ opacity: 1, scale: 0.5, x: anim.x - 20, y: anim.y - 20 }}
-                            animate={{ opacity: 0, scale: 1.5, y: anim.y - 100 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
-                            className="absolute text-ember-600 font-black text-xl pointer-events-none"
-                            style={{ textShadow: '0 0 10px rgba(255,255,255,0.8)' }}
-                        >
-                            +1
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-            </div>
-
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .scrollbar-hide::-webkit-scrollbar { display: none; }
                 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-            `}} />
-
-            {/* Points Instructions Modal */}
-            <AnimatePresence>
-                {showPointsInstructions && (
-                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setShowPointsInstructions(false)}
-                            className="absolute inset-0 bg-[#1A1410]/40 backdrop-blur-md"
-                        />
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-lg glass-panel-strong rounded-[2.5rem] p-8 sm:p-12 shadow-2xl border border-white/60"
-                        >
-                            <button 
-                                onClick={() => setShowPointsInstructions(false)}
-                                className="absolute top-6 right-6 w-10 h-10 glass-pill flex items-center justify-center hover:bg-white/40 transition-colors"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                            </button>
-
-                            <div className="text-center mb-10">
-                                <div className="w-16 h-16 bg-ember-600 rounded-2xl flex items-center justify-center text-3xl font-serif-1947 italic text-white shadow-xl mx-auto mb-6">PB</div>
-                                <h2 className="text-3xl font-serif-1947 italic text-[#1A1410] tracking-tight">{t('loyalty.instructionsTitle')}</h2>
-                            </div>
-
-                            <div className="space-y-6">
-                                {[1, 2, 3].map((step) => (
-                                    <div key={step} className="flex gap-5">
-                                        <div className="w-8 h-8 rounded-full bg-ember-500/15 flex items-center justify-center text-ember-600 font-black text-xs shrink-0">{step}</div>
-                                        <div>
-                                            <h4 className="font-bold text-[#1A1410] mb-1">{t(`loyalty.step${step}.title`)}</h4>
-                                            <p className="text-sm text-[#5C554E] leading-relaxed">{t(`loyalty.step${step}.desc`)}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-10">
-                                {profile ? (
-                                    <div className="bg-ember-500/5 rounded-2xl p-5 border border-ember-500/10 mb-6 flex items-center justify-between">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-[#9B8D74]">{t('loyalty.pointsBalance')}</span>
-                                        <span className="text-lg font-black text-ember-600 tracking-tight">{profile.loyalty?.points || 0} PTS</span>
-                                    </div>
-                                ) : (
-                                    <button 
-                                        onClick={() => navigate('/login')}
-                                        className="w-full h-14 glass-button-dark rounded-xl text-white font-black text-[11px] uppercase tracking-widest mb-4"
-                                    >
-                                        Login to Start Earning
-                                    </button>
-                                )}
-                                <button 
-                                    onClick={() => setShowPointsInstructions(false)}
-                                    className="w-full h-14 bg-[#1A1410] text-white rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all"
-                                >
-                                    {t('loyalty.gotIt')}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-            <style dangerouslySetInnerHTML={{ __html: `
-                .scrollbar-hide::-webkit-scrollbar { display: none; }
-                .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
-                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                #mainScrollRef::-webkit-scrollbar { width: 4px; }
             `}} />
         </div>
     )

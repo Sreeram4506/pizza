@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { io } from 'socket.io-client'
 import { showPushNotification, playNotificationSound } from '../../utils/notifications'
+import { getWebSocketUrl } from '../../utils/env'
 
 export default function OrderManager() {
   const [orders, setOrders] = useState([])
@@ -29,15 +30,15 @@ export default function OrderManager() {
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken')
-    const apiUrl = import.meta.env.VITE_API_URL || window.location.origin
-    const newSocket = io(apiUrl, {
+    const socketUrl = getWebSocketUrl() || window.location.origin
+    const newSocket = io(socketUrl, {
       auth: { token },
       transports: ['websocket', 'polling']
     })
 
     newSocket.on('connect', () => {
       console.log('Connected to live order system')
-      newSocket.emit('join-admin', localStorage.getItem('adminToken'))
+      newSocket.emit('join-admin')
     })
 
     newSocket.on('order:new', (order) => {
@@ -155,7 +156,7 @@ export default function OrderManager() {
           </div>
         </div>
         <div className="text-center">
-          <p className="font-sans font-bold text-xl text-[#1A1410]">Syncing Kitchen...</p>
+          <p className="font-display font-black italic text-xl text-[#1A1410]">Syncing Kitchen...</p>
           <p className="text-sm text-[#9B8D74] mt-1">Connecting to live order stream</p>
         </div>
       </div>
@@ -177,20 +178,20 @@ export default function OrderManager() {
               <div className="w-14 h-14 bg-ember-50 rounded-2xl flex items-center justify-center text-3xl shadow-ember-600/10 shadow-lg">🍕</div>
               <div className="flex-1">
                 <div className="flex justify-between items-center mb-1">
-                  <h4 className="font-sans font-bold text-xl text-[#1A1410]">New Order Incoming!</h4>
+                  <h4 className="font-display font-black italic text-xl text-[#1A1410]">New Order Incoming!</h4>
                   <button onClick={() => setNewOrderAlert(null)} className="text-[#9B8D74] hover:text-[#1A1410]">✕</button>
                 </div>
                 <p className="text-sm font-medium text-[#5C554E]">Order #{newOrderAlert.orderNumber} • ${newOrderAlert.total?.toFixed(2)}</p>
                 <div className="mt-4 flex gap-3">
                   <button
                     onClick={() => { setSelectedOrder(newOrderAlert); setNewOrderAlert(null) }}
-                    className="flex-1 py-3 bg-[#F5F3EF] text-[#1A1410] rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-[#EAE8E4] transition-all"
+                    className="flex-1 py-3 bg-[#F5F3EF] text-[#1A1410] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#EAE8E4] transition-all"
                   >
                     View Details
                   </button>
                   <button
                     onClick={() => { updateOrderStatus(newOrderAlert._id, 'preparing'); setNewOrderAlert(null) }}
-                    className="flex-1 py-3 bg-ember-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest hover:shadow-xl hover:shadow-ember-600/20 transition-all"
+                    className="flex-1 py-3 bg-ember-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:shadow-xl hover:shadow-ember-600/20 transition-all"
                   >
                     Start Cooking
                   </button>
@@ -205,23 +206,23 @@ export default function OrderManager() {
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-ember-600 font-bold px-2 py-1 bg-ember-50 rounded-lg">Real-time Dashboard</span>
+            <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-600 font-bold px-2 py-1 bg-ember-50 rounded-lg">Real-time Dashboard</span>
             {socket?.connected && (
               <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-lg">
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="font-sans text-[9px] font-bold uppercase tracking-widest text-emerald-600">Active</span>
+                <span className="font-mono text-[9px] font-black uppercase tracking-widest text-emerald-600">Active</span>
               </div>
             )}
           </div>
-          <h2 className="text-4xl sm:text-5xl font-sans font-bold text-[#1A1410] tracking-tight underline decoration-ember-600/20 underline-offset-8">
+          <h2 className="text-4xl sm:text-5xl font-display font-black text-[#1A1410] italic tracking-tight underline decoration-ember-600/20 underline-offset-8">
             Live Orders
           </h2>
         </div>
 
         <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-[rgba(26,20,16,0.06)] shadow-sm">
           <div className="px-4 py-2 bg-[#F5F3EF] rounded-xl">
-            <span className="font-sans font-bold text-[#1A1410] pr-2">{orders.length}</span>
-            <span className="font-sans text-[10px] text-[#9B8D74] uppercase tracking-widest">Orders</span>
+            <span className="font-display font-black italic text-[#1A1410] pr-2">{orders.length}</span>
+            <span className="font-mono text-[10px] text-[#9B8D74] uppercase tracking-widest">Orders</span>
           </div>
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
@@ -251,7 +252,7 @@ export default function OrderManager() {
                 }`}
             >
               <span>{status.replace(/_/g, ' ')}</span>
-              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${isActive ? 'bg-ember-500' : 'bg-[#F5F3EF] text-[#9B8D74]'}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${isActive ? 'bg-ember-500' : 'bg-[#F5F3EF] text-[#9B8D74]'}`}>
                 {count}
               </span>
             </button>
@@ -264,7 +265,7 @@ export default function OrderManager() {
         {filteredOrders.length === 0 ? (
           <div className="col-span-full bg-white rounded-[40px] py-32 px-4 border border-[rgba(26,20,16,0.06)] text-center shadow-sm">
             <div className="w-24 h-24 bg-[#FAFAF8] rounded-full flex items-center justify-center mx-auto mb-8 text-4xl shadow-inner">📦</div>
-            <h3 className="font-sans font-bold text-3xl text-[#1A1410] mb-2">No {filter !== 'all' ? filter : ''} orders Found</h3>
+            <h3 className="font-display font-black italic text-3xl text-[#1A1410] mb-2">No {filter !== 'all' ? filter : ''} orders Found</h3>
             <p className="text-sm text-[#9B8D74]">New orders will appear here automatically when they arrive.</p>
           </div>
         ) : (
@@ -282,15 +283,15 @@ export default function OrderManager() {
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="font-sans font-bold text-2xl text-[#1A1410]">#{order.orderNumber}</span>
-                      <div className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border transition-colors ${getStatusStyle(order.status)}`}>
+                      <span className="font-display font-black italic text-2xl text-[#1A1410]">#{order.orderNumber}</span>
+                      <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border transition-colors ${getStatusStyle(order.status)}`}>
                         {order.status.replace(/_/g, ' ')}
                       </div>
                     </div>
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#9B8D74]">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {order.type}</p>
+                    <p className="text-[11px] font-black uppercase tracking-widest text-[#9B8D74]">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {order.type}</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-2xl font-bold font-sans text-ember-600">${order.total?.toFixed(2)}</span>
+                    <span className="text-2xl font-black italic font-display text-ember-600">${order.total?.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -299,7 +300,7 @@ export default function OrderManager() {
                   <div className="space-y-2 mt-4 max-h-[160px] overflow-y-auto scrollbar-hide pr-1">
                     {order.items?.map((item, idx) => (
                       <div key={idx} className="flex items-start gap-3 p-3 bg-[#F5F3EF] rounded-2xl group/item hover:bg-[#EAE8E4] transition-colors border border-transparent hover:border-[rgba(26,20,16,0.04)]">
-                        <span className="flex-shrink-0 w-7 h-7 bg-white rounded-lg flex items-center justify-center font-sans text-[10px] font-bold text-ember-600 shadow-sm">{item.quantity}</span>
+                        <span className="flex-shrink-0 w-7 h-7 bg-white rounded-lg flex items-center justify-center font-mono text-[10px] font-black text-ember-600 shadow-sm">{item.quantity}</span>
                         <div className="min-w-0">
                           <p className="text-[13px] font-bold text-[#1A1410] truncate">{item.name}</p>
                           {item.modifiers?.length > 0 && (
@@ -330,32 +331,32 @@ export default function OrderManager() {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setSelectedOrder(order)}
-                    className="py-3.5 bg-[#F5F3EF] text-[#1A1410] rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-[#EAE8E4] transition-all active:scale-95"
+                    className="py-3.5 bg-[#F5F3EF] text-[#1A1410] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#EAE8E4] transition-all active:scale-95"
                   >
                     Details
                   </button>
                   {order.status === 'confirmed' && (
-                    <button onClick={() => updateOrderStatus(order._id, 'preparing')} className="py-3.5 bg-ember-600 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-ember-600/10 hover:shadow-ember-600/30 transition-all active:scale-95">
+                    <button onClick={() => updateOrderStatus(order._id, 'preparing')} className="py-3.5 bg-ember-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-ember-600/10 hover:shadow-ember-600/30 transition-all active:scale-95">
                       Start Prep
                     </button>
                   )}
                   {order.status === 'preparing' && (
-                    <button onClick={() => updateOrderStatus(order._id, 'ready')} className="py-3.5 bg-emerald-600 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/30 transition-all active:scale-95">
+                    <button onClick={() => updateOrderStatus(order._id, 'ready')} className="py-3.5 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/30 transition-all active:scale-95">
                       Mark Ready
                     </button>
                   )}
                   {order.status === 'ready' && order.type !== 'delivery' && (
-                    <button onClick={() => updateOrderStatus(order._id, 'delivered')} className="py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-slate-900/10 hover:shadow-slate-900/30 transition-all active:scale-95">
+                    <button onClick={() => updateOrderStatus(order._id, 'delivered')} className="py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-900/10 hover:shadow-slate-900/30 transition-all active:scale-95">
                       Complete
                     </button>
                   )}
                   {order.status === 'ready' && order.type === 'delivery' && (
-                    <button onClick={() => setSelectedOrder(order)} className="py-3.5 bg-indigo-600 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/30 transition-all active:scale-95">
+                    <button onClick={() => setSelectedOrder(order)} className="py-3.5 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/30 transition-all active:scale-95">
                       Assign
                     </button>
                   )}
                   {(order.status === 'delivered' || order.status === 'out_for_delivery' || order.status === 'cancelled') && (
-                    <button disabled className="py-3.5 bg-gray-50 text-gray-300 rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-gray-100 cursor-not-allowed">
+                    <button disabled className="py-3.5 bg-gray-50 text-gray-300 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-gray-100 cursor-not-allowed">
                       Locked
                     </button>
                   )}
@@ -385,19 +386,11 @@ export default function OrderManager() {
               </button>
 
               <div className="mb-10 pt-4">
-                <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-ember-600 font-bold px-3 py-1 bg-ember-50 rounded-lg">Invoice Master</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${getStatusStyle(selectedOrder.status)}`}>{selectedOrder.status}</span>
-                  {selectedOrder.source && selectedOrder.source !== 'website' && (
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm ${
-                      selectedOrder.source === 'ubereats' ? 'bg-black text-white' : 
-                      selectedOrder.source === 'grubhub' ? 'bg-[#FF8000] text-white' : 'bg-[#F5F3EF] text-[#1A1410]'
-                    }`}>
-                      🚀 {selectedOrder.source}
-                    </span>
-                  )}
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-600 font-bold px-3 py-1 bg-ember-50 rounded-lg">Invoice Master</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(selectedOrder.status)}`}>{selectedOrder.status}</span>
                 </div>
-                <h3 className="text-5xl font-sans font-bold text-[#1A1410] tracking-tight">#{selectedOrder.orderNumber}</h3>
+                <h3 className="text-5xl font-display font-black text-[#1A1410] italic tracking-tight">#{selectedOrder.orderNumber}</h3>
                 <p className="text-[#9B8D74] text-sm mt-1 font-medium">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
               </div>
 
@@ -405,7 +398,7 @@ export default function OrderManager() {
                 {/* Left Column: Customer & Delivery */}
                 <div className="space-y-8">
                   <div>
-                    <h4 className="font-sans text-[10px] font-bold uppercase tracking-[0.25em] text-[#9B8D74] mb-4">Customer Details</h4>
+                    <h4 className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-[#9B8D74] mb-4">Customer Details</h4>
                     <div className="space-y-1">
                       <p className="text-lg font-bold text-[#1A1410]">{selectedOrder.customerInfo?.name || 'Guest Customer'}</p>
                       <p className="text-sm font-medium text-[#5C554E] hover:text-ember-600 transition-colors cursor-pointer">{selectedOrder.customerInfo?.phone || 'No Phone provided'}</p>
@@ -415,7 +408,7 @@ export default function OrderManager() {
 
                   {selectedOrder.type === 'delivery' && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                      <h4 className="font-sans text-[10px] font-bold uppercase tracking-[0.25em] text-[#9B8D74] mb-4">Logistics Information</h4>
+                      <h4 className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-[#9B8D74] mb-4">Logistics Information</h4>
                       <div className="p-5 bg-ember-50/30 rounded-3xl border border-ember-100/50">
                         <p className="text-[13px] font-bold text-[#1A1410] leading-relaxed">
                           {typeof selectedOrder.address === 'string'
@@ -424,87 +417,16 @@ export default function OrderManager() {
                         </p>
                         {selectedOrder.address?.instructions && (
                           <div className="mt-4 pt-4 border-t border-ember-100/30">
-                            <span className="text-[9px] font-bold uppercase text-ember-600 tracking-widest block mb-1">Kitchen Note</span>
+                            <span className="text-[9px] font-black uppercase text-ember-600 tracking-widest block mb-1">Kitchen Note</span>
                             <p className="text-xs italic text-[#5C554E] leading-relaxed">"{selectedOrder.address.instructions}"</p>
                           </div>
                         )}
                       </div>
 
-                      {/* 3RD PARTY MAGIC LINK */}
-                      {selectedOrder.type === 'delivery' && (
-                        <div className="mt-8 p-6 bg-[#1A1410] rounded-[32px] border border-black/5 shadow-2xl relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 pointer-events-none group-hover:scale-110 transition-transform duration-700" />
-                          <h4 className="font-sans text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-4">3rd Party Delivery Suite</h4>
-                          
-                          <div className="space-y-5">
-                            {/* Brief Summary for Admin */}
-                            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1 italic">Shared Brief</p>
-                              <p className="text-[11px] text-white font-bold">📍 {typeof selectedOrder.address === 'string' ? selectedOrder.address : `${selectedOrder.address?.street}, ${selectedOrder.address?.city}`}</p>
-                              <p className="text-[10px] text-white/60 font-medium mt-1">📦 {selectedOrder.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')}</p>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row gap-2">
-                               <input 
-                                 readOnly 
-                                 value={`${window.location.origin}/delivery/${selectedOrder.deliveryToken}`}
-                                 className="w-full sm:flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white font-medium outline-none focus:border-ember-600/50 transition-all"
-                               />
-                               <button 
-                                 onClick={async () => {
-                                   const shareText = `${window.location.origin}/delivery/${selectedOrder.deliveryToken}`;
-                                   
-                                   try {
-                                     if (navigator.clipboard && window.isSecureContext) {
-                                       await navigator.clipboard.writeText(shareText);
-                                     } else {
-                                       const textArea = document.createElement("textarea");
-                                       textArea.value = shareText;
-                                       document.body.appendChild(textArea);
-                                       textArea.select();
-                                       document.execCommand('copy');
-                                       document.body.removeChild(textArea);
-                                     }
-                                     alert('Delivery Tracking Link Copied!');
-                                   } catch (err) {
-                                     console.error('Copy failed', err);
-                                     alert('Failed to copy. Please manually select the URL above.');
-                                   }
-                                 }}
-                                 className="w-full sm:w-auto px-6 py-3 bg-ember-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-ember-500 transition-all active:scale-95 shadow-lg shadow-ember-600/20 whitespace-nowrap"
-                               >
-                                 Copy Magic Link
-                               </button>
-                            </div>
-                            
-                            <div className="flex justify-between items-center px-1">
-                              <p className="text-[9px] text-white/40 font-bold italic leading-tight max-w-[70%]">
-                                Share this direct assignment link with your 3rd party couriers.
-                              </p>
-                              <div className="flex gap-2">
-                                <span className="text-white font-black text-sm">${selectedOrder.total?.toFixed(2)}</span>
-                                <div className="mt-1 flex flex-col items-end gap-1">
-                                    <span className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md border ${
-                                        selectedOrder.payment?.status === 'paid' 
-                                        ? 'bg-emerald-900 text-emerald-300 border-emerald-700' 
-                                        : 'bg-amber-900 text-amber-300 border-amber-700'
-                                    }`}>
-                                        {selectedOrder.payment?.status === 'paid' ? 'PAID' : 'PAYMENT PENDING'}
-                                    </span>
-                                    <span className="text-[7px] font-bold text-white/40 uppercase tracking-[0.1em]">
-                                        {selectedOrder.payment?.method || 'Method Unknown'}
-                                    </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
                       {/* Driver Assignment Flow within details */}
                       {(selectedOrder.status === 'ready' || selectedOrder.status === 'out_for_delivery') && (
                         <div className="mt-6">
-                          <label className="font-sans text-[9px] font-bold uppercase tracking-[0.2em] text-[#9B8D74] block mb-3">Courier Selection</label>
+                          <label className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-[#9B8D74] block mb-3">Courier Selection</label>
                           {selectedOrder.status === 'out_for_delivery' ? (
                             <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3">
                               <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-lg">🛵</div>
@@ -527,25 +449,18 @@ export default function OrderManager() {
                           )}
                         </div>
                       )}
-
-                      {selectedOrder.deliveryNotes && (
-                        <div className="mt-6 p-5 bg-blue-50/30 rounded-3xl border border-blue-100/50">
-                          <span className="text-[9px] font-bold uppercase text-blue-600 tracking-widest block mb-2">Driver's Delivery Note</span>
-                          <p className="text-xs italic text-[#5C554E] leading-relaxed">"{selectedOrder.deliveryNotes}"</p>
-                        </div>
-                      )}
                     </motion.div>
                   )}
                 </div>
 
                 {/* Right Column: Order Items */}
                 <div>
-                  <h4 className="font-sans text-[10px] font-bold uppercase tracking-[0.25em] text-[#9B8D74] mb-4">Cart Inventory</h4>
+                  <h4 className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-[#9B8D74] mb-4">Cart Inventory</h4>
                   <div className="space-y-4 max-h-[300px] overflow-y-auto pr-3 scrollbar-hide">
                     {selectedOrder.items?.map((item, i) => (
                       <div key={i} className="flex justify-between items-start gap-4 p-4 bg-[#FAFAF8] rounded-3xl group/hover transition-all border border-transparent hover:border-[rgba(26,20,16,0.04)]">
                         <div className="flex gap-4 min-w-0">
-                          <span className="w-8 h-8 bg-white border border-[rgba(26,20,16,0.06)] rounded-xl flex items-center justify-center text-[11px] font-bold text-[#1A1410]">{item.quantity}</span>
+                          <span className="w-8 h-8 bg-white border border-[rgba(26,20,16,0.06)] rounded-xl flex items-center justify-center text-[11px] font-black text-[#1A1410]">{item.quantity}</span>
                           <div className="min-w-0">
                             <p className="text-[14px] font-bold text-[#1A1410] truncate">{item.name}</p>
                             {item.modifiers?.length > 0 && (
@@ -555,15 +470,15 @@ export default function OrderManager() {
                             )}
                           </div>
                         </div>
-                        <p className="text-sm font-sans font-bold text-ember-600">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-sm font-display font-black italic text-ember-600">${(item.price * item.quantity).toFixed(2)}</p>
                       </div>
                     ))}
                   </div>
 
                   <div className="mt-8 pt-8 border-t-2 border-dashed border-[rgba(26,20,16,0.06)]">
                     <div className="flex justify-between items-center px-4">
-                      <span className="font-sans font-bold text-2xl text-[#1A1410]">Total Value</span>
-                      <span className="text-4xl font-sans font-bold text-ember-600">${selectedOrder.total?.toFixed(2)}</span>
+                      <span className="font-display font-black italic text-2xl text-[#1A1410]">Total Value</span>
+                      <span className="text-4xl font-display font-black italic text-ember-600">${selectedOrder.total?.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -575,7 +490,7 @@ export default function OrderManager() {
                   <select
                     value={selectedOrder.status}
                     onChange={(e) => updateOrderStatus(selectedOrder._id, e.target.value)}
-                    className="w-full h-16 bg-[#F5F3EF] border-none rounded-3xl px-8 text-sm font-bold uppercase tracking-[0.1em] text-[#1A1410] focus:ring-4 focus:ring-ember-500/10 outline-none transition-all appearance-none cursor-pointer"
+                    className="w-full h-16 bg-[#F5F3EF] border-none rounded-3xl px-8 text-sm font-black uppercase tracking-[0.1em] text-[#1A1410] focus:ring-4 focus:ring-ember-500/10 outline-none transition-all appearance-none cursor-pointer"
                   >
                     <option value="confirmed">Confirmed</option>
                     <option value="preparing">Preparing</option>
@@ -590,7 +505,7 @@ export default function OrderManager() {
                 </div>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="px-12 h-16 bg-[#1A1410] text-white rounded-3xl text-[11px] font-bold uppercase tracking-[0.2em] shadow-2xl shadow-black/20 hover:bg-ember-600 transition-all active:scale-95"
+                  className="px-12 h-16 bg-[#1A1410] text-white rounded-3xl text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-black/20 hover:bg-ember-600 transition-all active:scale-95"
                 >
                   Confirm Record
                 </button>

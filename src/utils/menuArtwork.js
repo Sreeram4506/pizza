@@ -1,3 +1,5 @@
+import { resolveAssetUrl } from './env'
+
 function escapeXml(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -256,9 +258,5 @@ export function resolveMenuItemImage(item) {
     return image
   }
 
-  const baseUrl = typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL
-    ? import.meta.env.VITE_API_URL
-    : ''
-
-  return `${baseUrl}${image}`
+  return resolveAssetUrl(image)
 }

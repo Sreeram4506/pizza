@@ -3,9 +3,7 @@ import mongoose from 'mongoose'
 const tenantSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true, lowercase: true },
-  subdomain: { type: String, unique: true, lowercase: true, sparse: true },
-  customDomain: { type: String, unique: true, lowercase: true, trim: true, sparse: true },
-  domainVerified: { type: Boolean, default: false },
+  subdomain: { type: String, required: true, unique: true, lowercase: true },
   description: { type: String, default: '' },
   logo: { type: String, default: '' },
   contact: {

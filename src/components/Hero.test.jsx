@@ -1,5 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import React from 'react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { SettingsProvider } from '../context/SettingsContext'
 import Hero from './Hero'
 
 // Mock the SettingsContext
@@ -30,23 +32,6 @@ jest.mock('../context/ChatbotContext', () => ({
   })
 }))
 
-jest.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key) => ({
-      'hero.est': 'Est. 2024',
-      'hero.type': 'Wood Fired Pizza',
-      'hero.tagline': 'Crafted by hand and fired fresh for every table.',
-      'hero.exploreMenu': 'Explore Menu',
-      'hero.buildYourOwn': 'Build Your Own',
-      'hero.features.dough': 'Slow Fermented Dough',
-      'hero.features.fired': 'Stone Fired',
-      'hero.features.tomatoes': 'San Marzano Tomatoes',
-      'hero.features.rating': 'Top Rated',
-      'hero.reservations': 'Reservations'
-    }[key] || key)
-  })
-}))
-
 const renderWithProviders = (component) => {
   return render(
     <BrowserRouter>
@@ -58,8 +43,7 @@ const renderWithProviders = (component) => {
 describe('Hero Component', () => {
   test('renders hero section with restaurant name', () => {
     renderWithProviders(<Hero />)
-    expect(screen.getByText('Test')).toBeInTheDocument()
-    expect(screen.getByText('Restaurant')).toBeInTheDocument()
+    expect(screen.getByText('Test Restaurant')).toBeInTheDocument()
   })
 
   test('renders call-to-action buttons', () => {
@@ -71,10 +55,10 @@ describe('Hero Component', () => {
 
   test('renders hero description', () => {
     renderWithProviders(<Hero />)
-    expect(screen.getByText('Crafted by hand and fired fresh for every table.')).toBeInTheDocument()
+    expect(screen.getByText(/Where fire meets flour/)).toBeInTheDocument()
   })
 
-  test('renders the menu navigation button', () => {
+  test('navigates to menu when Explore Menu is clicked', () => {
     renderWithProviders(<Hero />)
 
     const menuButton = screen.getByText('Explore Menu')

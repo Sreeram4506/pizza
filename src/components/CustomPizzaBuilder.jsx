@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence, useMotionValue, useTransform, useInView } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useChatbot } from '../context/ChatbotContext'
-import { useSettings } from '../context/SettingsContext'
-import { useTranslation } from 'react-i18next'
 
 // ═══════════════════════════════════════════
 // PIZZA ATELIER — Cinematic Builder
@@ -95,46 +93,42 @@ function PulseRing({ trigger }) {
   )
 }
 
-// Pizza configuration defaults
-const DEFAULT_PIZZA_CONFIG = {
+// Pizza configuration
+const PIZZA_CONFIG = {
   bases: [
-    { id: 'thin', nameKey: 'builder.config.bases.thin.name', price: 0, color: '#D4C5A1', descKey: 'builder.config.bases.thin.desc' },
-    { id: 'thick', nameKey: 'builder.config.bases.thick.name', price: 1, color: '#C4A484', descKey: 'builder.config.bases.thick.desc' },
-    { id: 'cheese-burst', nameKey: 'builder.config.bases.cheese-burst.name', price: 2.5, color: '#E6B325', descKey: 'builder.config.bases.cheese-burst.desc' },
-    { id: 'whole-wheat', nameKey: 'builder.config.bases.whole-wheat.name', price: 1.5, color: '#A67B5B', descKey: 'builder.config.bases.whole-wheat.desc' },
+    { id: 'thin', name: 'Thin Crust', price: 0, color: '#D4C5A1', desc: 'Crispy & light' },
+    { id: 'thick', name: 'Thick Crust', price: 1, color: '#C4A484', desc: 'Chewy & satisfying' },
+    { id: 'cheese-burst', name: 'Cheese Burst', price: 2.5, color: '#E6B325', desc: 'Molten cheese edge' },
+    { id: 'whole-wheat', name: 'Whole Wheat', price: 1.5, color: '#A67B5B', desc: 'Hearty & wholesome' },
   ],
   sauces: [
-    { id: 'tomato', nameKey: 'builder.config.sauces.tomato.name', price: 0, color: '#C1440E', descKey: 'builder.config.sauces.tomato.desc' },
-    { id: 'bbq', nameKey: 'builder.config.sauces.bbq.name', price: 0.75, color: '#5C3317', descKey: 'builder.config.sauces.bbq.desc' },
-    { id: 'white', nameKey: 'builder.config.sauces.white.name', price: 1, color: '#E8DFC9', descKey: 'builder.config.sauces.white.desc' },
-    { id: 'pesto', nameKey: 'builder.config.sauces.pesto.name', price: 1.25, color: '#4A7C3F', descKey: 'builder.config.sauces.pesto.desc' },
+    { id: 'tomato', name: 'San Marzano', price: 0, color: '#C1440E', desc: 'Classic Neapolitan' },
+    { id: 'bbq', name: 'Smoky BBQ', price: 0.75, color: '#5C3317', desc: 'Sweet & smoky' },
+    { id: 'white', name: 'Garlic Cream', price: 1, color: '#E8DFC9', desc: 'Rich & velvety' },
+    { id: 'pesto', name: 'Basil Pesto', price: 1.25, color: '#4A7C3F', desc: 'Fresh & aromatic' },
   ],
   toppings: [
-    { id: 'pepperoni', nameKey: 'builder.config.toppings.pepperoni', price: 1.5, emoji: '🍕', category: 'Meat' },
-    { id: 'mushrooms', nameKey: 'builder.config.toppings.mushrooms', price: 1, emoji: '🍄', category: 'Veggie' },
-    { id: 'olives', nameKey: 'builder.config.toppings.olives', price: 1.25, emoji: '🫒', category: 'Veggie' },
-    { id: 'jalapenos', nameKey: 'builder.config.toppings.jalapenos', price: 1, emoji: '🌶️', category: 'Spicy' },
-    { id: 'bell-peppers', nameKey: 'builder.config.toppings.bell-peppers', price: 0.75, emoji: '🫑', category: 'Veggie' },
-    { id: 'onions', nameKey: 'builder.config.toppings.onions', price: 0.5, emoji: '🧅', category: 'Veggie' },
-    { id: 'cheese', nameKey: 'builder.config.toppings.cheese', price: 2, emoji: '🧀', category: 'Cheese' },
-    { id: 'corn', nameKey: 'builder.config.toppings.corn', price: 0.75, emoji: '🌽', category: 'Veggie' },
-    { id: 'tomatoes', nameKey: 'builder.config.toppings.tomatoes', price: 0.75, emoji: '🍅', category: 'Veggie' },
-    { id: 'pineapple', nameKey: 'builder.config.toppings.pineapple', price: 1, emoji: '🍍', category: 'Sweet' },
+    { id: 'pepperoni', name: 'Pepperoni', price: 1.5, emoji: '🍕', category: 'Meat' },
+    { id: 'mushrooms', name: 'Wild Mushrooms', price: 1, emoji: '🍄', category: 'Veggie' },
+    { id: 'olives', name: 'Kalamata Olives', price: 1.25, emoji: '🫒', category: 'Veggie' },
+    { id: 'jalapenos', name: 'Jalapeños', price: 1, emoji: '🌶️', category: 'Spicy' },
+    { id: 'bell-peppers', name: 'Bell Peppers', price: 0.75, emoji: '🫑', category: 'Veggie' },
+    { id: 'onions', name: 'Caramelized Onion', price: 0.5, emoji: '🧅', category: 'Veggie' },
+    { id: 'cheese', name: 'Bufala Mozzarella', price: 2, emoji: '🧀', category: 'Cheese' },
+    { id: 'corn', name: 'Sweet Corn', price: 0.75, emoji: '🌽', category: 'Veggie' },
+    { id: 'tomatoes', name: 'Cherry Tomatoes', price: 0.75, emoji: '🍅', category: 'Veggie' },
+    { id: 'pineapple', name: 'Roasted Pineapple', price: 1, emoji: '🍍', category: 'Sweet' },
   ],
 }
 
-const STEPS = (t) => [
-  { id: 1, title: t('builder.steps.foundation.title'), subtitle: t('builder.steps.foundation.subtitle') },
-  { id: 2, title: t('builder.steps.canvas.title'), subtitle: t('builder.steps.canvas.subtitle') },
-  { id: 3, title: t('builder.steps.artistry.title'), subtitle: t('builder.steps.artistry.subtitle') },
-  { id: 4, title: t('builder.steps.bake.title'), subtitle: t('builder.steps.bake.subtitle') },
+const STEPS = [
+  { id: 1, title: 'Foundation', subtitle: 'Choose your crust' },
+  { id: 2, title: 'Canvas', subtitle: 'Select your sauce' },
+  { id: 3, title: 'Artistry', subtitle: 'Add your toppings' },
+  { id: 4, title: 'The Bake', subtitle: 'Cooked to perfection' },
 ]
 
 export default function CustomPizzaBuilder() {
-  const { t } = useTranslation()
-  const { settings } = useSettings()
-  const PIZZA_CONFIG = settings?.atelierConfig || DEFAULT_PIZZA_CONFIG
-
   const [selectedBase, setSelectedBase] = useState(null)
   const [selectedSauce, setSelectedSauce] = useState(null)
   const [selectedToppings, setSelectedToppings] = useState([])
@@ -147,12 +141,6 @@ export default function CustomPizzaBuilder() {
   const pizzaCanvasRef = useRef(null)
   const { openWithIntent } = useChatbot()
   const navigate = useNavigate()
-
-  const activeSteps = STEPS(t)
-
-  // Helper to get localized name/desc with fallback
-  const baseName = (item) => item.nameKey ? t(item.nameKey) : item.name
-  const baseDesc = (item) => item.descKey ? t(item.descKey) : item.desc
 
   // Baking animation simulation
   useEffect(() => {
@@ -223,12 +211,11 @@ export default function CustomPizzaBuilder() {
           x: xPercent,
           y: yPercent,
           rotation: Math.random() * 360,
-          scale: 0.7 + Math.random() * 0.4, // slight scale variation for realism
-          delay: i * 0.08, // faster stagger
+          scale: 0.65 + Math.random() * 0.35,
+          delay: i * 0.12,
           // Random start position for dramatic falling arc
-          startX: (Math.random() - 0.5) * 80,
+          startX: (Math.random() - 0.5) * 120,
           floatOffset: Math.random() * Math.PI * 2, // for idle floating
-          dropShadowOffset: { x: Math.random() * 2 - 1, y: Math.random() * 2 + 1 }, // dynamic shadow
         })
       }
       setToppingElements(prev => [...prev, ...newEls])
@@ -242,7 +229,7 @@ export default function CustomPizzaBuilder() {
       sauce: selectedSauce,
       toppings: selectedToppings,
       price: Number(pizzaPrice),
-      name: `${t('builder.yourCreation')} (${selectedBase ? baseName(selectedBase) : 'Classic'})`
+      name: `Custom Pizza (${selectedBase || 'Classic'})`
     }
     openWithIntent('add_to_cart', { item: customPizza })
     toast.success('Custom pizza added to cart!')
@@ -255,7 +242,7 @@ export default function CustomPizzaBuilder() {
       sauce: selectedSauce,
       toppings: selectedToppings,
       price: Number(pizzaPrice),
-      name: `${t('builder.yourCreation')} (${selectedBase ? baseName(selectedBase) : 'Classic'})`
+      name: `Custom Pizza (${selectedBase || 'Classic'})`
     }
     openWithIntent('checkout', { item: customPizza })
   }
@@ -276,55 +263,38 @@ export default function CustomPizzaBuilder() {
       setIsBaking(true)
       setBakeProgress(0)
     } else {
-      setCurrentStep(prev => Math.min(prev + 1, activeSteps.length))
+      setCurrentStep(prev => Math.min(prev + 1, STEPS.length))
     }
+    const atelier = document.getElementById('atelier')
+    atelier?.scrollIntoView({ behavior: 'auto' })
   }
 
   const prevStep = () => {
     if (currentStep === 4) setIsBaking(false)
     setCurrentStep(prev => Math.max(prev - 1, 1))
-  }
-
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-10% 0px -20% 0px' })
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { duration: 1, ease: [0.16, 1, 0.3, 1] }
-    }
+    const atelier = document.getElementById('atelier')
+    atelier?.scrollIntoView({ behavior: 'auto' })
   }
 
   return (
-    <section ref={ref} id="atelier" className="min-h-screen py-24 lg:py-40 bg-white relative overflow-hidden">
+    <section id="atelier" className="min-h-screen py-24 lg:py-32 bg-white relative overflow-hidden">
       {/* Grain */}
       <div className="grain-overlay" />
 
       {/* Background glows */}
-      <div className="absolute inset-0 ember-glow-bg opacity-30" />
-      <div className="absolute inset-0 gold-glow-bg opacity-20" />
+      <div className="absolute inset-0 ember-glow-bg" />
+      <div className="absolute inset-0 gold-glow-bg" />
+
+
 
       {/* Main Content */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-16 sm:pt-24 pb-32 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 pt-24 pb-32 relative z-10">
         {/* Cinematic Header */}
         <motion.div
-           variants={containerVariants}
-           initial="hidden"
-           animate={isInView ? "visible" : "hidden"}
-           className="text-center mb-16"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-16"
         >
           <motion.span
             initial={{ opacity: 0, y: 10 }}
@@ -332,7 +302,7 @@ export default function CustomPizzaBuilder() {
             transition={{ delay: 0.2 }}
             className="font-mono text-[10px] tracking-[0.4em] uppercase text-gold-400 block mb-4"
           >
-            {t('builder.titleLabel')}
+            The Atelier
           </motion.span>
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
@@ -340,7 +310,7 @@ export default function CustomPizzaBuilder() {
             transition={{ delay: 0.3, duration: 1 }}
             className="font-display italic font-bold text-5xl md:text-6xl lg:text-7xl text-[#1A1410] tracking-tight"
           >
-            {t('builder.title').split('Masterpiece')[0]}<span className="text-ember-500">{t('builder.title').includes('Masterpiece') ? 'Masterpiece' : ''}</span>{t('builder.title').split('Masterpiece')[1]}
+            Build Your <span className="text-ember-500">Masterpiece</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -348,7 +318,7 @@ export default function CustomPizzaBuilder() {
             transition={{ delay: 0.6 }}
             className="font-body text-[#7A7068] text-lg mt-4 italic"
           >
-            {t('builder.subtitle')}
+            "Every great pizza begins with a single choice."
           </motion.p>
         </motion.div>
 
@@ -357,10 +327,10 @@ export default function CustomPizzaBuilder() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="flex items-center justify-center gap-2 sm:gap-4 mb-10 sm:mb-16 overflow-x-auto pb-4 scrollbar-hide"
+          className="flex items-center justify-center gap-4 mb-16"
         >
-          {activeSteps.map((step, i) => (
-            <div key={step.id} className="flex items-center shrink-0">
+          {STEPS.map((step, i) => (
+            <div key={step.id} className="flex items-center">
               <motion.button
                 onClick={() => {
                   if (step.id <= currentStep || (step.id === 2 && selectedBase) || (step.id === 3 && selectedSauce)) {
@@ -368,19 +338,21 @@ export default function CustomPizzaBuilder() {
                       setIsBaking(false)
                     }
                     setCurrentStep(step.id)
+                    const atelier = document.getElementById('atelier')
+                    atelier?.scrollIntoView({ behavior: 'auto' })
                   }
                 }}
-                className={`relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 transition-all duration-500 ${currentStep === step.id
+                className={`relative flex items-center gap-3 px-6 py-3 transition-all duration-500 ${currentStep === step.id
                   ? 'text-[#1A1410]'
                   : currentStep > step.id
                     ? 'text-gold-500'
                     : 'text-[#9B8D74]/40'
                   }`}
               >
-                <span className={`font-mono text-sm sm:text-lg ${currentStep === step.id ? 'text-ember-600' : ''}`}>
+                <span className={`font-mono text-lg ${currentStep === step.id ? 'text-ember-600' : ''}`}>
                   {currentStep > step.id ? '✓' : `0${step.id}`}
                 </span>
-                <div className="hidden sm:block text-left">
+                <div className="hidden md:block text-left">
                   <div className="font-mono text-[10px] tracking-[0.2em] uppercase">{step.title}</div>
                   <div className="font-body text-xs opacity-60">{step.subtitle}</div>
                 </div>
@@ -393,8 +365,8 @@ export default function CustomPizzaBuilder() {
                   />
                 )}
               </motion.button>
-              {i < activeSteps.length - 1 && (
-                <div className={`w-4 sm:w-12 h-px mx-1 sm:mx-2 transition-colors duration-500 ${currentStep > step.id ? 'bg-gold-400/40' : 'bg-[rgba(26,20,16,0.08)]'
+              {i < STEPS.length - 1 && (
+                <div className={`w-12 h-px mx-2 transition-colors duration-500 ${currentStep > step.id ? 'bg-gold-400/40' : 'bg-[rgba(26,20,16,0.08)]'
                   }`} />
               )}
             </div>
@@ -402,17 +374,14 @@ export default function CustomPizzaBuilder() {
         </motion.div>
 
         {/* Two-Panel Layout */}
-        <motion.div
-           variants={containerVariants}
-           initial="hidden"
-           animate={isInView ? "visible" : "hidden"}
-           className="grid lg:grid-cols-[1fr,1.1fr] gap-12 lg:gap-16 items-start"
-        >
+        <div className="grid lg:grid-cols-[1fr,1.1fr] gap-12 lg:gap-16 items-start">
 
           {/* ═══ LEFT: Pizza Canvas — 3D Perspective ═══ */}
           <motion.div
-            variants={itemVariants}
-            className="order-1"
+            initial={{ opacity: 0, x: -60 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="order-2 lg:order-1"
           >
             <div
               className="relative"
@@ -433,7 +402,7 @@ export default function CustomPizzaBuilder() {
               >
                 <div
                   ref={pizzaCanvasRef}
-                  className="relative w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full"
+                  className="relative w-72 h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full"
                   style={{
                     background: selectedBase
                       ? 'radial-gradient(circle at 40% 40%, rgba(26,20,16,0.04), rgba(245,243,239,0.4))'
@@ -524,18 +493,15 @@ export default function CustomPizzaBuilder() {
                           left: `calc(50% + ${el.x}%)`,
                           top: `calc(50% + ${el.y}%)`,
                           transform: 'translate(-50%, -50%)',
-                          filter: `drop-shadow(${el.dropShadowOffset.x}px ${el.dropShadowOffset.y}px 2px rgba(0,0,0,0.65)) contrast(1.1) brightness(0.95)`,
+                          filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.5))',
                           zIndex: 10,
                         }}
                       >
                         <motion.span
                           className="block"
-                          style={{
-                            transformOrigin: 'center center',
-                          }}
                           animate={{
-                            y: [0, -2, 0, 1.5, 0],
-                            rotate: [-1, 1, 0, -0.5, 1],
+                            y: [0, -3, 0, 2, 0],
+                            rotate: [0, 2, -2, 1, 0],
                           }}
                           transition={{
                             duration: 3 + Math.random() * 2,
@@ -559,10 +525,10 @@ export default function CustomPizzaBuilder() {
                       className="absolute inset-0 flex flex-col items-center justify-center"
                     >
                       <span className="font-display italic text-3xl text-[#1A1410]/30">
-                        {t('builder.canvasLabel')}
+                        Your Canvas
                       </span>
                       <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#1A1410]/60 mt-2">
-                        {t('builder.canvasSubtitle')}
+                        Select a crust to begin
                       </span>
                     </motion.div>
                   )}
@@ -606,7 +572,7 @@ export default function CustomPizzaBuilder() {
               className="text-center mt-8"
             >
               <div className="inline-flex items-baseline gap-1">
-                <span className="font-mono text-xs tracking-[0.15em] uppercase text-[#9B8D74]">{t('builder.total')}</span>
+                <span className="font-mono text-xs tracking-[0.15em] uppercase text-[#9B8D74]">Total</span>
                 <motion.span
                   key={calculatePrice()}
                   initial={{ y: 10, opacity: 0 }}
@@ -622,7 +588,7 @@ export default function CustomPizzaBuilder() {
                   animate={{ opacity: 1 }}
                   className="mt-2 font-mono text-[10px] tracking-[0.15em] uppercase text-[#9B8D74]"
                 >
-                  {t('builder.toppingsCount', { count: selectedToppings.length })}
+                  {selectedToppings.length} topping{selectedToppings.length > 1 ? 's' : ''} selected
                 </motion.div>
               )}
             </motion.div>
@@ -635,24 +601,24 @@ export default function CustomPizzaBuilder() {
                 className="mt-8 p-6 bg-[#F5F3EF] border border-[rgba(26,20,16,0.08)] rounded-xl"
                 style={{ borderRadius: '2px' }}
               >
-                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 block mb-4">{t('builder.yourCreation')}</span>
+                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 block mb-4">Your Creation</span>
                 <div className="space-y-2">
                   {selectedBase && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-[#9B8D74] font-body">{baseName(selectedBase)}</span>
-                      <span className="font-mono text-[#1A1410] text-xs">{selectedBase.price > 0 ? `+$${selectedBase.price.toFixed(2)}` : t('builder.included')}</span>
+                      <span className="text-[#9B8D74] font-body">{selectedBase.name}</span>
+                      <span className="font-mono text-[#1A1410] text-xs">{selectedBase.price > 0 ? `+$${selectedBase.price.toFixed(2)}` : 'Included'}</span>
                     </div>
                   )}
                   {selectedSauce && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-[#9B8D74] font-body">{baseName(selectedSauce)}</span>
-                      <span className="font-mono text-[#1A1410] text-xs">{selectedSauce.price > 0 ? `+$${selectedSauce.price.toFixed(2)}` : t('builder.included')}</span>
+                      <span className="text-[#9B8D74] font-body">{selectedSauce.name}</span>
+                      <span className="font-mono text-[#1A1410] text-xs">{selectedSauce.price > 0 ? `+$${selectedSauce.price.toFixed(2)}` : 'Included'}</span>
                     </div>
                   )}
-                  {selectedToppings.map(t_top => (
-                    <div key={t_top.id} className="flex justify-between text-sm">
-                      <span className="text-[#9B8D74] font-body">{t_top.emoji} {baseName(t_top)}</span>
-                      <span className="font-mono text-[#1A1410] text-xs">+${t_top.price.toFixed(2)}</span>
+                  {selectedToppings.map(t => (
+                    <div key={t.id} className="flex justify-between text-sm">
+                      <span className="text-[#9B8D74] font-body">{t.emoji} {t.name}</span>
+                      <span className="font-mono text-[#1A1410] text-xs">+${t.price.toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -662,8 +628,10 @@ export default function CustomPizzaBuilder() {
 
           {/* ═══ RIGHT: Controls Panel ═══ */}
           <motion.div
-            variants={itemVariants}
-            className="order-2"
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="order-1 lg:order-2"
           >
             {/* Step Content — Animated Transitions */}
             <AnimatePresence mode="wait">
@@ -677,8 +645,8 @@ export default function CustomPizzaBuilder() {
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-3">Step 01</span>
-                  <h2 className="font-display italic text-3xl md:text-4xl text-[#1A1410] mb-2">{t('builder.foundation.title')}</h2>
-                  <p className="font-body text-[#9B8D74] text-sm mb-10">{t('builder.foundation.p')}</p>
+                  <h2 className="font-display italic text-3xl md:text-4xl text-[#1A1410] mb-2">Choose Your Foundation</h2>
+                  <p className="font-body text-[#9B8D74] text-sm mb-10">The soul of every great pizza starts here.</p>
 
                   <div className="space-y-4">
                     {PIZZA_CONFIG.bases.map((base, i) => (
@@ -702,11 +670,11 @@ export default function CustomPizzaBuilder() {
                           }}
                         />
                         <div className="flex-1">
-                          <div className="font-body font-medium text-[#1A1410]">{baseName(base)}</div>
-                          <div className="font-body text-xs text-[#9B8D74]">{baseDesc(base)}</div>
+                          <div className="font-body font-medium text-[#1A1410]">{base.name}</div>
+                          <div className="font-body text-xs text-[#9B8D74]">{base.desc}</div>
                         </div>
                         <div className="font-mono text-sm text-gold-400">
-                          {base.price > 0 ? `+$${base.price.toFixed(2)}` : t('builder.included')}
+                          {base.price > 0 ? `+$${base.price.toFixed(2)}` : 'Free'}
                         </div>
                         {selectedBase?.id === base.id && (
                           <motion.span
@@ -735,8 +703,8 @@ export default function CustomPizzaBuilder() {
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-3">Step 02</span>
-                  <h2 className="font-display italic text-3xl md:text-4xl text-[#1A1410] mb-2">{t('builder.palette.title')}</h2>
-                  <p className="font-body text-[#9B8D74] text-sm mb-10">{t('builder.palette.p')}</p>
+                  <h2 className="font-display italic text-3xl md:text-4xl text-[#1A1410] mb-2">Paint Your Canvas</h2>
+                  <p className="font-body text-[#9B8D74] text-sm mb-10">Every brushstroke of flavor matters.</p>
 
                   <div className="grid grid-cols-2 gap-4">
                     {PIZZA_CONFIG.sauces.map((sauce, i) => (
@@ -764,10 +732,10 @@ export default function CustomPizzaBuilder() {
                           className="w-8 h-8 rounded-full mb-4 transition-transform group-hover:scale-110"
                           style={{ background: sauce.color, boxShadow: `0 0 12px ${sauce.color}44` }}
                         />
-                        <div className="font-body font-medium text-[#1A1410] text-sm">{baseName(sauce)}</div>
-                        <div className="font-body text-xs text-[#9B8D74] mt-1">{baseDesc(sauce)}</div>
+                        <div className="font-body font-medium text-[#1A1410] text-sm">{sauce.name}</div>
+                        <div className="font-body text-xs text-[#9B8D74] mt-1">{sauce.desc}</div>
                         <div className="font-mono text-xs text-gold-400 mt-3">
-                          {sauce.price > 0 ? `+$${sauce.price.toFixed(2)}` : t('builder.included')}
+                          {sauce.price > 0 ? `+$${sauce.price.toFixed(2)}` : 'Included'}
                         </div>
                       </motion.button>
                     ))}
@@ -785,8 +753,8 @@ export default function CustomPizzaBuilder() {
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-3">Step 03</span>
-                  <h2 className="font-display italic text-3xl md:text-4xl text-[#1A1410] mb-2">{t('builder.artistry.title')}</h2>
-                  <p className="font-body text-[#9B8D74] text-sm mb-10">{t('builder.artistry.p')}</p>
+                  <h2 className="font-display italic text-3xl md:text-4xl text-[#1A1410] mb-2">Add Your Artistry</h2>
+                  <p className="font-body text-[#9B8D74] text-sm mb-10">Each topping tells a story. What's yours?</p>
 
                   <div className="space-y-8 max-h-[450px] overflow-y-auto pr-2 scroll-smooth-ios">
                     {Object.entries(
@@ -799,7 +767,7 @@ export default function CustomPizzaBuilder() {
                     ).map(([category, toppings], catIdx) => (
                       <div key={category} className="space-y-4">
                         <h3 className="font-mono text-[9px] tracking-[0.3em] uppercase text-gold-400/60 pb-2 border-b border-[rgba(26,20,16,0.05)]">
-                          {t(`builder.config.categories.${category.toLowerCase()}`, category)}
+                          {category}
                         </h3>
                         <div className="grid grid-cols-2 gap-3">
                           {toppings.map((topping, i) => {
@@ -824,7 +792,7 @@ export default function CustomPizzaBuilder() {
                                   {topping.emoji}
                                 </motion.span>
                                 <div className="flex-1 min-w-0">
-                                  <div className="font-body font-medium text-[#1A1410] text-sm truncate">{baseName(topping)}</div>
+                                  <div className="font-body font-medium text-[#1A1410] text-sm truncate">{topping.name}</div>
                                   <div className="font-mono text-[10px] text-gold-400">+${topping.price.toFixed(2)}</div>
                                 </div>
                                 {isSelected && (
@@ -859,8 +827,8 @@ export default function CustomPizzaBuilder() {
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-3">Step 04</span>
-                  <h2 className="font-display italic text-3xl md:text-4xl text-[#1A1410] mb-2">{t('builder.bake.title')}</h2>
-                  <p className="font-body text-[#9B8D74] text-sm mb-10">{t('builder.bake.p')}</p>
+                  <h2 className="font-display italic text-3xl md:text-4xl text-[#1A1410] mb-2">The Alchemist's Fire</h2>
+                  <p className="font-body text-[#9B8D74] text-sm mb-10">Patience is the final ingredient.</p>
 
                   <div className="bg-[#1A1410] rounded-[2.5rem] p-10 relative overflow-hidden h-[400px] flex flex-col items-center justify-center border border-[rgba(193,68,14,0.15)] shadow-ember-lg">
                     {/* Oven Interior Glow */}
@@ -873,7 +841,7 @@ export default function CustomPizzaBuilder() {
                     <div className="relative z-10 text-center w-full">
                       <div className="mb-8">
                         <div className="text-6xl mb-4">🔥</div>
-                        <div className="font-display italic text-2xl text-white">{t('builder.bake.baking')}</div>
+                        <div className="font-display italic text-2xl text-white">Baking...</div>
                       </div>
 
                       <div className="w-full max-w-[280px] mx-auto">
@@ -886,7 +854,7 @@ export default function CustomPizzaBuilder() {
                           />
                         </div>
                         <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-[#9B8D74]">
-                          <span>{t('builder.bake.oven')}</span>
+                          <span>Traditional Oven</span>
                           <span className="text-ember-500">{bakeProgress}%</span>
                         </div>
                       </div>
@@ -899,7 +867,7 @@ export default function CustomPizzaBuilder() {
                             className="mt-8"
                           >
                             <span className="bg-green-500/10 text-green-400 border border-green-500/20 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">
-                              ✨ {t('builder.bake.perfect')}
+                              ✨ Perfect Bake Achieved
                             </span>
                           </motion.div>
                         )}
@@ -915,87 +883,79 @@ export default function CustomPizzaBuilder() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-6"
+              className="mt-12 flex items-center justify-between"
             >
               <motion.button
                 whileHover={currentStep > 1 ? { scale: 1.05 } : {}}
                 whileTap={currentStep > 1 ? { scale: 0.95 } : {}}
                 onClick={prevStep}
                 disabled={currentStep === 1}
-                className={`flex items-center gap-2 font-mono text-xs tracking-[0.15em] uppercase transition-all ${currentStep === 1 ? 'text-[#1A1410]/20 cursor-not-allowed hidden sm:flex' : 'text-[#9B8D74] hover:text-[#1A1410]'
+                className={`flex items-center gap-2 font-mono text-xs tracking-[0.15em] uppercase transition-all ${currentStep === 1 ? 'text-[#1A1410]/20 cursor-not-allowed' : 'text-[#9B8D74] hover:text-[#1A1410]'
                   }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
-                {t('builder.actions.prev')}
+                Previous
               </motion.button>
 
-              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              <div className="flex items-center gap-4">
                 {currentStep < 4 ? (
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={nextStep}
                     disabled={currentStep === 1 && !selectedBase}
-                    className={`w-full sm:w-auto px-8 py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center justify-center gap-2 ${(currentStep === 1 && !selectedBase) ? 'opacity-50 cursor-not-allowed' : ''
+                    className={`px-8 py-4 bg-ember-500 text-parchment-200 font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center gap-2 ${(currentStep === 1 && !selectedBase) ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     style={{ borderRadius: '2px' }}
                   >
-                    {currentStep === 3 ? t('builder.actions.simulate') : t('builder.actions.next')}
+                    {currentStep === 3 ? 'Bake Simulation' : 'Continue'}
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                     </svg>
                   </motion.button>
                 ) : (
-                  <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                  <div className="flex items-center gap-3">
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={resetBuilder}
-                      className="w-full sm:w-auto px-6 py-4 border border-[rgba(26,20,16,0.1)] text-[#9B8D74] font-body text-sm tracking-[0.1em] uppercase hover:text-[#1A1410] transition-all"
+                      className="px-6 py-4 border border-[rgba(26,20,16,0.1)] text-[#9B8D74] font-body text-sm tracking-[0.1em] uppercase hover:text-[#1A1410] transition-all rounded-xl"
                       style={{ borderRadius: '2px' }}
                     >
-                      {t('builder.actions.reset')}
+                      Reset
                     </motion.button>
                     <motion.button
                       whileHover={bakeProgress === 100 ? { scale: 1.02 } : {}}
                       whileTap={bakeProgress === 100 ? { scale: 0.98 } : {}}
                       onClick={addToCartInternal}
                       disabled={bakeProgress < 100}
-                      className={`w-full sm:w-auto px-6 py-4 border border-gold-400/30 text-gold-400 font-body font-semibold text-sm tracking-[0.1em] uppercase hover:bg-gold-400/10 transition-all ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
+                      className={`px-6 py-4 border border-gold-400/30 text-gold-400 font-body font-semibold text-sm tracking-[0.1em] uppercase hover:bg-gold-400/10 transition-all rounded-xl ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
                         }`}
                       style={{ borderRadius: '2px' }}
                     >
-                      {t('builder.actions.add')}
+                      Add to Cart
                     </motion.button>
                     <motion.button
                       whileHover={bakeProgress === 100 ? { scale: 1.02 } : {}}
                       whileTap={bakeProgress === 100 ? { scale: 0.98 } : {}}
                       onClick={checkoutNow}
                       disabled={bakeProgress < 100}
-                      className={`w-full sm:w-auto px-8 py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center justify-center gap-2 ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
+                      className={`px-8 py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center gap-2 rounded-xl ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
                         }`}
                       style={{ borderRadius: '2px' }}
                     >
-                      {t('builder.actions.order')}
+                      Order Now
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                       </svg>
                     </motion.button>
                   </div>
                 )}
-                {currentStep > 1 && (
-                  <button
-                    onClick={prevStep}
-                    className="sm:hidden mt-2 font-mono text-[10px] tracking-[0.15em] uppercase text-[#9B8D74] underline"
-                  >
-                    {t('builder.actions.back')}
-                  </button>
-                )}
               </div>
             </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

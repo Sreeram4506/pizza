@@ -9,8 +9,6 @@ const orderItemSchema = new mongoose.Schema({
     name: String,
     price: Number
   }],
-  isPointsRedemption: { type: Boolean, default: false },
-  pointsCost: { type: Number, default: 0 },
   notes: { type: String, default: '' }
 })
 
@@ -23,7 +21,6 @@ const orderSchema = new mongoose.Schema({
   subtotal: { type: Number, required: true },
   tax: { type: Number, default: 0 },
   deliveryFee: { type: Number, default: 0 },
-  tip: { type: Number, default: 0 },
   discount: { type: Number, default: 0 },
   total: { type: Number, required: true },
   status: {
@@ -39,18 +36,13 @@ const orderSchema = new mongoose.Schema({
   customerInfo: {
     name: { type: String, required: true },
     phone: { type: String, required: true },
-    email: { type: String, default: '' },
-    promoEmail: { type: Boolean, default: false },
-    promoText: { type: Boolean, default: false }
+    email: { type: String, default: '' }
   },
-  promoCode: { type: String, default: '' },
   address: {
     street: { type: String, default: '' },
     city: { type: String, default: '' },
     zip: { type: String, default: '' },
-    instructions: { type: String, default: '' },
-    lat: { type: Number },
-    lng: { type: Number }
+    instructions: { type: String, default: '' }
   },
   payment: {
     method: { type: String, enum: ['cash', 'card', 'online'], required: true },
@@ -62,25 +54,8 @@ const orderSchema = new mongoose.Schema({
   estimatedDineInTime: { type: Date },
   actualDeliveredAt: { type: Date },
   notes: { type: String, default: '' },
-  deliveryNotes: { type: String, default: '' },
-  pointsEarned: { type: Number, default: 0 },
-  pointsRedeemed: { type: Number, default: 0 },
-  driverLocation: {
-    lat: Number,
-    lng: Number,
-    updatedAt: Date
-  },
-  deliveryToken: { type: String, unique: true },
-  trackingToken: { type: String, unique: true },
-  source: { type: String, enum: ['website', 'app', 'phone', 'in_person', 'grubhub', 'ubereats'], default: 'website' },
-  externalOrderId: { type: String },
-  externalPlatform: { type: String }
-}, { 
-  timestamps: true 
-})
-
-
-orderSchema.index({ tenantId: 1, status: 1 })
+  source: { type: String, enum: ['website', 'app', 'phone', 'in_person'], default: 'website' }
+}, { timestamps: true })
 
 orderSchema.index({ tenantId: 1, status: 1 })
 orderSchema.index({ tenantId: 1, createdAt: -1 })

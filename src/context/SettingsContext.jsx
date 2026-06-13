@@ -5,12 +5,12 @@ const SettingsContext = createContext()
 
 export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState({
-    restaurantName: '',
-    email: '',
-    phone: '',
-    address: '',
+    restaurantName: 'Pizza Blast',
+    email: 'contact@pizzablast.com',
+    phone: '+1 (555) 123-4567',
+    address: '123 Pizza Plaza, New York, NY 10001',
     currency: 'USD',
-    timezone: 'UTC'
+    timezone: 'America/New_York'
   })
   const [loading, setLoading] = useState(true)
   const [updateTrigger, setUpdateTrigger] = useState(0)

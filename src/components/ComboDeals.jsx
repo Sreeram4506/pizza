@@ -28,23 +28,19 @@ const combos = [
 ]
 
 function CountdownTimer() {
-  const [time, setTime] = useState({ hours: 0, minutes: 0, seconds: 0 })
+  const [time, setTime] = useState({ hours: 2, minutes: 14, seconds: 33 })
 
   useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date()
-      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
-      const diff = endOfDay - now
-      
-      return {
-        hours: Math.floor(diff / (1000 * 60 * 60)),
-        minutes: Math.floor((diff / (1000 * 60)) % 60),
-        seconds: Math.floor((diff / 1000) % 60)
-      }
-    }
-
-    const interval = setInterval(() => setTime(calculateTimeLeft()), 1000)
-    setTime(calculateTimeLeft())
+    const interval = setInterval(() => {
+      setTime(prev => {
+        let { hours, minutes, seconds } = prev
+        seconds--
+        if (seconds < 0) { seconds = 59; minutes-- }
+        if (minutes < 0) { minutes = 59; hours-- }
+        if (hours < 0) { hours = 23; minutes = 59; seconds = 59 }
+        return { hours, minutes, seconds }
+      })
+    }, 1000)
     return () => clearInterval(interval)
   }, [])
 
@@ -63,10 +59,10 @@ export default function ComboDeals() {
   const { openWithIntent } = useChatbot()
 
   return (
-    <section ref={ref} id="deals" className="py-16 lg:py-32 relative bg-[#F5F3EF] overflow-hidden section-grain">
+    <section ref={ref} id="deals" className="py-24 lg:py-32 relative bg-[#F5F3EF] overflow-hidden section-grain">
       <div className="absolute inset-0 ember-glow-bg" />
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -77,7 +73,7 @@ export default function ComboDeals() {
             <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold-400 block mb-4">
               Private Offers
             </span>
-            <h2 className="font-serif-1947 font-bold text-4xl md:text-5xl lg:text-7xl text-[#1A1410] tracking-tight italic">
+            <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
               Exclusive Deals
             </h2>
           </div>
@@ -112,7 +108,7 @@ export default function ComboDeals() {
                 </span>
 
                 {/* Name */}
-                <h3 className="font-serif-1947 text-3xl italic text-[#1A1410] mt-4 mb-6 relative z-10">
+                <h3 className="font-display text-3xl italic text-[#1A1410] mt-4 mb-6 relative z-10">
                   {combo.name}
                 </h3>
 
@@ -137,10 +133,10 @@ export default function ComboDeals() {
 
                 {/* CTA */}
                 <button
-                  onClick={() => openWithIntent('add_to_cart', { item: { ...combo, _id: `combo-${combo.name.replace(/\s+/g, '-').toLowerCase()}`, available: true } })}
-                  className={`relative z-10 w-full py-5 text-center font-body text-[10px] font-black tracking-[0.25em] uppercase transition-all duration-300 rounded-xl ${combo.featured
-                    ? 'bg-[#1A1410] text-white shadow-xl shadow-black/10'
-                    : 'border border-[rgba(26,20,16,0.1)] text-[#1A1410] hover:bg-[#1A1410] hover:text-white'
+                  onClick={() => openWithIntent('order', { item: combo.name })}
+                  className={`relative z-10 w-full py-4 text-center font-body text-sm font-medium tracking-[0.15em] uppercase transition-all duration-300 rounded-xl ${combo.featured
+                    ? 'bg-ember-500 text-white hover:shadow-ember'
+                    : 'border border-[rgba(26,20,16,0.1)] text-[#1A1410] hover:bg-ember-500 hover:border-ember-500 hover:text-white'
                     }`}
                   style={{ borderRadius: '12px' }}
                 >

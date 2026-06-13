@@ -1,54 +1,45 @@
 import mongoose from 'mongoose'
 import { config } from '../config.js'
 
-export let isConnected = false
+let isConnected = false
 
 export async function connectDatabase() {
   if (isConnected) {
     console.log('MongoDB already connected')
-    return true
+    return
   }
 
   try {
     const mongoUri = config.mongoUri
-    
-    // Diagnostic logging for production (masked)
-    if (mongoUri) {
-      const maskedUri = mongoUri.replace(/\/\/.*?:.*?@/, '//***:***@')
-      console.log(`Connecting to MongoDB at ${maskedUri}...`)
-    } else {
-      console.error('CRITICAL: MONGODB_URI is not defined in environment variables.')
-    }
+    console.log('Connecting to MongoDB...')
 
     await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
-      connectTimeoutMS: 10000,
+      // Connection options removed as they're deprecated in newer versions
     })
 
     isConnected = true
-    console.log('✅ MongoDB connected successfully')
+    console.log('MongoDB connected successfully')
 
-    // Handle connection errors after initial connection
+    // Handle connection errors
     mongoose.connection.on('error', (err) => {
-      console.error('❌ MongoDB connection error:', err)
-      isConnected = false
+      console.error('MongoDB connection error:', err)
     })
 
     mongoose.connection.on('disconnected', () => {
-      console.log('⚠️ MongoDB disconnected. Attempting to reconnect...')
+      console.log('MongoDB disconnected. Attempting to reconnect...')
       isConnected = false
+      setTimeout(() => {
+        connectDatabase()
+      }, 5000)
     })
 
-    return true
   } catch (error) {
-    console.error('❌ Failed to connect to MongoDB:', error.message)
-    console.log('⚠️  FALLBACK: Database not available - switching to mock data mode')
-    
-    // Disable buffering so queries fail immediately instead of hanging
-    mongoose.set('bufferCommands', false)
-    
+    console.error('Failed to connect to MongoDB:', error.message)
+    console.log('⚠️  MongoDB not available - some features will be limited')
+    console.log('Please ensure MongoDB is running or install MongoDB Community Server')
+
+    // Don't exit the process - allow the app to run with limited functionality
     isConnected = false
-    return false
   }
 }
 

@@ -11,15 +11,6 @@ const customerSchema = new mongoose.Schema({
     city: { type: String, default: '' },
     zip: { type: String, default: '' }
   },
-  addressBook: [
-    {
-      label: { type: String, required: true },
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      zip: { type: String, required: false },
-      isDefault: { type: Boolean, default: false }
-    }
-  ],
   preferences: {
     dietary: [{ type: String }],
     allergies: [{ type: String }],
@@ -41,6 +32,6 @@ const customerSchema = new mongoose.Schema({
 
 customerSchema.index({ tenantId: 1, email: 1 })
 customerSchema.index({ tenantId: 1, phone: 1 })
-customerSchema.index({ tenantId: 1, 'loyalty.points': -1 })
+customerSchema.index({ tenantId: 1, loyaltyPoints: -1 })
 
 export const Customer = mongoose.model('Customer', customerSchema)

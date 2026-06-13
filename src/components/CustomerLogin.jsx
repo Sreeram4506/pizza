@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSettings } from '../context/SettingsContext'
 
 export default function CustomerLogin() {
   const [email, setEmail] = useState('')
@@ -9,10 +8,6 @@ export default function CustomerLogin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { settings } = useSettings()
-  const restaurantName = settings?.restaurantName || 'Mustang Pizza'
-  const [brandFirst, ...brandRest] = restaurantName.split(' ')
-  const brandSecond = brandRest.join(' ') || 'Pizza'
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -30,14 +25,8 @@ export default function CustomerLogin() {
       clearTimeout(timeout)
       const data = await res.json()
       if (res.ok) {
-        if (data.role === 'customer') {
-          localStorage.setItem('customerToken', data.token)
-          navigate('/profile')
-        } else {
-          // Admin or Staff
-          localStorage.setItem('adminToken', data.token)
-          navigate('/admin/dashboard')
-        }
+        localStorage.setItem('customerToken', data.token)
+        navigate('/')
       } else {
         setError(data.error || 'Login failed')
       }
@@ -53,7 +42,7 @@ export default function CustomerLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] section-grain glass-shell pt-20 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] section-grain">
       {/* Background glows */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-ember-500/5 rounded-full blur-[100px] -mr-64 -mt-64" />
@@ -63,19 +52,15 @@ export default function CustomerLogin() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md glass-panel-strong glass-highlight-ring p-12 relative z-10 rounded-[3rem]"
+        className="w-full max-w-md bg-noir-850 border border-[rgba(242,235,217,0.06)] p-12 relative z-10"
+        style={{ borderRadius: '2px' }}
       >
         <div className="text-center mb-10">
-          <div className="flex flex-col items-center mb-6">
-            <span className="font-serif-1947 text-[32px] tracking-tight leading-none text-[#1A1410]">
-              {brandFirst}
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.3em] font-black text-ember-600 -mt-1">
-              {brandSecond}
-            </span>
-          </div>
-          <h2 className="font-serif-1947 italic text-4xl text-[#1A1410] tracking-tight mt-4">Welcome Back</h2>
-          <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#9B8D74] mt-3">Sign in to your account</p>
+          <span className="font-display italic text-3xl text-[#1A1410] block mb-2">
+            Pizza<span className="text-ember-500">Blast</span>
+          </span>
+          <h2 className="font-display italic text-4xl text-[#1A1410] tracking-tight mt-4">Welcome Back</h2>
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 mt-3">Sign in to your account</p>
         </div>
 
         <AnimatePresence>
@@ -84,7 +69,8 @@ export default function CustomerLogin() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="p-4 bg-ember-500/10 border border-ember-500/20 text-ember-500 mb-8 text-xs font-mono tracking-widest text-center rounded-xl backdrop-blur-sm"
+              className="p-4 bg-ember-500/10 border border-ember-500/20 text-ember-500 mb-8 text-xs font-mono tracking-widest text-center"
+              style={{ borderRadius: '2px' }}
             >
               {error}
             </motion.div>
@@ -98,23 +84,20 @@ export default function CustomerLogin() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="w-full px-5 py-4 glass-input border border-white/60 text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/20 transition-all font-body text-sm"
+              className="w-full px-5 py-4 bg-white border border-[rgba(26,20,16,0.1)] text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/40 transition-all font-body text-sm rounded-xl"
+              style={{ borderRadius: '2px' }}
               required
             />
           </div>
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Password</label>
-              <Link to="/forgot-password" size="sm" className="font-mono text-[10px] tracking-[0.2em] uppercase text-ember-500 hover:text-ember-600 font-bold">
-                Forgot?
-              </Link>
-            </div>
+            <label className="font-mono text-[10px] tracking-[0.2em] uppercase text-parchment-700 ml-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-5 py-4 glass-input border border-white/60 text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/20 transition-all font-body text-sm"
+              className="w-full px-5 py-4 bg-white border border-[rgba(26,20,16,0.1)] text-[#1A1410] placeholder-[#9B8D74]/50 outline-none focus:border-ember-500/40 transition-all font-body text-sm rounded-xl"
+              style={{ borderRadius: '2px' }}
               required
             />
           </div>
@@ -124,18 +107,22 @@ export default function CustomerLogin() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               disabled={loading}
-              className="w-full py-5 glass-button-dark text-white font-body font-semibold text-sm tracking-[0.15em] uppercase transition-all disabled:opacity-50 rounded-2xl"
+              className="w-full py-5 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all disabled:opacity-50 rounded-xl"
+              style={{ borderRadius: '2px' }}
             >
               {loading ? 'Authenticating...' : 'Sign In'}
             </motion.button>
           </div>
         </form>
 
-        <div className="mt-10 text-center border-t border-[rgba(26,20,16,0.06)] pt-8">
-          <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-[#9B8D74]">
-            New to {restaurantName}?{' '}
-            <Link to="/register" className="text-ember-500 font-bold hover:text-ember-600 ml-1">Join the family</Link>
+        <div className="mt-10 text-center border-t border-[rgba(242,235,217,0.06)] pt-8">
+          <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-parchment-700">
+            New to Pizza Blast?{' '}
+            <Link to="/register" className="text-ember-500 hover:text-ember-400 ml-1">Join the family</Link>
           </p>
+          <div className="mt-4">
+            <Link to="/admin/login" className="font-mono text-[10px] tracking-[0.15em] uppercase text-parchment-700/40 hover:text-parchment-700 transition-colors">Admin Portal →</Link>
+          </div>
         </div>
       </motion.div>
     </div>

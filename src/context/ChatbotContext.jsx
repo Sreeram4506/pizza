@@ -2,11 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const ChatbotContext = createContext()
 
-const createCartItemId = () => `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-
 export function ChatbotProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isCartOpen, setIsCartOpen] = useState(false)
   const [initialMessage, setInitialMessage] = useState(null)
 
   // Cart State with LocalStorage Persistence
@@ -15,72 +12,10 @@ export function ChatbotProvider({ children }) {
     return saved ? JSON.parse(saved) : []
   })
 
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
-    const saved = localStorage.getItem('chatbot_voice_enabled')
-    return saved === 'true'
-  })
-
-  // Persistence for Order Type (pickup/delivery)
-  const [orderType, setOrderType] = useState(() => {
-    return localStorage.getItem('pizza_order_type') || 'delivery'
-  })
-
-  // Global Modal States
-  const [showOrderDetails, setShowOrderDetails] = useState(false)
-  const [showTimePicker, setShowTimePicker] = useState(false)
-  
-  // Delivery & Timing Persistence
-  const [deliveryAddress, setDeliveryAddress] = useState(() => {
-    return localStorage.getItem('pizza_delivery_address') || ''
-  })
-  const [orderTime, setOrderTime] = useState(() => {
-    return localStorage.getItem('pizza_order_time') || 'ASAP'
-  })
-
-  // Persistence effect for cart
+  // Persistence effect
   useEffect(() => {
     localStorage.setItem('pizza_cart', JSON.stringify(cart))
   }, [cart])
-
-  // Persistence effect for voice
-  useEffect(() => {
-    localStorage.setItem('chatbot_voice_enabled', isVoiceEnabled)
-  }, [isVoiceEnabled])
-
-  // Persistence for Order Type
-  useEffect(() => {
-    localStorage.setItem('pizza_order_type', orderType)
-  }, [orderType])
-
-  // Persistence for Delivery Address
-  useEffect(() => {
-    localStorage.setItem('pizza_delivery_address', deliveryAddress)
-  }, [deliveryAddress])
-
-  // Saved Addresses Persistence
-  const [savedAddresses, setSavedAddresses] = useState(() => {
-    const saved = localStorage.getItem('pizza_saved_addresses')
-    return saved ? JSON.parse(saved) : [{ address: '702 Neponset Street, Norwood', type: 'Gas station' }]
-  })
-
-  // Persistence for Saved Addresses
-  useEffect(() => {
-    localStorage.setItem('pizza_saved_addresses', JSON.stringify(savedAddresses))
-  }, [savedAddresses])
-
-  const addSavedAddress = (address, type = 'Recent') => {
-    if (!address) return
-    setSavedAddresses(prev => {
-        // Only keep top 5 addresses
-        const filtered = prev.filter(a => a.address !== address)
-        return [{ address, type }, ...filtered].slice(0, 5)
-    })
-  }
-
-  // Persistence for Order Time
-  useEffect(() => {
-    localStorage.setItem('pizza_order_time', orderTime)
-  }, [orderTime])
 
   const openWithIntent = (intent, data = {}) => {
     setInitialMessage({ intent, data })
@@ -98,33 +33,11 @@ export function ChatbotProvider({ children }) {
   // Cart Methods
   const addToCart = (item) => {
     setCart(prev => {
-      const isPoints = item.isPointsRedemption || false
-      const itemId = item._id || item.itemId || createCartItemId()
-      
-      // Points items are unique entries usually, but if we want to stack them:
-      const existing = prev.find(i => (i._id || i.itemId) === itemId && i.isPointsRedemption === isPoints)
-      
+      const existing = prev.find(i => i._id === item._id)
       if (existing) {
-        return prev.map(i => ((i._id || i.itemId) === itemId && i.isPointsRedemption === isPoints) ? { ...i, qty: (i.qty || 1) + (item.qty || 1) } : i)
+        return prev.map(i => i._id === item._id ? { ...i, qty: i.qty + 1 } : i)
       }
-      return [...prev, { ...item, _id: itemId, itemId, qty: item.qty || 1, isPointsRedemption: isPoints, pointsCost: item.pointsCost || 0 }]
-    })
-  }
-
-  const addMultipleToCart = (items) => {
-    setCart(prev => {
-      let newCart = [...prev]
-      items.forEach(newItem => {
-        const itemId = newItem._id || newItem.itemId || createCartItemId()
-        const existingIdx = newCart.findIndex(i => (i._id || i.itemId) === itemId)
-        if (existingIdx > -1) {
-          const existingItem = newCart[existingIdx]
-          newCart[existingIdx] = { ...existingItem, qty: (existingItem.qty || 1) + (newItem.qty || newItem.quantity || 1) }
-        } else {
-          newCart.push({ ...newItem, _id: itemId, itemId, qty: newItem.qty || newItem.quantity || 1 })
-        }
-      })
-      return newCart
+      return [...prev, { ...item, qty: 1 }]
     })
   }
 
@@ -139,21 +52,13 @@ export function ChatbotProvider({ children }) {
 
   const clearCart = () => setCart([])
 
-  const clearOrderType = () => {
-    setOrderType('delivery')
-    localStorage.removeItem('pizza_order_type')
-  }
-
   const cartCount = cart.reduce((sum, i) => sum + (i.qty || 0), 0)
-  const cartTotal = cart.reduce((sum, i) => sum + (i.isPointsRedemption ? 0 : (i.price * (i.qty || 0))), 0)
-  const cartPointsTotal = cart.reduce((sum, i) => sum + (i.isPointsRedemption ? (i.pointsCost * (i.qty || 0)) : 0), 0)
+  const cartTotal = cart.reduce((sum, i) => sum + (i.price * (i.qty || 0)), 0)
 
   return (
     <ChatbotContext.Provider value={{
       isOpen,
       setIsOpen,
-      isCartOpen,
-      setIsCartOpen,
       openWithIntent,
       openChatbot,
       closeChatbot,
@@ -163,25 +68,8 @@ export function ChatbotProvider({ children }) {
       addToCart,
       removeFromCart,
       clearCart,
-      addMultipleToCart,
       cartCount,
-      cartTotal,
-      cartPointsTotal,
-      isVoiceEnabled,
-      setIsVoiceEnabled,
-      orderType,
-      setOrderType,
-      clearOrderType,
-      showOrderDetails,
-      setShowOrderDetails,
-      showTimePicker,
-      setShowTimePicker,
-      deliveryAddress,
-      setDeliveryAddress,
-      orderTime,
-      setOrderTime,
-      savedAddresses,
-      addSavedAddress
+      cartTotal
     }}>
       {children}
     </ChatbotContext.Provider>

@@ -2,13 +2,8 @@ import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { Customer } from '../models/Customer.js'
-import { User } from '../models/User.js'
 import { Order } from '../models/Order.js'
 import { LoyaltyConfig } from '../models/Loyalty.js'
-import { OTP } from '../models/OTP.js'
-import { config } from '../config.js'
-import { sendEmail } from '../utils/email.js'
-import crypto from 'crypto'
 
 const router = Router()
 
@@ -64,220 +59,75 @@ router.post('/register', async (req, res) => {
     })
   } catch (err) {
     console.error('Registration error:', err)
-    res.status(500).json({ 
-      error: 'Failed to register user',
-      details: err.message,
-      code: err.name || err.code
-    })
+    res.status(500).json({ error: 'Failed to register user' })
   }
 })
 
-// Unified login (Customer + Admin/Staff)
+// Customer login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required' })
 
-    const key = email.toLowerCase()
+    // For localhost development, skip tenant requirement
     const tenantId = req.tenantId
+    const key = email.toLowerCase()
 
-    // 1. Try to find the user in Customer model
-    let customer = await Customer.findOne(tenantId ? { tenantId, email: key } : { email: key })
+    // Find customer (with or without tenant)
+    let customer = null
+    if (tenantId) {
+      customer = await Customer.findOne({ tenantId, email: key })
+    } else {
+      customer = await Customer.findOne({ email: key })
+    }
 
-    if (customer) {
-      if (!bcrypt.compareSync(password, customer.passwordHash)) {
-        return res.status(401).json({ error: 'Invalid credentials' })
-      }
+    if (!customer) return res.status(404).json({ error: 'User not found' })
 
-      const token = jwt.sign({
-        role: 'customer',
-        email: key,
+    if (!bcrypt.compareSync(password, customer.passwordHash)) {
+      return res.status(401).json({ error: 'Invalid credentials' })
+    }
+
+    const token = jwt.sign({
+      role: 'customer',
+      email: key,
+      id: customer._id,
+      customerId: customer._id
+    }, JWT_SECRET, { expiresIn: '7d' })
+
+    res.json({
+      token,
+      user: {
         id: customer._id,
-        customerId: customer._id
-      }, JWT_SECRET, { expiresIn: '7d' })
-
-      return res.json({
-        token,
-        role: 'customer',
-        user: {
-          id: customer._id,
-          name: customer.name,
-          email: customer.email,
-          phone: customer.phone
-        }
-      })
-    }
-
-    // 2. Try to find the user in User model (Staff/Admins stored in DB)
-    let staff = await User.findOne(tenantId ? { tenantId, email: key } : { email: key })
-    if (staff) {
-      if (!bcrypt.compareSync(password, staff.passwordHash)) {
-        return res.status(401).json({ error: 'Invalid credentials' })
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone
       }
-
-      const token = jwt.sign({
-        role: staff.role || 'staff',
-        email: key,
-        id: staff._id
-      }, JWT_SECRET, { expiresIn: '1d' })
-
-      return res.json({
-        token,
-        role: staff.role || 'staff',
-        user: {
-          id: staff._id,
-          name: staff.name,
-          email: staff.email,
-          role: staff.role
-        }
-      })
-    }
-
-    // 3. Fallback to global admin from config
-    if (key === config.adminUsername.toLowerCase() && password === config.adminPassword) {
-      const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '1d' })
-      return res.json({
-        token,
-        role: 'admin',
-        user: {
-          name: 'Global Admin',
-          email: key,
-          role: 'admin'
-        }
-      })
-    }
-
-    res.status(401).json({ error: 'Invalid credentials' })
+    })
   } catch (err) {
     console.error('Login error:', err)
-    res.status(500).json({ 
-      error: 'Failed to login',
-      details: err.message,
-      code: err.name || err.code
-    })
-  }
-})
-
-// Forgot Password - Step 1: Request OTP
-router.post('/forgot-password', async (req, res) => {
-  try {
-    const { email } = req.body
-    if (!email) return res.status(400).json({ error: 'Email is required' })
-
-    const key = email.toLowerCase()
-    
-    // Check if user exists (Customer or User)
-    const customer = await Customer.findOne({ email: key })
-    const staff = await User.findOne({ email: key })
-    
-    if (!customer && !staff) {
-      // For security, don't reveal if email exists, but we need to stop here
-      return res.json({ message: 'If an account exists with this email, an OTP has been sent.' })
-    }
-
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString()
-    const expiresAt = new Date(Date.now() + 10 * 60000) // 10 minutes
-
-    // Save/Update OTP in DB
-    await OTP.findOneAndUpdate(
-      { email: key },
-      { otp, expiresAt },
-      { upsert: true }
-    )
-
-    // Send email
-    await sendEmail(
-      key,
-      'Your Password Reset OTP - Pizza Blast',
-      `<div style="font-family: sans-serif; padding: 20px;">
-        <h2>Password Reset Request</h2>
-        <p>Your one-time password (OTP) is:</p>
-        <h1 style="color: #dc2626; font-size: 40px; letter-spacing: 5px;">${otp}</h1>
-        <p>This OTP is valid for 10 minutes. If you did not request this, please ignore this email.</p>
-      </div>`
-    )
-
-    res.json({ message: 'OTP sent to your email.' })
-  } catch (err) {
-    console.error('Forgot password error:', err)
-    res.status(500).json({ error: 'Failed to process request' })
-  }
-})
-
-// Forgot Password - Step 2: Verify OTP
-router.post('/verify-otp', async (req, res) => {
-  try {
-    const { email, otp } = req.body
-    if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' })
-
-    const key = email.toLowerCase()
-    const record = await OTP.findOne({ email: key, otp })
-
-    if (!record || record.expiresAt < new Date()) {
-      return res.status(400).json({ error: 'Invalid or expired OTP' })
-    }
-
-    // Generate a temporary reset token
-    const resetToken = crypto.randomBytes(32).toString('hex')
-    record.token = resetToken
-    await record.save()
-
-    res.json({ resetToken })
-  } catch (err) {
-    console.error('Verify OTP error:', err)
-    res.status(500).json({ error: 'Failed to verify OTP' })
-  }
-})
-
-// Forgot Password - Step 3: Reset Password
-router.post('/reset-password', async (req, res) => {
-  try {
-    const { email, resetToken, newPassword } = req.body
-    if (!email || !resetToken || !newPassword) {
-      return res.status(400).json({ error: 'Email, reset token, and new password are required' })
-    }
-
-    const key = email.toLowerCase()
-    const record = await OTP.findOne({ email: key, token: resetToken })
-
-    if (!record) {
-      return res.status(400).json({ error: 'Invalid reset token' })
-    }
-
-    const hash = bcrypt.hashSync(newPassword, 10)
-
-    // Update password in Customer or User model
-    const customer = await Customer.findOneAndUpdate({ email: key }, { passwordHash: hash })
-    const staff = await User.findOneAndUpdate({ email: key }, { passwordHash: hash })
-
-    if (!customer && !staff) {
-      return res.status(404).json({ error: 'User not found' })
-    }
-
-    // Clean up OTP record
-    await OTP.deleteOne({ email: key })
-
-    res.json({ message: 'Password reset successfully. You can now log in.' })
-  } catch (err) {
-    console.error('Reset password error:', err)
-    res.status(500).json({ error: 'Failed to reset password' })
+    res.status(500).json({ error: 'Failed to login' })
   }
 })
 
 // Customer authentication middleware
 export const authenticateCustomer = async (req, res, next) => {
+  console.log('=== AUTHENTICATION MIDDLEWARE CALLED ===')
   try {
+    console.log('Auth middleware - Request headers:', req.headers.authorization)
     const token = req.headers.authorization?.replace('Bearer ', '')
 
     if (!token) {
+      console.log('No token provided - continuing as guest')
       req.user = null
       return next()
     }
 
+    console.log('Token found, verifying...')
     const decoded = jwt.verify(token, JWT_SECRET)
+    console.log('Token decoded:', decoded)
 
     if (decoded.role !== 'customer') {
+      console.log('Not a customer token - continuing as guest')
       req.user = null
       return next()
     }
@@ -293,6 +143,7 @@ export const authenticateCustomer = async (req, res, next) => {
     }
 
     if (!customer) {
+      console.log('Customer not found - continuing as guest')
       req.user = null
       return next()
     }
@@ -305,8 +156,10 @@ export const authenticateCustomer = async (req, res, next) => {
       isGuest: false
     }
 
+    console.log('Authentication successful - user:', req.user)
     next()
   } catch (err) {
+    console.log('Authentication error:', err.message)
     // Invalid token - continue as guest
     req.user = null
     next()
@@ -444,11 +297,7 @@ router.post('/quick-auth', async (req, res) => {
     }
   } catch (err) {
     console.error('Quick auth error:', err)
-    res.status(500).json({ 
-      error: 'Authentication failed',
-      details: err.message,
-      code: err.name || err.code
-    })
+    res.status(500).json({ error: 'Authentication failed' })
   }
 })
 
@@ -461,9 +310,8 @@ router.get('/me', authenticateCustomer, async (req, res) => {
     const customer = await Customer.findById(req.user.id)
     if (!customer) return res.status(404).json({ error: 'Profile not found' })
 
-    // Fetch recent orders explicitly linked to THIS customer ID
-    // This prevents "global" visibility of orders placed by others with same info
-    const orders = await Order.find({ customerId: customer._id })
+    // Fetch recent orders
+    const orders = await Order.find({ 'customerInfo.email': customer.email })
       .sort({ createdAt: -1 })
       .limit(5)
 
@@ -479,77 +327,14 @@ router.get('/me', authenticateCustomer, async (req, res) => {
         name: customer.name,
         email: customer.email,
         phone: customer.phone,
-        addressBook: customer.addressBook || [],
         loyalty: customer.loyalty || { points: 0, lifetimePoints: 0, tier: 'bronze' }
       },
       orders,
-      availableRewards: config ? config.rewards : [],
-      loyaltyConfig: config
+      availableRewards
     })
   } catch (err) {
     console.error('Profile fetch error:', err)
     res.status(500).json({ error: 'Failed to fetch profile' })
-  }
-})
-
-// Add or update address in address book
-router.post('/address-book', async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1]
-  if (!token) return res.status(401).json({ error: 'Authentication required' })
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET)
-    req.customerId = decoded.customerId || decoded.id
-    next()
-  } catch (err) {
-    res.status(401).json({ error: 'Invalid token' })
-  }
-}, async (req, res) => {
-  try {
-    const { label, street, city, zip, isDefault } = req.body
-    if (!label || !street || !city) {
-      return res.status(400).json({ error: 'Label, street, and city are required' })
-    }
-
-    const customer = await Customer.findById(req.customerId)
-    if (!customer) return res.status(404).json({ error: 'Customer not found' })
-
-    if (isDefault) {
-      customer.addressBook.forEach(a => { a.isDefault = false })
-    }
-
-    customer.addressBook.push({ label, street, city, zip, isDefault: !!isDefault })
-    await customer.save()
-
-    res.json({ message: 'Address added', addressBook: customer.addressBook })
-  } catch (err) {
-    console.error('Add address error:', err)
-    res.status(500).json({ error: 'Failed to add address' })
-  }
-})
-
-// Delete address from address book
-router.delete('/address-book/:addressId', async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1]
-  if (!token) return res.status(401).json({ error: 'Authentication required' })
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET)
-    req.customerId = decoded.customerId || decoded.id
-    next()
-  } catch (err) {
-    res.status(401).json({ error: 'Invalid token' })
-  }
-}, async (req, res) => {
-  try {
-    const customer = await Customer.findById(req.customerId)
-    if (!customer) return res.status(404).json({ error: 'Customer not found' })
-
-    customer.addressBook = customer.addressBook.filter(a => a._id.toString() !== req.params.addressId)
-    await customer.save()
-
-    res.json({ message: 'Address removed', addressBook: customer.addressBook })
-  } catch (err) {
-    console.error('Delete address error:', err)
-    res.status(500).json({ error: 'Failed to delete address' })
   }
 })
 
