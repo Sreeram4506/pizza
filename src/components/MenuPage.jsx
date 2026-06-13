@@ -138,9 +138,15 @@ export default function MenuPage() {
         <div className="h-screen flex flex-col bg-[#FAFAF8] overflow-hidden selection:bg-ember-500/15 selection:text-[#1A1410] font-sans">
             {/* Split Screen Header */}
             <header className="h-16 sm:h-20 flex-shrink-0 bg-white/80 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] px-4 sm:px-12 flex items-center justify-between z-50">
-                <div
+                    <div
                     className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
-                    onClick={() => closeMenuRoute(navigate, setIsOpen)}
+                    onClick={() => {
+                        try {
+                            if (typeof setIsOpen === 'function') setIsOpen(false)
+                        } catch (e) {}
+                        // Hard navigation fallback to ensure the exit button always works
+                        navigate('/')
+                    }}
                 >
                     <div className="w-8 h-8 sm:w-10 sm:h-10 bg-ember-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-mono font-bold text-lg sm:text-xl shadow-lg shadow-ember-600/20 group-hover:scale-105 transition-transform">
                         {settings?.restaurantName?.[0] || 'M'}

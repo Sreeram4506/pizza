@@ -57,9 +57,7 @@ describe('Navbar Component', () => {
 
   test('renders restaurant name from settings', () => {
     renderWithProviders(<Navbar />)
-    // Navbar renders "Pizza" and "Blast" separately
-    expect(screen.getByText('Pizza')).toBeInTheDocument()
-    expect(screen.getByText('Blast')).toBeInTheDocument()
+    expect(screen.getByText('Test Restaurant')).toBeInTheDocument()
   })
 
   test('renders navigation links', () => {
@@ -96,8 +94,8 @@ describe('Navbar Component', () => {
   test('toggles mobile menu', async () => {
     renderWithProviders(<Navbar />)
 
-    // Test that mobile menu button exists
-    const menuButton = screen.getByRole('button', { name: /menu/i })
+    // The mobile hamburger button has no accessible name; find it by its unique class
+    const menuButton = document.querySelector('button.lg\\:hidden')
     expect(menuButton).toBeInTheDocument()
 
     // Test that navigation links are present

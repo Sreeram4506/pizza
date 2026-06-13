@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
+import { scrollToSection } from '../utils/sectionNavigation'
 import BannerDisplay from './BannerDisplay'
 
 export default function Hero() {
@@ -92,7 +93,7 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => document.querySelector('#atelier')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => scrollToSection('#atelier')}
                 className="group px-8 py-3.5 border-2 border-[#1D1813] text-[#1D1813] text-sm font-body font-semibold tracking-[0.1em] uppercase rounded-full flex items-center gap-2 transition-colors hover:bg-[#1D1813] hover:text-white"
               >
                 Build Your Own

@@ -3,12 +3,18 @@ export function openMenuRoute(navigate, closeChatbot = null) {
     closeChatbot(false)
   }
 
-  navigate('/menu')
+  navigate('/', { replace: true })
+  window.scrollTo({ top: 0, behavior: 'auto' })
 }
 
 export function closeMenuRoute(navigate, closeChatbot = null) {
-  if (typeof closeChatbot === 'function') {
-    closeChatbot(false)
+  // Always navigate home; chatbot close is best-effort only.
+  try {
+    if (typeof closeChatbot === 'function') {
+      closeChatbot(false)
+    }
+  } catch (e) {
+    // ignore
   }
 
   navigate('/')

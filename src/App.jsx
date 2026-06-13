@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import { scrollToSectionWithRetry } from './utils/sectionNavigation'
 import { Toaster } from 'react-hot-toast'
 import { ChatbotProvider } from './context/ChatbotContext'
 import { SettingsProvider } from './context/SettingsContext'
@@ -66,6 +67,25 @@ function QuickLoginWrapper() {
   )
 }
 
+function ScrollToHash() {
+  const location = useLocation()
+
+  useEffect(() => {
+    if (!location.hash) {
+      // If we navigate to a new page without a hash, scroll to top
+      window.scrollTo(0, 0)
+      return
+    }
+    // Defer scroll by one animation frame to let the route finish painting
+    const raf = requestAnimationFrame(() => {
+      scrollToSectionWithRetry(location.hash, { behavior: 'smooth', offset: 24 })
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [location.hash, location.pathname])
+
+  return null
+}
+
 function Home() {
   return (
     <>
@@ -78,7 +98,13 @@ function Home() {
         <MarqueeStrip />
         <BannerDisplay position="middle" />
         <PizzaGallery />
-        <CustomPizzaBuilder />
+        <Suspense fallback={
+          <div id="atelier" className="py-24 lg:py-32 min-h-screen flex items-center justify-center bg-white relative overflow-hidden">
+            <div className="text-[#1A1410]/60 font-body">Loading Atelier...</div>
+          </div>
+        }>
+          <CustomPizzaBuilder />
+        </Suspense>
         <About />
         <ComboDeals />
         <Testimonials />
@@ -120,6 +146,7 @@ function App() {
                 }
               }} />
               <QuickLoginWrapper />
+              <ScrollToHash />
 
               <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F7F1EA] text-[#231B16] font-body">Loading Pizza Blast...</div>}>
                 <Routes>

@@ -54,6 +54,10 @@ html {
   scroll-behavior: smooth;
 }
 
+section[id] {
+  scroll-margin-top: 6rem;
+}
+
 body {
   font-family: var(--font-ui);
   background:

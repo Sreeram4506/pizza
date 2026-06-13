@@ -61,7 +61,7 @@ export default function PizzaGallery() {
         <div className="divider-gold mb-12" />
 
         {/* Menu Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-4 gap-3 lg:gap-4">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className={`bg-[#F5F3EF] rounded-xl overflow-hidden border border-white flex flex-col relative ${i === 0 ? 'aspect-[3/4] md:row-span-2' : 'aspect-square'}`}>
@@ -127,12 +127,12 @@ function MenuCard({ image, name, price, description, category, available, dietar
       initial={{ opacity: 0, y: 18 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ delay: 0.04 * index, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className={`group cursor-pointer relative overflow-hidden rounded-3xl shadow-sm hover:shadow-md transition-all ${!available ? 'opacity-40' : ''}`}
+      className={`group cursor-pointer relative overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all scale-[.99] hover:scale-[1.01] ${!available ? 'opacity-40' : ''}`}
       onClick={onOrder}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative overflow-hidden rounded-3xl aspect-[4/4.2] md:aspect-[4/4.1]">
+      <div className="relative overflow-hidden rounded-2xl aspect-[4/4.8] md:aspect-[4/4.2] lg:aspect-[4/4.1]">
         {/* Image */}
         <motion.img
           src={imgSrc}
@@ -153,7 +153,7 @@ function MenuCard({ image, name, price, description, category, available, dietar
 
         {/* Price — top-right */}
         <div className="absolute top-3 right-3 z-10">
-          <span className="font-mono text-[10px] sm:text-[11px] tracking-wider text-white bg-black/40 px-2 py-1 backdrop-blur-sm rounded-md">
+          <span className="font-mono text-[9px] sm:text-[10px] tracking-wider text-white bg-black/40 px-2 py-1 backdrop-blur-sm rounded-md">
             ${price?.toFixed(2)}
           </span>
         </div>
@@ -176,7 +176,7 @@ function MenuCard({ image, name, price, description, category, available, dietar
 
         {/* Dish name — slides up on hover */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10"
+          className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 z-10"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: isHovered ? 0 : 20, opacity: isHovered ? 1 : 0 }}
           transition={{ duration: 0.3 }}
@@ -186,9 +186,9 @@ function MenuCard({ image, name, price, description, category, available, dietar
               {category}
             </span>
           )}
-          <h3 className="font-display text-base lg:text-lg text-white mb-1 leading-tight not-italic">{name}</h3>
+          <h3 className="font-display text-sm lg:text-base text-white mb-1 leading-tight not-italic">{name}</h3>
           {description && (
-            <p className="text-white/70 text-[10px] lg:text-[11px] line-clamp-2 max-w-sm">{description}</p>
+            <p className="text-white/70 text-[9px] lg:text-[10px] line-clamp-2 max-w-sm">{description}</p>
           )}
 
           <motion.button
@@ -205,11 +205,11 @@ function MenuCard({ image, name, price, description, category, available, dietar
 
         {/* Resting state name */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10 bg-gradient-to-t from-black/50 to-transparent"
+          className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 z-10 bg-gradient-to-t from-black/50 to-transparent"
           animate={{ opacity: isHovered ? 0 : 1 }}
           transition={{ duration: 0.3 }}
         >
-          <h3 className="font-display text-sm lg:text-base text-white leading-tight not-italic">{name}</h3>
+          <h3 className="font-display text-xs lg:text-sm text-white leading-tight not-italic">{name}</h3>
         </motion.div>
       </div>
     </motion.div>
