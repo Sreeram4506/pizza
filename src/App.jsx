@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { ChatbotProvider } from './context/ChatbotContext'
@@ -17,23 +17,23 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
 
-import OrderTracker from './components/OrderTracker'
-import CustomerProfile from './components/CustomerProfile'
-import CustomerLogin from './components/CustomerLogin'
-import DeliveryPortal from './components/DeliveryPortal'
-import CustomerRegister from './components/CustomerRegister'
-import AdminLogin from './components/AdminLogin'
-import AdminLayout from './components/admin/Layout'
-import Dashboard from './components/admin/Dashboard'
-import MenuManager from './components/admin/MenuManager'
-import OrderManager from './components/admin/OrderManager'
-import CustomerManager from './components/admin/CustomerManager'
-import AnalyticsDashboard from './components/admin/Analytics'
-import Marketing from './components/admin/Marketing'
-import LoyaltyManager from './components/admin/LoyaltyManager'
-import Settings from './components/admin/Settings'
-import CustomPizzaBuilder from './components/CustomPizzaBuilder'
-import MenuPage from './components/MenuPage'
+const OrderTracker = lazy(() => import('./components/OrderTracker'))
+const CustomerProfile = lazy(() => import('./components/CustomerProfile'))
+const CustomerLogin = lazy(() => import('./components/CustomerLogin'))
+const DeliveryPortal = lazy(() => import('./components/DeliveryPortal'))
+const CustomerRegister = lazy(() => import('./components/CustomerRegister'))
+const AdminLogin = lazy(() => import('./components/AdminLogin'))
+const AdminLayout = lazy(() => import('./components/admin/Layout'))
+const Dashboard = lazy(() => import('./components/admin/Dashboard'))
+const MenuManager = lazy(() => import('./components/admin/MenuManager'))
+const OrderManager = lazy(() => import('./components/admin/OrderManager'))
+const CustomerManager = lazy(() => import('./components/admin/CustomerManager'))
+const AnalyticsDashboard = lazy(() => import('./components/admin/Analytics'))
+const Marketing = lazy(() => import('./components/admin/Marketing'))
+const LoyaltyManager = lazy(() => import('./components/admin/LoyaltyManager'))
+const Settings = lazy(() => import('./components/admin/Settings'))
+const CustomPizzaBuilder = lazy(() => import('./components/CustomPizzaBuilder'))
+const MenuPage = lazy(() => import('./components/MenuPage'))
 import { resolveApiUrl } from './utils/env'
 
 // Routes where quick login should NOT appear
@@ -121,33 +121,35 @@ function App() {
               }} />
               <QuickLoginWrapper />
 
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/menu" element={<><MenuPage /><Chatbot /></>} />
+              <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F7F1EA] text-[#231B16] font-body">Loading Pizza Blast...</div>}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/menu" element={<><MenuPage /><Chatbot /></>} />
 
-                <Route path="/login" element={<><Navbar /><CustomerLogin /><Chatbot /></>} />
-                <Route path="/register" element={<><Navbar /><CustomerRegister /><Chatbot /></>} />
-                <Route path="/track" element={<><Navbar /><OrderTracker /><Chatbot /></>} />
-                <Route path="/profile" element={<><Navbar /><CustomerProfile /><Chatbot /></>} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/delivery" element={<DeliveryPortal />} />
+                  <Route path="/login" element={<><Navbar /><CustomerLogin /><Chatbot /></>} />
+                  <Route path="/register" element={<><Navbar /><CustomerRegister /><Chatbot /></>} />
+                  <Route path="/track" element={<><Navbar /><OrderTracker /><Chatbot /></>} />
+                  <Route path="/profile" element={<><Navbar /><CustomerProfile /><Chatbot /></>} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/delivery" element={<DeliveryPortal />} />
 
-                {/* Secure Nested Admin Routes — no chatbot, no grain */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="menu" element={<MenuManager />} />
-                  <Route path="orders" element={<OrderManager />} />
-                  <Route path="customers" element={<CustomerManager />} />
-                  <Route path="loyalty" element={<LoyaltyManager />} />
-                  <Route path="analytics" element={<AnalyticsDashboard />} />
-                  <Route path="marketing" element={<Marketing />} />
-                  <Route path="settings" element={<Settings />} />
-                  <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-                </Route>
+                  {/* Secure Nested Admin Routes — no chatbot, no grain */}
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="menu" element={<MenuManager />} />
+                    <Route path="orders" element={<OrderManager />} />
+                    <Route path="customers" element={<CustomerManager />} />
+                    <Route path="loyalty" element={<LoyaltyManager />} />
+                    <Route path="analytics" element={<AnalyticsDashboard />} />
+                    <Route path="marketing" element={<Marketing />} />
+                    <Route path="settings" element={<Settings />} />
+                    <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+                  </Route>
 
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
             </div>
           </div>
         </ChatbotProvider>

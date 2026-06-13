@@ -1,4 +1,14 @@
-import { patchFetchForEnvironment } from './urlHelpers'
+import { normalizeEnvironmentBaseUrl, patchFetchForEnvironment } from './urlHelpers'
+
+describe('normalizeEnvironmentBaseUrl', () => {
+  test('ignores localhost backend URLs in production builds', () => {
+    expect(normalizeEnvironmentBaseUrl('http://localhost:5070', { isProd: true })).toBe('')
+  })
+
+  test('keeps a real remote backend URL in production', () => {
+    expect(normalizeEnvironmentBaseUrl('https://pizza-backend.onrender.com', { isProd: true })).toBe('https://pizza-backend.onrender.com')
+  })
+})
 
 describe('patchFetchForEnvironment', () => {
   const originalFetch = globalThis.fetch

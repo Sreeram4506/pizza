@@ -40,8 +40,9 @@ This guide outlines how to deploy the **Pizza Blast** application to **Vercel** 
 6.  **Output Directory**: `dist`
 7.  **Environment Variables**:
     *   `VITE_API_URL`: `https://pizza-backend.onrender.com` (Your Render URL)
-    *   `VITE_WS_URL`: `pizza-backend.onrender.com` (Render host without protocol)
+    *   `VITE_WS_URL`: `https://pizza-backend.onrender.com` (WebSocket origin, use the real backend host)
     *   `VITE_STRIPE_PUBLISHABLE_KEY`: `your_stripe_pk`
+    *   Important: do not leave these set to `localhost` in the deployed Vercel environment; the client now ignores localhost-only backend values in production builds so the app uses the real backend URL you configure.
 8.  **Vercel Configuration**:
     The included `vercel.json` will automatically proxy `/api` and `/socket.io` requests to your backend.
 

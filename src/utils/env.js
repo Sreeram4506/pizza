@@ -1,32 +1,40 @@
 import {
-  trimTrailingSlash,
+  normalizeEnvironmentBaseUrl,
   resolveApiUrl as resolveApiPath,
   patchFetchForEnvironment as patchFetchWithBase
 } from './urlHelpers'
 
 export function getApiBaseUrl() {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) {
-    return trimTrailingSlash(import.meta.env.VITE_API_URL)
+  if (typeof import.meta !== 'undefined') {
+    return normalizeEnvironmentBaseUrl(import.meta.env?.VITE_API_URL || '', {
+      isProd: import.meta.env?.PROD === true
+    })
   }
 
   return ''
 }
 
 export function getWebSocketUrl() {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_WS_URL) {
-    return trimTrailingSlash(import.meta.env.VITE_WS_URL)
+  let wsUrl = ''
+
+  if (typeof import.meta !== 'undefined') {
+    wsUrl = normalizeEnvironmentBaseUrl(import.meta.env?.VITE_WS_URL || '', {
+      isProd: import.meta.env?.PROD === true
+    })
   }
 
-  const apiUrl = getApiBaseUrl()
-  if (apiUrl) {
-    return apiUrl.replace(/^http/, 'ws')
+  if (!wsUrl) {
+    const apiUrl = getApiBaseUrl()
+    if (apiUrl) {
+      wsUrl = apiUrl.replace(/^http/, 'ws')
+    }
   }
 
-  if (typeof window !== 'undefined') {
-    return window.location.origin
+  if (!wsUrl && typeof window !== 'undefined') {
+    wsUrl = window.location.origin
   }
 
-  return ''
+  return wsUrl
 }
 
 export function resolveApiUrl(path = '') {

@@ -2,6 +2,30 @@ export function trimTrailingSlash(value = '') {
   return String(value || '').trim().replace(/\/$/, '')
 }
 
+export function isLocalBackendUrl(value = '') {
+  const normalized = String(value || '').trim().toLowerCase()
+
+  if (!normalized) return false
+
+  if (/^(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i.test(normalized)) return true
+
+  try {
+    const url = new URL(normalized)
+    return ['localhost', '127.0.0.1', '0.0.0.0'].includes(url.hostname.toLowerCase())
+  } catch {
+    return false
+  }
+}
+
+export function normalizeEnvironmentBaseUrl(value = '', { isProd = false } = {}) {
+  const normalized = trimTrailingSlash(String(value || '').trim())
+
+  if (!normalized) return ''
+  if (isProd && isLocalBackendUrl(normalized)) return ''
+
+  return normalized
+}
+
 export function isAbsoluteUrl(value = '') {
   return /^(https?:|data:|blob:|mailto:|tel:)/i.test(String(value || ''))
 }
