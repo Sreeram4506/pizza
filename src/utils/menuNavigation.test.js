@@ -9,7 +9,7 @@ describe('menu navigation helpers', () => {
     openMenuRoute(navigate, closeChatbot)
 
     expect(closeChatbot).toHaveBeenCalledWith(false)
-    expect(navigate).toHaveBeenCalledWith('/menu')
+    expect(navigate).toHaveBeenCalledWith('/menu', { replace: false })
   })
 
   it('returns to the home page and closes the chatbot panel', () => {

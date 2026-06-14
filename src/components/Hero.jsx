@@ -104,7 +104,7 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="w-full lg:w-[55%] mt-16 lg:mt-0 relative flex items-center justify-center">
+          <div className="w-full lg:w-[55%] mt-16 lg:mt-0 relative hidden lg:flex items-center justify-center">
             <motion.div
               className="relative w-full max-w-lg lg:max-w-xl xl:max-w-2xl"
               initial={{ opacity: 0, x: 60, rotate: 0 }}

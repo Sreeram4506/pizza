@@ -61,7 +61,7 @@ export default function PizzaGallery() {
         <div className="divider-gold mb-12" />
 
         {/* Menu Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-4 gap-3 lg:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-4 gap-3 lg:gap-4">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className={`bg-[#F5F3EF] rounded-xl overflow-hidden border border-white flex flex-col relative ${i === 0 ? 'aspect-[3/4] md:row-span-2' : 'aspect-square'}`}>

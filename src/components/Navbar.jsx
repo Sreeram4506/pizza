@@ -20,37 +20,48 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const { openWithIntent, cartCount } = useChatbot()
+  const { openWithIntent, cartCount, setIsOpen } = useChatbot()
   const { settings } = useSettings()
   const navigate = useNavigate()
   const location = useLocation()
 
   const goTo = (to) => {
+    // Prevent chatbot drawer from persisting across route changes
+    if (typeof setIsOpen === 'function') setIsOpen(false)
+
     navigate(to, { replace: false })
     window.scrollTo({ top: 0, behavior: 'auto' })
   }
 
   const handleNavClick = (event, link) => {
-    if (event?.preventDefault) {
-      event.preventDefault()
-    }
-
     setMobileOpen(false)
 
-    if (link.intent) {
+    if (link?.intent) {
+      event.preventDefault()
       openWithIntent(link.intent)
       return
     }
 
-    if (link.href.startsWith('/#')) {
-      navigate(link.href, { replace: false })
-      setTimeout(() => {
-        scrollToSectionWithRetry(link.href, { behavior: 'smooth', offset: 24 })
-      }, 0)
+    if (typeof setIsOpen === 'function') setIsOpen(false)
+
+    const href = link?.href
+    if (!href) return
+
+    // For full route navigations, prevent the <Link> default and use navigate()
+    // so we don't get a double-navigation race between Link and goTo().
+    if (href === '/menu' || href === '/track' || href === '/login' || href === '/register' || href === '/profile') {
+      event.preventDefault()
+      goTo(href)
       return
     }
 
-    goTo(link.href)
+    // Extra scroll work for hash links — let the Link handle the URL update,
+    // but add explicit scroll behavior on top.
+    if (href.startsWith('/#')) {
+      setTimeout(() => {
+        scrollToSectionWithRetry(href, { behavior: 'smooth', offset: 24 })
+      }, 0)
+    }
   }
 
   useEffect(() => {
@@ -91,7 +102,7 @@ export default function Navbar() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className={`sticky top-4 mx-4 lg:mx-auto lg:max-w-6xl z-[70] transition-all duration-500 rounded-full ${
+        className={`fixed top-4 left-0 right-0 mx-4 lg:mx-auto lg:max-w-6xl z-[70] transition-all duration-500 rounded-full ${
           scrolled || mobileOpen
             ? 'bg-white/90 backdrop-blur-3xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.08)] py-3'
             : 'bg-white/60 backdrop-blur-xl border border-white/30 shadow-sm py-4'

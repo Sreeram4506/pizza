@@ -3,7 +3,7 @@ export function openMenuRoute(navigate, closeChatbot = null) {
     closeChatbot(false)
   }
 
-  navigate('/', { replace: true })
+  navigate('/menu', { replace: false })
   window.scrollTo({ top: 0, behavior: 'auto' })
 }
 

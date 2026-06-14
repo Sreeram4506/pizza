@@ -10,20 +10,20 @@
   --font-ui: "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
   --font-mono-ui: "SFMono-Regular", "Consolas", "Liberation Mono", Menlo, monospace;
 
-  /* Core Palette — Warm Terracotta / Olive Theme */
-  --bg-primary: #F7F1EA;
-  --bg-surface: #FFFDF8;
-  --bg-elevated: #EFE5D8;
+  /* Core Palette — Strictly Black, White, and Gold (#D4AF37) */
+  --bg-primary: #FFFFFF;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F5F5F5;
   --bg-card: #FFFFFF;
-  --accent-primary: #C46A3B;
-  --accent-glow: rgba(196, 106, 59, 0.12);
-  --accent-secondary: #7D8C5F;
-  --accent-secondary-dim: rgba(125, 140, 95, 0.14);
-  --text-primary: #231B16;
-  --text-secondary: #5E574F;
-  --text-muted: #7A7166;
-  --border-subtle: rgba(35, 27, 22, 0.10);
-  --border-accent: rgba(196, 106, 59, 0.18);
+  --accent-primary: #D4AF37;
+  --accent-glow: rgba(212, 175, 55, 0.12);
+  --accent-secondary: #D4AF37;
+  --accent-secondary-dim: rgba(212, 175, 55, 0.14);
+  --text-primary: #000000;
+  --text-secondary: #1A1A1A;
+  --text-muted: #555555;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-accent: rgba(212, 175, 55, 0.3);
 
   /* Easings */
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
@@ -31,17 +31,17 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Legacy mappings */
-  --color-primary: #A24A28;
-  --color-accent: #8B7A4E;
-  --color-bg: #F6F1E8;
-  --color-surface: #FFFCF7;
-  --color-text: #1D1813;
-  --color-text-muted: #8B8174;
-  --color-border: rgba(29, 24, 19, 0.08);
-  --brand-dark: #1D1813;
+  --color-primary: #D4AF37;
+  --color-accent: #D4AF37;
+  --color-bg: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-text: #000000;
+  --color-text-muted: #555555;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --brand-dark: #000000;
   --brand-card: #FFFFFF;
-  --brand-gold: #8B7A4E;
-  --brand-cream: #F6F1E8;
+  --brand-gold: #D4AF37;
+  --brand-cream: #FFFFFF;
 }
 
 * {
@@ -60,8 +60,7 @@ section[id] {
 
 body {
   font-family: var(--font-ui);
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.8) 0%, rgba(247, 241, 234, 0.96) 45%, #F5EFE6 100%);
+  background: #FFFFFF;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -109,17 +108,17 @@ body {
 
 /* ═══ Glow Backgrounds (Light) ═══ */
 .ember-glow-bg {
-  background: radial-gradient(ellipse at bottom left, rgba(162, 74, 40, 0.07) 0%, transparent 55%);
+  background: radial-gradient(ellipse at bottom left, rgba(212, 175, 55, 0.07) 0%, transparent 55%);
 }
 
 .gold-glow-bg {
-  background: radial-gradient(ellipse at top right, rgba(139, 122, 78, 0.05) 0%, transparent 45%);
+  background: radial-gradient(ellipse at top right, rgba(212, 175, 55, 0.05) 0%, transparent 45%);
 }
 
 /* ═══ Section Dividers ═══ */
 .divider-gold {
   height: 1px;
-  background: rgba(139, 122, 78, 0.15);
+  background: rgba(212, 175, 55, 0.15);
 }
 
 .divider-subtle {
@@ -137,7 +136,7 @@ body {
 
 .noir-card:hover {
   border-color: var(--border-accent);
-  box-shadow: 0 8px 32px rgba(162, 74, 40, 0.08);
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.08);
 }
 
 /* ═══ Buttons ═══ */
@@ -248,7 +247,7 @@ body {
 
 /* ═══ Selection ═══ */
 ::selection {
-  background: rgba(193, 68, 14, 0.12);
+  background: rgba(212, 175, 55, 0.15);
   color: var(--text-primary);
 }
 

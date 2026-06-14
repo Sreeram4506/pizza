@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { scrollToSectionWithRetry } from './utils/sectionNavigation'
 import { Toaster } from 'react-hot-toast'
-import { ChatbotProvider } from './context/ChatbotContext'
+import { ChatbotProvider, useChatbot } from './context/ChatbotContext'
 import { SettingsProvider } from './context/SettingsContext'
 import { useQuickLoginTrigger } from './hooks/useQuickLoginTrigger'
 import QuickLoginModal from './components/QuickLoginModal'
@@ -86,6 +86,17 @@ function ScrollToHash() {
   return null
 }
 
+function CloseChatbotOnRouteChange() {
+  const location = useLocation()
+  const { setIsOpen } = useChatbot()
+
+  useEffect(() => {
+    if (typeof setIsOpen === 'function') setIsOpen(false)
+  }, [location.pathname, location.hash, setIsOpen])
+
+  return null
+}
+
 function Home() {
   return (
     <>
@@ -147,6 +158,7 @@ function App() {
               }} />
               <QuickLoginWrapper />
               <ScrollToHash />
+              <CloseChatbotOnRouteChange />
 
               <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F7F1EA] text-[#231B16] font-body">Loading Pizza Blast...</div>}>
                 <Routes>

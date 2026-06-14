@@ -6,6 +6,11 @@ export const useVoice = (onResult) => {
   const [supported, setSupported] = useState({ speech: false, synthesis: false });
   const recognitionRef = useRef(null);
 
+  const onResultRef = useRef(onResult);
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
+
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const SpeechSynthesis = window.speechSynthesis;
@@ -29,12 +34,12 @@ export const useVoice = (onResult) => {
       };
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        if (onResult) onResult(transcript);
+        if (onResultRef.current) onResultRef.current(transcript);
       };
 
       recognitionRef.current = recognition;
     }
-  }, [onResult]);
+  }, []);
 
   const startListening = useCallback(() => {
     if (recognitionRef.current && !isListening) {
