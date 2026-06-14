@@ -5,7 +5,7 @@ import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
 import wsService from '../services/websocket.js'
 import toast from 'react-hot-toast'
-import { resolveAssetUrl } from '../utils/env'
+import { resolveAssetUrl, resolveApiUrl } from '../utils/env'
 import { closeMenuRoute } from '../utils/menuNavigation'
 
 export default function MenuPage() {
@@ -25,8 +25,8 @@ export default function MenuPage() {
         const fetchData = async () => {
             try {
                 const [catRes, itemRes] = await Promise.all([
-                    fetch('/api/menu/categories'),
-                    fetch('/api/menu/items')
+                    fetch(resolveApiUrl('/api/menu/categories')),
+                    fetch(resolveApiUrl('/api/menu/items'))
                 ])
                 const cats = await catRes.json()
                 const items = await itemRes.json()

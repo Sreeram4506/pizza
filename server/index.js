@@ -42,26 +42,45 @@ connectDatabase().then(() => {
   runCleanup()
 })
 
-// Configure CORS
+/**
+ * Configure CORS
+ * Note: deployed frontend is on Vercel, and your browser errors show that OPTIONS/preflight and
+ * Access-Control-Allow-Origin are not being returned reliably for the deployed origin.
+ */
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
+
+  // Deployed Vercel frontend (update if your domain changes)
+  'https://pizza-ruby.vercel.app',
+
+  // Configured via env (if present)
   frontendUrl,
   vercelFrontendUrl
 ].filter(Boolean)
 
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true)
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
+
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+
+    // During local dev / non-production, be permissive
+    if (process.env.NODE_ENV !== 'production') return callback(null, true)
+
+    // Block otherwise
+    callback(new Error('Not allowed by CORS'))
   },
-  credentials: true
-}))
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
+}
+
+// Ensure preflight requests are handled
+app.options('*', cors(corsOptions))
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 // Health check for Deployment
