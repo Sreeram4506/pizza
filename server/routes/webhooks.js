@@ -6,39 +6,40 @@ import crypto from 'crypto'
 
 const router = Router()
 
-// Verification middleware for Uber Eats
-const verifyUberEats = (req, res, next) => {
-  const signature = req.headers['x-uber-signature']
-  if (!signature) return res.status(401).json({ error: 'No signature' })
-  
-  const clientSecret = process.env.UBER_EATS_CLIENT_SECRET
-  if (!clientSecret) return next() // Skip if not configured (dev mode)
+// Builds a webhook signature-verification middleware for a given platform.
+// Fails closed (rejects the request) if the platform secret is missing in
+// production, rather than silently skipping verification.
+function verifyWebhookSignature(headerName, envVar) {
+  return (req, res, next) => {
+    const signature = req.headers[headerName]
+    if (!signature) return res.status(401).json({ error: 'No signature' })
 
-  const hmac = crypto.createHmac('sha256', clientSecret)
-  const digest = hmac.update(JSON.stringify(req.body)).digest('hex')
-  
-  if (signature !== digest) {
-    return res.status(401).json({ error: 'Invalid signature' })
+    const clientSecret = process.env[envVar]
+    if (!clientSecret) {
+      if (process.env.NODE_ENV === 'production') {
+        console.error(`${envVar} is not configured; rejecting webhook request`)
+        return res.status(500).json({ error: 'Webhook not configured' })
+      }
+      return next() // Not configured in dev - skip verification
+    }
+
+    const hmac = crypto.createHmac('sha256', clientSecret)
+    const digest = hmac.update(JSON.stringify(req.body)).digest('hex')
+
+    const signatureBuffer = Buffer.from(signature)
+    const digestBuffer = Buffer.from(digest)
+    const isValid = signatureBuffer.length === digestBuffer.length &&
+      crypto.timingSafeEqual(signatureBuffer, digestBuffer)
+
+    if (!isValid) {
+      return res.status(401).json({ error: 'Invalid signature' })
+    }
+    next()
   }
-  next()
 }
 
-// Verification middleware for Grubhub
-const verifyGrubhub = (req, res, next) => {
-  const signature = req.headers['x-grubhub-signature']
-  if (!signature) return res.status(401).json({ error: 'No signature' })
-  
-  const clientSecret = process.env.GRUBHUB_CLIENT_SECRET
-  if (!clientSecret) return next() // Skip if not configured
-
-  const hmac = crypto.createHmac('sha256', clientSecret)
-  const digest = hmac.update(JSON.stringify(req.body)).digest('hex')
-  
-  if (signature !== digest) {
-    return res.status(401).json({ error: 'Invalid signature' })
-  }
-  next()
-}
+const verifyUberEats = verifyWebhookSignature('x-uber-signature', 'UBER_EATS_CLIENT_SECRET')
+const verifyGrubhub = verifyWebhookSignature('x-grubhub-signature', 'GRUBHUB_CLIENT_SECRET')
 
 // Uber Eats Webhook
 router.post('/ubereats', verifyUberEats, async (req, res) => {

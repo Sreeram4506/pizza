@@ -6,9 +6,14 @@ import { buildMenuArtworkSvg, slugifyMenuItemName } from '../src/utils/menuArtwo
 dotenv.config()
 
 const apiBase = process.env.MENU_BACKFILL_API_BASE || `http://localhost:${process.env.PORT || 5000}`
-const adminUsername = process.env.ADMIN_USERNAME || 'admin'
-const adminPassword = process.env.ADMIN_PASSWORD || 'password123'
+const adminUsername = process.env.ADMIN_USERNAME
+const adminPassword = process.env.ADMIN_PASSWORD
 const generatedDir = path.join(process.cwd(), 'server', 'uploads', 'menu', 'generated')
+
+if (!adminUsername || !adminPassword) {
+  console.error('ADMIN_USERNAME and ADMIN_PASSWORD must be set in the environment to run this script.')
+  process.exit(1)
+}
 
 function normalizeCategoryId(categoryId) {
   if (!categoryId) return ''

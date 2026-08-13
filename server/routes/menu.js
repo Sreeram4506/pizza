@@ -52,9 +52,7 @@ const emitMenuUpdate = (req, event, data) => {
 // Get all categories for a tenant
 router.get('/categories', async (req, res) => {
   try {
-    console.log('GET /api/menu/categories - Request received')
     const tenantId = req.tenantId
-    console.log('Tenant ID:', tenantId)
 
     // For localhost development, get all categories without tenant filter
     let query = {}
@@ -66,7 +64,6 @@ router.get('/categories', async (req, res) => {
     const categories = await MenuCategory.find(query)
       .sort({ sortOrder: 1, createdAt: 1 })
 
-    console.log('Categories found:', categories.length, categories)
     res.json(categories)
   } catch (err) {
     console.error('Failed to fetch categories:', err)
@@ -162,9 +159,7 @@ router.delete('/categories/:id', verifyAdmin, async (req, res) => {
 // Get all menu items
 router.get('/items', async (req, res) => {
   try {
-    console.log('GET /api/menu/items - Request received')
     const tenantId = req.tenantId
-    console.log('Tenant ID:', tenantId)
 
     // For localhost development, get all items without tenant filter
     let query = {}
@@ -176,7 +171,6 @@ router.get('/items', async (req, res) => {
     const items = await MenuItem.find(query)
       .sort({ sortOrder: 1, createdAt: -1 })
 
-    console.log('Menu items found:', items.length, items)
     res.json(items)
   } catch (err) {
     console.error('Failed to fetch items:', err)

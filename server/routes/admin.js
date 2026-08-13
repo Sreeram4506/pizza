@@ -17,6 +17,7 @@ import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
 import { config } from '../config.js'
 import { sendMarketingEmail } from '../utils/email.js'
 import { verifyAdmin } from '../middleware/auth.js'
+import { loginRateLimiter } from '../middleware/rateLimit.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -74,7 +75,7 @@ const handleMulterError = (err, req, res, next) => {
 }
 
 // Login Route
-router.post('/login', async (req, res) => {
+router.post('/login', loginRateLimiter, async (req, res) => {
     const { username, password } = req.body
 
     if (username === ADMIN_USER() && bcrypt.compareSync(password, ADMIN_PASS_HASH)) {

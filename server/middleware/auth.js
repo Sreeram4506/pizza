@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
+import { config } from '../config.js'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'pizza-blast-secret-2024'
+const JWT_SECRET = config.JWT_SECRET
 
 export const verifyCustomer = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1]

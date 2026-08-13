@@ -110,11 +110,6 @@ export default function AdminLogin() {
                     </motion.button>
                 </form>
 
-                <div className="mt-8 p-4 bg-[#F5F3EF] border border-[rgba(26,20,16,0.06)] rounded-xl">
-                    <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-parchment-700 text-center mb-2">Default Credentials</p>
-                    <p className="text-sm text-parchment-700 text-center font-mono">admin / password123</p>
-                </div>
-
                 <p className="text-center font-mono text-[9px] tracking-[0.15em] uppercase text-parchment-700/40 mt-6">
                     Authorized personnel only
                 </p>

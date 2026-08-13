@@ -61,7 +61,9 @@ export default function DeliveryTrackingBar() {
           if (localActiveIds.length > 0) {
             const lastId = localActiveIds[localActiveIds.length - 1]
             try {
-              const orderRes = await fetch(`/api/orders/${lastId}`)
+              const orderRes = await fetch(`/api/orders/${lastId}`, {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+              })
               if (orderRes.ok) {
                 const order = await orderRes.json()
                 

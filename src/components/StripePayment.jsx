@@ -9,8 +9,12 @@ import {
 import { motion } from 'framer-motion'
 
 // Load stripe with the publishable key
-// Replace this with your actual publishable key from your .env or similar
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51...your_mock_key...');
+if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+    console.error('VITE_STRIPE_PUBLISHABLE_KEY is not set - Stripe payments will not work')
+}
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+    ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+    : null;
 
 const CheckoutForm = ({ amount, onPaymentSuccess, onCancel }) => {
     const stripe = useStripe()

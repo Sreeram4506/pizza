@@ -2,17 +2,15 @@ import { Router } from 'express'
 import { Order } from '../models/Order.js'
 import { Customer } from '../models/Customer.js'
 import { Loyalty, LoyaltyConfig } from '../models/Loyalty.js'
-import { optionalVerifyCustomer } from '../middleware/auth.js'
+import { optionalVerifyCustomer, verifyAdmin } from '../middleware/auth.js'
 import { v4 as uuidv4 } from 'uuid'
 import { config } from '../config.js'
 import { sendOrderConfirmation, sendAdminNotification } from '../utils/email.js'
 
-console.log('Orders route loaded - authenticateCustomer imported:', typeof authenticateCustomer)
-
 const router = Router()
 
-// Get all orders (with filters)
-router.get('/', async (req, res) => {
+// Get all orders (with filters) - admin only
+router.get('/', verifyAdmin, async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { status, limit = 50, page = 1 } = req.query
@@ -33,8 +31,6 @@ router.get('/', async (req, res) => {
 
 // Create new order
 router.post('/', optionalVerifyCustomer, async (req, res) => {
-  console.log('=== ORDER ROUTE CALLED ===')
-
   // Apply authentication (handled by optionalVerifyCustomer)
   let authenticatedUser = null
   if (req.customerId && req.customerRole === 'customer') {
@@ -54,9 +50,6 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
   try {
     const tenantId = req.tenantId
     const { items, customerInfo, address, type, payment, pickupDateTime, dineInTime, appliedReward } = req.body
-
-    console.log('Order request - Authenticated user:', authenticatedUser)
-    console.log('Order request - Body:', { items, customerInfo, address, type, payment })
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'Items required' })
@@ -108,10 +101,8 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
         email: authenticatedUser.email,
         phone: authenticatedUser.phone
       }
-      console.log('Using authenticated user info:', finalCustomerInfo)
     } else if (customerInfo) {
       finalCustomerInfo = customerInfo
-      console.log('Using provided customer info:', finalCustomerInfo)
     } else {
       return res.status(400).json({ error: 'Customer information required' })
     }
@@ -190,8 +181,6 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
     // Update customer stats
     if (authenticatedUser) {
       // Authenticated user - update their existing record
-      console.log('Updating authenticated customer:', authenticatedUser.name)
-
       const updateQuery = {
         $inc: { orderCount: 1, totalSpent: total },
         $set: {
@@ -224,13 +213,9 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
         })
         await loyalty.save()
       }
-
-      console.log('Authenticated customer updated:', customer._id, customer.name, 'Order count:', customer.orderCount)
     } else if (customerInfo?.phone) {
       // Guest user - create or update guest record
-      console.log('Creating/updating guest customer:', customerInfo.phone, customerInfo.name)
-
-      const customer = await Customer.findOneAndUpdate(
+      await Customer.findOneAndUpdate(
         { ...(tenantId && { tenantId }), phone: customerInfo.phone },
         {
           $inc: { orderCount: 1, totalSpent: total },
@@ -247,8 +232,6 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
         },
         { upsert: true, new: true }
       )
-
-      console.log('Guest customer updated/created:', customer._id, customer.name, 'Order count:', customer.orderCount)
     }
 
     // Send order confirmation email (non-blocking)
@@ -279,13 +262,24 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
 })
 
 // Get order by ID
-router.get('/:id', async (req, res) => {
+// Orders placed by a registered customer are only visible to that customer or an admin.
+// Guest orders (no customerId) remain publicly viewable by ID, preserving the guest
+// order-tracking UX that never required an account.
+router.get('/:id', optionalVerifyCustomer, async (req, res) => {
   try {
     const tenantId = req.tenantId
     const order = await Order.findOne({ _id: req.params.id, tenantId })
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' })
+    }
+
+    if (order.customerId) {
+      const isOwner = req.customerId && req.customerId.toString() === order.customerId.toString()
+      const isAdmin = req.customerRole === 'admin'
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({ error: 'Not authorized to view this order' })
+      }
     }
 
     res.json(order)
@@ -335,10 +329,21 @@ router.get('/track/:phone', async (req, res) => {
   }
 })
 
-// Cancel order
-router.delete('/:id', async (req, res) => {
+// Cancel order - requires ownership of the order (or admin)
+router.delete('/:id', optionalVerifyCustomer, async (req, res) => {
   try {
     const tenantId = req.tenantId
+
+    const existing = await Order.findOne({ _id: req.params.id, tenantId })
+    if (!existing) {
+      return res.status(404).json({ error: 'Order not found or already completed' })
+    }
+
+    const isAdmin = req.customerRole === 'admin'
+    const isOwner = existing.customerId && req.customerId && req.customerId.toString() === existing.customerId.toString()
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ error: 'Not authorized to cancel this order' })
+    }
 
     const order = await Order.findOneAndUpdate(
       { _id: req.params.id, tenantId, status: { $nin: ['delivered', 'cancelled'] } },

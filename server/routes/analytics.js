@@ -2,8 +2,11 @@ import { Router } from 'express'
 import { Order } from '../models/Order.js'
 import { Customer } from '../models/Customer.js'
 import { MenuItem } from '../models/MenuItem.js'
+import { verifyAdmin } from '../middleware/auth.js'
 
 const router = Router()
+
+router.use(verifyAdmin)
 
 // Get analytics summary
 router.get('/', async (req, res) => {

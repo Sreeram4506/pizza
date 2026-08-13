@@ -4,13 +4,15 @@ import jwt from 'jsonwebtoken'
 import { Customer } from '../models/Customer.js'
 import { Order } from '../models/Order.js'
 import { LoyaltyConfig } from '../models/Loyalty.js'
+import { config } from '../config.js'
+import { loginRateLimiter, authRateLimiter } from '../middleware/rateLimit.js'
 
 const router = Router()
 
-const JWT_SECRET = process.env.JWT_SECRET || 'pizza-blast-secret-2024'
+const JWT_SECRET = config.JWT_SECRET
 
 // Register customer
-router.post('/register', async (req, res) => {
+router.post('/register', authRateLimiter, async (req, res) => {
   try {
     const { name, email, password, phone } = req.body
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required' })
@@ -64,7 +66,7 @@ router.post('/register', async (req, res) => {
 })
 
 // Customer login
-router.post('/login', async (req, res) => {
+router.post('/login', loginRateLimiter, async (req, res) => {
   try {
     const { email, password } = req.body
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required' })
@@ -111,23 +113,17 @@ router.post('/login', async (req, res) => {
 
 // Customer authentication middleware
 export const authenticateCustomer = async (req, res, next) => {
-  console.log('=== AUTHENTICATION MIDDLEWARE CALLED ===')
   try {
-    console.log('Auth middleware - Request headers:', req.headers.authorization)
     const token = req.headers.authorization?.replace('Bearer ', '')
 
     if (!token) {
-      console.log('No token provided - continuing as guest')
       req.user = null
       return next()
     }
 
-    console.log('Token found, verifying...')
     const decoded = jwt.verify(token, JWT_SECRET)
-    console.log('Token decoded:', decoded)
 
     if (decoded.role !== 'customer') {
-      console.log('Not a customer token - continuing as guest')
       req.user = null
       return next()
     }
@@ -143,7 +139,6 @@ export const authenticateCustomer = async (req, res, next) => {
     }
 
     if (!customer) {
-      console.log('Customer not found - continuing as guest')
       req.user = null
       return next()
     }
@@ -156,10 +151,8 @@ export const authenticateCustomer = async (req, res, next) => {
       isGuest: false
     }
 
-    console.log('Authentication successful - user:', req.user)
     next()
   } catch (err) {
-    console.log('Authentication error:', err.message)
     // Invalid token - continue as guest
     req.user = null
     next()

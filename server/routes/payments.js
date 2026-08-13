@@ -34,12 +34,16 @@ router.post('/create-payment-intent', async (req, res) => {
 // Webhook for payment confirmation
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature']
+    const webhookSecret = config.stripeWebhookSecret
     let event
 
+    if (!webhookSecret) {
+        console.error('STRIPE_WEBHOOK_SECRET is not configured; rejecting webhook request')
+        return res.status(500).json({ error: 'Webhook not configured' })
+    }
+
     try {
-        // In production, verify signature:
-        // event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
-        event = req.body
+        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret)
 
         if (event.type === 'payment_intent.succeeded') {
             const paymentIntent = event.data.object
