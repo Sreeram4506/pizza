@@ -705,17 +705,17 @@ export default function Chatbot() {
 
               {/* CART VIEW */}
               {view === 'cart' && (
-                <div className="bg-[#0c0c0c] text-white min-h-full p-6 sm:p-10 flex justify-center">
+                <div className="bg-mozzarella-100 text-wood-800 min-h-full p-6 sm:p-10 flex justify-center">
                   <div className="max-w-2xl w-full">
-                    <h2 className="font-display font-black text-3xl sm:text-4xl mb-6 tracking-tight">Cart</h2>
+                    <h2 className="font-display font-black text-3xl sm:text-4xl mb-6 tracking-tight text-wood-800">Cart</h2>
 
                     {/* Pickup / Delivery toggle */}
-                    <div className="flex bg-white/[0.06] rounded-full p-1 mb-3 w-fit">
+                    <div className="flex bg-white rounded-full p-1 mb-3 w-fit border border-crust-100 shadow-sm">
                       {['pickup', 'delivery'].map(t => (
                         <button
                           key={t}
                           onClick={() => setOrderType(t)}
-                          className={`px-6 py-2 rounded-full text-sm font-semibold capitalize transition-all ${orderType === t ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}
+                          className={`px-6 py-2 rounded-full text-sm font-semibold capitalize transition-all ${orderType === t ? 'bg-tomato-600 text-white shadow-md' : 'text-wood-500 hover:text-tomato-600'}`}
                         >
                           {t}
                         </button>
@@ -723,19 +723,19 @@ export default function Chatbot() {
                     </div>
 
                     {/* ASAP indicator */}
-                    <div className="flex items-center gap-2 bg-white/[0.06] rounded-full px-4 py-2.5 mb-8 w-fit text-sm font-semibold text-white/90">
-                      <svg className="w-4 h-4 text-ember-400" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v6h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 19v-6H4a1 1 0 01-.82-1.573l7-10a1 1 0 01.98-.38z" /></svg>
+                    <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2.5 mb-8 w-fit text-sm font-semibold text-wood-700 border border-crust-100 shadow-sm">
+                      <svg className="w-4 h-4 text-tomato-600" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v6h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 19v-6H4a1 1 0 01-.82-1.573l7-10a1 1 0 01.98-.38z" /></svg>
                       ASAP (20-30 min)
                     </div>
 
                     {cart.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center gap-6 text-white/40 py-20">
+                      <div className="flex flex-col items-center justify-center gap-6 text-wood-300 py-20">
                         <span className="text-7xl">🍕</span>
-                        <p className="text-lg font-medium text-white/70">Your cart is empty!</p>
+                        <p className="text-lg font-medium text-wood-500">Your cart is empty!</p>
 
                         <motion.button
                           onClick={goToMenu}
-                          className="px-10 py-4 rounded-2xl bg-ember-500 text-white font-bold"
+                          className="px-10 py-4 rounded-2xl bg-tomato-600 text-white font-bold shadow-pizza"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
@@ -744,51 +744,51 @@ export default function Chatbot() {
                       </div>
                     ) : (
                       <>
-                        <div className="flex flex-col divide-y divide-white/10 border-t border-white/10">
+                        <div className="flex flex-col divide-y divide-crust-100 border-t border-crust-100">
                           {cart.map(item => (
                             <div key={item._id} className="flex items-center gap-4 py-5">
                               <img
                                 src={item.image ? resolveAssetUrl(item.image) : '/pizza-hero-poster.svg'}
                                 alt={item.name}
-                                className="w-16 h-16 rounded-xl object-cover bg-white/10 shrink-0"
+                                className="w-16 h-16 rounded-xl object-cover bg-white border border-crust-100 shrink-0"
                               />
                               <div className="flex-1 min-w-0">
-                                <p className="font-semibold truncate">{item.name}</p>
+                                <p className="font-semibold truncate text-wood-800">{item.name}</p>
                                 <div className="flex items-center gap-3 mt-2">
                                   <motion.button
                                     onClick={() => deleteItem(item._id)}
                                     whileTap={{ scale: 0.9 }}
-                                    className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-white/60 hover:text-red-400 hover:bg-white/10 transition-colors"
+                                    className="w-8 h-8 rounded-full bg-white border border-crust-100 flex items-center justify-center text-wood-400 hover:text-tomato-600 hover:border-tomato-200 transition-colors"
                                     title="Remove item"
                                   >
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                   </motion.button>
-                                  <div className="flex items-center bg-white/[0.06] rounded-full">
+                                  <div className="flex items-center bg-white rounded-full border border-crust-100">
                                     <button
                                       onClick={() => removeFromCart(item._id)}
-                                      className="w-8 h-8 flex items-center justify-center text-white/80 font-bold"
+                                      className="w-8 h-8 flex items-center justify-center text-wood-700 font-bold"
                                     >−</button>
-                                    <span className="w-6 text-center font-semibold text-sm">{item.qty}</span>
+                                    <span className="w-6 text-center font-semibold text-sm text-wood-800">{item.qty}</span>
                                     <button
                                       onClick={() => addToCart(item)}
-                                      className="w-8 h-8 flex items-center justify-center text-white/80 font-bold"
+                                      className="w-8 h-8 flex items-center justify-center text-wood-700 font-bold"
                                     >+</button>
                                   </div>
                                 </div>
                               </div>
-                              <span className="font-semibold shrink-0">${(item.price * item.qty).toFixed(2)}</span>
+                              <span className="font-semibold shrink-0 text-wood-800">${(item.price * item.qty).toFixed(2)}</span>
                             </div>
                           ))}
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-white/10">
-                          <div className="flex justify-between items-center text-lg font-bold mb-6">
+                        <div className="mt-8 pt-6 border-t border-crust-100">
+                          <div className="flex justify-between items-center text-lg font-bold mb-6 text-wood-800">
                             <span>Subtotal</span>
                             <span>${cartTotal.toFixed(2)}</span>
                           </div>
 
                           {pointsToEarn > 0 && (
-                            <div className="bg-ember-500/15 text-ember-300 text-sm font-semibold rounded-xl py-3 text-center mb-4">
+                            <div className="bg-tomato-50 text-tomato-700 text-sm font-semibold rounded-xl py-3 text-center mb-4 border border-tomato-100">
                               You'll earn <strong>{pointsToEarn} points</strong> with this order
                             </div>
                           )}
@@ -796,7 +796,7 @@ export default function Chatbot() {
                           <motion.button
                             onClick={handleCheckoutIntent}
                             disabled={isPlacingOrder}
-                            className="w-full py-4 rounded-2xl bg-gradient-to-r from-ember-400 to-ember-600 text-white font-bold text-base shadow-xl shadow-ember-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full py-4 rounded-2xl bg-tomato-600 text-white font-bold text-base shadow-xl shadow-tomato-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.98 }}
                           >
@@ -805,7 +805,7 @@ export default function Chatbot() {
 
                           <button
                             onClick={goToMenu}
-                            className="w-full mt-4 text-sm text-white/50 font-bold uppercase tracking-widest hover:text-white transition-colors"
+                            className="w-full mt-4 text-sm text-wood-400 font-bold uppercase tracking-widest hover:text-tomato-600 transition-colors"
                           >
                             + Add more items
                           </button>
