@@ -13,6 +13,7 @@ export default function MenuPage() {
     const [menuItems, setMenuItems] = useState([])
     const [searchQuery, setSearchQuery] = useState('')
     const [activeCategory, setActiveCategory] = useState('')
+    const [orderType, setOrderType] = useState('pickup')
     const { openWithIntent, cartCount, addToCart, setIsOpen } = useChatbot()
     const { settings } = useSettings()
     const navigate = useNavigate()
@@ -20,6 +21,13 @@ export default function MenuPage() {
     const mainScrollRef = useRef(null)
     const categoryRefs = useRef({})
     const sidebarScrollRef = useRef(null)
+    const mostOrderedRef = useRef(null)
+
+    const scrollMostOrdered = (dir) => {
+        if (mostOrderedRef.current) {
+            mostOrderedRef.current.scrollBy({ left: dir * 320, behavior: 'smooth' })
+        }
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -135,9 +143,9 @@ export default function MenuPage() {
     const [showMobileSearch, setShowMobileSearch] = useState(false)
 
     return (
-        <div className="h-screen flex flex-col bg-[#FAFAF8] overflow-hidden selection:bg-ember-500/15 selection:text-[#1A1410] font-sans">
+        <div className="h-screen flex flex-col bg-[#0a0a0a] overflow-hidden selection:bg-ember-500/25 selection:text-white font-sans">
             {/* Split Screen Header */}
-            <header className="h-16 sm:h-20 flex-shrink-0 bg-white/80 backdrop-blur-xl border-b border-[rgba(26,20,16,0.06)] px-4 sm:px-12 flex items-center justify-between z-50">
+            <header className="h-16 sm:h-20 flex-shrink-0 bg-black/80 backdrop-blur-xl border-b border-white/[0.06] px-4 sm:px-12 flex items-center justify-between z-50">
                     <div
                     className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
                     onClick={() => {
@@ -155,7 +163,7 @@ export default function MenuPage() {
                         <motion.span
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="font-display font-bold text-lg sm:text-2xl tracking-tighter text-[#1A1410] italic truncate max-w-[120px] sm:max-w-none"
+                            className="font-display font-bold text-lg sm:text-2xl tracking-tighter text-white italic truncate max-w-[120px] sm:max-w-none"
                         >
                             {settings?.restaurantName || 'Mustang Pizza'}
                         </motion.span>
@@ -173,13 +181,13 @@ export default function MenuPage() {
                                 autoFocus
                                 type="text"
                                 placeholder="Search menu..."
-                                className="w-full pl-4 pr-10 py-2 bg-[#F5F3EF] border-none rounded-full text-sm font-medium focus:ring-2 focus:ring-ember-500/20"
+                                className="w-full pl-4 pr-10 py-2 bg-white/[0.06] text-white placeholder:text-white/40 border-none rounded-full text-sm font-medium focus:ring-2 focus:ring-ember-500/30"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                             <button
                                 onClick={() => { setShowMobileSearch(false); setSearchQuery(''); }}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9B8D74]"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </button>
@@ -190,7 +198,7 @@ export default function MenuPage() {
                 <div className="flex items-center gap-2 sm:gap-6">
                     <button
                         onClick={() => setShowMobileSearch(!showMobileSearch)}
-                        className="sm:hidden p-2 rounded-full hover:bg-[#F5F3EF] text-[#1A1410]"
+                        className="sm:hidden p-2 rounded-full hover:bg-white/[0.06] text-white"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -199,18 +207,18 @@ export default function MenuPage() {
 
                     <div className="hidden sm:flex items-center gap-3">
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-[#9B8D74]">Kitchen Live</span>
+                        <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Kitchen Live</span>
                     </div>
 
                     <button
                         onClick={() => openWithIntent('cart')}
-                        className="relative p-2 sm:p-2.5 rounded-full bg-[#1A1410] text-white shadow-xl shadow-black/10 hover:bg-ember-600 transition-colors group"
+                        className="relative p-2 sm:p-2.5 rounded-full bg-white text-black shadow-xl shadow-black/40 hover:bg-ember-500 hover:text-white transition-colors group"
                     >
                         <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 10-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                         {cartCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-ember-500 text-white text-[8px] sm:text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white">
+                            <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-ember-500 text-white text-[8px] sm:text-[10px] font-black rounded-full flex items-center justify-center border-2 border-black">
                                 {cartCount}
                             </span>
                         )}
@@ -218,7 +226,7 @@ export default function MenuPage() {
 
                     <button
                         onClick={() => closeMenuRoute(navigate, setIsOpen)}
-                        className="flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all shadow-sm border border-[rgba(26,20,16,0.04)]"
+                        className="flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-white/[0.06] text-white hover:bg-white/10 transition-all border border-white/10"
                     >
                         <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -227,25 +235,59 @@ export default function MenuPage() {
                 </div>
             </header>
 
+            {/* Info bar: address / open status / pickup-delivery / ASAP */}
+            <div className="flex-shrink-0 bg-[#0a0a0a] border-b border-white/[0.06] px-4 sm:px-12 py-4 sm:py-6 flex flex-wrap items-center gap-3 sm:gap-5">
+                <div className="flex-1 min-w-[200px]">
+                    <h1 className="font-display italic font-bold text-lg sm:text-2xl text-white tracking-tight">
+                        {settings?.restaurantName || 'Pizza Blast'} Menu
+                    </h1>
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-white/50 mt-1">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        <span className="truncate">{settings?.address || '123 Pizza Plaza, New York, NY'}</span>
+                        <span className="text-white/20">·</span>
+                        <span className="flex items-center gap-1.5 text-green-400 font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-400" /> Open now
+                        </span>
+                    </div>
+                </div>
+
+                <div className="flex bg-white/[0.06] rounded-full p-1">
+                    {['pickup', 'delivery'].map(t => (
+                        <button
+                            key={t}
+                            onClick={() => setOrderType(t)}
+                            className={`px-5 py-2 rounded-full text-xs sm:text-sm font-semibold capitalize transition-all ${orderType === t ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}
+                        >
+                            {t}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex items-center gap-2 bg-white/[0.06] rounded-full px-4 py-2.5 text-xs sm:text-sm font-semibold text-white/90">
+                    <svg className="w-4 h-4 text-ember-400" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v6h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 19v-6H4a1 1 0 01-.82-1.573l7-10a1 1 0 01.98-.38z" /></svg>
+                    ASAP (20 min)
+                </div>
+            </div>
+
             <div className="flex flex-1 overflow-hidden relative">
                 {/* Slim Side Texture Overlays */}
-                <div className="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[#FAFAF8] to-transparent z-20 pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-[#FAFAF8] to-transparent z-20 pointer-events-none" />
+                <div className="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[#0a0a0a] to-transparent z-20 pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-[#0a0a0a] to-transparent z-20 pointer-events-none" />
 
                 {/* LEFT SIDEBAR: Categories (Responsive Width) */}
                 <aside
                     ref={sidebarScrollRef}
-                    className="w-[75px] sm:w-72 lg:w-96 p-2 sm:p-8 overflow-y-auto border-r border-[rgba(26,20,16,0.06)] bg-[#FAFAF8] scrollbar-hide z-10 flex flex-col transition-all duration-500"
+                    className="w-[75px] sm:w-72 lg:w-96 p-2 sm:p-8 overflow-y-auto border-r border-white/[0.06] bg-[#0a0a0a] scrollbar-hide z-10 flex flex-col transition-all duration-500"
                 >
                     <div className="hidden sm:block mb-10 pt-2">
                         <div className="relative group">
-                            <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#9B8D74] opacity-50 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-white/40 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                             <input
                                 type="text"
-                                placeholder="Search..."
-                                className="w-full pl-12 pr-4 py-4 bg-white border border-[rgba(26,20,16,0.08)] rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-ember-500/5 transition-all shadow-sm"
+                                placeholder="Search menu"
+                                className="w-full pl-12 pr-4 py-4 bg-white/[0.06] text-white placeholder:text-white/40 border border-white/10 rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-ember-500/20 transition-all"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -253,9 +295,9 @@ export default function MenuPage() {
                     </div>
 
                     <div className="flex-1 space-y-4 sm:space-y-12">
-                        <span className="hidden sm:block font-mono text-[10px] tracking-[0.3em] uppercase text-ember-600 font-black px-2">Navigation</span>
+                        <span className="hidden sm:block font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 font-black px-2">Navigation</span>
                         <nav className="flex flex-col gap-1.5 sm:gap-2">
-                            {categories.map((cat) => {
+                            {categories.filter(cat => cat.name !== 'Popular').map((cat) => {
                                 const catItems = filteredMenuItems(groupedItems[cat.name] || [])
                                 const isVisible = catItems.length > 0
                                 if (!isVisible && searchQuery) return null
@@ -266,15 +308,15 @@ export default function MenuPage() {
                                         data-cat-btn={cat.name}
                                         onClick={() => handleCategoryClick(cat.name)}
                                         className={`group flex flex-col sm:flex-row items-center sm:justify-between p-3 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl text-[9px] sm:text-[12px] font-bold tracking-[0.02em] sm:tracking-[0.05em] uppercase transition-all duration-300 relative overflow-hidden ${activeCategory === cat.name
-                                            ? 'bg-[#1A1410] text-[#FAFAFA] shadow-lg sm:shadow-2xl shadow-black/10'
-                                            : 'text-[#5C554E] hover:bg-white hover:text-[#1A1410]'
+                                            ? 'bg-white text-black shadow-lg sm:shadow-2xl shadow-black/40'
+                                            : 'text-white/50 hover:bg-white/[0.06] hover:text-white'
                                             }`}
                                     >
                                         <div className="flex items-center gap-2 sm:gap-4 relative z-10">
                                             <div className={`w-1 h-1 rounded-full transition-all duration-500 ${activeCategory === cat.name ? 'bg-ember-500 scale-125' : 'bg-transparent'}`} />
-                                            <span className={`text-center sm:text-left leading-tight break-words sm:break-normal transition-colors ${activeCategory === cat.name ? 'text-white' : ''}`}>{cat.name}</span>
+                                            <span className="text-center sm:text-left leading-tight break-words sm:break-normal transition-colors">{cat.name}</span>
                                         </div>
-                                        <span className={`hidden sm:block font-mono text-[10px] opacity-40 transition-opacity ${activeCategory === cat.name ? 'text-ember-400' : 'text-[#9B8D74]'}`}>
+                                        <span className={`hidden sm:block font-mono text-[10px] opacity-60 transition-opacity ${activeCategory === cat.name ? 'text-ember-600' : 'text-white/30'}`}>
                                             {catItems.length}
                                         </span>
                                     </button>
@@ -287,26 +329,75 @@ export default function MenuPage() {
                 {/* RIGHT CONTENT Area */}
                 <main
                     ref={mainScrollRef}
-                    className="flex-1 overflow-y-auto p-3 sm:p-12 bg-white/40 backdrop-blur-3xl scroll-smooth"
+                    className="flex-1 overflow-y-auto p-3 sm:p-12 bg-[#0a0a0a] scroll-smooth"
                 >
                     <div className="max-w-6xl mx-auto space-y-10 sm:space-y-24 pb-32">
                         {!hasSearchResults && (
                             <div className="flex flex-col items-center justify-center pt-20 text-center">
-                                <div className="w-16 h-16 bg-[#F5F3EF] rounded-full flex items-center justify-center mb-6">
-                                    <svg className="w-8 h-8 text-[#9B8D74]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                <div className="w-16 h-16 bg-white/[0.06] rounded-full flex items-center justify-center mb-6">
+                                    <svg className="w-8 h-8 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                 </div>
-                                <h3 className="text-xl font-display font-black italic text-[#1A1410]">No items found</h3>
-                                <p className="text-sm text-[#5C554E] opacity-60 mt-2">Try searching for something else like "Cheese" or "Pepperoni"</p>
+                                <h3 className="text-xl font-display font-black italic text-white">No items found</h3>
+                                <p className="text-sm text-white/50 mt-2">Try searching for something else like "Cheese" or "Pepperoni"</p>
                                 <button
                                     onClick={() => setSearchQuery('')}
-                                    className="mt-8 text-ember-600 font-mono text-[10px] uppercase font-bold tracking-widest border-b border-ember-600/30 pb-1"
+                                    className="mt-8 text-ember-500 font-mono text-[10px] uppercase font-bold tracking-widest border-b border-ember-500/30 pb-1"
                                 >
                                     Clear Search
                                 </button>
                             </div>
                         )}
 
-                        {categories.map((category) => {
+                        {/* MOST ORDERED: horizontal carousel of popular items */}
+                        {hasSearchResults && !searchQuery && filteredMenuItems(groupedItems['Popular'] || []).length > 0 && (
+                            <section className="relative flex flex-col pt-2 sm:pt-4">
+                                <div className="flex items-baseline justify-between mb-6 sm:mb-8">
+                                    <h2 className="text-xl sm:text-3xl font-display font-black italic text-white tracking-tight">Most ordered</h2>
+                                    <div className="hidden sm:flex items-center gap-2">
+                                        <button
+                                            onClick={() => scrollMostOrdered(-1)}
+                                            className="w-9 h-9 rounded-full bg-white/[0.06] hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                        </button>
+                                        <button
+                                            onClick={() => scrollMostOrdered(1)}
+                                            className="w-9 h-9 rounded-full bg-white/[0.06] hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div ref={mostOrderedRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 scroll-smooth">
+                                    {filteredMenuItems(groupedItems['Popular'] || []).map((item) => (
+                                        <div
+                                            key={item._id}
+                                            onClick={() => handleOrder(item)}
+                                            className="group relative shrink-0 w-40 sm:w-56 cursor-pointer"
+                                        >
+                                            <div className="relative aspect-square rounded-2xl overflow-hidden bg-white/[0.06] border border-white/10">
+                                                <img
+                                                    src={item.image ? resolveAssetUrl(item.image) : '/pizza-hero-poster.svg'}
+                                                    alt={item.name}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                                />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
+                                                    className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:bg-ember-500 hover:text-white transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
+                                                </button>
+                                            </div>
+                                            <p className="mt-3 font-semibold text-white text-sm sm:text-base truncate">{item.name}</p>
+                                            <p className="text-white/50 text-sm">${item.price?.toFixed(2)}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {categories.filter(cat => cat.name !== 'Popular').map((category) => {
                             const items = filteredMenuItems(groupedItems[category.name] || [])
                             if (items.length === 0) return null
 
@@ -318,19 +409,19 @@ export default function MenuPage() {
                                     className="relative flex flex-col pt-2 sm:pt-4"
                                 >
                                     {/* SECTION HEADER: STICKY */}
-                                    <div className="sticky top-0 z-30 -mx-4 px-4 py-3 sm:py-6 bg-white/60 backdrop-blur-xl mb-6 sm:mb-12 flex items-baseline justify-between border-b border-[rgba(26,20,16,0.04)]">
+                                    <div className="sticky top-0 z-30 -mx-4 px-4 py-3 sm:py-6 bg-[#0a0a0a]/90 backdrop-blur-xl mb-6 sm:mb-12 flex items-baseline justify-between border-b border-white/[0.06]">
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2 sm:gap-3 mb-1">
                                                 <div className="w-1 h-1 rounded-full bg-ember-500" />
-                                                <span className="font-mono text-[8px] sm:text-[10px] tracking-[0.3em] uppercase text-ember-600 font-bold opacity-70">
-                                                    {category.name === 'Popular' ? 'Curated' : 'Selection'}
+                                                <span className="font-mono text-[8px] sm:text-[10px] tracking-[0.3em] uppercase text-ember-500 font-bold opacity-90">
+                                                    Selection
                                                 </span>
                                             </div>
-                                            <h2 className="text-xl sm:text-[56px] font-display font-black italic text-[#1A1410] tracking-tighter leading-none">
+                                            <h2 className="text-xl sm:text-[56px] font-display font-black italic text-white tracking-tighter leading-none">
                                                 {category.name}
                                             </h2>
                                         </div>
-                                        <div className="font-mono text-[9px] sm:text-[11px] text-[#9B8D74] tracking-widest uppercase font-bold">
+                                        <div className="font-mono text-[9px] sm:text-[11px] text-white/40 tracking-widest uppercase font-bold">
                                             {items.length} {items.length === 1 ? 'Item' : 'Items'}
                                         </div>
                                     </div>
@@ -346,18 +437,18 @@ export default function MenuPage() {
                                                 className="group relative flex flex-col"
                                             >
                                                 <div
-                                                    className="relative aspect-[4/5] sm:aspect-square rounded-xl sm:rounded-3xl overflow-hidden bg-[#F5F3EF] border border-white shadow-sm transition-all duration-700 hover:shadow-2xl cursor-pointer"
+                                                    className="relative aspect-[4/5] sm:aspect-square rounded-xl sm:rounded-3xl overflow-hidden bg-white/[0.06] border border-white/10 transition-all duration-700 hover:border-white/20 cursor-pointer"
                                                     onClick={() => handleOrder(item)}
                                                 >
                                                     <img
                                                         src={item.image ? resolveAssetUrl(item.image) : '/pizza-hero-poster.svg'}
                                                         alt={item.name}
-                                                        className="w-full h-full object-cover img-noir group-hover:scale-110 transition-transform duration-1000"
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                                                     />
 
                                                     <div className="absolute top-1.5 right-1.5 sm:top-4 sm:right-4 z-10">
-                                                        <div className="px-1.5 py-0.5 sm:px-4 sm:py-2 bg-white/90 backdrop-blur-md rounded-lg sm:rounded-2xl shadow-xl border border-white/50">
-                                                            <span className="font-mono text-[9px] sm:text-sm font-black text-[#1A1410] tracking-tighter">
+                                                        <div className="px-1.5 py-0.5 sm:px-4 sm:py-2 bg-black/70 backdrop-blur-md rounded-lg sm:rounded-2xl shadow-xl border border-white/10">
+                                                            <span className="font-mono text-[9px] sm:text-sm font-black text-white tracking-tighter">
                                                                 ${item.price?.toFixed(2)}
                                                             </span>
                                                         </div>
@@ -372,24 +463,18 @@ export default function MenuPage() {
                                                         )}
                                                     </div>
 
-                                                    {/* Quick Add Overlay Mobile Hint */}
-                                                    <div className="sm:hidden absolute bottom-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-[#1A1410] shadow-md">
-                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
-                                                    </div>
-
-                                                    <div className="hidden sm:flex absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 via-black/20 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col justify-end">
-                                                        <button
-                                                            className="w-full bg-white text-[#1A1410] font-black text-[10px] uppercase tracking-[0.2em] py-4 rounded-2xl hover:bg-ember-500 hover:text-white transition-all shadow-xl"
-                                                            onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
-                                                        >
-                                                            Add to Order
-                                                        </button>
-                                                    </div>
+                                                    {/* Quick Add - always visible */}
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
+                                                        className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 w-8 h-8 sm:w-9 sm:h-9 bg-white text-black rounded-full flex items-center justify-center shadow-lg hover:bg-ember-500 hover:text-white transition-colors z-10"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
+                                                    </button>
                                                 </div>
 
                                                 <div className="py-2 sm:p-5 flex flex-col flex-1">
-                                                    <h3 className="font-display text-[13px] sm:text-2xl font-black italic text-[#1A1410] tracking-tight group-hover:text-ember-600 transition-colors mb-0.5 line-clamp-1">{item.name}</h3>
-                                                    <p className="text-[9px] sm:text-[13px] leading-tight sm:leading-relaxed text-[#5C554E] font-medium opacity-70 line-clamp-1 sm:line-clamp-2">
+                                                    <h3 className="font-display text-[13px] sm:text-2xl font-black italic text-white tracking-tight group-hover:text-ember-500 transition-colors mb-0.5 line-clamp-1">{item.name}</h3>
+                                                    <p className="text-[9px] sm:text-[13px] leading-tight sm:leading-relaxed text-white/50 font-medium line-clamp-1 sm:line-clamp-2">
                                                         {item.description || "Handcrafted fresh daily."}
                                                     </p>
                                                 </div>

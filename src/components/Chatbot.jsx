@@ -9,6 +9,7 @@ import wsService from '../services/websocket.js'
 import StripePayment from './StripePayment'
 import { useVoice } from '../hooks/useVoice'
 import { openMenuRoute } from '../utils/menuNavigation'
+import { resolveAssetUrl } from '../utils/env'
 
 export default function Chatbot() {
   const navigate = useNavigate()
@@ -19,6 +20,7 @@ export default function Chatbot() {
     cart,
     addToCart,
     removeFromCart,
+    deleteItem,
     clearCart,
     cartCount,
     // cartTotal // Removed from useChatbot as it's now calculated locally
@@ -119,6 +121,7 @@ export default function Chatbot() {
     }
   }
   const cartTotal = Math.max(0, cartSubtotal - discountAmount)
+  const pointsToEarn = Math.floor(cartTotal * 0.05)
 
   useEffect(() => {
     fetchMenuData()
@@ -702,83 +705,114 @@ export default function Chatbot() {
 
               {/* CART VIEW */}
               {view === 'cart' && (
-                <div className="p-6 max-w-2xl mx-auto w-full h-full">
-                  <h2 className="font-display font-black text-4xl text-slate-900 mb-8 tracking-tighter">🛒 Your Cart</h2>
+                <div className="bg-[#0c0c0c] text-white min-h-full p-6 sm:p-10 flex justify-center">
+                  <div className="max-w-2xl w-full">
+                    <h2 className="font-display font-black text-3xl sm:text-4xl mb-6 tracking-tight">Cart</h2>
 
-                  {cart.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-6 text-wood-300 py-20">
-                      <span className="text-8xl">🍕</span>
-                      <p className="text-xl font-medium">Your cart is empty!</p>
-
-                      <motion.button
-                        onClick={goToMenu}
-                        className="px-10 py-4 rounded-2xl bg-tomato-600 text-white font-bold shadow-pizza"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        Explore Menu
-                      </motion.button>
-
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-4">
-                      {cart.map(item => (
-                        <div key={item._id} className="flex items-center justify-between p-8 rounded-[2.5rem] bg-white border border-crust-100">
-                          <div className="flex items-center gap-6">
-                            <span className="text-5xl">🍕</span>
-                            <div>
-                              <p className="font-display font-black text-wood-800 text-xl uppercase tracking-tight">{item.name}</p>
-                              <p className="text-tomato-600 font-black text-lg tracking-tight">${(item.price * item.qty).toFixed(2)}</p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-4">
-                            <motion.button
-                              onClick={() => removeFromCart(item._id)}
-                              className="w-12 h-12 rounded-2xl bg-mozzarella-100 border border-crust-100 flex items-center justify-center text-wood-700 font-black hover:bg-mozzarella-200 transition-colors"
-                              whileTap={{ scale: 0.9 }}
-                            >−</motion.button>
-                            <span className="text-wood-800 font-black w-8 text-center text-2xl tracking-tighter">{item.qty}</span>
-                            <motion.button
-                              onClick={() => addToCart(item)}
-                              className="w-12 h-12 rounded-2xl bg-tomato-600 flex items-center justify-center text-white font-black shadow-lg shadow-tomato-600/10"
-                              whileTap={{ scale: 0.9 }}
-                            >+</motion.button>
-                          </div>
-                        </div>
-                      ))}
-
-
-                      <div className="mt-12 p-10 rounded-[3rem] bg-white text-black shadow-2xl relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold/10 rounded-full blur-3xl -mr-16 -mt-16" />
-                        <div className="flex justify-between items-center mb-10">
-                          <div>
-                            <p className="text-wood-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total Amount Due</p>
-                            <h3 className="text-5xl font-black tracking-tighter">${cartTotal.toFixed(2)}</h3>
-                          </div>
-                          <div className="w-16 h-16 rounded-3xl bg-mozzarella-100 flex items-center justify-center text-4xl shadow-inner italic font-black text-tomato-600 border border-crust-100">PB</div>
-                        </div>
-                        <motion.button
-                          onClick={handleCheckoutIntent}
-                          disabled={isPlacingOrder}
-                          className="w-full py-6 rounded-[2rem] bg-tomato-600 text-white font-black text-lg shadow-xl shadow-tomato-600/20 disabled:opacity-50 tracking-widest uppercase"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          {isPlacingOrder ? '⏳ Processing Order...' : 'Secure Checkout'}
-                        </motion.button>
-
-
+                    {/* Pickup / Delivery toggle */}
+                    <div className="flex bg-white/[0.06] rounded-full p-1 mb-3 w-fit">
+                      {['pickup', 'delivery'].map(t => (
                         <button
-                          onClick={goToMenu}
-                          className="w-full mt-4 text-sm text-wood-400 font-bold uppercase tracking-widest hover:text-tomato-600 transition-colors"
+                          key={t}
+                          onClick={() => setOrderType(t)}
+                          className={`px-6 py-2 rounded-full text-sm font-semibold capitalize transition-all ${orderType === t ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}
                         >
-                          + Add more items
+                          {t}
                         </button>
-                      </div>
-
+                      ))}
                     </div>
-                  )}
+
+                    {/* ASAP indicator */}
+                    <div className="flex items-center gap-2 bg-white/[0.06] rounded-full px-4 py-2.5 mb-8 w-fit text-sm font-semibold text-white/90">
+                      <svg className="w-4 h-4 text-ember-400" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v6h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 19v-6H4a1 1 0 01-.82-1.573l7-10a1 1 0 01.98-.38z" /></svg>
+                      ASAP (20-30 min)
+                    </div>
+
+                    {cart.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center gap-6 text-white/40 py-20">
+                        <span className="text-7xl">🍕</span>
+                        <p className="text-lg font-medium text-white/70">Your cart is empty!</p>
+
+                        <motion.button
+                          onClick={goToMenu}
+                          className="px-10 py-4 rounded-2xl bg-ember-500 text-white font-bold"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Explore Menu
+                        </motion.button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex flex-col divide-y divide-white/10 border-t border-white/10">
+                          {cart.map(item => (
+                            <div key={item._id} className="flex items-center gap-4 py-5">
+                              <img
+                                src={item.image ? resolveAssetUrl(item.image) : '/pizza-hero-poster.svg'}
+                                alt={item.name}
+                                className="w-16 h-16 rounded-xl object-cover bg-white/10 shrink-0"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold truncate">{item.name}</p>
+                                <div className="flex items-center gap-3 mt-2">
+                                  <motion.button
+                                    onClick={() => deleteItem(item._id)}
+                                    whileTap={{ scale: 0.9 }}
+                                    className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-white/60 hover:text-red-400 hover:bg-white/10 transition-colors"
+                                    title="Remove item"
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                  </motion.button>
+                                  <div className="flex items-center bg-white/[0.06] rounded-full">
+                                    <button
+                                      onClick={() => removeFromCart(item._id)}
+                                      className="w-8 h-8 flex items-center justify-center text-white/80 font-bold"
+                                    >−</button>
+                                    <span className="w-6 text-center font-semibold text-sm">{item.qty}</span>
+                                    <button
+                                      onClick={() => addToCart(item)}
+                                      className="w-8 h-8 flex items-center justify-center text-white/80 font-bold"
+                                    >+</button>
+                                  </div>
+                                </div>
+                              </div>
+                              <span className="font-semibold shrink-0">${(item.price * item.qty).toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-white/10">
+                          <div className="flex justify-between items-center text-lg font-bold mb-6">
+                            <span>Subtotal</span>
+                            <span>${cartTotal.toFixed(2)}</span>
+                          </div>
+
+                          {pointsToEarn > 0 && (
+                            <div className="bg-ember-500/15 text-ember-300 text-sm font-semibold rounded-xl py-3 text-center mb-4">
+                              You'll earn <strong>{pointsToEarn} points</strong> with this order
+                            </div>
+                          )}
+
+                          <motion.button
+                            onClick={handleCheckoutIntent}
+                            disabled={isPlacingOrder}
+                            className="w-full py-4 rounded-2xl bg-gradient-to-r from-ember-400 to-ember-600 text-white font-bold text-base shadow-xl shadow-ember-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            {isPlacingOrder ? 'Processing Order...' : (<>Go to checkout <span aria-hidden>→</span></>)}
+                          </motion.button>
+
+                          <button
+                            onClick={goToMenu}
+                            className="w-full mt-4 text-sm text-white/50 font-bold uppercase tracking-widest hover:text-white transition-colors"
+                          >
+                            + Add more items
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
 

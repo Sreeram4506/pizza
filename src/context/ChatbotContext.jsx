@@ -50,6 +50,10 @@ export function ChatbotProvider({ children }) {
     })
   }
 
+  const deleteItem = (id) => {
+    setCart(prev => prev.filter(i => i._id !== id))
+  }
+
   const clearCart = () => setCart([])
 
   const cartCount = cart.reduce((sum, i) => sum + (i.qty || 0), 0)
@@ -67,6 +71,7 @@ export function ChatbotProvider({ children }) {
       setCart,
       addToCart,
       removeFromCart,
+      deleteItem,
       clearCart,
       cartCount,
       cartTotal
