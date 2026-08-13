@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
@@ -115,12 +115,27 @@ export default function CartDrawer({ isOpen, onClose }) {
   }
 
   return (
-    <motion.div
-      initial={{ x: '100%' }}
-      animate={{ x: isOpen ? 0 : '100%' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed right-0 top-0 h-screen w-full sm:w-96 bg-mozzarella-100 shadow-2xl z-40 flex flex-col"
-    >
+    <>
+      {/* Backdrop overlay */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleClose}
+            className="fixed inset-0 bg-black/30 z-40 backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Cart drawer */}
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: isOpen ? 0 : '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="fixed right-0 top-0 h-screen w-full sm:w-96 bg-mozzarella-100 shadow-2xl z-50 flex flex-col"
+      >
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-crust-100 bg-white">
         <h2 className="font-display font-black text-2xl text-wood-800">
@@ -376,5 +391,6 @@ export default function CartDrawer({ isOpen, onClose }) {
         )}
       </div>
     </motion.div>
+    </>
   )
 }
