@@ -1,3 +1,4 @@
+import './bootstrap.js'
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
@@ -101,9 +102,10 @@ app.get('/', (req, res) => {
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
-// Fallback for missing upload files — redirect to a placeholder instead of 404
+// Missing upload files fall through to a plain 404; the frontend already
+// handles broken image URLs client-side via onError fallbacks.
 app.use('/uploads', (req, res) => {
-  res.redirect('https://images.unsplash.com/photo-1574071318508-1cdbad80ad50?w=600&q=80')
+  res.status(404).json({ error: 'File not found' })
 })
 
 // Tenant extraction middleware

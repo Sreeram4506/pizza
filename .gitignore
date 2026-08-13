@@ -8,7 +8,7 @@ dist
 build
 .system_generated
 .gemini
-package-lock.json
+tmp/
 
 # System files outside project
 ../../../Downloads/

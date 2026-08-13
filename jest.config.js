@@ -7,7 +7,7 @@ export default {
   
   // Transform patterns
   transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.(js|mjs|jsx)$': 'babel-jest',
     '^.+\\.(css|scss|sass)$': 'jest-transform-stub',
     '^.+\\.(jpg|jpeg|png|gif|webp|avif|svg)$': 'jest-transform-stub'
   },
@@ -19,9 +19,9 @@ export default {
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx}',
     '<rootDir>/src/**/*.{test,spec}.{js,jsx}',
-    '<rootDir>/server/**/__tests__/**/*.{js}',
-    '<rootDir>/server/**/*.{test,spec}.{js}',
-    '<rootDir>/integration/**/*.{test,spec}.{js}'
+    '<rootDir>/server/**/__tests__/**/*.js',
+    '<rootDir>/server/**/*.{test,spec}.js',
+    '<rootDir>/integration/**/*.{test,spec}.js'
   ],
   
   // Coverage configuration
