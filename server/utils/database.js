@@ -35,11 +35,15 @@ export async function connectDatabase() {
 
   } catch (error) {
     console.error('Failed to connect to MongoDB:', error.message)
-    console.log('⚠️  MongoDB not available - some features will be limited')
-    console.log('Please ensure MongoDB is running or install MongoDB Community Server')
+    console.log('⚠️  MongoDB not available - retrying in 5s')
 
-    // Don't exit the process - allow the app to run with limited functionality
+    // Don't exit the process - allow the app to run with limited functionality,
+    // but keep retrying the initial connection (mongoose's own 'disconnected'
+    // handler only covers a connection that succeeded once and later dropped).
     isConnected = false
+    setTimeout(() => {
+      connectDatabase()
+    }, 5000)
   }
 }
 
