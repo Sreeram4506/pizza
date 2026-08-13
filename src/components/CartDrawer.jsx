@@ -1,209 +1,380 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
+import toast from 'react-hot-toast'
 import { useChatbot } from '../context/ChatbotContext'
 import { useSettings } from '../context/SettingsContext'
-import { resolveMenuItemImage } from '../utils/menuArtwork'
-import toast from 'react-hot-toast'
+import { OrderService } from '../services/OrderService'
+import StripePayment from './StripePayment'
+import { resolveAssetUrl } from '../utils/env'
 
-export default function CartDrawer() {
-  const { 
-    isCartOpen, 
-    setIsCartOpen, 
-    cart, 
-    addToCart, 
-    removeFromCart, 
-    cartTotal,
-    orderType,
-    setOrderType,
-    openWithIntent,
-    setShowOrderDetails
+export default function CartDrawer({ isOpen, onClose }) {
+  const {
+    cart,
+    addToCart,
+    removeFromCart,
+    deleteItem,
+    clearCart,
   } = useChatbot()
   const { settings } = useSettings()
-  const navigate = useNavigate()
-  const [profile, setProfile] = useState(null)
 
-  useEffect(() => {
-    if (isCartOpen) {
-      const token = localStorage.getItem('customerToken')
-      if (token) {
-        fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
-          .then(res => res.json())
-          .then(data => { if (data.user) setProfile(data.user) })
-          .catch(err => console.error('Failed to fetch profile:', err))
-      }
-    }
-  }, [isCartOpen])
+  const [view, setView] = useState('cart') // 'cart' | 'checkout' | 'payment' | 'confirmation'
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [guestName, setGuestName] = useState('')
+  const [guestPhone, setGuestPhone] = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
+  const [orderType, setOrderType] = useState('pickup')
+  const [deliveryAddress, setDeliveryAddress] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [pickupDate, setPickupDate] = useState('')
+  const [pickupTime, setPickupTime] = useState('')
+  const [orderId, setOrderId] = useState(null)
+  const [orderTotal, setOrderTotal] = useState(0)
 
-  if (!isCartOpen) return null
+  const cartTotal = useMemo(() => {
+    return cart.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0)
+  }, [cart])
 
-  const pointsEarned = Math.floor(cartTotal * 0.05)
-  const cartPointsTotal = cart.reduce((sum, i) => sum + (i.isPointsRedemption ? (i.pointsCost * (i.qty || 0)) : 0), 0)
-  const availablePoints = profile?.loyalty?.points || 0
+  const deliveryFee = orderType === 'delivery' ? 3.99 : 0
+  const tax = (cartTotal + deliveryFee) * 0.08
+  const total = cartTotal + deliveryFee + tax
+  const pointsToEarn = Math.floor(total * 0.05)
 
   const handleCheckout = () => {
-    if (cartPointsTotal > availablePoints) {
-      toast.error('Insufficient points for rewards in cart!')
+    setView('checkout')
+  }
+
+  const handlePlaceOrder = async () => {
+    if (!guestName || !guestPhone) {
+      toast.error('Please fill in name and phone')
       return
     }
-    setIsCartOpen(false)
-    navigate('/checkout')
+    if (!pickupDate || !pickupTime) {
+      toast.error('Please select date and time')
+      return
+    }
+
+    setIsPlacingOrder(true)
+    try {
+      const orderData = {
+        items: cart.map(item => ({
+          itemId: item._id,
+          name: item.name,
+          price: item.price,
+          quantity: item.qty || 1,
+          modifiers: [],
+          notes: ''
+        })),
+        type: orderType,
+        customerInfo: {
+          name: guestName,
+          phone: guestPhone,
+          email: guestEmail
+        },
+        address: {
+          street: orderType === 'delivery' ? deliveryAddress : 'Pickup',
+          city: '',
+          zip: ''
+        },
+        payment: {
+          method: paymentMethod,
+          status: paymentMethod === 'cash' ? 'pending' : 'pending'
+        }
+      }
+
+      const result = await OrderService.placeOrder(orderData)
+      setOrderId(result._id)
+      setOrderTotal(result.total)
+      clearCart()
+      setView('confirmation')
+      toast.success('Order placed successfully!')
+    } catch (err) {
+      toast.error(err.message || 'Failed to place order')
+      console.error(err)
+    } finally {
+      setIsPlacingOrder(false)
+    }
+  }
+
+  const handlePaymentSuccess = () => {
+    setPaymentSuccess(true)
+  }
+
+  const handleClose = () => {
+    if (view === 'confirmation') {
+      setView('cart')
+      setGuestName('')
+      setGuestPhone('')
+      setGuestEmail('')
+      setOrderType('pickup')
+      setPaymentMethod('cash')
+      setPickupDate('')
+      setPickupTime('')
+    }
+    onClose()
   }
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[10000] flex justify-end">
-        {/* Backdrop */}
-        <motion.div 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }} 
-          exit={{ opacity: 0 }}
-          onClick={() => setIsCartOpen(false)}
-          className="absolute inset-0 bg-black/40 backdrop-blur-[4px]"
-        />
-
-        {/* Drawer content mapping the exact cart layout, but converted to minimal light theme */}
-        <motion.div 
-          initial={{ x: '100%', opacity: 0.8 }} 
-          animate={{ x: 0, opacity: 1 }} 
-          exit={{ x: '100%', opacity: 0.8 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-          className="w-full sm:w-[500px] h-full bg-[#FAFAF8] pb-safe z-10 flex flex-col shadow-2xl border-l border-[#EBEBE6]"
+    <motion.div
+      initial={{ x: '100%' }}
+      animate={{ x: isOpen ? 0 : '100%' }}
+      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      className="fixed right-0 top-0 h-screen w-full sm:w-96 bg-mozzarella-100 shadow-2xl z-40 flex flex-col"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-crust-100 bg-white">
+        <h2 className="font-display font-black text-2xl text-wood-800">
+          {view === 'cart' ? 'Cart' : view === 'checkout' ? 'Checkout' : view === 'payment' ? 'Payment' : 'Order Confirmed'}
+        </h2>
+        <button
+          onClick={handleClose}
+          className="p-2 hover:bg-crust-50 rounded-full transition-colors"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 pt-6 pb-4">
-            <h2 className="text-[#1A1410] text-3xl font-bold font-serif tracking-tight">Cart</h2>
-            <button 
-              onClick={() => setIsCartOpen(false)}
-              className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-[#1A1410]/70 hover:text-[#1A1410] hover:bg-black/10 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+          <svg className="w-6 h-6 text-wood-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
-          <div className="px-6 pb-5 border-b border-[#EBEBE6]">
-            {/* Delivery Toggle */}
-            <div className="flex p-1 bg-[#F5F5F0] rounded-[14px] mb-4 shadow-inner">
-              {['pickup', 'delivery'].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => { setOrderType(type); setShowOrderDetails(true); }}
-                  className={`flex-1 py-2.5 rounded-[10px] text-[13px] font-bold capitalize transition-all ${
-                    orderType === type 
-                      ? 'bg-white text-[#1A1410] shadow-sm ring-1 ring-[#EBEBE6]' 
-                      : 'text-[#1A1410]/60 hover:text-[#1A1410]'
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-6">
+        {view === 'cart' && (
+          <>
+            {/* Order Type Toggle */}
+            <div className="mb-6">
+              <div className="flex gap-2 mb-4 bg-white rounded-full p-1 border border-crust-100 w-fit">
+                {['pickup', 'delivery'].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setOrderType(t)}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold capitalize transition-all ${
+                      orderType === t ? 'bg-tomato-600 text-white shadow-md' : 'text-wood-500 hover:text-tomato-600'
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 bg-white rounded-full px-3 py-2 text-xs font-semibold text-wood-700 w-fit border border-crust-100">
+                <svg className="w-4 h-4 text-tomato-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M11.3 1.046A1 1 0 0112 2v6h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 19v-6H4a1 1 0 01-.82-1.573l7-10a1 1 0 01.98-.38z" />
+                </svg>
+                ASAP (20 min)
+              </div>
             </div>
 
-            {/* Time selector (ASAP) */}
-            <button className="w-full flex items-center justify-between px-4 py-3.5 bg-white border border-[#EBEBE6] rounded-[14px] text-[#1A1410] outline-none shadow-sm hover:border-[#1A1410]/20 transition-colors">
-              <span className="text-[13px] font-bold">ASAP (20 min)</span>
-              <svg className="w-4 h-4 text-[#1A1410]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Cart Items Area */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+            {/* Cart Items */}
             {cart.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-[#1A1410]/40 space-y-4">
-                <svg className="w-16 h-16 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <p className="text-sm font-bold">Your cart is empty</p>
+              <div className="flex flex-col items-center justify-center gap-6 text-wood-300 py-12">
+                <span className="text-5xl">🛒</span>
+                <p className="text-lg font-medium text-wood-500">Your cart is empty</p>
               </div>
             ) : (
-              cart.map((item) => (
-                <div key={item._id} className="flex gap-5">
-                  <div className="w-[72px] h-[72px] rounded-xl overflow-hidden shrink-0 bg-[#F5F5F0] border border-[#EBEBE6] shadow-sm">
-                    <img src={resolveMenuItemImage(item)} alt={item.name} className="w-full h-full object-cover" />
-                  </div>
-                  
-                  <div className="flex-1 pt-1 flex flex-col">
-                    <h4 className="text-[#1A1410] text-[15px] font-bold leading-tight line-clamp-2">
-                      {item.name} {item.modifiers?.length ? `(${item.modifiers.join(', ')})` : ''}
-                    </h4>
-                    
-                    <div className="flex items-center justify-between mt-auto pt-4">
-                      <div className="flex items-center gap-4 bg-white border border-[#EBEBE6] rounded-full px-1.5 py-1 w-fit shadow-sm">
-                        <button 
+              <div className="space-y-4 mb-6">
+                {cart.map(item => (
+                  <div key={item._id} className="flex gap-3 pb-4 border-b border-crust-100">
+                    <img
+                      src={item.image ? resolveAssetUrl(item.image) : '/pizza-hero-poster.svg'}
+                      alt={item.name}
+                      className="w-16 h-16 rounded-lg object-cover bg-white border border-crust-100"
+                    />
+                    <div className="flex-1">
+                      <p className="font-semibold text-wood-800 text-sm">{item.name}</p>
+                      <p className="text-xs text-wood-500 mt-1">${item.price.toFixed(2)}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
                           onClick={() => removeFromCart(item._id)}
-                          className="w-7 h-7 flex items-center justify-center text-[#1A1410]/60 hover:text-[#1A1410] hover:bg-black/5 rounded-full transition-colors"
+                          className="w-6 h-6 rounded-full bg-white border border-crust-100 flex items-center justify-center text-wood-600 text-xs font-bold hover:text-tomato-600"
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 12H4" />
-                          </svg>
+                          −
                         </button>
-                        <span className="text-[#1A1410] text-[13px] font-bold w-4 text-center select-none">{item.qty}</span>
-                        <button 
-                          onClick={() => addToCart({ ...item, qty: 1 })}
-                          className="w-7 h-7 flex items-center justify-center text-[#1A1410]/60 hover:text-[#1A1410] hover:bg-black/5 rounded-full transition-colors"
+                        <span className="w-5 text-center text-xs font-semibold text-wood-800">{item.qty}</span>
+                        <button
+                          onClick={() => addToCart(item)}
+                          className="w-6 h-6 rounded-full bg-white border border-crust-100 flex items-center justify-center text-wood-600 text-xs font-bold hover:text-tomato-600"
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                          +
+                        </button>
+                        <button
+                          onClick={() => deleteItem(item._id)}
+                          className="ml-auto p-1 text-wood-400 hover:text-tomato-600 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                       </div>
-
-                      <span className="text-[#1A1410] font-black text-[16px]">
-                        {item.isPointsRedemption ? (
-                          <span className="text-amber-600 text-[13px]">FREE ({item.pointsCost * item.qty} pts)</span>
-                        ) : (
-                          `$${(item.price * item.qty).toFixed(2)}`
-                        )}
-                      </span>
                     </div>
+                    <span className="font-semibold text-wood-800 text-sm">${(item.price * item.qty).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Summary */}
+            {cart.length > 0 && (
+              <>
+                <div className="space-y-2 mb-6 p-4 bg-white rounded-xl border border-crust-100">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-wood-600">Subtotal</span>
+                    <span className="font-semibold text-wood-800">${cartTotal.toFixed(2)}</span>
+                  </div>
+                  {orderType === 'delivery' && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-wood-600">Delivery Fee</span>
+                      <span className="font-semibold text-wood-800">${deliveryFee.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm border-t border-crust-100 pt-2">
+                    <span className="text-wood-600">Tax</span>
+                    <span className="font-semibold text-wood-800">${tax.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-base font-bold border-t border-crust-100 pt-2">
+                    <span className="text-wood-800">Total</span>
+                    <span className="text-tomato-600">${total.toFixed(2)}</span>
                   </div>
                 </div>
-              ))
+
+                {pointsToEarn > 0 && (
+                  <div className="bg-tomato-50 border border-tomato-100 rounded-lg p-3 mb-6 text-center text-sm text-tomato-700 font-semibold">
+                    You'll earn {pointsToEarn} points with this order
+                  </div>
+                )}
+
+                <motion.button
+                  onClick={handleCheckout}
+                  className="w-full py-4 rounded-xl bg-tomato-600 text-white font-bold shadow-lg shadow-tomato-600/20 mb-3"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Go to Checkout
+                </motion.button>
+              </>
             )}
-          </div>
+          </>
+        )}
 
-          {/* Footer Area */}
-          {cart.length > 0 && (
-            <div className="px-6 pb-6 pt-5 bg-white border-t border-[#EBEBE6] shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] z-20">
-              
-              {/* Points Logic Section */}
-              {/* Points Logic Section */}
-              <div className="py-3 px-4 rounded-[12px] bg-[#FFFDF7] border border-[#EBB250]/40 mb-6 shadow-sm">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-[#1A1410] text-[11px] font-medium uppercase tracking-wider opacity-60">Status</span>
-                  <span className="text-[#1A1410] text-[12px] font-bold">{availablePoints} Available PTS</span>
-                </div>
-                <div className="h-[1px] bg-[#EBB250]/20 my-2" />
-                <div className="flex justify-between items-center text-[13px]">
-                   <span className="text-[#1A1410] font-medium">Earn <span className="font-extrabold text-[#D2902A]">{pointsEarned} pts</span></span>
-                   {cartPointsTotal > 0 && <span className="text-amber-700 font-bold">Use {cartPointsTotal} pts</span>}
-                </div>
-              </div>
-
-              {/* Subtotal */}
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-[#1A1410] text-[17px] font-bold">Subtotal</span>
-                <span className="text-[#1A1410] text-[20px] font-black tracking-tight">${cartTotal.toFixed(2)}</span>
-              </div>
-
-              {/* Checkout CTA */}
-              <button 
-                onClick={handleCheckout}
-                className="w-full flex items-center justify-center gap-2 bg-[#EBB250] hover:bg-[#DCA440] text-[#1A1410] text-[18px] font-black py-5 rounded-[16px] transition-all active:scale-[0.98] shadow-md hover:shadow-xl mt-2"
-              >
-                Go to checkout
-                <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+        {view === 'checkout' && (
+          <>
+            {/* Guest Info */}
+            <div className="space-y-4 mb-6">
+              <h3 className="font-bold text-wood-800 mb-4">Delivery Information</h3>
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
+              />
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                value={guestPhone}
+                onChange={(e) => setGuestPhone(e.target.value)}
+                className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
+              />
+              <input
+                type="email"
+                placeholder="Email Address"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
+              />
             </div>
-          )}
-        </motion.div>
+
+            {/* Pickup/Delivery Date & Time */}
+            <div className="space-y-4 mb-6">
+              <h3 className="font-bold text-wood-800 mb-4">Pickup Date & Time</h3>
+              <input
+                type="date"
+                value={pickupDate}
+                onChange={(e) => setPickupDate(e.target.value)}
+                className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
+              />
+              <input
+                type="time"
+                value={pickupTime}
+                onChange={(e) => setPickupTime(e.target.value)}
+                className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
+              />
+            </div>
+
+            {/* Payment Method */}
+            <div className="space-y-4 mb-6">
+              <h3 className="font-bold text-wood-800 mb-4">Payment Method</h3>
+              <div className="space-y-2">
+                {['card', 'cash'].map(method => (
+                  <label key={method} className="flex items-center gap-3 p-3 border border-crust-100 rounded-lg cursor-pointer hover:bg-crust-50 transition-colors">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={method}
+                      checked={paymentMethod === method}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-4 h-4"
+                    />
+                    <span className="font-semibold text-wood-800 capitalize">{method === 'card' ? 'Card Payment' : 'Cash on Delivery'}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Order Summary */}
+            <div className="bg-white rounded-lg p-4 border border-crust-100 mb-6 space-y-2 text-sm">
+              <div className="flex justify-between text-wood-600">
+                <span>Subtotal</span>
+                <span>${cartTotal.toFixed(2)}</span>
+              </div>
+              {orderType === 'delivery' && (
+                <div className="flex justify-between text-wood-600">
+                  <span>Delivery</span>
+                  <span>${deliveryFee.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-wood-600">
+                <span>Tax</span>
+                <span>${tax.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-wood-800 border-t border-crust-100 pt-2">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <motion.button
+              onClick={handlePlaceOrder}
+              disabled={isPlacingOrder}
+              className="w-full py-4 rounded-xl bg-tomato-600 text-white font-bold shadow-lg shadow-tomato-600/20 disabled:opacity-50 mb-3"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {isPlacingOrder ? 'Placing Order...' : 'Place Order'}
+            </motion.button>
+
+            <button
+              onClick={() => setView('cart')}
+              className="w-full py-3 text-wood-600 font-semibold hover:text-tomato-600 transition-colors"
+            >
+              ← Back to Cart
+            </button>
+          </>
+        )}
+
+        {view === 'confirmation' && (
+          <div className="flex flex-col items-center justify-center gap-6 py-12 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-2xl font-black text-wood-800 mb-2">Order Confirmed!</h3>
+              <p className="text-sm text-wood-500">Order ID: {orderId}</p>
+              <p className="text-lg font-bold text-tomato-600 mt-4">${orderTotal.toFixed(2)}</p>
+            </div>
+          </div>
+        )}
       </div>
-    </AnimatePresence>
+    </motion.div>
   )
 }

@@ -17,6 +17,7 @@ import Testimonials from './components/Testimonials'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
+import CartDrawer from './components/CartDrawer'
 
 const OrderTracker = lazy(() => import('./components/OrderTracker'))
 const CustomerProfile = lazy(() => import('./components/CustomerProfile'))
@@ -88,13 +89,19 @@ function ScrollToHash() {
 
 function CloseChatbotOnRouteChange() {
   const location = useLocation()
-  const { setIsOpen } = useChatbot()
+  const { setIsOpen, setIsCartDrawerOpen } = useChatbot()
 
   useEffect(() => {
     if (typeof setIsOpen === 'function') setIsOpen(false)
   }, [location.pathname, location.hash, setIsOpen])
 
   return null
+}
+
+function CartDrawerWrapper() {
+  const { isCartDrawerOpen, setIsCartDrawerOpen } = useChatbot()
+
+  return <CartDrawer isOpen={isCartDrawerOpen} onClose={() => setIsCartDrawerOpen(false)} />
 }
 
 function Home() {
@@ -159,6 +166,7 @@ function App() {
               <QuickLoginWrapper />
               <ScrollToHash />
               <CloseChatbotOnRouteChange />
+              <CartDrawerWrapper />
 
               <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F7F1EA] text-[#231B16] font-body">Loading Pizza Blast...</div>}>
                 <Routes>

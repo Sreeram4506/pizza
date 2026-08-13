@@ -4,6 +4,7 @@ const ChatbotContext = createContext()
 
 export function ChatbotProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
   const [initialMessage, setInitialMessage] = useState(null)
 
   // Cart State with LocalStorage Persistence
@@ -63,6 +64,8 @@ export function ChatbotProvider({ children }) {
     <ChatbotContext.Provider value={{
       isOpen,
       setIsOpen,
+      isCartDrawerOpen,
+      setIsCartDrawerOpen,
       openWithIntent,
       openChatbot,
       closeChatbot,

@@ -14,7 +14,7 @@ export default function MenuPage() {
     const [searchQuery, setSearchQuery] = useState('')
     const [activeCategory, setActiveCategory] = useState('')
     const [orderType, setOrderType] = useState('pickup')
-    const { openWithIntent, cartCount, addToCart, setIsOpen } = useChatbot()
+    const { openWithIntent, cartCount, addToCart, setIsOpen, setIsCartDrawerOpen } = useChatbot()
     const { settings } = useSettings()
     const navigate = useNavigate()
 
@@ -114,7 +114,6 @@ export default function MenuPage() {
 
     const handleOrder = (item) => {
         addToCart(item)
-        setIsOpen(true)
         toast.success(`${item.name} added to cart`)
     }
 
@@ -212,7 +211,7 @@ export default function MenuPage() {
                     </div>
 
                     <button
-                        onClick={() => openWithIntent('cart')}
+                        onClick={() => setIsCartDrawerOpen(true)}
                         className="relative p-2 sm:p-2.5 rounded-full bg-[#1A1410] text-white shadow-xl shadow-black/10 hover:bg-ember-600 transition-colors group"
                     >
                         <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
