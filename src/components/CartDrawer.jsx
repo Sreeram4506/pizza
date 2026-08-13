@@ -136,63 +136,104 @@ export default function CartDrawer({ isOpen, onClose }) {
               {/* Left: Form */}
               <div className="flex-1 p-8 lg:p-12 overflow-y-auto max-w-2xl">
                 {/* Guest Info */}
-                <div className="space-y-4 mb-8">
-                  <h3 className="font-bold text-wood-800 text-lg mb-4">Delivery Information</h3>
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                    className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
-                  />
-                  <input
-                    type="tel"
-                    placeholder="Phone Number"
-                    value={guestPhone}
-                    onChange={(e) => setGuestPhone(e.target.value)}
-                    className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={guestEmail}
-                    onChange={(e) => setGuestEmail(e.target.value)}
-                    className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
-                  />
+                <div className="p-6 bg-white rounded-xl border border-crust-100 mb-8">
+                  <h3 className="font-display font-bold text-lg text-wood-800 mb-6">Delivery Information</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-wood-800 mb-2">Full Name</label>
+                      <input
+                        type="text"
+                        placeholder="John Doe"
+                        value={guestName}
+                        onChange={(e) => setGuestName(e.target.value)}
+                        className="w-full px-4 py-3 border border-crust-100 rounded-lg bg-white placeholder:text-wood-300
+                          focus:ring-2 focus:ring-tomato-500 focus:border-transparent focus:shadow-md
+                          transition-all duration-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-wood-800 mb-2">Phone Number</label>
+                      <input
+                        type="tel"
+                        placeholder="(555) 123-4567"
+                        value={guestPhone}
+                        onChange={(e) => setGuestPhone(e.target.value)}
+                        className="w-full px-4 py-3 border border-crust-100 rounded-lg bg-white placeholder:text-wood-300
+                          focus:ring-2 focus:ring-tomato-500 focus:border-transparent focus:shadow-md
+                          transition-all duration-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-wood-800 mb-2">Email Address (Optional)</label>
+                      <input
+                        type="email"
+                        placeholder="john@example.com"
+                        value={guestEmail}
+                        onChange={(e) => setGuestEmail(e.target.value)}
+                        className="w-full px-4 py-3 border border-crust-100 rounded-lg bg-white placeholder:text-wood-300
+                          focus:ring-2 focus:ring-tomato-500 focus:border-transparent focus:shadow-md
+                          transition-all duration-200"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Pickup Date & Time */}
-                <div className="space-y-4 mb-8">
-                  <h3 className="font-bold text-wood-800 text-lg mb-4">Pickup Date & Time</h3>
-                  <input
-                    type="date"
-                    value={pickupDate}
-                    onChange={(e) => setPickupDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
-                  />
-                  <input
-                    type="time"
-                    value={pickupTime}
-                    onChange={(e) => setPickupTime(e.target.value)}
-                    className="w-full px-4 py-3 border border-crust-100 rounded-lg focus:ring-2 focus:ring-tomato-600 focus:border-transparent"
-                  />
+                <div className="p-6 bg-white rounded-xl border border-crust-100 mb-8">
+                  <h3 className="font-display font-bold text-lg text-wood-800 mb-6">Pickup Date & Time</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-wood-800 mb-2">Date</label>
+                      <input
+                        type="date"
+                        value={pickupDate}
+                        onChange={(e) => setPickupDate(e.target.value)}
+                        className="w-full px-4 py-3 border border-crust-100 rounded-lg bg-white
+                          focus:ring-2 focus:ring-tomato-500 focus:border-transparent focus:shadow-md
+                          transition-all duration-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-wood-800 mb-2">Time</label>
+                      <input
+                        type="time"
+                        value={pickupTime}
+                        onChange={(e) => setPickupTime(e.target.value)}
+                        className="w-full px-4 py-3 border border-crust-100 rounded-lg bg-white
+                          focus:ring-2 focus:ring-tomato-500 focus:border-transparent focus:shadow-md
+                          transition-all duration-200"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Payment Method */}
-                <div className="space-y-4">
-                  <h3 className="font-bold text-wood-800 text-lg mb-4">Payment Method</h3>
-                  <div className="space-y-2">
+                <div className="p-6 bg-white rounded-xl border border-crust-100">
+                  <h3 className="font-display font-bold text-lg text-wood-800 mb-6">Payment Method</h3>
+                  <div className="space-y-3">
                     {['card', 'cash'].map(method => (
-                      <label key={method} className="flex items-center gap-3 p-4 border border-crust-100 rounded-lg cursor-pointer hover:bg-crust-50 transition-colors">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value={method}
-                          checked={paymentMethod === method}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="w-4 h-4"
-                        />
-                        <span className="font-semibold text-wood-800 capitalize">{method === 'card' ? 'Card Payment' : 'Cash on Delivery'}</span>
+                      <label
+                        key={method}
+                        className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                          paymentMethod === method
+                            ? 'border-tomato-600 bg-tomato-50'
+                            : 'border-crust-100 hover:border-crust-200 bg-white'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                          paymentMethod === method
+                            ? 'border-tomato-600 bg-tomato-600'
+                            : 'border-wood-300'
+                        }`}>
+                          {paymentMethod === method && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                        <span className={`font-semibold capitalize ${
+                          paymentMethod === method ? 'text-tomato-700' : 'text-wood-800'
+                        }`}>
+                          {method === 'card' ? 'Card Payment' : 'Cash on Delivery'}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -219,24 +260,31 @@ export default function CartDrawer({ isOpen, onClose }) {
                 </div>
 
                 {/* Totals */}
-                <div className="space-y-3 p-4 bg-crust-50 rounded-xl border border-crust-100">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-wood-600">Subtotal</span>
-                    <span className="font-semibold text-wood-800">${cartTotal.toFixed(2)}</span>
-                  </div>
-                  {orderType === 'delivery' && (
+                <div className="p-6 bg-crust-50 rounded-xl border border-crust-100">
+                  <div className="space-y-3 mb-4">
                     <div className="flex justify-between text-sm">
-                      <span className="text-wood-600">Delivery Fee</span>
-                      <span className="font-semibold text-wood-800">${deliveryFee.toFixed(2)}</span>
+                      <span className="text-wood-600">Subtotal</span>
+                      <span className="font-semibold text-wood-800">${cartTotal.toFixed(2)}</span>
                     </div>
-                  )}
-                  <div className="flex justify-between text-sm border-t border-crust-200 pt-3">
-                    <span className="text-wood-600">Tax</span>
-                    <span className="font-semibold text-wood-800">${tax.toFixed(2)}</span>
+                    {orderType === 'delivery' && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-wood-600">Delivery Fee</span>
+                        <span className="font-semibold text-wood-800">${deliveryFee.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-sm">
+                      <span className="text-wood-600">Tax</span>
+                      <span className="font-semibold text-wood-800">${tax.toFixed(2)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-lg font-bold border-t border-crust-200 pt-3">
-                    <span className="text-wood-800">Total</span>
-                    <span className="text-tomato-600">${total.toFixed(2)}</span>
+
+                  {/* Divider */}
+                  <div className="border-t-2 border-crust-200 my-4" />
+
+                  {/* Grand Total - EMPHASIS */}
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-display font-black text-lg text-wood-900">Total</span>
+                    <span className="font-display font-black text-2xl text-tomato-600">${total.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -251,11 +299,22 @@ export default function CartDrawer({ isOpen, onClose }) {
                 <motion.button
                   onClick={handlePlaceOrder}
                   disabled={isPlacingOrder}
-                  className="w-full py-4 rounded-xl bg-tomato-600 text-white font-bold shadow-lg shadow-tomato-600/20 disabled:opacity-50"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-4 rounded-xl bg-tomato-600 text-white font-bold
+                    shadow-lg shadow-tomato-600/20
+                    hover:bg-tomato-700 active:scale-[0.98]
+                    disabled:bg-wood-200 disabled:text-wood-400 disabled:shadow-none disabled:cursor-not-allowed
+                    transition-all duration-150"
+                  whileHover={!isPlacingOrder ? { scale: 1.02 } : {}}
+                  whileTap={!isPlacingOrder ? { scale: 0.98 } : {}}
                 >
-                  {isPlacingOrder ? 'Placing Order...' : 'Place Order'}
+                  {isPlacingOrder ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="inline-block animate-spin">⏳</span>
+                      Placing Order...
+                    </span>
+                  ) : (
+                    'Place Order'
+                  )}
                 </motion.button>
               </div>
             </div>
@@ -377,24 +436,26 @@ export default function CartDrawer({ isOpen, onClose }) {
                 {/* Summary */}
                 {cart.length > 0 && (
                   <>
-                    <div className="space-y-2 mb-6 p-4 bg-white rounded-xl border border-crust-100">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-wood-600">Subtotal</span>
-                        <span className="font-semibold text-wood-800">${cartTotal.toFixed(2)}</span>
-                      </div>
-                      {orderType === 'delivery' && (
+                    <div className="p-4 bg-crust-50 rounded-xl border border-crust-100 mb-6">
+                      <div className="space-y-3 mb-3">
                         <div className="flex justify-between text-sm">
-                          <span className="text-wood-600">Delivery Fee</span>
-                          <span className="font-semibold text-wood-800">${deliveryFee.toFixed(2)}</span>
+                          <span className="text-wood-600">Subtotal</span>
+                          <span className="font-semibold text-wood-800">${cartTotal.toFixed(2)}</span>
                         </div>
-                      )}
-                      <div className="flex justify-between text-sm border-t border-crust-100 pt-2">
-                        <span className="text-wood-600">Tax</span>
-                        <span className="font-semibold text-wood-800">${tax.toFixed(2)}</span>
+                        {orderType === 'delivery' && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-wood-600">Delivery Fee</span>
+                            <span className="font-semibold text-wood-800">${deliveryFee.toFixed(2)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm">
+                          <span className="text-wood-600">Tax</span>
+                          <span className="font-semibold text-wood-800">${tax.toFixed(2)}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-base font-bold border-t border-crust-100 pt-2">
-                        <span className="text-wood-800">Total</span>
-                        <span className="text-tomato-600">${total.toFixed(2)}</span>
+                      <div className="border-t-2 border-crust-200 pt-3 flex justify-between items-baseline">
+                        <span className="font-display font-black text-wood-900">Total</span>
+                        <span className="font-display font-black text-xl text-tomato-600">${total.toFixed(2)}</span>
                       </div>
                     </div>
 
@@ -406,7 +467,10 @@ export default function CartDrawer({ isOpen, onClose }) {
 
                     <motion.button
                       onClick={handleCheckout}
-                      className="w-full py-4 rounded-xl bg-tomato-600 text-white font-bold shadow-lg shadow-tomato-600/20"
+                      className="w-full py-4 rounded-xl bg-tomato-600 text-white font-bold
+                        shadow-lg shadow-tomato-600/20
+                        hover:bg-tomato-700 active:scale-[0.98]
+                        transition-all duration-150"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
