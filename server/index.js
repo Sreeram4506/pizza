@@ -16,6 +16,7 @@ import analyticsRoutes from './routes/analytics.js'
 import cartRoutes from './routes/cart.js'
 import paymentRoutes from './routes/payments.js'
 import deliveryRoutes from './routes/delivery.js'
+import doordashRoutes from './routes/doordash.js'
 import { config } from './config.js'
 import { connectDatabase } from './utils/database.js'
 import { runCleanup } from './utils/cleanup.js'
@@ -124,6 +125,7 @@ app.use('/api/cart', requireTenant, verifyCustomer, cartRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/payments', paymentRoutes)
 app.use('/api/delivery', requireTenant, deliveryRoutes)
+app.use('/api/doordash', doordashRoutes)
 
 // WebSocket connection handling
 io.on('connection', (socket) => {
