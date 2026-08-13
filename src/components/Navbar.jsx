@@ -99,9 +99,8 @@ export default function Navbar() {
       </div>
       
       <motion.header
-        initial={{ y: -100, opacity: 0 }}
+        initial={false}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-4 left-0 right-0 mx-4 lg:mx-auto lg:max-w-6xl z-[70] transition-all duration-500 rounded-full ${
           scrolled || mobileOpen
             ? 'bg-white/90 backdrop-blur-3xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.08)] py-3'
