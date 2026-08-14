@@ -81,25 +81,25 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-wood-900 text-wood-100">
+        <div className="min-h-screen bg-[#1A1410] text-[#F5F3EF]">
             {/* ── Header ───────────────────────────────── */}
-            <header className="bg-wood-800/95 backdrop-blur-xl border-b border-wood-700 px-4 sm:px-6 lg:px-10 py-4 flex items-center justify-between sticky top-0 z-40">
+            <header className="bg-[#1A1410]/95 backdrop-blur-xl border-b border-[#1A1410]/75 px-4 sm:px-6 lg:px-10 py-4 flex items-center justify-between sticky top-0 z-40">
                 {/* Logo */}
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-tomato-600 rounded-xl flex items-center justify-center text-xl shadow-lg flex-shrink-0">🍕</div>
+                    <div className="w-10 h-10 bg-ember-600 rounded-xl flex items-center justify-center text-xl shadow-lg flex-shrink-0">🍕</div>
                     <div className="hidden sm:block">
                         <h1 className="font-display font-black text-base text-white tracking-tight leading-none">Admin Panel</h1>
-                        <p className="text-[10px] text-tomato-400 font-semibold uppercase tracking-wider">{settings?.restaurantName || 'Pizza Blast'} Control</p>
+                        <p className="text-[10px] text-ember-400 font-semibold uppercase tracking-wider">{settings?.restaurantName || 'Pizza Blast'} Control</p>
                     </div>
                 </div>
 
                 {/* Desktop Tab Nav */}
-                <nav className="hidden sm:flex items-center bg-wood-700/60 rounded-full p-1 border border-wood-600">
+                <nav className="hidden sm:flex items-center bg-[#1A1410]/75/60 rounded-full p-1 border border-[#1A1410]/60">
                     {['orders', 'emails'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${activeTab === tab ? 'bg-tomato-600 text-white shadow-lg' : 'text-wood-300 hover:text-white'
+                            className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${activeTab === tab ? 'bg-ember-600 text-white shadow-lg' : 'text-[#1A1410]/30 hover:text-white'
                                 }`}
                         >
                             {tab === 'orders' ? '📋 Orders' : '📣 Broadcaster'}
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
                     {/* Mobile tab toggle */}
                     <button
                         onClick={() => setActiveTab(t => t === 'orders' ? 'emails' : 'orders')}
-                        className="sm:hidden p-2.5 bg-wood-700 rounded-xl text-wood-300 text-xs font-bold"
+                        className="sm:hidden p-2.5 bg-[#1A1410]/75 rounded-xl text-[#1A1410]/30 text-xs font-bold"
                     >
                         {activeTab === 'orders' ? '📣' : '📋'}
                     </button>
@@ -134,14 +134,14 @@ export default function AdminDashboard() {
             </header>
 
             {/* Mobile Tab Bar */}
-            <div className="sm:hidden flex border-b border-wood-700 bg-wood-800">
+            <div className="sm:hidden flex border-b border-[#1A1410]/75 bg-[#1A1410]">
                 {['orders', 'emails'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition-all ${activeTab === tab
-                            ? 'text-tomato-400 border-b-2 border-tomato-500'
-                            : 'text-wood-400'
+                            ? 'text-ember-400 border-b-2 border-ember-500'
+                            : 'text-[#9B8D74]'
                             }`}
                     >
                         {tab === 'orders' ? '📋 Orders' : '📣 Broadcaster'}
@@ -153,8 +153,8 @@ export default function AdminDashboard() {
             <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-6 pb-24 lg:pb-10">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center h-64 gap-4">
-                        <div className="animate-spin w-10 h-10 border-[3px] border-tomato-500 border-t-transparent rounded-full" />
-                        <p className="text-xs font-bold text-wood-400 uppercase tracking-widest animate-pulse">Syncing Data...</p>
+                        <div className="animate-spin w-10 h-10 border-[3px] border-ember-500 border-t-transparent rounded-full" />
+                        <p className="text-xs font-bold text-[#9B8D74] uppercase tracking-widest animate-pulse">Syncing Data...</p>
                     </div>
                 ) : (
                     <AnimatePresence mode="wait">
@@ -170,17 +170,17 @@ export default function AdminDashboard() {
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                     <div>
                                         <h2 className="text-2xl sm:text-3xl font-display font-black text-white tracking-tight">Queue Management</h2>
-                                        <p className="text-wood-400 text-sm mt-1">Real-time order tracking and response.</p>
+                                        <p className="text-[#9B8D74] text-sm mt-1">Real-time order tracking and response.</p>
                                     </div>
                                     {/* Stats Pills */}
                                     <div className="flex flex-wrap gap-2">
-                                        <span className="bg-wood-800 border border-wood-700 text-tomato-400 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                                        <span className="bg-[#1A1410] border border-[#1A1410]/75 text-ember-400 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
                                             {orders.length} Orders
                                         </span>
-                                        <span className="bg-wood-800 border border-wood-700 text-wood-300 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                                        <span className="bg-[#1A1410] border border-[#1A1410]/75 text-[#1A1410]/30 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
                                             {analytics ? `$${analytics.revenue?.toFixed(2) || '0.00'}` : '--'} Revenue
                                         </span>
-                                        <span className="bg-wood-800 border border-wood-700 text-wood-300 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                                        <span className="bg-[#1A1410] border border-[#1A1410]/75 text-[#1A1410]/30 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
                                             {users.length} Users
                                         </span>
                                     </div>
@@ -189,9 +189,9 @@ export default function AdminDashboard() {
                                 {/* Order Cards */}
                                 <div className="space-y-3">
                                     {orders.length === 0 ? (
-                                        <div className="text-center py-20 bg-wood-800 rounded-2xl border border-dashed border-wood-600">
+                                        <div className="text-center py-20 bg-[#1A1410] rounded-2xl border border-dashed border-[#1A1410]/60">
                                             <div className="text-5xl mb-4 opacity-30">📭</div>
-                                            <p className="text-xs font-black uppercase tracking-widest text-wood-400">No orders yet</p>
+                                            <p className="text-xs font-black uppercase tracking-widest text-[#9B8D74]">No orders yet</p>
                                         </div>
                                     ) : (
                                         orders.map((order, i) => (
@@ -200,11 +200,11 @@ export default function AdminDashboard() {
                                                 initial={{ opacity: 0, x: -12 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: i * 0.04 }}
-                                                className="bg-wood-800 rounded-2xl border border-wood-700 hover:border-wood-600 transition-colors p-4 sm:p-6"
+                                                className="bg-[#1A1410] rounded-2xl border border-[#1A1410]/75 hover:border-[#1A1410]/60 transition-colors p-4 sm:p-6"
                                             >
                                                 {/* Top row: ID + Status + Time */}
                                                 <div className="flex flex-wrap items-center gap-2 mb-3">
-                                                    <span className="text-[10px] font-black bg-wood-700 px-3 py-1 rounded-full text-wood-300 tracking-widest uppercase">
+                                                    <span className="text-[10px] font-black bg-[#1A1410]/75 px-3 py-1 rounded-full text-[#1A1410]/30 tracking-widest uppercase">
                                                         #{(order.id || order._id || '').slice(-6).toUpperCase()}
                                                     </span>
                                                     <span className={`text-[10px] uppercase tracking-wider font-black px-3 py-1 rounded-full ${order.status === 'confirmed'
@@ -213,7 +213,7 @@ export default function AdminDashboard() {
                                                         }`}>
                                                         {order.status}
                                                     </span>
-                                                    <span className="text-[10px] text-wood-500 font-bold uppercase tracking-widest ml-auto">
+                                                    <span className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest ml-auto">
                                                         {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </span>
                                                 </div>
@@ -225,21 +225,21 @@ export default function AdminDashboard() {
 
                                                 {/* Bottom row: Details + Amount */}
                                                 <div className="flex items-end justify-between gap-3 flex-wrap">
-                                                    <div className="flex flex-wrap gap-3 text-xs text-wood-400">
+                                                    <div className="flex flex-wrap gap-3 text-xs text-[#9B8D74]">
                                                         {order.address && (
                                                             <span className="flex items-center gap-1">
-                                                                <span className="text-tomato-400">📍</span>
+                                                                <span className="text-ember-400">📍</span>
                                                                 {typeof order.address === 'string' ? order.address : `${order.address.street}, ${order.address.city}`}
                                                             </span>
                                                         )}
                                                         {(order.customerInfo?.phone || order.phone) && (
                                                             <span className="flex items-center gap-1">
-                                                                <span className="text-tomato-400">📞</span> {order.customerInfo?.phone || order.phone}
+                                                                <span className="text-ember-400">📞</span> {order.customerInfo?.phone || order.phone}
                                                             </span>
                                                         )}
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className="text-xl font-black text-tomato-400">
+                                                        <p className="text-xl font-black text-ember-400">
                                                             ${(order.total || order.items?.reduce((sum, i) => sum + i.price * (i.quantity || i.qty), 0)).toFixed(2)}
                                                         </p>
                                                     </div>
@@ -256,32 +256,32 @@ export default function AdminDashboard() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.98 }}
                             >
-                                <div className="max-w-xl mx-auto bg-wood-800 rounded-2xl border border-wood-700 p-5 sm:p-8 space-y-5">
+                                <div className="max-w-xl mx-auto bg-[#1A1410] rounded-2xl border border-[#1A1410]/75 p-5 sm:p-8 space-y-5">
                                     <div>
                                         <h2 className="text-2xl font-display font-black text-white tracking-tight">Broadcaster</h2>
-                                        <p className="text-wood-400 text-sm mt-1">Send announcements to all {users.length} registered customers.</p>
+                                        <p className="text-[#9B8D74] text-sm mt-1">Send announcements to all {users.length} registered customers.</p>
                                     </div>
 
                                     {/* Subject */}
                                     <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-wood-400 uppercase tracking-widest">Subject Line</label>
+                                        <label className="text-[10px] font-black text-[#9B8D74] uppercase tracking-widest">Subject Line</label>
                                         <input
                                             type="text"
                                             value={offerSubject}
                                             onChange={e => setOfferSubject(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl bg-wood-700 border border-wood-600 outline-none focus:border-tomato-500 text-white text-sm transition-all"
+                                            className="w-full px-4 py-3 rounded-xl bg-[#1A1410]/75 border border-[#1A1410]/60 outline-none focus:border-ember-500 text-white text-sm transition-all"
                                             placeholder="Email subject..."
                                         />
                                     </div>
 
                                     {/* Message */}
                                     <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-wood-400 uppercase tracking-widest">Message</label>
+                                        <label className="text-[10px] font-black text-[#9B8D74] uppercase tracking-widest">Message</label>
                                         <textarea
                                             rows={6}
                                             value={offerText}
                                             onChange={e => setOfferText(e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl bg-wood-700 border border-wood-600 outline-none focus:border-tomato-500 text-white text-sm resize-none transition-all placeholder:text-wood-500"
+                                            className="w-full px-4 py-3 rounded-xl bg-[#1A1410]/75 border border-[#1A1410]/60 outline-none focus:border-ember-500 text-white text-sm resize-none transition-all placeholder:text-[#9B8D74]"
                                             placeholder="Compose your message to customers..."
                                         />
                                     </div>
@@ -290,7 +290,7 @@ export default function AdminDashboard() {
                                         whileTap={{ scale: 0.98 }}
                                         onClick={handleSendOffers}
                                         disabled={sendingEmail || !offerText}
-                                        className="w-full py-4 bg-tomato-600 hover:bg-tomato-700 text-white font-black rounded-xl shadow-lg disabled:opacity-50 transition-colors uppercase tracking-widest text-sm"
+                                        className="w-full py-4 bg-ember-600 hover:bg-ember-700 text-white font-black rounded-xl shadow-lg disabled:opacity-50 transition-colors uppercase tracking-widest text-sm"
                                     >
                                         {sendingEmail ? '🚀 Sending...' : '📣 Broadcast to All Customers'}
                                     </motion.button>

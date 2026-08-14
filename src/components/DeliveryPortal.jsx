@@ -66,20 +66,20 @@ export default function DeliveryPortal() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-wood-900 flex items-center justify-center">
-                <div className="animate-spin w-10 h-10 border-[3px] border-tomato-500 border-t-transparent rounded-full" />
+            <div className="min-h-screen bg-[#1A1410] flex items-center justify-center">
+                <div className="animate-spin w-10 h-10 border-[3px] border-ember-500 border-t-transparent rounded-full" />
             </div>
         )
     }
 
     if (!token || !isDriver) {
         return (
-            <div className="min-h-screen bg-wood-900 flex items-center justify-center p-6">
-                <div className="bg-wood-800 p-8 rounded-3xl max-w-sm w-full text-center border border-wood-700">
+            <div className="min-h-screen bg-[#1A1410] flex items-center justify-center p-6">
+                <div className="bg-[#1A1410] p-8 rounded-3xl max-w-sm w-full text-center border border-[#1A1410]/75">
                     <div className="text-4xl mb-4">🚫</div>
                     <h2 className="text-xl font-black text-white mb-2">Access Denied</h2>
-                    <p className="text-sm text-wood-400 mb-6">You must be logged in as a delivery driver to view this portal.</p>
-                    <a href="/admin/login" className="block w-full py-3 bg-tomato-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-tomato-700 transition-colors">
+                    <p className="text-sm text-[#9B8D74] mb-6">You must be logged in as a delivery driver to view this portal.</p>
+                    <a href="/admin/login" className="block w-full py-3 bg-ember-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-ember-700 transition-colors">
                         Driver Login
                     </a>
                 </div>
@@ -88,19 +88,19 @@ export default function DeliveryPortal() {
     }
 
     return (
-        <div className="min-h-screen bg-wood-900 text-white overflow-x-hidden">
+        <div className="min-h-screen bg-[#1A1410] text-white overflow-x-hidden">
             {/* Header */}
-            <div className="bg-wood-800 border-b border-wood-700 p-4 sticky top-0 z-10 flex justify-between items-center shadow-lg">
+            <div className="bg-[#1A1410] border-b border-[#1A1410]/75 p-4 sticky top-0 z-10 flex justify-between items-center shadow-lg">
                 <div>
-                    <h1 className="text-xl font-display font-black text-tomato-400">Driver Portal</h1>
-                    <p className="text-[10px] text-wood-400 font-bold uppercase tracking-widest">{orders.length} Active Deliveries</p>
+                    <h1 className="text-xl font-display font-black text-ember-400">Driver Portal</h1>
+                    <p className="text-[10px] text-[#9B8D74] font-bold uppercase tracking-widest">{orders.length} Active Deliveries</p>
                 </div>
                 <button
                     onClick={() => {
                         localStorage.removeItem('adminToken')
                         window.location.href = '/'
                     }}
-                    className="p-2 text-wood-400 hover:text-white transition-colors"
+                    className="p-2 text-[#9B8D74] hover:text-white transition-colors"
                 >
                     Logout
                 </button>
@@ -116,8 +116,8 @@ export default function DeliveryPortal() {
                             className="text-center py-20"
                         >
                             <div className="text-6xl mb-4 opacity-50">🛵</div>
-                            <p className="text-wood-400 font-bold uppercase tracking-widest">No active deliveries</p>
-                            <p className="text-xs text-wood-500 mt-2">Wait for assignments from the kitchen.</p>
+                            <p className="text-[#9B8D74] font-bold uppercase tracking-widest">No active deliveries</p>
+                            <p className="text-xs text-[#9B8D74] mt-2">Wait for assignments from the kitchen.</p>
                         </motion.div>
                     ) : (
                         orders.map(order => (
@@ -127,18 +127,18 @@ export default function DeliveryPortal() {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95, x: -100 }}
-                                className="bg-wood-800 rounded-3xl p-5 border border-wood-700 shadow-xl"
+                                className="bg-[#1A1410] rounded-3xl p-5 border border-[#1A1410]/75 shadow-xl"
                             >
-                                <div className="flex justify-between items-start mb-4 pb-4 border-b border-wood-700">
+                                <div className="flex justify-between items-start mb-4 pb-4 border-b border-[#1A1410]/75">
                                     <div>
                                         <h3 className="font-black text-lg text-white">#{order.orderNumber}</h3>
-                                        <p className="text-wood-400 text-xs mt-1">
+                                        <p className="text-[#9B8D74] text-xs mt-1">
                                             {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <span className="text-tomato-400 font-black">${order.total?.toFixed(2)}</span>
-                                        <span className="block mt-1 px-2 py-0.5 bg-tomato-600/20 text-tomato-400 text-[10px] font-black uppercase tracking-widest rounded-md border border-tomato-500/30">
+                                        <span className="text-ember-400 font-black">${order.total?.toFixed(2)}</span>
+                                        <span className="block mt-1 px-2 py-0.5 bg-ember-600/20 text-ember-400 text-[10px] font-black uppercase tracking-widest rounded-md border border-ember-500/30">
                                             PAID
                                         </span>
                                     </div>
@@ -146,30 +146,30 @@ export default function DeliveryPortal() {
 
                                 <div className="space-y-4 mb-6">
                                     <div>
-                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Customer</p>
+                                        <p className="text-[10px] text-[#9B8D74] font-black uppercase tracking-widest mb-1">Customer</p>
                                         <p className="font-bold text-white text-sm">{order.customerInfo?.name}</p>
-                                        <a href={`tel:${order.customerInfo?.phone}`} className="text-tomato-400 font-bold text-sm block mt-1 hover:underline">
+                                        <a href={`tel:${order.customerInfo?.phone}`} className="text-ember-400 font-bold text-sm block mt-1 hover:underline">
                                             📞 {order.customerInfo?.phone}
                                         </a>
                                     </div>
 
                                     <div>
-                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Address</p>
+                                        <p className="text-[10px] text-[#9B8D74] font-black uppercase tracking-widest mb-1">Address</p>
                                         <p className="font-bold text-white text-sm leading-snug">
                                             {typeof order.address === 'string'
                                                 ? order.address
                                                 : `${order.address?.street}, ${order.address?.city}`}
                                         </p>
                                         {order.address?.instructions && (
-                                            <div className="mt-2 text-xs bg-wood-900 p-2 rounded-xl text-wood-300 border border-wood-700">
+                                            <div className="mt-2 text-xs bg-[#1A1410] p-2 rounded-xl text-[#1A1410]/30 border border-[#1A1410]/75">
                                                 "{order.address.instructions}"
                                             </div>
                                         )}
                                     </div>
 
                                     <div>
-                                        <p className="text-[10px] text-wood-500 font-black uppercase tracking-widest mb-1">Items ({order.items?.length})</p>
-                                        <p className="text-xs text-wood-300">
+                                        <p className="text-[10px] text-[#9B8D74] font-black uppercase tracking-widest mb-1">Items ({order.items?.length})</p>
+                                        <p className="text-xs text-[#1A1410]/30">
                                             {order.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')}
                                         </p>
                                     </div>
@@ -177,7 +177,7 @@ export default function DeliveryPortal() {
 
                                 <button
                                     onClick={() => handleDeliver(order._id)}
-                                    className="w-full py-4 bg-tomato-600 hover:bg-tomato-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-tomato-600/20 transition-all active:scale-95"
+                                    className="w-full py-4 bg-ember-600 hover:bg-ember-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-ember-600/20 transition-all active:scale-95"
                                 >
                                     Mark Delivered
                                 </button>

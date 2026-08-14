@@ -59,8 +59,8 @@ const CheckoutForm = ({ amount, onPaymentSuccess, onCancel }) => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="p-6 bg-mozzarella-100 rounded-3xl border border-crust-100 shadow-inner">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-wood-400 mb-4 block">
+            <div className="p-6 bg-[#FAFAF8] rounded-3xl border border-[#EBEBE6] shadow-inner">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9B8D74] mb-4 block">
                     Card Details
                 </label>
                 <CardElement
@@ -68,11 +68,11 @@ const CheckoutForm = ({ amount, onPaymentSuccess, onCancel }) => {
                         style: {
                             base: {
                                 fontSize: '16px',
-                                color: '#292524', // wood-800
-                                '::placeholder': { color: '#a8a29e' }, // wood-400
+                                color: '#292524', // [#1A1410]
+                                '::placeholder': { color: '#a8a29e' }, // [#9B8D74]
                                 fontFamily: 'Inter, system-ui, sans-serif',
                             },
-                            invalid: { color: '#dc2626' }, // tomato-600
+                            invalid: { color: '#dc2626' }, // ember-600
                         },
                     }}
                 />
@@ -82,7 +82,7 @@ const CheckoutForm = ({ amount, onPaymentSuccess, onCancel }) => {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="p-4 bg-tomato-50 border border-tomato-100 text-tomato-600 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center"
+                    className="p-4 bg-ember-50 border border-ember-100 text-ember-600 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center"
                 >
                     {error}
                 </motion.div>
@@ -92,7 +92,7 @@ const CheckoutForm = ({ amount, onPaymentSuccess, onCancel }) => {
                 <motion.button
                     type="submit"
                     disabled={!stripe || processing || !clientSecret}
-                    className="w-full py-5 rounded-[2rem] bg-tomato-600 text-white font-black text-lg shadow-xl shadow-tomato-600/20 disabled:opacity-50 transition-all uppercase tracking-widest"
+                    className="w-full py-5 rounded-[2rem] bg-ember-600 text-white font-black text-lg shadow-xl shadow-ember-600/20 disabled:opacity-50 transition-all uppercase tracking-widest"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                 >
@@ -101,7 +101,7 @@ const CheckoutForm = ({ amount, onPaymentSuccess, onCancel }) => {
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="w-full py-2 text-wood-400 font-bold text-[10px] uppercase tracking-widest hover:text-tomato-600 transition-colors"
+                    className="w-full py-2 text-[#9B8D74] font-bold text-[10px] uppercase tracking-widest hover:text-ember-600 transition-colors"
                 >
                     Cancel & Go Back
                 </button>

@@ -56,7 +56,7 @@ export default function Testimonials() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           className="text-center mb-20"
         >
-          <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold-400 block mb-4">
+          <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-4">
             Testimonials
           </span>
           <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
@@ -97,7 +97,7 @@ export default function Testimonials() {
               </p>
 
               {/* Thin divider */}
-              <div className="w-12 h-px bg-gold-400/30 mx-auto mb-8" />
+              <div className="w-12 h-px bg-ember-500/30 mx-auto mb-8" />
 
               {/* Customer — mono small caps */}
               <div>

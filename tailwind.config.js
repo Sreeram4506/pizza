@@ -123,6 +123,7 @@ export default {
         body: ['"Segoe UI"', '"Inter"', 'Helvetica Neue', 'Arial', 'sans-serif'],
         mono: ['"SFMono-Regular"', 'Consolas', '"Liberation Mono"', 'Menlo', 'monospace'],
         marquee: ['"Segoe UI"', '"Inter"', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        'serif-1947': ['"Playfair Display"', 'Georgia', 'serif'],
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',

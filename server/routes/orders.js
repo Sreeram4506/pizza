@@ -113,8 +113,15 @@ router.post('/', optionalVerifyCustomer, async (req, res) => {
 
     switch (type || 'delivery') {
       case 'delivery':
-        estimatedReadyAt = new Date(now.getTime() + 25 * 60 * 1000) // 25 min for prep
-        estimatedDeliveryAt = new Date(now.getTime() + 40 * 60 * 1000) // 40 min total (25 prep + 15 delivery)
+        // If customer scheduled a future delivery time, honor it, otherwise default to ASAP
+        if (pickupDateTime) {
+          const scheduledAt = new Date(pickupDateTime)
+          estimatedDeliveryAt = scheduledAt
+          estimatedReadyAt = new Date(scheduledAt.getTime() - 15 * 60 * 1000) // Ready 15 min before delivery window
+        } else {
+          estimatedReadyAt = new Date(now.getTime() + 25 * 60 * 1000) // 25 min for prep
+          estimatedDeliveryAt = new Date(now.getTime() + 40 * 60 * 1000) // 40 min total (25 prep + 15 delivery)
+        }
         estimatedDineInTime = null
         break
       case 'pickup':

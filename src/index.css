@@ -3,27 +3,28 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════
-   PIZZABLAST — Premium White Theme
+   PIZZA BLAST — Artisan Neapolitan Theme
+   Near-black (#1A1410) + terracotta ember (#B35B33) on cream/white
    ═══════════════════════════════════════════ */
 
 :root {
   --font-ui: "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
   --font-mono-ui: "SFMono-Regular", "Consolas", "Liberation Mono", Menlo, monospace;
 
-  /* Core Palette — Strictly Black, White, and Gold (#D4AF37) */
+  /* Core Palette */
   --bg-primary: #FFFFFF;
   --bg-surface: #FFFFFF;
-  --bg-elevated: #F5F5F5;
+  --bg-elevated: #F5F3EF;
   --bg-card: #FFFFFF;
-  --accent-primary: #D4AF37;
-  --accent-glow: rgba(212, 175, 55, 0.12);
-  --accent-secondary: #D4AF37;
-  --accent-secondary-dim: rgba(212, 175, 55, 0.14);
-  --text-primary: #000000;
-  --text-secondary: #1A1A1A;
-  --text-muted: #555555;
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-accent: rgba(212, 175, 55, 0.3);
+  --accent-primary: #B35B33;
+  --accent-glow: rgba(179, 91, 51, 0.12);
+  --accent-secondary: #B35B33;
+  --accent-secondary-dim: rgba(179, 91, 51, 0.14);
+  --text-primary: #1A1410;
+  --text-secondary: #1A1410;
+  --text-muted: #9B8D74;
+  --border-subtle: rgba(26, 20, 16, 0.08);
+  --border-accent: rgba(179, 91, 51, 0.3);
 
   /* Easings */
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
@@ -31,16 +32,16 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Legacy mappings */
-  --color-primary: #D4AF37;
-  --color-accent: #D4AF37;
+  --color-primary: #B35B33;
+  --color-accent: #B35B33;
   --color-bg: #FFFFFF;
   --color-surface: #FFFFFF;
-  --color-text: #000000;
-  --color-text-muted: #555555;
-  --color-border: rgba(0, 0, 0, 0.08);
-  --brand-dark: #000000;
+  --color-text: #1A1410;
+  --color-text-muted: #9B8D74;
+  --color-border: rgba(26, 20, 16, 0.08);
+  --brand-dark: #1A1410;
   --brand-card: #FFFFFF;
-  --brand-gold: #D4AF37;
+  --brand-gold: #B35B33;
   --brand-cream: #FFFFFF;
 }
 
@@ -108,17 +109,17 @@ body {
 
 /* ═══ Glow Backgrounds (Light) ═══ */
 .ember-glow-bg {
-  background: radial-gradient(ellipse at bottom left, rgba(212, 175, 55, 0.07) 0%, transparent 55%);
+  background: radial-gradient(ellipse at bottom left, rgba(179, 91, 51, 0.07) 0%, transparent 55%);
 }
 
 .gold-glow-bg {
-  background: radial-gradient(ellipse at top right, rgba(212, 175, 55, 0.05) 0%, transparent 45%);
+  background: radial-gradient(ellipse at top right, rgba(232, 165, 126, 0.06) 0%, transparent 45%);
 }
 
 /* ═══ Section Dividers ═══ */
 .divider-gold {
   height: 1px;
-  background: rgba(212, 175, 55, 0.15);
+  background: rgba(179, 91, 51, 0.18);
 }
 
 .divider-subtle {
@@ -126,45 +127,76 @@ body {
   background: var(--border-subtle);
 }
 
-/* ═══ Card Style ═══ */
-.noir-card {
-  background: var(--bg-surface);
+/* ═══ Glass Panels (Reservations / Catering forms) ═══ */
+.glass-panel-strong {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-subtle);
-  transition: all 0.4s var(--ease-smooth);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 60px rgba(26, 20, 16, 0.08);
 }
 
-.noir-card:hover {
-  border-color: var(--border-accent);
-  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.08);
+.glass-highlight-ring {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 20px 60px rgba(26, 20, 16, 0.08);
 }
 
-/* ═══ Buttons ═══ */
-.btn-ember {
-  background: var(--accent-primary);
-  color: #FFFFFF;
-  border-radius: 8px;
+.glass-button-dark {
+  background: var(--text-primary);
   transition: all 0.3s var(--ease-smooth);
 }
 
-.btn-ember:hover {
-  background: #B65A32;
-  box-shadow: 0 4px 20px rgba(162, 74, 40, 0.25);
+.glass-button-dark:hover:not(:disabled) {
+  background: var(--accent-primary);
+  box-shadow: 0 8px 24px var(--accent-glow);
 }
 
-.btn-outlined {
-  background: transparent;
+/* ═══ Legal / Static Content Pages ═══ */
+.glass-shell {
+  background: var(--bg-elevated);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-subtle);
+  border-radius: 32px;
+  box-shadow: 0 20px 60px rgba(26, 20, 16, 0.06);
+}
+
+.glass-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+}
+
+.section-eyebrow {
+  font-family: var(--font-mono-ui);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+
+.section-title {
+  font-family: "Playfair Display", var(--font-ui);
+  font-style: italic;
+  font-weight: 800;
+  font-size: clamp(2rem, 4vw, 3rem);
   color: var(--text-primary);
-  border-radius: 8px;
-  transition: all 0.3s var(--ease-smooth);
+  letter-spacing: -0.01em;
 }
 
-.btn-outlined:hover {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(162, 74, 40, 0.2);
+.section-copy {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.section-rule {
+  height: 1px;
+  background: var(--border-subtle);
 }
 
 /* ═══ Nav Link Hover Underline ═══ */
@@ -268,24 +300,13 @@ body {
   filter: saturate(1.1) brightness(1.02) contrast(1.05);
 }
 
-/* ═══ Ghost / Stroke Text ═══ */
-.text-stroke {
-  -webkit-text-stroke: 2px var(--text-primary);
-  color: transparent;
-}
-
-.text-ghost {
-  opacity: 0.04;
-  color: var(--text-primary);
-}
-
 /* ═══ Foil Shimmer Effect ═══ */
 .foil-shimmer {
   background: linear-gradient(105deg,
       transparent 40%,
-      rgba(212, 146, 42, 0.06) 45%,
-      rgba(212, 146, 42, 0.12) 50%,
-      rgba(212, 146, 42, 0.06) 55%,
+      rgba(196, 106, 59, 0.06) 45%,
+      rgba(196, 106, 59, 0.12) 50%,
+      rgba(196, 106, 59, 0.06) 55%,
       transparent 60%);
   background-size: 200% 100%;
   animation: shimmer 3s linear infinite;
@@ -352,60 +373,11 @@ a {
 }
 
 /* ═══ Legacy compatibility classes ═══ */
-.pizza-bg {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C1440E' fill-opacity='0.03'%3E%3Ccircle cx='10' cy='10' r='1'/%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3Ccircle cx='50' cy='50' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-}
-
-.wood-texture {
-  background-image:
-    linear-gradient(90deg, rgba(26, 20, 16, 0.02) 1px, transparent 1px),
-    linear-gradient(rgba(26, 20, 16, 0.02) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
-.pizza-card {
-  border-radius: 12px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  transition: all 0.4s var(--ease-smooth);
-}
-
-.pizza-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 32px rgba(162, 74, 40, 0.1);
-}
-
 .btn-tomato {
   background: var(--accent-primary);
-  box-shadow: 0 4px 14px rgba(162, 74, 40, 0.2);
+  box-shadow: 0 4px 14px rgba(179, 91, 51, 0.2);
 }
 
 .btn-tomato:hover {
-  box-shadow: 0 6px 20px rgba(162, 74, 40, 0.3);
-}
-
-.btn-crust {
-  background: var(--accent-secondary);
-  box-shadow: 0 4px 14px rgba(139, 122, 78, 0.2);
-}
-
-.btn-basil {
-  background: var(--accent-secondary);
-  box-shadow: 0 4px 14px rgba(139, 122, 78, 0.15);
-}
-
-@keyframes float-cheese {
-
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-
-  50% {
-    transform: translateY(-15px) rotate(5deg);
-  }
-}
-
-.animate-float-cheese {
-  animation: float-cheese 4s ease-in-out infinite;
+  box-shadow: 0 6px 20px rgba(179, 91, 51, 0.3);
 }

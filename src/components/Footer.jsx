@@ -1,8 +1,19 @@
 import { useSettings } from '../context/SettingsContext'
 
+const NAV_LINKS = [
+  { label: 'Home', href: '/#home' },
+  { label: 'Menu', href: '/menu' },
+  { label: 'Custom Pizza', href: '/#atelier' },
+  { label: 'Reservations', href: '/dining' },
+  { label: 'Catering', href: '/catering' },
+  { label: 'Track Order', href: '/track' },
+]
+
 export default function Footer() {
   const currentYear = new Date().getFullYear()
   const { settings } = useSettings()
+  const address = settings?.address || '123 Pizza Plaza, New York, NY 10001'
+  const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
 
   return (
     <footer className="bg-[#1A1410] relative overflow-hidden section-grain">
@@ -19,12 +30,12 @@ export default function Footer() {
         {/* 4 Columns */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 py-16">
           <div>
-            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">Navigate</h4>
+            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-ember-500 mb-6">Navigate</h4>
             <ul className="space-y-4">
-              {['Home', 'Menu', 'Order Online', 'Custom Pizza', 'Track Order'].map((link) => (
-                <li key={link}>
-                  <a href="#" className="text-white/50 text-sm font-body hover:text-white transition-colors">
-                    {link}
+              {NAV_LINKS.map((link) => (
+                <li key={link.label}>
+                  <a href={link.href} className="text-white/50 text-sm font-body hover:text-white transition-colors">
+                    {link.label}
                   </a>
                 </li>
               ))}
@@ -32,7 +43,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">Hours</h4>
+            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-ember-500 mb-6">Hours</h4>
             <ul className="space-y-4">
               <li className="text-white/50 text-sm font-body">Mon – Fri: 10am – 11pm</li>
               <li className="text-white/50 text-sm font-body">Saturday: 10am – 12am</li>
@@ -42,18 +53,18 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">Location</h4>
+            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-ember-500 mb-6">Location</h4>
             <p className="text-white/50 text-sm font-body leading-relaxed mb-4">
               {settings?.address?.split(',')[0] || '123 Pizza Plaza'}<br />
               {settings?.address?.split(',').slice(1).join(',') || 'New York, NY 10001'}
             </p>
-            <a href="#" className="text-white text-sm font-body hover:text-ember-500 transition-colors">
+            <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="text-white text-sm font-body hover:text-ember-500 transition-colors">
               Get Directions →
             </a>
           </div>
 
           <div>
-            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 mb-6">Follow</h4>
+            <h4 className="font-mono text-[9px] tracking-[0.25em] uppercase text-ember-500 mb-6">Follow</h4>
             <ul className="space-y-4">
               {['Instagram', 'Facebook', 'Twitter', 'TikTok'].map((social) => (
                 <li key={social}>
@@ -72,8 +83,8 @@ export default function Footer() {
             © {currentYear} {settings?.restaurantName || 'Mustang Pizza'} — All rights reserved
           </p>
           <div className="flex items-center gap-6 text-xs font-body">
-            <a href="#" className="text-white/30 hover:text-white/60 transition-colors">Privacy</a>
-            <a href="#" className="text-white/30 hover:text-white/60 transition-colors">Terms</a>
+            <a href="/legal/privacy" className="text-white/30 hover:text-white/60 transition-colors">Privacy</a>
+            <a href="/legal/terms" className="text-white/30 hover:text-white/60 transition-colors">Terms</a>
             <span className="text-white/20">Made with ♥ in New York</span>
           </div>
         </div>

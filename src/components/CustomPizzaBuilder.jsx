@@ -300,7 +300,7 @@ export default function CustomPizzaBuilder() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="font-mono text-[10px] tracking-[0.4em] uppercase text-gold-400 block mb-4"
+            className="font-mono text-[10px] tracking-[0.4em] uppercase text-ember-500 block mb-4"
           >
             The Atelier
           </motion.span>
@@ -345,7 +345,7 @@ export default function CustomPizzaBuilder() {
                 className={`relative flex items-center gap-3 px-6 py-3 transition-all duration-500 ${currentStep === step.id
                   ? 'text-[#1A1410]'
                   : currentStep > step.id
-                    ? 'text-gold-500'
+                    ? 'text-ember-600'
                     : 'text-[#9B8D74]/40'
                   }`}
               >
@@ -366,7 +366,7 @@ export default function CustomPizzaBuilder() {
                 )}
               </motion.button>
               {i < STEPS.length - 1 && (
-                <div className={`w-12 h-px mx-2 transition-colors duration-500 ${currentStep > step.id ? 'bg-gold-400/40' : 'bg-[rgba(26,20,16,0.08)]'
+                <div className={`w-12 h-px mx-2 transition-colors duration-500 ${currentStep > step.id ? 'bg-ember-500/40' : 'bg-[rgba(26,20,16,0.08)]'
                   }`} />
               )}
             </div>
@@ -599,9 +599,8 @@ export default function CustomPizzaBuilder() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-8 p-6 bg-[#F5F3EF] border border-[rgba(26,20,16,0.08)] rounded-xl"
-                style={{ borderRadius: '2px' }}
               >
-                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 block mb-4">Your Creation</span>
+                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ember-500 block mb-4">Your Creation</span>
                 <div className="space-y-2">
                   {selectedBase && (
                     <div className="flex justify-between text-sm">
@@ -656,11 +655,10 @@ export default function CustomPizzaBuilder() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 * i }}
                         onClick={() => { setSelectedBase(base); triggerPulse() }}
-                        className={`w-full flex items-center gap-5 p-5 border transition-all duration-500 group text-left ${selectedBase?.id === base.id
+                        className={`w-full flex items-center gap-5 p-5 rounded-xl border transition-all duration-500 group text-left ${selectedBase?.id === base.id
                           ? 'border-ember-500/40 bg-ember-500/5 shadow-ember'
-                          : 'border-[rgba(242,235,217,0.06)] bg-noir-850 hover:border-[rgba(193,68,14,0.2)]'
+                          : 'border-[rgba(26,20,16,0.06)] bg-[#F5F3EF] hover:border-[rgba(193,68,14,0.2)]'
                           }`}
-                        style={{ borderRadius: '2px' }}
                       >
                         <div
                           className="w-12 h-12 rounded-full flex-shrink-0 transition-transform group-hover:scale-110"
@@ -673,7 +671,7 @@ export default function CustomPizzaBuilder() {
                           <div className="font-body font-medium text-[#1A1410]">{base.name}</div>
                           <div className="font-body text-xs text-[#9B8D74]">{base.desc}</div>
                         </div>
-                        <div className="font-mono text-sm text-gold-400">
+                        <div className="font-mono text-sm text-ember-500">
                           {base.price > 0 ? `+$${base.price.toFixed(2)}` : 'Free'}
                         </div>
                         {selectedBase?.id === base.id && (
@@ -714,11 +712,10 @@ export default function CustomPizzaBuilder() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 * i }}
                         onClick={() => { setSelectedSauce(sauce); triggerPulse() }}
-                        className={`relative overflow-hidden p-6 border transition-all duration-500 group text-left ${selectedSauce?.id === sauce.id
+                        className={`relative overflow-hidden p-6 rounded-xl border transition-all duration-500 group text-left ${selectedSauce?.id === sauce.id
                           ? 'border-ember-500/40 bg-ember-500/5 shadow-ember'
-                          : 'border-[rgba(242,235,217,0.06)] bg-noir-850 hover:border-[rgba(193,68,14,0.2)]'
+                          : 'border-[rgba(26,20,16,0.06)] bg-[#F5F3EF] hover:border-[rgba(193,68,14,0.2)]'
                           }`}
-                        style={{ borderRadius: '2px' }}
                       >
                         {/* Sauce color accent */}
                         <div
@@ -734,7 +731,7 @@ export default function CustomPizzaBuilder() {
                         />
                         <div className="font-body font-medium text-[#1A1410] text-sm">{sauce.name}</div>
                         <div className="font-body text-xs text-[#9B8D74] mt-1">{sauce.desc}</div>
-                        <div className="font-mono text-xs text-gold-400 mt-3">
+                        <div className="font-mono text-xs text-ember-500 mt-3">
                           {sauce.price > 0 ? `+$${sauce.price.toFixed(2)}` : 'Included'}
                         </div>
                       </motion.button>
@@ -766,7 +763,7 @@ export default function CustomPizzaBuilder() {
                       }, {})
                     ).map(([category, toppings], catIdx) => (
                       <div key={category} className="space-y-4">
-                        <h3 className="font-mono text-[9px] tracking-[0.3em] uppercase text-gold-400/60 pb-2 border-b border-[rgba(26,20,16,0.05)]">
+                        <h3 className="font-mono text-[9px] tracking-[0.3em] uppercase text-ember-500/60 pb-2 border-b border-[rgba(26,20,16,0.05)]">
                           {category}
                         </h3>
                         <div className="grid grid-cols-2 gap-3">
@@ -779,11 +776,10 @@ export default function CustomPizzaBuilder() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.05 * i + catIdx * 0.1 }}
                                 onClick={() => handleToppingToggle(topping)}
-                                className={`flex items-center gap-3 p-4 border transition-all duration-300 group text-left ${isSelected
+                                className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-300 group text-left ${isSelected
                                   ? 'border-ember-500/40 bg-ember-500/10'
-                                  : 'border-[rgba(242,235,217,0.06)] bg-white hover:border-[rgba(193,68,14,0.1)]'
+                                  : 'border-[rgba(26,20,16,0.06)] bg-white hover:border-[rgba(193,68,14,0.1)]'
                                   }`}
-                                style={{ borderRadius: '2px' }}
                               >
                                 <motion.span
                                   className="text-2xl"
@@ -793,14 +789,13 @@ export default function CustomPizzaBuilder() {
                                 </motion.span>
                                 <div className="flex-1 min-w-0">
                                   <div className="font-body font-medium text-[#1A1410] text-sm truncate">{topping.name}</div>
-                                  <div className="font-mono text-[10px] text-gold-400">+${topping.price.toFixed(2)}</div>
+                                  <div className="font-mono text-[10px] text-ember-500">+${topping.price.toFixed(2)}</div>
                                 </div>
                                 {isSelected && (
                                   <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    className="w-5 h-5 bg-ember-500 flex items-center justify-center flex-shrink-0 rounded"
-                                    style={{ borderRadius: '2px' }}
+                                    className="w-5 h-5 bg-ember-500 flex items-center justify-center flex-shrink-0 rounded-full"
                                   >
                                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
                                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -906,9 +901,8 @@ export default function CustomPizzaBuilder() {
                     whileTap={{ scale: 0.98 }}
                     onClick={nextStep}
                     disabled={currentStep === 1 && !selectedBase}
-                    className={`px-8 py-4 bg-ember-500 text-parchment-200 font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center gap-2 ${(currentStep === 1 && !selectedBase) ? 'opacity-50 cursor-not-allowed' : ''
+                    className={`px-8 py-4 rounded-xl bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center gap-2 ${(currentStep === 1 && !selectedBase) ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
-                    style={{ borderRadius: '2px' }}
                   >
                     {currentStep === 3 ? 'Bake Simulation' : 'Continue'}
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -921,7 +915,6 @@ export default function CustomPizzaBuilder() {
                       whileTap={{ scale: 0.98 }}
                       onClick={resetBuilder}
                       className="px-6 py-4 border border-[rgba(26,20,16,0.1)] text-[#9B8D74] font-body text-sm tracking-[0.1em] uppercase hover:text-[#1A1410] transition-all rounded-xl"
-                      style={{ borderRadius: '2px' }}
                     >
                       Reset
                     </motion.button>
@@ -930,9 +923,8 @@ export default function CustomPizzaBuilder() {
                       whileTap={bakeProgress === 100 ? { scale: 0.98 } : {}}
                       onClick={addToCartInternal}
                       disabled={bakeProgress < 100}
-                      className={`px-6 py-4 border border-gold-400/30 text-gold-400 font-body font-semibold text-sm tracking-[0.1em] uppercase hover:bg-gold-400/10 transition-all rounded-xl ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
+                      className={`px-6 py-4 border border-ember-500/40 text-ember-600 font-body font-semibold text-sm tracking-[0.1em] uppercase hover:bg-ember-500/10 transition-all rounded-xl ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
                         }`}
-                      style={{ borderRadius: '2px' }}
                     >
                       Add to Cart
                     </motion.button>
@@ -943,7 +935,6 @@ export default function CustomPizzaBuilder() {
                       disabled={bakeProgress < 100}
                       className={`px-8 py-4 bg-ember-500 text-white font-body font-semibold text-sm tracking-[0.15em] uppercase hover:shadow-ember transition-all flex items-center gap-2 rounded-xl ${bakeProgress < 100 ? 'opacity-30 cursor-not-allowed' : ''
                         }`}
-                      style={{ borderRadius: '2px' }}
                     >
                       Order Now
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>

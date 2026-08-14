@@ -56,7 +56,7 @@ export default function AdminLogin() {
                 style={{ borderRadius: '2px' }}
             >
                 <div className="text-center mb-10">
-                    <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-gold-400 block mb-4">Management Portal</span>
+                    <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-ember-500 block mb-4">Management Portal</span>
                     <h1 className="font-display italic text-4xl text-[#1A1410] tracking-tight">Admin Access</h1>
                 </div>
 

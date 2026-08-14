@@ -1,6 +1,5 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import toast from 'react-hot-toast'
 import { useSettings } from '../context/SettingsContext'
 
 export default function Contact() {
@@ -62,7 +61,7 @@ export default function Contact() {
               transition={{ delay: 0.3 + i * 0.1 }}
               className="bg-[#F5F3EF] p-8 lg:p-12"
             >
-              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 block mb-6">
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ember-500 block mb-6">
                 {item.title}
               </span>
               <p className="text-[#1A1410] font-sub text-lg mb-2">{item.info}</p>
@@ -92,12 +91,14 @@ export default function Contact() {
           >
             Email Us
           </a>
-          <button
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address || '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-8 py-4 border border-[rgba(26,20,16,0.1)] text-[#1A1410] font-body text-sm font-medium tracking-[0.15em] uppercase transition-all hover:bg-ember-500 hover:border-ember-500 hover:text-white rounded-xl"
-            onClick={() => toast.success('Opening maps...')}
           >
             Get Directions
-          </button>
+          </a>
         </motion.div>
 
         {/* Delivery Partners */}

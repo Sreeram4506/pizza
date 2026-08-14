@@ -36,7 +36,7 @@ export default function About() {
           </blockquote>
 
           {/* Thin rule */}
-          <div className="w-16 h-px bg-gold-400/40 mb-10" />
+          <div className="w-16 h-px bg-ember-500/40 mb-10" />
 
           {/* Description */}
           <div className="grid md:grid-cols-2 gap-12 max-w-3xl">

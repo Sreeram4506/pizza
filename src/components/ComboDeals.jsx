@@ -70,7 +70,7 @@ export default function ComboDeals() {
           className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8"
         >
           <div>
-            <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-gold-400 block mb-4">
+            <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 block mb-4">
               Private Offers
             </span>
             <h2 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-[#1A1410] tracking-tight italic">
@@ -103,7 +103,7 @@ export default function ComboDeals() {
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 foil-shimmer" />
 
                 {/* Tag */}
-                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-gold-400 relative z-10">
+                <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-ember-500 relative z-10">
                   {combo.tag}
                 </span>
 
@@ -115,7 +115,7 @@ export default function ComboDeals() {
                 {/* Price */}
                 <div className="flex items-baseline gap-3 mb-8 relative z-10">
                   <span className="font-mono text-xl md:text-2xl text-ember-500 tracking-tight">${combo.price}</span>
-                  <span className="font-mono text-[11px] text-gold-400/60">Save ${combo.savings}</span>
+                  <span className="font-mono text-[11px] text-ember-500/70">Save ${combo.savings}</span>
                 </div>
 
                 {/* Divider */}
@@ -159,7 +159,7 @@ export default function ComboDeals() {
           </span>
           <span className="w-px h-4 bg-[rgba(26,20,16,0.1)]" />
           <span className="font-mono text-[10px] tracking-[0.2em] uppercase">
-            <span className="text-gold-400">20% off</span> first-time customers
+            <span className="text-ember-500">20% off</span> first-time customers
           </span>
         </motion.div>
       </div>

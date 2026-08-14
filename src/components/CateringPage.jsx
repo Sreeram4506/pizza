@@ -1,13 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 
 export default function CateringPage() {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
   const { settings } = useSettings()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({

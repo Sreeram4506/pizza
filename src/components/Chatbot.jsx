@@ -497,16 +497,25 @@ export default function Chatbot() {
     <>
       {/* Floating Chat Button with cart badge */}
       <motion.button
-        className="fixed bottom-8 right-8 z-[60] w-16 h-16 rounded-full bg-gradient-to-r from-tomato-500 to-tomato-700 shadow-[0_0_30px_rgba(239,68,68,0.4)] flex items-center justify-center text-white"
+        className="fixed bottom-8 right-8 z-[60] w-16 h-16 rounded-full bg-gradient-to-r from-ember-500 to-ember-700 shadow-[0_0_30px_rgba(179,91,51,0.4)] flex items-center justify-center text-white"
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 1 }}
-        whileHover={{ scale: 1.1, shadow: '0 0 50px rgba(244,162,97,0.6)' }}
+        whileHover={{ scale: 1.1, shadow: '0 0 50px rgba(196,106,59,0.6)' }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? 'Close chat' : 'Open chat'}
       >
-        <motion.span className="text-2xl" animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
-          {isOpen ? '✕' : '💬'}
+        <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
+          {isOpen ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8-1.17 0-2.29-.196-3.31-.552L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          )}
         </motion.span>
         {cartCount > 0 && !isOpen && (
           <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-white text-black text-xs flex items-center justify-center font-black shadow-lg">
@@ -525,16 +534,16 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[60] bg-mozzarella-100 flex flex-col border-none text-wood-800"
+            className="fixed inset-0 z-[60] bg-[#FAFAF8] flex flex-col border-none text-[#1A1410]"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-8 border-b border-gray-100 bg-white">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-tomato-600 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(220,38,38,0.2)] text-white">
+                <div className="w-12 h-12 rounded-2xl bg-ember-600 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(220,38,38,0.2)] text-white">
                   🍕
                 </div>
                 <div>
-                  <h3 className="font-display font-black text-xl text-wood-800 tracking-tight uppercase">Pizza Assistant</h3>
+                  <h3 className="font-display font-black text-xl text-[#1A1410] tracking-tight uppercase">Pizza Assistant</h3>
                   <p className="text-[10px] text-basil-600 font-black uppercase tracking-[0.2em] flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-basil-600 animate-pulse" /> System Active
                   </p>
@@ -552,7 +561,7 @@ export default function Chatbot() {
                     if (voiceEnabled) cancelSpeech()
                     setVoiceEnabled(!voiceEnabled)
                   }}
-                  className={`p-3 rounded-xl border transition-all ${voiceEnabled ? 'bg-tomato-100 border-tomato-200 text-tomato-600' : 'bg-gray-50 border-gray-100 text-gray-400'} ${!supported.synthesis ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`p-3 rounded-xl border transition-all ${voiceEnabled ? 'bg-ember-100 border-ember-200 text-ember-600' : 'bg-gray-50 border-gray-100 text-gray-400'} ${!supported.synthesis ? 'opacity-50 cursor-not-allowed' : ''}`}
                   whileTap={{ scale: 0.95 }}
                   title={!supported.synthesis ? 'Speech not supported' : (voiceEnabled ? 'Disable Voice' : 'Enable Voice')}
                 >
@@ -569,7 +578,7 @@ export default function Chatbot() {
                     <motion.button
                       key={tab}
                       onClick={() => (tab === 'menu' ? goToMenu() : setView(tab))}
-                      className={`px-8 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${view === tab ? 'bg-tomato-600 text-white shadow-lg shadow-tomato-600/20' : 'text-wood-600 hover:text-tomato-600'}`}
+                      className={`px-8 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${view === tab ? 'bg-ember-600 text-white shadow-lg shadow-ember-600/20' : 'text-[#1A1410]/60 hover:text-ember-600'}`}
                       whileTap={{ scale: 0.95 }}
                     >
                       {tab === 'cart' ? `Cart ${cartCount > 0 ? `(${cartCount})` : ''}` : tab}
@@ -579,7 +588,7 @@ export default function Chatbot() {
 
                 <motion.button
                   onClick={() => setIsOpen(false)}
-                  className="w-12 h-12 rounded-full border border-crust-100 flex items-center justify-center text-wood-500 hover:text-tomato-600 hover:border-tomato-200 transition-all font-bold"
+                  className="w-12 h-12 rounded-full border border-[#EBEBE6] flex items-center justify-center text-[#9B8D74] hover:text-ember-600 hover:border-ember-200 transition-all font-bold"
                   whileTap={{ scale: 0.9 }}
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -597,16 +606,16 @@ export default function Chatbot() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="w-full bg-white rounded-[3rem] p-10 shadow-crust border border-crust-100 relative overflow-hidden"
+                    className="w-full bg-white rounded-[3rem] p-10 shadow-ember border border-[#EBEBE6] relative overflow-hidden"
                   >
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-tomato-500/5 rounded-full blur-2xl -mr-12 -mt-12" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-ember-500/5 rounded-full blur-2xl -mr-12 -mt-12" />
 
                     <div className="text-center mb-10">
-                      <div className="w-20 h-20 bg-tomato-600 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-xl shadow-tomato-600/20 mb-6 text-white">
+                      <div className="w-20 h-20 bg-ember-600 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-xl shadow-ember-600/20 mb-6 text-white">
                         💳
                       </div>
-                      <h2 className="font-display font-black text-3xl text-wood-800 tracking-tight uppercase">Secure Payment</h2>
-                      <p className="text-xs text-wood-400 font-bold uppercase tracking-widest mt-2">Paying ${(cartTotal + (orderType === 'delivery' ? 3.99 : 0)).toFixed(2)} to {settings?.restaurantName || 'Pizza Blast'}</p>
+                      <h2 className="font-display font-black text-3xl text-[#1A1410] tracking-tight uppercase">Secure Payment</h2>
+                      <p className="text-xs text-[#9B8D74] font-bold uppercase tracking-widest mt-2">Paying ${(cartTotal + (orderType === 'delivery' ? 3.99 : 0)).toFixed(2)} to {settings?.restaurantName || 'Pizza Blast'}</p>
                     </div>
 
                     <StripePayment
@@ -615,7 +624,7 @@ export default function Chatbot() {
                       onCancel={() => setView('checkout')}
                     />
 
-                    <div className="mt-10 flex items-center justify-center gap-2 text-wood-200">
+                    <div className="mt-10 flex items-center justify-center gap-2 text-[#1A1410]/15">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                       </svg>
@@ -644,10 +653,10 @@ export default function Chatbot() {
               {view === 'menu' && (
                 <div className="p-6 max-w-4xl mx-auto w-full">
                   <div className="flex items-center justify-between mb-8">
-                    <h2 className="font-display font-black text-4xl text-wood-800 tracking-tighter">🍕 Our Selection</h2>
+                    <h2 className="font-display font-black text-4xl text-[#1A1410] tracking-tighter">🍕 Our Selection</h2>
                     <button
                       onClick={fetchMenuData}
-                      className="px-4 py-2 bg-tomato-100 text-tomato-700 rounded-lg hover:bg-tomato-200 transition-colors"
+                      className="px-4 py-2 bg-ember-100 text-ember-700 rounded-lg hover:bg-ember-200 transition-colors"
                       title="Refresh menu"
                     >
                       Refresh
@@ -656,8 +665,8 @@ export default function Chatbot() {
 
                   {loading ? (
                     <div className="text-center py-12">
-                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-tomato-600"></div>
-                      <p className="text-wood-600 mt-4">Loading menu...</p>
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-ember-600"></div>
+                      <p className="text-[#1A1410]/60 mt-4">Loading menu...</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -667,27 +676,27 @@ export default function Chatbot() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.05 }}
-                          className={`flex items-center justify-between gap-6 p-8 rounded-[2.5rem] bg-white border border-crust-100 hover:border-tomato-300 transition-all group ${!item.available ? 'opacity-60' : ''
+                          className={`flex items-center justify-between gap-6 p-8 rounded-[2.5rem] bg-white border border-[#EBEBE6] hover:border-ember-300 transition-all group ${!item.available ? 'opacity-60' : ''
                             }`}
                         >
                           <div className="flex items-center gap-6">
                             <span className="text-4xl filter drop-shadow-[0_0_10px_rgba(220,38,38,0.2)] transition-transform group-hover:scale-125">🍕</span>
                             <div>
                               <div className="flex items-center gap-3">
-                                <span className="font-display font-black text-lg text-wood-800 uppercase tracking-tight">{item.name}</span>
-                                {item.isPopular && <span className="text-[9px] bg-tomato-600 text-white font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full">Popular</span>}
+                                <span className="font-display font-black text-lg text-[#1A1410] uppercase tracking-tight">{item.name}</span>
+                                {item.isPopular && <span className="text-[9px] bg-ember-600 text-white font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full">Popular</span>}
                                 {!item.available && <span className="text-[9px] bg-gray-400 text-white font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full">Out of Stock</span>}
                               </div>
                               <p className="text-sm text-gray-500 mt-1 font-light">{item.description}</p>
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-3 shrink-0">
-                            <span className="text-wood-800 font-black text-xl tracking-tighter">${item.price.toFixed(2)}</span>
+                            <span className="text-[#1A1410] font-black text-xl tracking-tighter">${item.price.toFixed(2)}</span>
                             <motion.button
                               onClick={() => handleAddToCart(item)}
                               disabled={!item.available}
                               className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg ${item.available
-                                ? 'bg-tomato-600 text-white shadow-tomato-600/20'
+                                ? 'bg-ember-600 text-white shadow-ember-600/20'
                                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                 }`}
                               whileHover={item.available ? { scale: 1.05 } : {}}
@@ -705,17 +714,17 @@ export default function Chatbot() {
 
               {/* CART VIEW */}
               {view === 'cart' && (
-                <div className="bg-mozzarella-100 text-wood-800 min-h-full p-6 sm:p-10 flex justify-center">
+                <div className="bg-[#FAFAF8] text-[#1A1410] min-h-full p-6 sm:p-10 flex justify-center">
                   <div className="max-w-2xl w-full">
-                    <h2 className="font-display font-black text-3xl sm:text-4xl mb-6 tracking-tight text-wood-800">Cart</h2>
+                    <h2 className="font-display font-black text-3xl sm:text-4xl mb-6 tracking-tight text-[#1A1410]">Cart</h2>
 
                     {/* Pickup / Delivery toggle */}
-                    <div className="flex bg-white rounded-full p-1 mb-3 w-fit border border-crust-100 shadow-sm">
+                    <div className="flex bg-white rounded-full p-1 mb-3 w-fit border border-[#EBEBE6] shadow-sm">
                       {['pickup', 'delivery'].map(t => (
                         <button
                           key={t}
                           onClick={() => setOrderType(t)}
-                          className={`px-6 py-2 rounded-full text-sm font-semibold capitalize transition-all ${orderType === t ? 'bg-tomato-600 text-white shadow-md' : 'text-wood-500 hover:text-tomato-600'}`}
+                          className={`px-6 py-2 rounded-full text-sm font-semibold capitalize transition-all ${orderType === t ? 'bg-ember-600 text-white shadow-md' : 'text-[#9B8D74] hover:text-ember-600'}`}
                         >
                           {t}
                         </button>
@@ -723,19 +732,19 @@ export default function Chatbot() {
                     </div>
 
                     {/* ASAP indicator */}
-                    <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2.5 mb-8 w-fit text-sm font-semibold text-wood-700 border border-crust-100 shadow-sm">
-                      <svg className="w-4 h-4 text-tomato-600" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v6h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 19v-6H4a1 1 0 01-.82-1.573l7-10a1 1 0 01.98-.38z" /></svg>
+                    <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2.5 mb-8 w-fit text-sm font-semibold text-[#1A1410]/75 border border-[#EBEBE6] shadow-sm">
+                      <svg className="w-4 h-4 text-ember-600" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v6h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 19v-6H4a1 1 0 01-.82-1.573l7-10a1 1 0 01.98-.38z" /></svg>
                       ASAP (20-30 min)
                     </div>
 
                     {cart.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center gap-6 text-wood-300 py-20">
+                      <div className="flex flex-col items-center justify-center gap-6 text-[#1A1410]/30 py-20">
                         <span className="text-7xl">🍕</span>
-                        <p className="text-lg font-medium text-wood-500">Your cart is empty!</p>
+                        <p className="text-lg font-medium text-[#9B8D74]">Your cart is empty!</p>
 
                         <motion.button
                           onClick={goToMenu}
-                          className="px-10 py-4 rounded-2xl bg-tomato-600 text-white font-bold shadow-pizza"
+                          className="px-10 py-4 rounded-2xl bg-ember-600 text-white font-bold shadow-pizza"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
@@ -744,51 +753,51 @@ export default function Chatbot() {
                       </div>
                     ) : (
                       <>
-                        <div className="flex flex-col divide-y divide-crust-100 border-t border-crust-100">
+                        <div className="flex flex-col divide-y divide-[#EBEBE6] border-t border-[#EBEBE6]">
                           {cart.map(item => (
                             <div key={item._id} className="flex items-center gap-4 py-5">
                               <img
                                 src={item.image ? resolveAssetUrl(item.image) : '/pizza-hero-poster.svg'}
                                 alt={item.name}
-                                className="w-16 h-16 rounded-xl object-cover bg-white border border-crust-100 shrink-0"
+                                className="w-16 h-16 rounded-xl object-cover bg-white border border-[#EBEBE6] shrink-0"
                               />
                               <div className="flex-1 min-w-0">
-                                <p className="font-semibold truncate text-wood-800">{item.name}</p>
+                                <p className="font-semibold truncate text-[#1A1410]">{item.name}</p>
                                 <div className="flex items-center gap-3 mt-2">
                                   <motion.button
                                     onClick={() => deleteItem(item._id)}
                                     whileTap={{ scale: 0.9 }}
-                                    className="w-8 h-8 rounded-full bg-white border border-crust-100 flex items-center justify-center text-wood-400 hover:text-tomato-600 hover:border-tomato-200 transition-colors"
+                                    className="w-8 h-8 rounded-full bg-white border border-[#EBEBE6] flex items-center justify-center text-[#9B8D74] hover:text-ember-600 hover:border-ember-200 transition-colors"
                                     title="Remove item"
                                   >
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                   </motion.button>
-                                  <div className="flex items-center bg-white rounded-full border border-crust-100">
+                                  <div className="flex items-center bg-white rounded-full border border-[#EBEBE6]">
                                     <button
                                       onClick={() => removeFromCart(item._id)}
-                                      className="w-8 h-8 flex items-center justify-center text-wood-700 font-bold"
+                                      className="w-8 h-8 flex items-center justify-center text-[#1A1410]/75 font-bold"
                                     >−</button>
-                                    <span className="w-6 text-center font-semibold text-sm text-wood-800">{item.qty}</span>
+                                    <span className="w-6 text-center font-semibold text-sm text-[#1A1410]">{item.qty}</span>
                                     <button
                                       onClick={() => addToCart(item)}
-                                      className="w-8 h-8 flex items-center justify-center text-wood-700 font-bold"
+                                      className="w-8 h-8 flex items-center justify-center text-[#1A1410]/75 font-bold"
                                     >+</button>
                                   </div>
                                 </div>
                               </div>
-                              <span className="font-semibold shrink-0 text-wood-800">${(item.price * item.qty).toFixed(2)}</span>
+                              <span className="font-semibold shrink-0 text-[#1A1410]">${(item.price * item.qty).toFixed(2)}</span>
                             </div>
                           ))}
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-crust-100">
-                          <div className="flex justify-between items-center text-lg font-bold mb-6 text-wood-800">
+                        <div className="mt-8 pt-6 border-t border-[#EBEBE6]">
+                          <div className="flex justify-between items-center text-lg font-bold mb-6 text-[#1A1410]">
                             <span>Subtotal</span>
                             <span>${cartTotal.toFixed(2)}</span>
                           </div>
 
                           {pointsToEarn > 0 && (
-                            <div className="bg-tomato-50 text-tomato-700 text-sm font-semibold rounded-xl py-3 text-center mb-4 border border-tomato-100">
+                            <div className="bg-ember-50 text-ember-700 text-sm font-semibold rounded-xl py-3 text-center mb-4 border border-ember-100">
                               You'll earn <strong>{pointsToEarn} points</strong> with this order
                             </div>
                           )}
@@ -796,7 +805,7 @@ export default function Chatbot() {
                           <motion.button
                             onClick={handleCheckoutIntent}
                             disabled={isPlacingOrder}
-                            className="w-full py-4 rounded-2xl bg-tomato-600 text-white font-bold text-base shadow-xl shadow-tomato-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full py-4 rounded-2xl bg-ember-600 text-white font-bold text-base shadow-xl shadow-ember-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.98 }}
                           >
@@ -805,7 +814,7 @@ export default function Chatbot() {
 
                           <button
                             onClick={goToMenu}
-                            className="w-full mt-4 text-sm text-wood-400 font-bold uppercase tracking-widest hover:text-tomato-600 transition-colors"
+                            className="w-full mt-4 text-sm text-[#9B8D74] font-bold uppercase tracking-widest hover:text-ember-600 transition-colors"
                           >
                             + Add more items
                           </button>
@@ -822,16 +831,16 @@ export default function Chatbot() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="w-full bg-white rounded-[3rem] p-10 shadow-crust border border-crust-100 relative overflow-hidden"
+                    className="w-full bg-white rounded-[3rem] p-10 shadow-ember border border-[#EBEBE6] relative overflow-hidden"
                   >
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-tomato-500/5 rounded-full blur-2xl -mr-12 -mt-12" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-ember-500/5 rounded-full blur-2xl -mr-12 -mt-12" />
 
                     <div className="text-center mb-10">
-                      <div className="w-20 h-20 bg-tomato-600 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-xl shadow-tomato-600/20 mb-6 text-white">
+                      <div className="w-20 h-20 bg-ember-600 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-xl shadow-ember-600/20 mb-6 text-white">
                         💳
                       </div>
-                      <h2 className="font-display font-black text-3xl text-wood-800 tracking-tight uppercase">Secure Payment</h2>
-                      <p className="text-xs text-wood-400 font-bold uppercase tracking-widest mt-2 flex flex-col items-center">
+                      <h2 className="font-display font-black text-3xl text-[#1A1410] tracking-tight uppercase">Secure Payment</h2>
+                      <p className="text-xs text-[#9B8D74] font-bold uppercase tracking-widest mt-2 flex flex-col items-center">
                         <span>Subtotal: ${cartSubtotal.toFixed(2)}</span>
                         {selectedReward && <span className="text-green-500 font-bold">- Discount: ${discountAmount.toFixed(2)}</span>}
                         <span>Paying ${(cartTotal + (orderType === 'delivery' ? 3.99 : 0)).toFixed(2)} to {settings?.restaurantName || 'Pizza Blast'}</span>
@@ -839,36 +848,36 @@ export default function Chatbot() {
 
                       <button
                         onClick={() => setView('cart')}
-                        className="mt-4 text-tomato-600 text-[10px] font-black uppercase tracking-widest hover:underline"
+                        className="mt-4 text-ember-600 text-[10px] font-black uppercase tracking-widest hover:underline"
                       >
                         ← Back to Cart
                       </button>
                     </div>
 
                     {!customerProfile && (
-                      <div className="mb-8 p-6 bg-wood-50 rounded-2xl border border-crust-100">
-                        <h3 className="text-lg font-semibold text-wood-800 mb-4">Guest Information</h3>
+                      <div className="mb-8 p-6 bg-[#F5F3EF] rounded-2xl border border-[#EBEBE6]">
+                        <h3 className="text-lg font-semibold text-[#1A1410] mb-4">Guest Information</h3>
                         <div className="space-y-4">
                           <input
                             type="text"
                             placeholder="Full Name"
                             value={guestName}
                             onChange={(e) => setGuestName(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 outline-none text-wood-800"
+                            className="w-full px-4 py-3 rounded-xl border border-[#1A1410]/15 focus:border-ember-500 outline-none text-[#1A1410]"
                           />
                           <input
                             type="tel"
                             placeholder="Phone Number"
                             value={guestPhone}
                             onChange={(e) => setGuestPhone(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 outline-none text-wood-800"
+                            className="w-full px-4 py-3 rounded-xl border border-[#1A1410]/15 focus:border-ember-500 outline-none text-[#1A1410]"
                           />
                           <input
                             type="email"
                             placeholder="Email Address (for confirmation)"
                             value={guestEmail}
                             onChange={(e) => setGuestEmail(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 outline-none text-wood-800"
+                            className="w-full px-4 py-3 rounded-xl border border-[#1A1410]/15 focus:border-ember-500 outline-none text-[#1A1410]"
                           />
                         </div>
                       </div>
@@ -876,9 +885,9 @@ export default function Chatbot() {
 
                     {customerProfile && availableRewards.length > 0 && (
                       <div className="mb-8">
-                        <h3 className="text-lg font-semibold text-wood-800 mb-4 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-[#1A1410] mb-4 flex justify-between items-center">
                           Apply Loyalty Reward
-                          <span className="text-tomato-500 text-sm font-black">{customerProfile.loyalty?.points || 0} PTS</span>
+                          <span className="text-ember-500 text-sm font-black">{customerProfile.loyalty?.points || 0} PTS</span>
                         </h3>
                         <div className="space-y-3">
                           {availableRewards.map((reward) => {
@@ -889,18 +898,18 @@ export default function Chatbot() {
                                 key={reward._id}
                                 disabled={!canAfford && !isSelected}
                                 onClick={() => isSelected ? setSelectedReward(null) : setSelectedReward(reward)}
-                                className={`w-full text-left p-4 rounded-xl border flex justify-between items-center transition-all ${isSelected ? 'border-tomato-500 bg-tomato-50' : canAfford ? 'border-wood-200 hover:border-tomato-300 bg-white' : 'border-wood-100 bg-wood-50 opacity-60 cursor-not-allowed'}`}
+                                className={`w-full text-left p-4 rounded-xl border flex justify-between items-center transition-all ${isSelected ? 'border-ember-500 bg-ember-50' : canAfford ? 'border-[#1A1410]/15 hover:border-ember-300 bg-white' : 'border-[#F5F3EF] bg-[#F5F3EF] opacity-60 cursor-not-allowed'}`}
                               >
                                 <div>
-                                  <div className="font-semibold text-wood-800">{reward.name}</div>
-                                  <div className="text-xs text-wood-500">{reward.pointsCost} Points • {reward.discountType === 'percentage' ? `${reward.discountValue}%` : `$${reward.discountValue}`} OFF</div>
+                                  <div className="font-semibold text-[#1A1410]">{reward.name}</div>
+                                  <div className="text-xs text-[#9B8D74]">{reward.pointsCost} Points • {reward.discountType === 'percentage' ? `${reward.discountValue}%` : `$${reward.discountValue}`} OFF</div>
                                 </div>
                                 {isSelected ? (
-                                  <span className="text-tomato-500 font-bold text-sm">Applied</span>
+                                  <span className="text-ember-500 font-bold text-sm">Applied</span>
                                 ) : canAfford ? (
-                                  <span className="text-tomato-500 text-sm font-semibold">Apply</span>
+                                  <span className="text-ember-500 text-sm font-semibold">Apply</span>
                                 ) : (
-                                  <span className="text-wood-400 text-sm">Need {reward.pointsCost - (customerProfile.loyalty?.points || 0)} more</span>
+                                  <span className="text-[#9B8D74] text-sm">Need {reward.pointsCost - (customerProfile.loyalty?.points || 0)} more</span>
                                 )}
                               </button>
                             );
@@ -911,45 +920,45 @@ export default function Chatbot() {
 
                     {/* Order Type Selection */}
                     <div className="mb-8">
-                      <h3 className="text-lg font-semibold text-wood-800 mb-4">Choose Order Type</h3>
+                      <h3 className="text-lg font-semibold text-[#1A1410] mb-4">Choose Order Type</h3>
                       <div className="grid grid-cols-3 gap-4 mb-6">
                         <button
                           type="button"
                           onClick={() => setOrderType('delivery')}
                           className={`p-4 rounded-xl border-2 transition-all ${orderType === 'delivery'
-                            ? 'bg-tomato-600 text-white border-tomato-600'
-                            : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                            ? 'bg-ember-600 text-white border-ember-600'
+                            : 'bg-white text-[#1A1410]/75 border-[#1A1410]/15 hover:border-ember-300'
                             }`}
                         >
                           <div className="text-2xl mb-2">🚚</div>
                           <div className="font-semibold">Delivery</div>
-                          <div className="text-sm text-wood-600">25-40 min</div>
-                          <div className="text-xs text-wood-500 mt-1">+ $3.99 delivery fee</div>
+                          <div className="text-sm text-[#1A1410]/60">25-40 min</div>
+                          <div className="text-xs text-[#9B8D74] mt-1">+ $3.99 delivery fee</div>
                         </button>
                         <button
                           type="button"
                           onClick={() => setOrderType('pickup')}
                           className={`p-4 rounded-xl border-2 transition-all ${orderType === 'pickup'
-                            ? 'bg-tomato-600 text-white border-tomato-600'
-                            : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                            ? 'bg-ember-600 text-white border-ember-600'
+                            : 'bg-white text-[#1A1410]/75 border-[#1A1410]/15 hover:border-ember-300'
                             }`}
                         >
                           <div className="text-2xl mb-2">🛒</div>
                           <div className="font-semibold">Pickup</div>
-                          <div className="text-sm text-wood-600">20 min</div>
+                          <div className="text-sm text-[#1A1410]/60">20 min</div>
                           <div className="text-xs text-green-600 mt-1">No delivery fee</div>
                         </button>
                         <button
                           type="button"
                           onClick={() => setOrderType('dine_in')}
                           className={`p-4 rounded-xl border-2 transition-all ${orderType === 'dine_in'
-                            ? 'bg-tomato-600 text-white border-tomato-600'
-                            : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                            ? 'bg-ember-600 text-white border-ember-600'
+                            : 'bg-white text-[#1A1410]/75 border-[#1A1410]/15 hover:border-ember-300'
                             }`}
                         >
                           <div className="text-2xl mb-2">🍽</div>
                           <div className="font-semibold">Dine In</div>
-                          <div className="text-sm text-wood-600">45 min</div>
+                          <div className="text-sm text-[#1A1410]/60">45 min</div>
                           <div className="text-xs text-green-600 mt-1">No delivery fee</div>
                         </button>
                       </div>
@@ -957,13 +966,13 @@ export default function Chatbot() {
                       {/* Delivery Address for delivery orders */}
                       {orderType === 'delivery' && (
                         <div className="mb-6">
-                          <h3 className="text-lg font-semibold text-wood-800 mb-4">Delivery Address</h3>
+                          <h3 className="text-lg font-semibold text-[#1A1410] mb-4">Delivery Address</h3>
                           <input
                             type="text"
                             placeholder="Enter your delivery address"
                             value={deliveryAddress}
                             onChange={(e) => setDeliveryAddress(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 focus:ring-2 focus:ring-tomato-200 outline-none text-wood-800"
+                            className="w-full px-4 py-3 rounded-xl border border-[#1A1410]/15 focus:border-ember-500 focus:ring-2 focus:ring-ember-200 outline-none text-[#1A1410]"
                           />
                         </div>
                       )}
@@ -971,25 +980,25 @@ export default function Chatbot() {
                       {/* Pickup Date and Time */}
                       {orderType === 'pickup' && (
                         <div className="mb-6">
-                          <h3 className="text-lg font-semibold text-wood-800 mb-4">Pickup Date & Time</h3>
+                          <h3 className="text-lg font-semibold text-[#1A1410] mb-4">Pickup Date & Time</h3>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-medium text-wood-700 mb-2">Date</label>
+                              <label className="block text-sm font-medium text-[#1A1410]/75 mb-2">Date</label>
                               <input
                                 type="date"
                                 min={new Date().toISOString().split('T')[0]} // Today's date
                                 value={pickupDateTime.split('T')[0] || ''}
                                 onChange={(e) => setPickupDateTime(e.target.value + 'T' + (pickupDateTime.split('T')[1] || ''))}
-                                className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 focus:ring-2 focus:ring-tomato-200 outline-none text-wood-800"
+                                className="w-full px-4 py-3 rounded-xl border border-[#1A1410]/15 focus:border-ember-500 focus:ring-2 focus:ring-ember-200 outline-none text-[#1A1410]"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-wood-700 mb-2">Time</label>
+                              <label className="block text-sm font-medium text-[#1A1410]/75 mb-2">Time</label>
                               <input
                                 type="time"
                                 value={pickupDateTime.split('T')[1] || ''}
                                 onChange={(e) => setPickupDateTime((pickupDateTime.split('T')[0] || '') + 'T' + e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 focus:ring-2 focus:ring-tomato-200 outline-none text-wood-800"
+                                className="w-full px-4 py-3 rounded-xl border border-[#1A1410]/15 focus:border-ember-500 focus:ring-2 focus:ring-ember-200 outline-none text-[#1A1410]"
                               />
                             </div>
                           </div>
@@ -999,52 +1008,52 @@ export default function Chatbot() {
                       {/* Dine In Time for dine-in orders */}
                       {orderType === 'dine_in' && (
                         <div className="mb-6">
-                          <h3 className="text-lg font-semibold text-wood-800 mb-4">Dine In Time</h3>
+                          <h3 className="text-lg font-semibold text-[#1A1410] mb-4">Dine In Time</h3>
                           <input
                             type="time"
                             value={dineInTime}
                             onChange={(e) => setDineInTime(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-wood-200 focus:border-tomato-500 focus:ring-2 focus:ring-tomato-200 outline-none text-wood-800"
+                            className="w-full px-4 py-3 rounded-xl border border-[#1A1410]/15 focus:border-ember-500 focus:ring-2 focus:ring-ember-200 outline-none text-[#1A1410]"
                           />
                         </div>
                       )}
 
                       {/* Payment Method Selection */}
                       <div className="mb-6">
-                        <h3 className="text-lg font-semibold text-wood-800 mb-4">Payment Method</h3>
+                        <h3 className="text-lg font-semibold text-[#1A1410] mb-4">Payment Method</h3>
                         <div className="grid grid-cols-2 gap-4">
                           <button
                             type="button"
                             onClick={() => setPaymentMethod('card')}
                             className={`p-4 rounded-xl border-2 transition-all ${paymentMethod === 'card'
-                              ? 'bg-tomato-600 text-white border-tomato-600'
-                              : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                              ? 'bg-ember-600 text-white border-ember-600'
+                              : 'bg-white text-[#1A1410]/75 border-[#1A1410]/15 hover:border-ember-300'
                               }`}
                           >
                             <div className="text-2xl mb-2">💳</div>
                             <div className="font-semibold">Card Payment</div>
-                            <div className="text-sm text-wood-600">Pay now online</div>
+                            <div className="text-sm text-[#1A1410]/60">Pay now online</div>
                             <div className="text-xs text-green-600 mt-1">Secure & instant</div>
                           </button>
                           <button
                             type="button"
                             onClick={() => setPaymentMethod('cash')}
                             className={`p-4 rounded-xl border-2 transition-all ${paymentMethod === 'cash'
-                              ? 'bg-tomato-600 text-white border-tomato-600'
-                              : 'bg-white text-wood-700 border-wood-200 hover:border-tomato-300'
+                              ? 'bg-ember-600 text-white border-ember-600'
+                              : 'bg-white text-[#1A1410]/75 border-[#1A1410]/15 hover:border-ember-300'
                               }`}
                           >
                             <div className="text-2xl mb-2">💵</div>
                             <div className="font-semibold">Cash on Delivery</div>
-                            <div className="text-sm text-wood-600">Pay when delivered</div>
+                            <div className="text-sm text-[#1A1410]/60">Pay when delivered</div>
                             <div className="text-xs text-blue-600 mt-1">No payment now</div>
                           </button>
                         </div>
                       </div>
 
                       {/* Order Summary */}
-                      <div className="mb-6 p-4 bg-wood-50 rounded-xl">
-                        <h3 className="text-lg font-semibold text-wood-800 mb-2">Order Summary</h3>
+                      <div className="mb-6 p-4 bg-[#F5F3EF] rounded-xl">
+                        <h3 className="text-lg font-semibold text-[#1A1410] mb-2">Order Summary</h3>
                         <div className="space-y-1 text-sm">
                           <div className="flex justify-between">
                             <span>Subtotal:</span>
@@ -1077,7 +1086,7 @@ export default function Chatbot() {
                           }
                           paymentMethod === 'card' ? setView('payment') : handleCheckout()
                         }}
-                        className="w-full bg-tomato-600 text-white py-4 rounded-xl font-semibold hover:bg-tomato-700 transition-colors"
+                        className="w-full bg-ember-600 text-white py-4 rounded-xl font-semibold hover:bg-ember-700 transition-colors"
                       >
                         {paymentMethod === 'card' ? 'Proceed to Payment' : 'Place Order (Cash on Delivery)'}
                       </button>
@@ -1089,15 +1098,15 @@ export default function Chatbot() {
 
             {/* Input — only in chat view */}
             {view === 'chat' && (
-              <div className="p-8 bg-white border-t border-crust-100">
+              <div className="p-8 bg-white border-t border-[#EBEBE6]">
                 <div className="max-w-4xl mx-auto w-full">
                   <div className="flex gap-4 mb-6">
                     <motion.button type="button" onClick={goToMenu}
-                      className="px-8 py-2.5 rounded-full border border-crust-100 text-wood-500 text-[10px] font-black uppercase tracking-[0.2em] hover:text-tomato-600 hover:border-tomato-200 transition-all shadow-sm"
+                      className="px-8 py-2.5 rounded-full border border-[#EBEBE6] text-[#9B8D74] text-[10px] font-black uppercase tracking-[0.2em] hover:text-ember-600 hover:border-ember-200 transition-all shadow-sm"
                       whileTap={{ scale: 0.95 }}>Browse Menu</motion.button>
                     {cart.length > 0 && (
                       <motion.button type="button" onClick={() => setView('cart')}
-                        className="px-8 py-2.5 rounded-full bg-tomato-600 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-tomato-600/10"
+                        className="px-8 py-2.5 rounded-full bg-ember-600 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-ember-600/10"
                         whileTap={{ scale: 0.95 }}>Cart ({cartCount})</motion.button>
                     )}
                   </div>
@@ -1108,7 +1117,7 @@ export default function Chatbot() {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       placeholder="Message your pizza assistant..."
-                      className="flex-1 px-8 py-5 rounded-[2rem] bg-mozzarella-100 border-none focus:ring-2 focus:ring-tomato-600/10 outline-none text-wood-800 font-bold placeholder:text-wood-300 transition-all"
+                      className="flex-1 px-8 py-5 rounded-[2rem] bg-[#FAFAF8] border-none focus:ring-2 focus:ring-ember-600/10 outline-none text-[#1A1410] font-bold placeholder:text-[#1A1410]/30 transition-all"
                     />
 
                     <motion.button
@@ -1120,7 +1129,7 @@ export default function Chatbot() {
                         }
                         toggleListening();
                       }}
-                      className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-tomato-600 text-white shadow-lg animate-pulse' : 'bg-mozzarella-200 text-wood-500 hover:text-tomato-600'} ${!supported.speech ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-ember-600 text-white shadow-lg animate-pulse' : 'bg-[#F5F5F0] text-[#9B8D74] hover:text-ember-600'} ${!supported.speech ? 'opacity-50 cursor-not-allowed' : ''}`}
                       whileHover={supported.speech ? { scale: 1.05 } : {}}
                       whileTap={supported.speech ? { scale: 0.95 } : {}}
                       title={!supported.speech ? 'Speech recognition not supported' : 'Voice Input'}
@@ -1131,7 +1140,7 @@ export default function Chatbot() {
                     </motion.button>
                     <motion.button
                       type="submit"
-                      className="w-16 h-16 bg-tomato-600 text-white font-black rounded-full shadow-lg shadow-tomato-600/20 flex items-center justify-center shrink-0"
+                      className="w-16 h-16 bg-ember-600 text-white font-black rounded-full shadow-lg shadow-ember-600/20 flex items-center justify-center shrink-0"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -1165,8 +1174,8 @@ function ChatMessage({ message, onMenuOpen, onCartOpen, onCheckoutOpen }) {
     >
       <div className={`max-w-[85%] ${isBot ? 'text-left' : 'text-right'}`}>
         <div className={`inline-block px-6 py-5 rounded-[2.5rem] shadow-sm ${isBot
-          ? 'bg-white rounded-tl-sm text-wood-700 font-medium border border-crust-100'
-          : 'bg-tomato-600 text-white rounded-tr-sm shadow-xl shadow-tomato-600/10 font-bold'
+          ? 'bg-white rounded-tl-sm text-[#1A1410]/75 font-medium border border-[#EBEBE6]'
+          : 'bg-ember-600 text-white rounded-tr-sm shadow-xl shadow-ember-600/10 font-bold'
           }`}>
           <p className="text-base whitespace-pre-wrap leading-relaxed" dangerouslySetInnerHTML={{ __html: formatText(message.text) }} />
         </div>
@@ -1178,7 +1187,7 @@ function ChatMessage({ message, onMenuOpen, onCartOpen, onCheckoutOpen }) {
             {(message.showMenuBtn || message.cartAction) && (
               <motion.button
                 onClick={onMenuOpen}
-                className="px-6 py-2.5 rounded-2xl bg-wood-800 text-white text-sm font-bold shadow-lg"
+                className="px-6 py-2.5 rounded-2xl bg-[#1A1410] text-white text-sm font-bold shadow-lg"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -1188,7 +1197,7 @@ function ChatMessage({ message, onMenuOpen, onCartOpen, onCheckoutOpen }) {
             {message.cartAction && (
               <motion.button
                 onClick={onCartOpen}
-                className="px-6 py-2.5 rounded-2xl border-2 border-crust-100 text-wood-800 text-sm font-bold hover:bg-white transition-colors"
+                className="px-6 py-2.5 rounded-2xl border-2 border-[#EBEBE6] text-[#1A1410] text-sm font-bold hover:bg-white transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -1198,7 +1207,7 @@ function ChatMessage({ message, onMenuOpen, onCartOpen, onCheckoutOpen }) {
             {message.cartAction && (
               <motion.button
                 onClick={onCheckoutOpen}
-                className="px-6 py-2.5 rounded-2xl bg-tomato-600 text-white text-sm font-bold shadow-lg"
+                className="px-6 py-2.5 rounded-2xl bg-ember-600 text-white text-sm font-bold shadow-lg"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -1216,11 +1225,11 @@ function ChatMessage({ message, onMenuOpen, onCartOpen, onCheckoutOpen }) {
 function TypingIndicator() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-      <div className="px-5 py-4 rounded-[2rem] rounded-tl-sm bg-white flex gap-2 border border-crust-100 shadow-sm">
+      <div className="px-5 py-4 rounded-[2rem] rounded-tl-sm bg-white flex gap-2 border border-[#EBEBE6] shadow-sm">
         {[0, 1, 2].map((i) => (
           <motion.span
             key={i}
-            className="w-1.5 h-1.5 rounded-full bg-tomato-600"
+            className="w-1.5 h-1.5 rounded-full bg-ember-600"
             animate={{ scale: [1, 1.4, 1], opacity: [0.3, 1, 0.3] }}
             transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
           />

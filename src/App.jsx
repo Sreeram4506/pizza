@@ -24,6 +24,9 @@ const CustomerProfile = lazy(() => import('./components/CustomerProfile'))
 const CustomerLogin = lazy(() => import('./components/CustomerLogin'))
 const DeliveryPortal = lazy(() => import('./components/DeliveryPortal'))
 const CustomerRegister = lazy(() => import('./components/CustomerRegister'))
+const DiningPage = lazy(() => import('./components/DiningPage'))
+const CateringPage = lazy(() => import('./components/CateringPage'))
+const LegalPage = lazy(() => import('./components/LegalPage'))
 const AdminLogin = lazy(() => import('./components/AdminLogin'))
 const AdminLayout = lazy(() => import('./components/admin/Layout'))
 const Dashboard = lazy(() => import('./components/admin/Dashboard'))
@@ -177,6 +180,10 @@ function App() {
                   <Route path="/register" element={<><Navbar /><CustomerRegister /><Chatbot /></>} />
                   <Route path="/track" element={<><Navbar /><OrderTracker /><Chatbot /></>} />
                   <Route path="/profile" element={<><Navbar /><CustomerProfile /><Chatbot /></>} />
+                  <Route path="/dining" element={<><Navbar /><DiningPage /><Footer /><Chatbot /></>} />
+                  <Route path="/catering" element={<><Navbar /><CateringPage /><Footer /><Chatbot /></>} />
+                  <Route path="/legal/privacy" element={<><Navbar /><LegalPage variant="privacy" /><Footer /></>} />
+                  <Route path="/legal/terms" element={<><Navbar /><LegalPage variant="terms" /><Footer /></>} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/delivery" element={<DeliveryPortal />} />
 

@@ -187,7 +187,8 @@ export default function MenuPage() {
                             />
                             <button
                                 onClick={() => { setShowMobileSearch(false); setSearchQuery(''); }}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9B8D74]"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9B8D74] touch-target flex items-center justify-center"
+                                aria-label="Close search"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </button>
@@ -198,7 +199,8 @@ export default function MenuPage() {
                 <div className="flex items-center gap-2 sm:gap-6">
                     <button
                         onClick={() => setShowMobileSearch(!showMobileSearch)}
-                        className="sm:hidden p-2 rounded-full hover:bg-[#F5F3EF] text-[#1A1410]"
+                        className="sm:hidden p-2 rounded-full hover:bg-[#F5F3EF] text-[#1A1410] touch-target flex items-center justify-center"
+                        aria-label="Search menu"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -212,7 +214,8 @@ export default function MenuPage() {
 
                     <button
                         onClick={() => setIsCartDrawerOpen(true)}
-                        className="relative p-2 sm:p-2.5 rounded-full bg-[#1A1410] text-white shadow-xl shadow-black/10 hover:bg-ember-600 transition-colors group"
+                        className="relative p-2 sm:p-2.5 rounded-full bg-[#1A1410] text-white shadow-xl shadow-black/10 hover:bg-ember-600 transition-colors group touch-target flex items-center justify-center"
+                        aria-label={`Open cart${cartCount > 0 ? ` (${cartCount} items)` : ''}`}
                     >
                         <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 10-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -226,7 +229,8 @@ export default function MenuPage() {
 
                     <button
                         onClick={() => closeMenuRoute(navigate, setIsOpen)}
-                        className="flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all shadow-sm border border-[rgba(26,20,16,0.04)]"
+                        className="flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-[#F5F3EF] text-[#1A1410] hover:bg-white transition-all shadow-sm border border-[rgba(26,20,16,0.04)] touch-target"
+                        aria-label="Close menu"
                     >
                         <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -357,12 +361,14 @@ export default function MenuPage() {
                                         <button
                                             onClick={() => scrollMostOrdered(-1)}
                                             className="w-9 h-9 rounded-full bg-[#F5F3EF] hover:bg-white border border-[rgba(26,20,16,0.06)] text-[#1A1410] flex items-center justify-center transition-colors shadow-sm"
+                                            aria-label="Scroll left"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                                         </button>
                                         <button
                                             onClick={() => scrollMostOrdered(1)}
                                             className="w-9 h-9 rounded-full bg-[#F5F3EF] hover:bg-white border border-[rgba(26,20,16,0.06)] text-[#1A1410] flex items-center justify-center transition-colors shadow-sm"
+                                            aria-label="Scroll right"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                         </button>
@@ -385,6 +391,7 @@ export default function MenuPage() {
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
                                                     className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white text-[#1A1410] flex items-center justify-center shadow-lg hover:bg-ember-500 hover:text-white transition-colors"
+                                                    aria-label={`Add ${item.name} to cart`}
                                                 >
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
                                                 </button>
@@ -467,6 +474,7 @@ export default function MenuPage() {
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); handleOrder(item); }}
                                                         className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 w-8 h-8 sm:w-9 sm:h-9 bg-white text-[#1A1410] rounded-full flex items-center justify-center shadow-lg hover:bg-ember-500 hover:text-white transition-colors z-10 border border-black/5"
+                                                        aria-label={`Add ${item.name} to cart`}
                                                     >
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
                                                     </button>

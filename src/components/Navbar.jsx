@@ -116,7 +116,7 @@ export default function Navbar() {
               whileTap={{ scale: 0.95 }}
             >
               {settings?.logo ? (
-                <img src={settings.logo} alt="Logo" className="h-9 object-contain drop-shadow-sm" />
+                <img src={settings.logo} alt={settings?.restaurantName || 'Pizza Blast'} className="h-9 object-contain drop-shadow-sm" />
               ) : (
                 <span className="font-sans font-black text-xl tracking-tight text-ember-600 uppercase drop-shadow-sm">
                   {settings?.restaurantName || 'Pizza Blast'}
@@ -159,6 +159,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => openWithIntent('cart')}
+                aria-label={`Open cart${cartCount > 0 ? ` (${cartCount} items)` : ''}`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -182,6 +183,7 @@ export default function Navbar() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => goTo('/profile')}
                     className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1A1410] text-white shadow-md hover:shadow-lg transition-all"
+                    aria-label="My profile"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                   </motion.button>
@@ -203,6 +205,8 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(!mobileOpen)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileOpen}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   {mobileOpen ? (

@@ -217,12 +217,12 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="bg-tomato-600 px-6 py-4 flex items-center justify-between">
+              <div className="bg-ember-600 px-6 py-4 flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-display font-bold text-white">
                     Quick Login
                   </h2>
-                  <p className="text-tomato-100 text-sm">
+                  <p className="text-ember-100 text-sm">
                     Order faster with an account
                   </p>
                 </div>
@@ -251,8 +251,8 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
                 {/* Name Field */}
                 <div>
-                  <label htmlFor="quick-name" className="block text-sm font-medium text-wood-700 mb-1">
-                    Full Name <span className="text-tomato-500">*</span>
+                  <label htmlFor="quick-name" className="block text-sm font-medium text-[#1A1410]/75 mb-1">
+                    Full Name <span className="text-ember-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -263,7 +263,7 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     disabled={isLoading}
                     className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${errors.name
                         ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-wood-200 focus:border-tomato-500'
+                        : 'border-[#EBEBE6] focus:border-ember-500'
                       }`}
                     placeholder="John Doe"
                   />
@@ -274,8 +274,8 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
                 {/* Email Field */}
                 <div>
-                  <label htmlFor="quick-email" className="block text-sm font-medium text-wood-700 mb-1">
-                    Email <span className="text-tomato-500">*</span>
+                  <label htmlFor="quick-email" className="block text-sm font-medium text-[#1A1410]/75 mb-1">
+                    Email <span className="text-ember-500">*</span>
                   </label>
                   <input
                     type="email"
@@ -286,7 +286,7 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     disabled={isLoading}
                     className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${errors.email
                         ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-wood-200 focus:border-tomato-500'
+                        : 'border-[#EBEBE6] focus:border-ember-500'
                       }`}
                     placeholder="john@example.com"
                   />
@@ -297,8 +297,8 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
                 {/* Phone Field */}
                 <div>
-                  <label htmlFor="quick-phone" className="block text-sm font-medium text-wood-700 mb-1">
-                    Phone Number <span className="text-wood-400">(optional)</span>
+                  <label htmlFor="quick-phone" className="block text-sm font-medium text-[#1A1410]/75 mb-1">
+                    Phone Number <span className="text-[#9B8D74]">(optional)</span>
                   </label>
                   <input
                     type="tel"
@@ -309,7 +309,7 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     disabled={isLoading}
                     className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none ${errors.phone
                         ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-wood-200 focus:border-tomato-500'
+                        : 'border-[#EBEBE6] focus:border-ember-500'
                       }`}
                     placeholder="+1 (555) 123-4567"
                   />
@@ -320,8 +320,8 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
                 {/* Password Field */}
                 <div>
-                  <label htmlFor="quick-password" className="block text-sm font-medium text-wood-700 mb-1">
-                    Password <span className="text-tomato-500">*</span>
+                  <label htmlFor="quick-password" className="block text-sm font-medium text-[#1A1410]/75 mb-1">
+                    Password <span className="text-ember-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -333,14 +333,14 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                       disabled={isLoading}
                       className={`w-full px-4 py-2.5 rounded-lg border-2 transition-colors outline-none pr-10 ${errors.password
                           ? 'border-red-300 focus:border-red-500 bg-red-50'
-                          : 'border-wood-200 focus:border-tomato-500'
+                          : 'border-[#EBEBE6] focus:border-ember-500'
                         }`}
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-wood-400 hover:text-wood-600 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9B8D74] hover:text-[#1A1410]/60 transition-colors"
                       tabIndex={-1}
                     >
                       {showPassword ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
@@ -349,7 +349,7 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                   {errors.password ? (
                     <p className="mt-1 text-sm text-red-600">{errors.password}</p>
                   ) : (
-                    <p className="mt-1 text-xs text-wood-500">
+                    <p className="mt-1 text-xs text-[#9B8D74]">
                       Min 8 chars, uppercase, lowercase, number
                     </p>
                   )}
@@ -377,7 +377,7 @@ const QuickLoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                 </motion.button>
 
                 {/* Footer */}
-                <p className="text-center text-xs text-wood-500">
+                <p className="text-center text-xs text-[#9B8D74]">
                   By continuing, you agree to our Terms of Service and Privacy Policy.
                   <br />
                   New users will be automatically registered.

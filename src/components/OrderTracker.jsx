@@ -94,17 +94,17 @@ export default function OrderTracker() {
   }
 
   return (
-    <div className="min-h-screen bg-mozzarella-100 py-12">
+    <div className="min-h-screen bg-[#FAFAF8] py-12">
       <div className="container mx-auto px-6 max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <h1 className="text-4xl font-display font-black text-wood-800 mb-4">
+          <h1 className="text-4xl font-display font-black text-[#1A1410] mb-4">
             Track Your Order
           </h1>
-          <p className="text-wood-600 text-lg">
+          <p className="text-[#1A1410]/60 text-lg">
             Enter your order number to see real-time status updates
           </p>
         </motion.div>
@@ -114,7 +114,7 @@ export default function OrderTracker() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-mozzarella-200 rounded-2xl p-8 shadow-lg border border-basil-200 mb-8"
+          className="bg-[#F5F5F0] rounded-2xl p-8 shadow-lg border border-green-200 mb-8"
         >
           <form onSubmit={trackOrder} className="flex gap-4">
             <input
@@ -122,12 +122,12 @@ export default function OrderTracker() {
               value={orderNumber}
               onChange={(e) => setOrderNumber(e.target.value)}
               placeholder="Enter order number (e.g., ORD001)"
-              className="flex-1 px-4 py-3 rounded-lg bg-mozzarella-100 border border-basil-200 text-wood-800 placeholder-wood-400 focus:outline-none focus:border-tomato-400 focus:ring-2 focus:ring-tomato-200"
+              className="flex-1 px-4 py-3 rounded-lg bg-[#FAFAF8] border border-green-200 text-[#1A1410] placeholder-[#9B8D74] focus:outline-none focus:border-ember-400 focus:ring-2 focus:ring-ember-200"
             />
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-3 bg-tomato-600 text-white font-semibold rounded-lg hover:bg-tomato-700 transition-colors disabled:opacity-50"
+              className="px-8 py-3 bg-ember-600 text-white font-semibold rounded-lg hover:bg-ember-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Tracking...' : 'Track Order'}
             </button>
@@ -137,7 +137,7 @@ export default function OrderTracker() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mt-4 p-3 bg-tomato-100 text-tomato-700 rounded-lg"
+              className="mt-4 p-3 bg-ember-100 text-ember-700 rounded-lg"
             >
               {error}
             </motion.div>
@@ -150,17 +150,17 @@ export default function OrderTracker() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl p-8 shadow-lg border border-basil-200"
+            className="bg-white rounded-2xl p-8 shadow-lg border border-green-200"
           >
             <div className="text-center mb-6">
               <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-full border-2 ${getStatusColor(orderStatus.status)}`}>
                 <span className="text-2xl">{getStatusIcon(orderStatus.status)}</span>
                 <span className="font-bold text-lg capitalize">{getStepName(orderStatus.status)}</span>
               </div>
-              <h2 className="text-2xl font-bold text-wood-800 mt-4">
+              <h2 className="text-2xl font-bold text-[#1A1410] mt-4">
                 Order #{orderStatus.orderNumber}
               </h2>
-              <p className="text-wood-600 mt-2">
+              <p className="text-[#1A1410]/60 mt-2">
                 Estimated time: {orderStatus.estimatedTime}
               </p>
             </div>
@@ -170,34 +170,34 @@ export default function OrderTracker() {
               <div className="flex justify-between items-center mb-4 relative z-10 px-2 sm:px-6">
                 {/* Step 1 */}
                 <div className={`flex flex-col items-center gap-2 ${['confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
-                  <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">1</div>
-                  <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">Confirmed</span>
+                  <div className="w-8 h-8 rounded-full bg-white border-4 border-ember-500 flex items-center justify-center text-xs font-black text-ember-500">1</div>
+                  <span className="text-[10px] font-black uppercase text-[#1A1410]/60 text-center w-20 leading-tight block hidden sm:block">Confirmed</span>
                 </div>
                 {/* Step 2 */}
                 <div className={`flex flex-col items-center gap-2 ${['preparing', 'ready', 'out_for_delivery', 'delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
-                  <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">2</div>
-                  <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">Getting Ready</span>
+                  <div className="w-8 h-8 rounded-full bg-white border-4 border-ember-500 flex items-center justify-center text-xs font-black text-ember-500">2</div>
+                  <span className="text-[10px] font-black uppercase text-[#1A1410]/60 text-center w-20 leading-tight block hidden sm:block">Getting Ready</span>
                 </div>
                 {/* Step 3 */}
                 {orderStatus.type === 'delivery' && (
                   <div className={`flex flex-col items-center gap-2 ${['out_for_delivery', 'delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
-                    <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">3</div>
-                    <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">Out for Delivery</span>
+                    <div className="w-8 h-8 rounded-full bg-white border-4 border-ember-500 flex items-center justify-center text-xs font-black text-ember-500">3</div>
+                    <span className="text-[10px] font-black uppercase text-[#1A1410]/60 text-center w-20 leading-tight block hidden sm:block">Out for Delivery</span>
                   </div>
                 )}
                 {/* Step 4 */}
                 <div className={`flex flex-col items-center gap-2 ${['delivered', 'completed'].includes(orderStatus.status) ? 'opacity-100' : 'opacity-40'}`}>
-                  <div className="w-8 h-8 rounded-full bg-white border-4 border-tomato-500 flex items-center justify-center text-xs font-black text-tomato-500">{orderStatus.type === 'delivery' ? '4' : '3'}</div>
-                  <span className="text-[10px] font-black uppercase text-wood-600 text-center w-20 leading-tight block hidden sm:block">{orderStatus.type === 'delivery' ? 'Delivered' : 'Ready'}</span>
+                  <div className="w-8 h-8 rounded-full bg-white border-4 border-ember-500 flex items-center justify-center text-xs font-black text-ember-500">{orderStatus.type === 'delivery' ? '4' : '3'}</div>
+                  <span className="text-[10px] font-black uppercase text-[#1A1410]/60 text-center w-20 leading-tight block hidden sm:block">{orderStatus.type === 'delivery' ? 'Delivered' : 'Ready'}</span>
                 </div>
               </div>
 
-              <div className="w-full bg-wood-200 rounded-full h-3 relative overflow-hidden -mt-[44px] sm:-mt-[44px] mx-8 sm:mx-14 w-[calc(100%-4rem)] sm:w-[calc(100%-7rem)]">
+              <div className="w-full bg-[#EBEBE6] rounded-full h-3 relative overflow-hidden -mt-[44px] sm:-mt-[44px] mx-8 sm:mx-14 w-[calc(100%-4rem)] sm:w-[calc(100%-7rem)]">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: getStepPercentage(orderStatus.status) }}
                   transition={{ duration: 1, ease: 'easeOut' }}
-                  className="bg-tomato-500 h-3 rounded-full relative z-0"
+                  className="bg-ember-500 h-3 rounded-full relative z-0"
                 />
               </div>
               <div className="h-[44px]"></div>
@@ -206,18 +206,18 @@ export default function OrderTracker() {
             {/* Order Details */}
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold text-wood-700 mb-2">Customer Information</h3>
-                <div className="bg-mozzarella-100 p-4 rounded-lg">
+                <h3 className="font-semibold text-[#1A1410]/75 mb-2">Customer Information</h3>
+                <div className="bg-[#FAFAF8] p-4 rounded-lg">
                   <p><strong>Name:</strong> {orderStatus.customerName}</p>
                   <p><strong>Order Time:</strong> {orderStatus.orderTime.toLocaleString()}</p>
                 </div>
               </div>
 
               <div>
-                <h3 className="font-semibold text-wood-700 mb-2">Order Items</h3>
+                <h3 className="font-semibold text-[#1A1410]/75 mb-2">Order Items</h3>
                 <div className="space-y-2">
                   {orderStatus.items.map((item, index) => (
-                    <div key={index} className="flex justify-between bg-mozzarella-100 p-3 rounded">
+                    <div key={index} className="flex justify-between bg-[#FAFAF8] p-3 rounded">
                       <span>{item.name} x{item.quantity}</span>
                       <span className="font-semibold">${item.price.toFixed(2)}</span>
                     </div>
@@ -227,8 +227,8 @@ export default function OrderTracker() {
 
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center">
-                  <p className="text-lg font-semibold text-wood-800">Total Amount:</p>
-                  <p className="text-lg font-bold text-tomato-600">${orderStatus.total.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-[#1A1410]">Total Amount:</p>
+                  <p className="text-lg font-bold text-ember-600">${orderStatus.total.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -237,13 +237,13 @@ export default function OrderTracker() {
             <div className="mt-6 flex gap-4">
               <button
                 onClick={() => window.location.href = '/contact'}
-                className="flex-1 py-3 bg-wood-200 text-wood-800 font-semibold rounded-lg hover:bg-wood-300 transition-colors"
+                className="flex-1 py-3 bg-[#EBEBE6] text-[#1A1410] font-semibold rounded-lg hover:bg-[#1A1410]/30 transition-colors"
               >
                 Contact Restaurant
               </button>
               <button
                 onClick={() => window.location.href = '/'}
-                className="flex-1 py-3 bg-tomato-600 text-white font-semibold rounded-lg hover:bg-tomato-700 transition-colors"
+                className="flex-1 py-3 bg-ember-600 text-white font-semibold rounded-lg hover:bg-ember-700 transition-colors"
               >
                 Order Again
               </button>
